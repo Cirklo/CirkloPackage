@@ -62,7 +62,8 @@ ALTER TABLE `pubref`
 -- Constraints for table `resinterface`
 --
 ALTER TABLE `resinterface`
-  ADD CONSTRAINT `resinterface_ibfk_1` FOREIGN KEY (`resinterface_resource`) REFERENCES `resource` (`resource_id`);
+  ADD CONSTRAINT `resinterface_ibfk_1` FOREIGN KEY (`resinterface_room`) REFERENCES `interfacerooms` (`interfacerooms_id`),
+  ADD CONSTRAINT `resinterface_ibfk_2` FOREIGN KEY (`resinterface_resource`) REFERENCES `resource` (`resource_id`);
 
 --
 -- Constraints for table `resource`

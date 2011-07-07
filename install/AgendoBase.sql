@@ -96,7 +96,16 @@ CREATE TABLE IF NOT EXISTS `equip` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='monitored equipment' AUTO_INCREMENT=1 ;
 
 
--- --------------------------------------------------------
+--
+-- Table structure for table `interfacerooms`
+--
+
+CREATE TABLE IF NOT EXISTS `interfacerooms` (
+  `interfacerooms_id` int(11) NOT NULL AUTO_INCREMENT,
+  `interfacerooms_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`interfacerooms_id`),
+  UNIQUE KEY `interfacerooms_name_UNIQUE` (`interfacerooms_name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Rooms that have resources that use a custom interface' AUTO_INCREMENT=1 ;-- --------------------------------------------------------
 
 --
 -- Dumping data for table `mask`
@@ -286,9 +295,11 @@ CREATE TABLE IF NOT EXISTS `resinterface` (
   `resinterface_id` int(11) NOT NULL AUTO_INCREMENT,
   `resinterface_resource` int(11) NOT NULL,
   `resinterface_phpfile` varchar(200) COLLATE utf8_bin NOT NULL,
+  `resinterface_room` int(11) DEFAULT NULL,
   PRIMARY KEY (`resinterface_id`),
-  KEY `resinterface_resource` (`resinterface_resource`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+  KEY `resinterface_resource` (`resinterface_resource`),
+  KEY `resinterface_room` (`resinterface_room`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Contains custom interfaces for a specific resource' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 

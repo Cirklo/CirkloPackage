@@ -21,7 +21,7 @@ function go (objIMG) {
 }
 
 function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
-    formObj=document.getElementById('edituser');
+	formObj=document.getElementById('edituser');
 	passCrypted = false;
 
 	if(user==null){
@@ -57,19 +57,6 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	;
 }
 
-function showMessage(msg, isError){
-	isError = isError || false; // sets isError as false by default, javascript is primitive and doesnt allow something like isError = false in the parameters
-	extra = '';
-	
-	// what should happen is its an error message
-	if(isError){
-		extra = 'error';
-	}
-	
-	// alert(msg);
-	$.jnotify(msg, extra);
-}
-
 function logOff(phpFilePath, resource){
 	$.post(phpFilePath, {functionName:'logOff'},"json")
 		.error(function(error){showMessage(error);})
@@ -88,4 +75,20 @@ function ajaxRequest(url){
     xmlhttp.send(null);
     var str=xmlhttp.responseText;
     return str;
+}
+
+function showMessage(msg, isError){
+	isError = isError || false; // sets isError as false by default, javascript is primitive and doesnt allow something like isError = false in the parameters
+	extra = '';
+	
+	// what should happen is its an error message
+	if(isError){
+		extra = 'error';
+	}
+	
+	// alert(msg);
+	$(document).ready(function(){
+		$.jnotify(msg, extra);
+		}
+	);
 }
