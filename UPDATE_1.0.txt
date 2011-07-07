@@ -1,0 +1,33 @@
+
+WELCOME TO THE CIRKLO SOFTWARE UPDATE 1.0 
+
+
+Proceed as follows in order to update your software:
+
+1. Download Cirklo Package from http://github.com/Cirklo/CirkloPackage
+
+2. Replace Datumo and Agendo folders in your server by the ones you have just downloaded. This will update all functions related with 
+the backoffice and with the scheduler.
+
+3. Open the Install folder from the recently downloaded package. Copy the following files to the folder that holds the index page of 
+your software
+
+	. indexAgendo.php
+	. weekview.php
+	. nonconformities.php
+
+4. Rename the file indexAgendo.php to index.php	
+
+5. In the end you should have
+
+	. agendo
+	. datumo
+	. PATH-TO-INDEX
+		. pics
+		. index.php
+		. weekview.php
+		. nonconformities.php
+		. .htconnect.php
+	
+... and an upgraded software.
+

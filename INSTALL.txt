@@ -1,0 +1,88 @@
+
+WELCOME TO THE CIRKLO SOFTWARE INSTALLATION GUIDE
+
+This is a simple guide to use in a first time installation of our software. Proceed as follows to have Cirklo software running 
+at your facility.
+
+NOTE:
+Performing a manual installation of Agendo might result in several broken configurations
+
+
+SYSTEM REQUIREMENTS
+
+Web server 
+APACHE
+MYSQL 5.1+
+PHP 5+
+
+INSTALLATION GUIDE
+
+1. Download the CirkloPackage from Github.
+
+2. Extract the folders to your server root. At this point you must have in the root of your local server 
+the following files and folders.
+	
+	.agendo
+	.datumo
+	.install
+	.server
+	.favicon.ico
+	.README.txt
+	.EUPL.pdf
+	.INSTALL.txt
+
+3. Make sure your APACHE server is running.
+
+4. Open the browser and go to
+
+	http://localhost/install
+
+5. Enter your database management system parameters (host, username, password, path to server). Be aware that 
+the software will be installed at
+
+	http://YOUR-SERVER-HOST/PATH-TO-SERVER
+
+6. Check Agendo if you want to install it. If you don't, only Datumo will be installed.
+
+7. Press the "Create DataBase Connection" button. The database will be imported to your server.
+
+NOTE: If you're installing the software in a UNIX server make sure that you have Read+Write permissions to the server root 
+folders and subfolders.
+
+8. Enter all the fields in order to complete the install. This will create a department, an institute and an 
+user in your database. Be careful to choose a correct email address. This will be used to send software alerts and 
+notifications. 
+
+NOTE: You can use gmail emais settings
+	
+	.email: yourGmailAccount@gmail.com
+	.password
+	.host: ssl://smtp.gmail.com
+	.port: 465
+	.SMTP secure: none
+	.Auth: 1
+
+At this point, if you press "Undo Changes" the database will be deleted and you'll be able to restart the installer.
+
+9. Press "Finish" to complete the installation.
+
+10. Once the installation is completed go to http://YOUR-SERVER-HOST/PATH-TO-SERVER to start the software.
+
+ADD-ON
+If you want a resource admin to receive an alert every time a reservation is not confirmed by the user, 
+proceed as follows:
+
+1) LINUX SERVERS
+Search for the folder 'server' inside the downloaded package. At this point, it should be in the root of your server.
+Inside this folder there is a file named 'runnonconformities'. Move this file to /etc/cron.hourly/.
+This will guarantee that a background script will run every hour checking if there's an unconfirmed entry in the 
+schedule. If any unconfirmed entry is found, an alert is sent to the resource administrator and user.
+
+2) WINDOWS SERVERS
+
+In development...
+
+
+Visit www.cirklo.org for more information or contact us to info@cirklo.org
+
+You can also visit our help guide or watch the feature videos at youtube.com

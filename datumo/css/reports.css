@@ -1,0 +1,18 @@
+@CHARSET "ISO-8859-1";
+
+body{
+	font-family:Verdana, Geneva, sans-serif; 
+	font-size:10px; 
+	
+	}
+
+
+.tableSel{
+	line-height:18px; 
+    text-align: left;
+}
+
+div.next{
+	position:relative;
+	text-align:right;
+}

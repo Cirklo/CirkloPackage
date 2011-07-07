@@ -1,0 +1,105 @@
+td {
+    font-family:sans-serif;
+    font-size:11px;
+    padding:0px;
+}
+
+td.fields {
+    width:100px;
+    text-align:right;
+    font-weight:bold;
+    
+}
+
+td.tables {
+    font-size:14px;
+    text-align:center;
+}
+input.reg {
+	font-size:12px;
+	background:#EEE;
+	border:solid;
+	border-width:1px;
+	border-color:#AAA;
+ }
+ 
+input.ek {
+	font-size:12px;
+	background:#DDD;
+	border:solid;
+	border-width:1px;
+	border-color:#AAA;
+ }
+ 
+ 
+/* =Container
+---------------------------------------------------------------------------------------------------- */
+
+#container
+{
+	margin: 0 auto;
+	width: 500px;
+}
+
+/* =Cloning Functionality
+---------------------------------------------------------------------------------------------------- */
+
+.deleteMe
+{
+	display: none;
+}
+
+.duplicate .deleteMe
+{
+	display: inline;
+}
+
+.duplicate .cloneMe
+{
+	display: none;
+}
+
+span.tab
+{
+	background: #ffc;
+	border-color: #999;
+	border-style: solid;
+	border-width: 1px 1px 1px 0;
+	display: block;
+	padding: 5px 0 7px;
+	position: absolute;
+	top: -1px;
+	right: -26px;
+	text-align: center;
+	width: 25px;
+}
+
+span.tab a.cloneMe
+{
+	background: #fff;
+	border: 1px solid #3c3;
+	color: #090;
+	padding: 0 3px 2px;
+	text-decoration: none;
+}
+
+span.tab a.cloneMe:hover
+{
+	background: #cfc;
+	color: #000;
+}
+
+span.tab a.deleteMe
+{
+	background: #fff;
+	border: 1px solid #f66;
+	color: #f00;
+	padding: 0 4px 2px;
+	text-decoration: none;
+}
+
+span.tab a.deleteMe:hover
+{
+	background: #fdd;
+	color: #000;
+}
