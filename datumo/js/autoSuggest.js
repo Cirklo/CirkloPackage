@@ -81,12 +81,21 @@
 							var position = thisElement.position();
 							var height = thisElement.height();
 							var width = thisElement.width();
-
-							$('div.' + classAC).css({
-								'top': ( height + position.top + 6 ) + 'px',
-								'left': ( position.left )+'px',
-								'margin': '0px'
-							});
+							
+							//check height of the autosuggest div and display accordingly
+							if(($('div.' + classAC).offset().top + $('div.' + classAC).height()) < $(window).height()){
+								$('div.' + classAC).css({
+									'top': ( height + position.top + 6 ) + 'px',
+									'left': ( position.left )+'px',
+									'margin': '0px'
+								});
+							} else {
+								$('div.' + classAC).css({
+									'top': ( height + position.top ) - $('div.' + classAC).height() - 18 + 'px',
+									'left': ( position.left )+'px',
+									'margin': '0px'
+								});
+							}
 							
 							$('div.' + classAC + ' ul').css({
 								'margin-left': '0px'
