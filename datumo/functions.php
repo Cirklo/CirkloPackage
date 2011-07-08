@@ -42,6 +42,8 @@ function splitString($mainQuery, $glue, $appendQuery){
 
 
 function uploadImage(){
+	require_once "session.php";
+	startSession();
 	require_once "__dbConnect.php";
 	
 	$conn=new dbConnection();
@@ -123,7 +125,9 @@ function throwError($error){
 		"3"=>"Image name length exceeded (30 chars)",
 		"4"=>"There was an error uploading the file, please try again",
 		"5"=>"Please select a valid resource");
-
+	echo "<script type='text/javascript'>";
+	echo "window.location='resupload.php?error=$err[$error]';";
+	echo "</script>";
 }
 
 function getExtension($str) {

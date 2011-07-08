@@ -67,14 +67,6 @@ class pubHandler{
 				echo "<script type='text/javascript' src='../datumo/js/jquery-1.5.1.js'></script>";
 				echo "<script type='text/javascript' src='../datumo/js/jquery.timers.js'></script>";
 				echo "<script type='text/javascript' src='../datumo/js/jquery.pub.js'></script>";
-				//left main div -> holds children
-				echo "<div style='
-					background-color:#F7C439;
-					position:absolute;
-					top:0px;
-					width:130px;
-					height:100%;
-					border:0px solid;'>";
 				$query="SELECT pubpages_position, pubpages_width, pubpages_height, pub_image, pub_outlink, pub_id
 				FROM pubpages, pub, pubref, resourcetype
 				WHERE pubpages_id=pub_target
@@ -84,31 +76,33 @@ class pubHandler{
 				AND pubpages_name='$target_page'
 				AND pubpages_position='pub1'";
 				$sql=$this->pdo->query($query);
-				//loop through all results
-				for($i=0;$row=$sql->fetch();$i++){
-					echo "<div lang=exp id=$row[0] style='
-						position:relative;
-						border:2px solid #FFF;
-						overflow:hidden;
-						margin:auto;
-						margin-bottom:0px;
-						width:$row[1];
-						height:$row[2];
-						text-align:center;
-						vertical-align:bottom'>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
-					echo "BASDABDJ KLABDJKLA BDSJKALBDASJKLBD ASJKDBAS JKDBAJKLB<br>";
+				if($sql->rowCount>0){				
+					//left main div -> holds children
+					echo "<div style='
+						background-color:#F7C439;
+						position:absolute;
+						top:0px;
+						width:134px;
+						border:0px solid;'>";
 					
-					echo "<br>";					
-					echo "<a href=javascript:clickPub('$row[5]','$row[4]');><img src='$row[3]' width=128px height=256px></a>";
+					//loop through all results
+					for($i=0;$row=$sql->fetch();$i++){
+						echo "<div lang=exp id=$row[0] style='
+							position:relative;
+							border:2px solid #FFF;
+							overflow:hidden;
+							margin:auto;
+							margin-bottom:0px;
+							width:130px;
+							height:$row[2];
+							text-align:center;
+							vertical-align:bottom'>";			
+						echo "<a href=javascript:clickPub('$row[5]','$row[4]');><img src='$row[3]' width=128px></a>";
+						echo "</div>";
+					}		
+					
 					echo "</div>";
-				}		
-				echo "</div>";
+				}
 				break;
 		}
 		

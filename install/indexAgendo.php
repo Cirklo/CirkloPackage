@@ -77,7 +77,7 @@ echo "<table id='master' style='width:800' align=center>";
 			echo "<tr>";
 				$imgWidth=200;
 				echo "<td style='font-size:11px;text-align:left;padding:0px;margin:0px' width='".$imgWidth."'>";
-				echo "<img width='".$imgWidth."' style='cursor:pointer;' id=agendo title='agendo' src=pics/agendo.png onmouseover=\"this.src='pics/agendo_.png'\" onmouseout=\"this.src='pics/agendo.png'\" onclick=\"javascript:window.open('http://www.cirklo.org/agendo','_blank','directories=yes,status=yes,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1024,height=768')\" />";
+				echo "<img width='".$imgWidth."' style='cursor:pointer;' id=agendo title='agendo' src=pics/agendo.png onmouseover=\"this.src='pics/agendo_.png'\" onmouseout=\"this.src='pics/agendo.png'\" onclick=\"javascript:window.open('http://www.cirklo.org/agendo.php','_blank','directories=yes,status=yes,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1024,height=768')\" />";
 				echo "</td>";
 				
 				echo "<td align='right' >";
