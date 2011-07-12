@@ -343,4 +343,43 @@
 		return array(0 => "IRSYSTEMSEPARATOR", 1 => "IRSEPARATOR");
 	}
 	
+	function sendMail($subject, $address, $message, $replyToPerson, $userDbSettings, $auth, $secure, $port, $host, $username, $password){
+		require_once("../agendo/alert/class.phpmailer.php");
+		$mail = new PHPMailer();
+		
+		$mail->IsSMTP();
+		$mail->SMTPDebug  = 1;
+		if($userDbSettings){
+			$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
+			$res = dbHelp::mysql_query2($sql);
+			for($i=0;$arr=dbHelp::mysql_fetch_row2($res);$i++){
+				$row[$i]=$arr[1];
+			}
+			$mail->SMTPAuth   = $row[5];
+			$mail->SMTPSecure = $row[4];
+			$mail->Port       = $row[1];
+			$mail->Host       = $row[0];
+			$mail->Username   = $row[3];
+			$mail->Password   = $row[2];
+		}
+		else{
+			$mail->SMTPAuth   = $auth;
+			$mail->SMTPSecure = $secure;
+			$mail->Port       = $port;
+			$mail->Host       = $host;
+			$mail->Username   = $username;
+			$mail->Password   = $password;
+		}	
+		
+		$mail->SetFrom($username, $replyToPerson);
+		$mail->Subject = $subject;
+		$mail->AddReplyTo($username, $replyToPerson);
+
+		$mail->Body = $message;
+		$mail->AddAddress($address, "");
+
+		if($mail->Send() === false){
+			throw new Exception("Unable to send the email, please check the mail settings.");
+		}
+	}
 ?>
