@@ -7,7 +7,7 @@
 		exit;
 	}
 
-	// These methods seem quite useless for this test: echo "çççãã"; and as such they are commented as a reminder of the dark side of programming
+	// These methods seem quite useless for this test: echo "?????"; and as such they are commented as a reminder of the dark side of programming
 	// header('Content-Type:text/html; charset=UTF-8');
 	// echo " <html><head><meta http-equiv='Content-type' value='text/html; charset=utf-8'></head>";
 	// echo "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Frameset//EN' 'http://www.w3.org/TR/html4/frameset.dtd'>";
@@ -448,7 +448,7 @@
 			}
 			// }
 			
-			sendMail($subject, $address, $message, ($adminFirst." ".$adminLast), $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
+			sendMail($subject, $address, $message, ($adminFirst." ".$adminLast), false, $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
 			
 			$datumoConstraintsFile = 'DatumoConstraints.sql';
 			$datumoTriggersFile = 'DatumoTriggers.sql';
@@ -631,38 +631,6 @@
 		}
 	}
 	
-	function sendMail($subject, $address, $message, $replyToPerson, $auth, $secure, $port, $host, $username, $password){
-		require_once("../agendo/alert/class.phpmailer.php");
-		$mail = new PHPMailer();
-
-		$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-		$res = dbHelp::mysql_query2($sql);
-		for($i=0;$arr=dbHelp::mysql_fetch_row2($res);$i++){
-			$row[$i]=$arr[1];
-		}
-		$mail->IsSMTP();
-		$mail->SMTPDebug  = 1;
-
-		$mail->SMTPAuth   = $auth;
-		$mail->SMTPSecure = $secure;
-		$mail->Port       = $port;
-
-		$mail->Host       = $host;
-		$mail->Username   = $username;
-		$mail->Password   = $password;
-
-		$mail->SetFrom($username, $replyToPerson);
-		$mail->Subject = $subject;
-		$mail->AddReplyTo($username, $replyToPerson);
-
-		$mail->Body = $message;
-		$mail->AddAddress($address, "");
-
-		if($mail->Send() === false){
-			throw new Exception("Unable to send the email, please check the mail settings.");
-		}
-	}
-
 	function checkMail(){
 		if(!isset($_POST['address'])){
 			echo "Didn't get an email address.";
