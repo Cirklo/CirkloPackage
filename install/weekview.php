@@ -30,7 +30,6 @@
 <script type="text/javascript" src="../agendo/js/datefunc.js"></script>
 <script type="text/javascript" src="../agendo/js/overdiv.js"></script>
 <script type="text/javascript" src="../agendo/js/weekview.js"></script>
-<script type="text/javascript" src="../agendo/js/commonCode.js"></script>
 
 
 <?php

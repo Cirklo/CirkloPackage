@@ -64,7 +64,6 @@ class pubHandler{
 				break;
 			case "weekview.php";
 				//JS includes
-				echo "<script type='text/javascript' src='../datumo/js/jquery-1.5.1.js'></script>";
 				echo "<script type='text/javascript' src='../datumo/js/jquery.timers.js'></script>";
 				echo "<script type='text/javascript' src='../datumo/js/jquery.pub.js'></script>";
 				$query="SELECT pubpages_position, pubpages_width, pubpages_height, pub_image, pub_outlink, pub_id
