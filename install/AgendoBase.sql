@@ -426,7 +426,8 @@ INSERT INTO `status` (`status_id`, `status_name`) VALUES
 (1, 'Regular'),
 (2, 'Pre-reserve'),
 (3, 'Deleted'),
-(4, 'Monitor');
+(4, 'Monitor'),
+(5, 'In use');
 
 -- --------------------------------------------------------
 
