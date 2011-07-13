@@ -59,8 +59,9 @@ function add(){
     $min=substr($datetime,10,2);
     $hour=substr($datetime,8,2);
     $slots=clean_input($_GET['slots']);
-    $assistance=($assistance)?"1":"0";
-    
+    //$assistance=($assistance)?"1":"0";
+    if($assistance=="true")	$assistance=1;
+    else $assistance=0;
     $user_id=getUserId();
     $user_passwd=getPass();
     $resource=clean_input($_GET['resource']);
