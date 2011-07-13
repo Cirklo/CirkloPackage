@@ -62,12 +62,12 @@ function setPermission($user,$resource,$passwd) {
 	// Checks if the responsible's password matches the given one
     if ($arrpwdadmin[0]==$passwd){
         $this->WasAdmin=true;
-		$sql="select '1111',resource_maxdays,resource_maxslots,resource_status,resource_delhour from resource where resource_id=". $resource;
+		$sql="select '1111', resource_maxdays, resource_maxslots, resource_status, resource_delhour, resource_resolution from resource where resource_id=". $resource;
 		$res=dbHelp::mysql_query2($sql) or die ($sql);
 		$arr=dbHelp::mysql_fetch_row2($res);
     } else {
         $this->WasAdmin=false;
-		$sql="select permissions_level,resource_maxdays,resource_maxslots,resource_status,resource_delhour from permissions,resource where permissions_resource=resource_id and permissions_user=". $this->User ." and permissions_resource=". $resource;
+		$sql="select permissions_level, resource_maxdays, resource_maxslots, resource_status, resource_delhour, resource_resolution from permissions,resource where permissions_resource=resource_id and permissions_user=". $this->User ." and permissions_resource=". $resource;
 		$res=dbHelp::mysql_query2($sql) or die ($sql);
 		$arr=dbHelp::mysql_fetch_row2($res);
 
@@ -82,6 +82,7 @@ function setPermission($user,$resource,$passwd) {
     $this->ResourceStatus=$arr[3];
     $this->ResourceDelHour=$arr[4];
     $this->Passwd=$passwd;
+	$this->Resolution = $arr[5];
     
 	// Checks if the user's password matches the converted one given OR if the responsible's password does
     if ($arrpwd[0]==$passwd || $this->WasAdmin) {
@@ -133,7 +134,7 @@ function addRegular(){
 }
 
 //if there is the possibility to add an entry anytime ahead
-function addAhead($date)     {
+function addAhead($date, $slots)     {
     if (substr($this->Permission,2,1)) {
         return true;
 
@@ -143,7 +144,8 @@ function addAhead($date)     {
         $day=substr($date,6,2);
         $hour=substr($date,8,2);
         $min=substr($date,10,2);
-        
+		// $lastSlotEnds = (date('YmdHi', strtotime($date) + ($slots*$this->Resolution*60)), 'a');//date format
+		$lastSlotEnds = strtotime($date) + ($slots*$this->Resolution*60);// time format
         
         $Tday=date("d");
         $Tmonth=date("m");
@@ -152,7 +154,8 @@ function addAhead($date)     {
         $Tmin=date("i");
         $times=1;
         if (substr($this->Permission,0,1)) $times=2;// duplicate days ahead for power users/experiments
-        if (mktime(8,0,0,$Tmonth,($Tday +$this->DaysAhead*$times),$Tyear)< mktime($hour,$min,0,$month,$day,$year)) {
+        // if (mktime(8,0,0,$Tmonth,($Tday +$this->DaysAhead*$times),$Tyear)<= mktime($hour,$min,0,$month,$day,$year)) {
+        if (mktime(8,0,0,$Tmonth,($Tday +$this->DaysAhead*$times),$Tyear)< $lastSlotEnds) {
             $this->warning="You are only allowed to reserve " . $this->DaysAhead*$times . " days ahead";
             return false;
         } else {
