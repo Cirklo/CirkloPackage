@@ -62,6 +62,7 @@ function add(){
     //$assistance=($assistance)?"1":"0";
     if($assistance=="true")	$assistance=1;
     else $assistance=0;
+
     $user_id=getUserId();
     $user_passwd=getPass();
     $resource=clean_input($_GET['resource']);
@@ -70,7 +71,7 @@ function add(){
 
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();exit;};
     if (!$perm->addRegular()) {echo $perm->getWarning();exit;};
-    if (!$perm->addAhead($datetime)) {echo $perm->getWarning();exit;}
+    if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();exit;}
     if (!$perm->addBack($datetime)) {echo $perm->getWarning();exit;}
     $EntryStatus=$perm->getEntryStatus();
     if (!$perm->getEntryStatus()) {echo $perm->getWarning();exit;}
@@ -98,7 +99,7 @@ function add(){
     if ($repeat=='false') $enddate='999999999999';
     //building the repetition pattern
     while ((substr($weekahead,0,8)<=$enddate) && ($w<53)) {
-        if (!$perm->addAhead($weekahead)) {echo $perm->getWarning();exit;}
+        if (!$perm->addAhead($weekahead, $slots)) {echo $perm->getWarning();exit;}
         if (!$perm->checkOverlap($weekahead,$slots)) {echo $perm->getWarning();exit;}
         $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(".$user_id.",".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."," . $slots .",". $assistance ."," . $arrrep[0] .",". $EntryStatus . "," . $resource . ", '".date('Y-m-d H:i:s',time())."',NULL)";
         dbHelp::mysql_query2($sql) or die($sql);
@@ -253,7 +254,7 @@ function update(){
     if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
     //if (!$perm->addBack($datetime)) $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
     
-    if (!$perm->addAhead($datetime)) {echo $perm->getWarning();return;}
+    if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();return;}
     //checking datetime before update
     // $sql="select @edt:=entry_datetime,@res:=entry_resource,entry_user from entry where entry_id=". $entry;
     $sql="select entry_datetime,entry_resource,entry_user from entry where entry_id=". $entry;
