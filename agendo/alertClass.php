@@ -257,7 +257,7 @@ END:VCALENDAR";
             $this->Subject=strtoupper($type)." on " . $this->ResourceName ;
             $this->AddReplyTo($this->UserEmail,$this->UserFullName);
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
-            $this->Body=$msg . "\n email:". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr  ;
+            $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr  ;
             $address = $this->RespEmail;
             $this->AddAddress($address, "");
             if(!$this->Send()) {
