@@ -145,6 +145,7 @@ function addAhead($date, $slots)     {
         $hour=substr($date,8,2);
         $min=substr($date,10,2);
 		// $lastSlotEnds = (date('YmdHi', strtotime($date) + ($slots*$this->Resolution*60)), 'a');//date format
+		// $lastSlotEnds = strtotime($year.$month.$day."0800") + ($slots*$this->Resolution*60);// time format
 		$lastSlotEnds = strtotime($date) + ($slots*$this->Resolution*60);// time format
         
         $Tday=date("d");
@@ -153,9 +154,14 @@ function addAhead($date, $slots)     {
         $Thour=date("H");
         $Tmin=date("i");
         $times=1;
-        if (substr($this->Permission,0,1)) $times=2;// duplicate days ahead for power users/experiments
-        // if (mktime(8,0,0,$Tmonth,($Tday +$this->DaysAhead*$times),$Tyear)<= mktime($hour,$min,0,$month,$day,$year)) {
-        if (mktime(8,0,0,$Tmonth,($Tday +$this->DaysAhead*$times),$Tyear)< $lastSlotEnds) {
+        if(substr($this->Permission,0,1)) $times=2;// duplicate days ahead for power users/experiments
+
+		$extra = 0;
+		if(time() > mktime(8,0,0,$Tmonth,$Tday, $Tyear)){
+			$extra = 1;
+		}
+
+        if($lastSlotEnds > mktime(8,0,0,$Tmonth,($Tday + $this->DaysAhead + $extra) * $times, $Tyear)) {
             $this->warning="You are only allowed to reserve " . $this->DaysAhead*$times . " days ahead";
             return false;
         } else {
