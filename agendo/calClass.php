@@ -76,6 +76,7 @@ class calCell {
         if ($this->EntryStatus==2) $cellbgLight=cal::PreCellColorOff;
         if ($this->EntryStatus==4) $cellbgLight=cal::MonCellColorOff;
         if ($this->EntryStatus==9) $cellbgLight=cal::ErrCellColorOff;
+        if ($this->EntryStatus==5) $cellbgLight=cal::InUseCellColorOff;
         $cellgrey="#aaaaaa";
         
         switch ($slotType){
@@ -148,7 +149,8 @@ class cal extends phpCollection{
     const ErrCellColorOn='#f39ea8';
     const ErrCellColorOff='#f8dada';
     
-    
+    const InUseCellColorOff='#fbc314';
+   
     //private $ResStatus;
     function __construct ($Resource,$update=0){
 		// require_once("__dbHelp.php");
