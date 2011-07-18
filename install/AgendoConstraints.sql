@@ -51,6 +51,13 @@ ALTER TABLE `pics`
 
 
 --
+-- Constraints for table `price`
+--
+ALTER TABLE `price`
+  ADD CONSTRAINT `price_ibfk_6` FOREIGN KEY (`price_resource`) REFERENCES `resource` (`resource_id`),
+  ADD CONSTRAINT `price_ibfk_7` FOREIGN KEY (`price_type`) REFERENCES `pricetype` (`pricetype_id`);--
+
+--
 -- Limitadores para a tabela `pubref`
 --
 ALTER TABLE `pubref`

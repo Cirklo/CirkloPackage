@@ -275,6 +275,42 @@ INSERT INTO `pics` (`pics_id` ,`pics_resource` ,`pics_path`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `price`
+--
+
+CREATE TABLE IF NOT EXISTS `price` (
+  `price_id` int(11) NOT NULL AUTO_INCREMENT,
+  `price_value` int(11) NOT NULL,
+  `price_resource` int(11) DEFAULT NULL,
+  `price_type` int(11) DEFAULT NULL,
+  PRIMARY KEY (`price_id`),
+  KEY `price_equip` (`price_resource`),
+  KEY `price_type` (`price_type`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pricetype`
+--
+
+CREATE TABLE IF NOT EXISTS `pricetype` (
+  `pricetype_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pricetype_name` varchar(100) COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`pricetype_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=5 ;
+
+--
+-- Dumping data for table `pricetype`
+--
+
+INSERT INTO `pricetype` (`pricetype_id`, `pricetype_name`) VALUES
+(1, 'Internal'),
+(2, 'Academic'),
+(3, 'Campus'),
+(4, 'Comercial');
+
+--
 -- Table structure for table `repetition`
 --
 
