@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/var/www/PATH-TO-AGENDO/nonconformities.php >> /var/www/agendo/alert/send.log

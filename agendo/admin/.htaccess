@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Agendo Administration area"
+AuthUserFile /var/www/agendo/admin/.htpasswd
+Require valid-user

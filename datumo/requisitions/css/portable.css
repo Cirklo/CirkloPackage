@@ -1,0 +1,62 @@
+@CHARSET "ISO-8859-1";
+
+body {
+	background:#fff; 
+	font-family:Verdana, Geneva, sans-serif; 
+	font-size:12px; 
+	line-height:20px; 
+	color:#545353;
+	}
+
+	
+table.main{
+	background-color:#EEEEFF;
+	table-layout:fixed;
+	border-width:1px;
+	border-color:#164f55;
+	border-style:solid;
+	border-spacing:0px;
+	-moz-border-radius: 5px; 
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	font-size:12px;
+	line-height:25px;
+	}
+	
+table.main th{
+	background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.23, rgb(22,79,85)),
+    color-stop(0.6, rgb(61,120,125))
+	);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(22,79,85) 23%,
+    rgb(61,120,125) 60%
+	);
+	color:#FFF;
+}
+
+table.main th,td{
+	padding:5px;
+	}
+
+input.btn{
+	height:30px;
+	width:150px;
+	font-size:20px;
+	}
+	
+div.igc_user{
+	width:200px;
+	position: absolute;
+    left: 50%;
+    top: 50%;
+	display:none;
+	z-index:9999;
+	padding:20px;
+	border:1px solid;
+	background:#DDD;
+}
