@@ -105,6 +105,7 @@ echo "<table id='legend'>";
 		echo "<td bgcolor=". cal::PreCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>To be confirmed</td>";
 		echo "<td bgcolor=". cal::ErrCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Unconfirmed</td>";
 		echo "<td bgcolor=". cal::MonCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Monitored</td>";
+		echo "<td bgcolor=". cal::InUseCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>In use</td>";
 	echo "</tr>";
 echo "</table>";
 
