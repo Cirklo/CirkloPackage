@@ -44,16 +44,11 @@ function setPermission($user,$resource,$passwd) {
     $this->User=$user;
     $this->Resource=$resource;
 	
-	// Encrypts the given password
-    // $sql="select password('". $passwd ."')";
-    // $res=dbHelp::mysql_query2($sql);
-    // $arrcheck=dbHelp::mysql_fetch_row2($res);
-	// $arrcheck = cryptPassword($passwd);
-
 	// Gets the crypted password from the given user
     $sql="select user_passwd from ".dbHelp::getSchemaName().".user where user_id=". $user;
     $res=dbHelp::mysql_query2($sql);
     $arrpwd=dbHelp::mysql_fetch_row2($res);
+	
 	// Gets the password and id of the resource responsible
     $sql="select user_passwd,user_id from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp and resource_id=" . $resource;
     $res=dbHelp::mysql_query2($sql);
@@ -144,10 +139,13 @@ function addAhead($date, $slots)     {
         $day=substr($date,6,2);
         $hour=substr($date,8,2);
         $min=substr($date,10,2);
-		// $lastSlotEnds = (date('YmdHi', strtotime($date) + ($slots*$this->Resolution*60)), 'a');//date format
-		// $lastSlotEnds = strtotime($year.$month.$day."0800") + ($slots*$this->Resolution*60);// time format
 		$lastSlotEnds = strtotime($date) + ($slots*$this->Resolution*60);// time format
         
+		$sql = "select configParams_value from configParams where configParams_name = 'bookingHour'";
+		$res = dbHelp::mysql_query2($sql);
+		$arr = dbHelp::mysql_fetch_row2($res);
+		$hour = $arr[0];
+		
         $Tday=date("d");
         $Tmonth=date("m");
         $Tyear=date("Y");
@@ -157,11 +155,11 @@ function addAhead($date, $slots)     {
         if(substr($this->Permission,0,1)) $times=2;// duplicate days ahead for power users/experiments
 
 		$extra = 0;
-		if(time() > mktime(8,0,0,$Tmonth,$Tday, $Tyear)){
+		if(time() > mktime($hour,0,0,$Tmonth,$Tday, $Tyear)){
 			$extra = 1;
 		}
 
-        if($lastSlotEnds > mktime(8,0,0,$Tmonth,($Tday + $this->DaysAhead + $extra) * $times, $Tyear)) {
+        if($lastSlotEnds > mktime($hour,0,0,$Tmonth,($Tday + $this->DaysAhead + $extra) * $times, $Tyear)) {
             $this->warning="You are only allowed to reserve " . $this->DaysAhead*$times . " days ahead";
             return false;
         } else {

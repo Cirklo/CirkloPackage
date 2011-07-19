@@ -43,12 +43,11 @@ CREATE TABLE IF NOT EXISTS `board` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 
-
 INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
-(12, 'AgendoVersion', '1.5');
+(12, 'AgendoVersion', '1.5'),
+(13, 'bookingHour', '9');
 
 -- --------------------------------------------------------
-
 --
 -- Table structure for table `entry`
 --
