@@ -52,6 +52,30 @@ class mailClass extends PHPMailer{
         	return "Mail successfully sent!";   
         }
 	}
+	
+	public function mailingList($subject, $to, $from, $msg){
+		$this->CharSet="UTF-8";
+		$this->SetFrom($from, $from);
+        $this->AddReplyTo($from,$from);
+		$this->Subject=$subject;
+        $this->Body=$msg;
+        if(sizeof($to)==1){
+        	$this->AddBCC($to[0]);
+        } else {
+	        foreach($to as $target){
+	        	$this->AddBCC($target);
+	        }
+        } 
+       
+		if(!$this->Send()) {
+            //mail error
+            return "Could not send mail!";
+        } else {
+            //mail OK
+        	return "Mail successfully sent!";   
+        }
+		
+	}
 }
 
 

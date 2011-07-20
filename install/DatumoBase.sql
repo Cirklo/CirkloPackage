@@ -1112,7 +1112,8 @@ INSERT INTO `menu` (`menu_id`, `menu_name`, `menu_description`, `menu_plugin`, `
 (1, 'My Calendar', 'Personal calendar', 1, 'mycalendar.php'),
 (2, 'Image upload', 'Resource image uploader', 1, 'resupload.php'),
 (3, 'Reservations', 'Return to reservation system', 1, '../pathMarker/index.php'),
-(4, 'Make cookie', 'Set up resource for local confirmation', 1, '../pathMarker/admin/cookie.php');
+(4, 'Make cookie', 'Set up resource for local confirmation', 1, '../pathMarker/admin/cookie.php'),
+(5, 'Mailing', 'Mailing list tool', 1, 'mailing.php');
 
 
 -- --------------------------------------------------------

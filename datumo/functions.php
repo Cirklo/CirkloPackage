@@ -6,6 +6,12 @@ if(isset($_GET['type']) and !isset($_GET['sidx'])){
 		case 0:
 			uploadImage();
 			break;
+		case 1:
+			mailingList();
+			break;
+		case 2:
+			sendMail();
+			break;
 	}
 }
 
@@ -136,6 +142,144 @@ function getExtension($str) {
     $l = strlen($str) - $i;
     $ext = substr($str,$i+1,$l);
     return $ext;
+}
+
+function mailingList(){
+	//PHP includes
+	require_once "session.php";
+	startSession();
+	require_once "__dbConnect.php";
+
+	//call class
+	$conn=new dbConnection();
+	
+	if(isset($_GET['list']))	$list=$_GET['list'];
+	switch ($list){
+		case "all":	//all users from the database
+			echo "This email will be sent to all registered users";
+			break;
+		case "department":	//select department
+			$query="SELECT department_id, department_name FROM department";
+			$sql=$conn->query($query);
+			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
+			//loop through all deps
+			for($i=0;$row=$sql->fetch();$i++){
+				echo "<option value=$row[0]>$row[1]</option>";
+			}
+			echo "</select>";
+			break;
+		case "resource":	//select resource
+			$query="SELECT resource_id, resource_name FROM resource";
+			$sql=$conn->query($query);
+			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
+			//loop through all deps
+			for($i=0;$row=$sql->fetch();$i++){
+				echo "<option value=$row[0]>$row[1]</option>";
+			}
+			echo "</select>";
+			break;
+		case "resourcetype":			//select resourceType
+			$query="SELECT resourcetype_id, resourcetype_name FROM resourcetype";
+			$sql=$conn->query($query);
+			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
+			//loop through all deps
+			for($i=0;$row=$sql->fetch();$i++){
+				echo "<option value=$row[0]>$row[1]</option>";
+			}
+			echo "</select>";
+			break;
+	}
+}
+
+function sendMail(){
+	//PHP includes
+	require_once "session.php";
+	$user_id=startSession();
+	require_once "__dbConnect.php";
+	require_once "mailClass.php";
+	require_once "resClass.php";
+	
+	//call classes
+	$conn=new dbConnection();
+	$mail=new mailClass();
+	$res=new restrictClass();
+	
+	if(isset($_GET['list']))	$list=$_GET['list'];
+	if(isset($_GET['recipient']))	$recipient=$_GET['recipient'];
+	if(isset($_GET['subject'])){
+		$subject="[AGENDO] ";	//initialize subject
+		$subject.=$_GET['subject'];
+	}
+	if(isset($_GET['message']))	$message=$_GET['message'];
+	
+
+	//get user info
+	$res->userInfo($user_id);
+	$from=$res->getUserEmail();	//current user email
+	
+	switch($list){
+		case "all":	//all users from the database
+			//get all users from the database
+			$query="SELECT DISTINCT user_email FROM user";
+			$sql=$conn->query($query);
+			//loop through all query results
+			for($i=0;$row=$sql->fetch();$i++){
+				$address[]=$row[0];	//store email into an array
+			}
+			break;
+		case "department":
+			//loop through all selected departments
+			foreach($recipient as $department_id){
+				$query="SELECT DISTINCT user_email FROM user WHERE user_dep=$department_id";
+				$sql=$conn->query($query);
+				//loop through all query results
+				for($i=0;$row=$sql->fetch();$i++){
+					$address[]=$row[0];	//store email into an array
+				}
+			}
+			break;
+		case "resource":	
+			//loop through all selected resources
+			foreach($recipient as $resource_id){
+				$query="SELECT DISTINCT user_email
+					FROM user, permissions 
+					WHERE permissions_user=user_id 
+					AND permissions_resource=$resource_id UNION 
+					SELECT user_email FROM user WHERE user_id 
+					IN (SELECT resource_resp FROM resource WHERE resource_id=$resource_id)";
+				$sql=$conn->query($query);
+				//loop through all query results
+				for($i=0;$row=$sql->fetch();$i++){
+					$address[]=$row[0];
+				}
+			}	
+			break;
+		case "resourcetype":
+			//loop through all selected resource type
+			foreach($recipient as $resourcetype_id){
+				$query="SELECT DISTINCT resource_id FROM resource WHERE resource_type=$resourcetype_id";
+				$sql=$conn->query($query);
+				//loop through all query results
+				for($i=0;$row=$sql->fetch();$i++){
+					
+					$query_="SELECT DISTINCT user_email 
+					FROM user, permissions 
+					WHERE permissions_user=user_id 
+					AND permissions_resource=$row[0] UNION 
+					SELECT user_email FROM user WHERE user_id 
+					IN (SELECT resource_resp FROM resource WHERE resource_id=$row[0])";
+					$sql_=$conn->query($query_);
+					for($j=0;$row_=$sql_->fetch();$j++){
+						$address[]=$row[0];
+					}
+				}
+			}	
+			break;
+	}
+	
+	//send output
+	$output=$mail->mailingList($subject,$address,$from,$message);
+	echo $output;
 }
 
 ?>
