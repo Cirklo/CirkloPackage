@@ -1,6 +1,6 @@
 <?php 
 session_start();
-require_once("../".$_SESSION['path']."/.htconnect.php");
+require_once("../.htconnect.php");
 //call database
 $conn=new dbConnection();
 if(isset($_GET['type'])){
@@ -18,7 +18,7 @@ if(isset($_GET['type'])){
 } 
 ?>
 
-<script type="text/javascript" src="../js/jquery-1.6.js"></script>
+<script type="text/javascript" src="../../agendo/js/jquery-1.6.js"></script>
 <script type="text/javascript">
 
 function makecookie(){

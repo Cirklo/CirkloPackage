@@ -337,6 +337,45 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "</td>";
 					echo "</tr>";
 
+					//***********************************************
+					//************* Weekly hours left ***************
+					
+					if(isset($_SESSION['user_id'])){
+						$day=substr($calendar->getStartDate(),6,2);
+						$month=substr($calendar->getStartDate(),4,2);
+						$year=substr($calendar->getStartDate(),0,4);
+						$slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
+						$day=substr($slotDate,6,2);
+						$month=substr($slotDate,4,2);
+						$year=substr($slotDate,0,4);
+						
+						$arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
+
+						if($arrSRM[3] != $user_id){
+							$totalSlots = $arrSRM[0];
+							$resolution = $arrSRM[1];
+							$maxHours 	= $arrSRM[2];
+							
+							$timeUsed = $totalSlots * $resolution/60;
+							$maxSlots = $maxHours * 60 / $resolution;
+							
+							echo "<tr>";
+								echo "<td colspan=2 align='center'>";
+								echo "You have ".($maxHours - $timeUsed)." hours (".($maxSlots - $totalSlots)." entries) left to book";
+								echo "</td>";
+							echo "</tr>";
+							
+							echo "<tr>";
+								echo "<td colspan=2>";
+								echo "<hr>";
+								echo "</td>";
+							echo "</tr>";
+						}
+					}
+					
+					//************* Weekly hours left ***************
+					//***********************************************
+	
 					if($calendar->monitor($calendar->getResourceName())){
 						echo "<tr><td colspan=2 align=center><a href=ekrano target='blank'>Monitored resource</a></td></tr>";
 						echo "<tr><td colspan=2><hr></td></tr>";

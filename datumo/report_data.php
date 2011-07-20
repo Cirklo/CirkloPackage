@@ -127,8 +127,19 @@ for($i=0;$row=$sql->fetch();$i++){
 				break;
 		}
 		$ref=$qClass->prepareQuery(array($row[0],$conn->getDatabase(),"",""),3);
+		//echo "flag".$ref[0];
 		if($ref[0]!=""){
-			$arr_fields[$i]=$display->FKfield($ref[0], $arr_fields[$i]);
+			//search path to information schema
+			$conn->dbInfo();
+			$resQuery="SELECT column_name FROM columns WHERE table_schema='".$conn->getDatabase()."' AND table_name='$ref[0]' AND ordinal_position=2";
+			$sql=$conn->query($resQuery);
+			$res_=$sql->fetch();
+			//search path to main database
+			$conn->dbConn();
+			$sql_=$conn->query("SELECT * FROM $ref[0] WHERE $res_[0]='$arr_fields[$i]'");
+			$result=$sql_->fetch();
+			$arr_fields[$i]=$result[0];
+			//$arr_fields[$i]=$display->FKfield($ref[0], $arr_fields[$i]);
 		}
 		$extra_query.=$row[0].$arr_op[$i]."'$arr_fields[$i]' AND ";	
 	}
@@ -150,7 +161,7 @@ if($extra_query!=""){
 
 //echo $flag;
 // the actual query for the grid data 
-$sql=$conn->prepare($query); 
+$sql=$conn->prepare($query.$clause.$extra_query); 
 //echo $sql->queryString;
 $sql->execute();
 //number of rows in the query
@@ -180,7 +191,6 @@ $response->records = $count;
 // the actual query for the grid data 
 $sql=$conn->prepare($query.$clause.$extra_query." ORDER BY $sidx $sord LIMIT $limit OFFSET $start"); 
 $sql->execute();
-
 for($i=0;$row=$sql->fetch();$i++){
 	$response->rows[$i]["id"]=$row[0];
 	$response->rows[$i]["cell"]=null;

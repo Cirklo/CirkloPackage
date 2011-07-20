@@ -67,8 +67,26 @@ function add(){
     $user_passwd=getPass();
     $resource=clean_input($_GET['resource']);
 	
+	//201102251200
+    $day=substr($datetime,6,2);
+    $month=substr($datetime,4,2);
+    $year=substr($datetime,0,4);
+	
+	//****************
+	$arr = getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource);
+	if($arr[3] != $user_id){
+		// check if the number of slots*resolution is bigger then the resource_maxhoursweek
+		// if so, return error and exit
+		$totalTime = ($arr[0] + $slots) * $arr[1] / 60;
+		$timeUsed = $arr[0] * $arr[1] / 60;
+		if($totalTime > $arr[2]){
+			echo "You cannot book more then ".$arr[2]." hours per week, you have ".($arr[2] - $timeUsed)." hours left.";
+			exit;
+		}
+	}
+	//****************
+	
     $perm= new permClass;
-
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();exit;};
     if (!$perm->addRegular()) {echo $perm->getWarning();exit;};
     if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();exit;}
@@ -90,10 +108,6 @@ function add(){
 
     $res=dbHelp::mysql_query2($sql) or die($sql);
     $arrrep=dbHelp::mysql_fetch_row2($res);
-	//201102251200
-    $day=substr($datetime,6,2);
-    $month=substr($datetime,4,2);
-    $year=substr($datetime,0,4);
     $weekahead=$datetime;
     $notify=new alert($resource);   
     if ($repeat=='false') $enddate='999999999999';
@@ -144,7 +158,6 @@ function add(){
 }
 //changes the entry state to 3, ie, invisible
 function del(){
-    
     $user_id=getUserId();
     $user_passwd=getPass();
 	
@@ -175,7 +188,6 @@ function del(){
     if ($entry!=$arr[1]) $deleteall=0; //delete from monitor does not allow delete all 
     
 
-    // $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
     $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > now()";
     if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
     
@@ -188,9 +200,7 @@ function del(){
     } else {
         $sql="update entry set entry_status=3 where entry_id=" . $seekentry . $extra;
     }
-    //echo $sql;
     $resPDO = dbHelp::mysql_query2($sql) or die ($sql);
-    // if (mysql_affected_rows()==0) {
     if (dbHelp::mysql_numrows2($resPDO)==0) {
         echo "No permission to delete selected entry(ies)";
     } else {
@@ -203,24 +213,14 @@ function del(){
             if (($perm->getResourceStatus()==4)) { // if there is a manager and user is the same as in the entry, ie, not admin              
                 $notify->toAdmin($arr[1],'','delete');
             }
-            // $sql="select @edt:=entry_datetime,@res:=entry_resource from entry where entry_id=". $entry;
-            // $res=dbHelp::mysql_query2($sql) or die ($sql);
-            
             $notify->toWaitList('delete'); // for waiting list. As to be send before update the entry to regular.    
             
-            // $sql="update entry set entry_status=" . $status ." where entry_status=4 and entry_resource=@res and entry_datetime=@edt";
-//**************************************************
             $sql="select entry_resource,entry_datetime from entry where entry_id=". $entry;
 			$res=dbHelp::mysql_query2($sql);
 			$arr=dbHelp::mysql_fetch_row2($res);
 
             $sql="update entry set entry_status=".$status." where entry_status=4 and entry_resource=".$arr[0]." and entry_datetime='".$arr[1]."'";
             $res=dbHelp::mysql_query2($sql) or die ($sql);
-//**************************************************
-
-            // $sql="update entry set entry_status=" . $status ." where entry_status=4 and (entry_resource, entry_datetime) in (select entry_resource,entry_datetime from entry where entry_id=". $entry.")";
-            // $res=dbHelp::mysql_query2($sql) or die ($sql);
-            
         }
         
         //always notify if it was deleted from admin
@@ -244,13 +244,39 @@ function update(){
     $resource=clean_input($_GET['resource']);
     $entry=clean_input($_GET['entry']);
     
+	//**********************************************
+    $day=substr($datetime,6,2);
+    $month=substr($datetime,4,2);
+    $year=substr($datetime,0,4);
+	
+	$arr = getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource);
+
+	if($arr[3] != $user_id){
+		$totalSlots = $arr[0];
+		$resolution = $arr[1];
+		$maxHours = $arr[2];
+		
+		$sql="select entry_slots from entry where entry_id=". $entry;
+		$res=dbHelp::mysql_query2($sql) or die($sql);
+		$arr=dbHelp::mysql_fetch_row2($res);
+		$formerEntrySlots = $arr[0];
+		
+		$newTime = ($totalSlots - $formerEntrySlots + $slots) * $resolution / 60;
+		$timeUsed = $totalSlots * $resolution/60;
+
+		if($newTime > $maxHours){
+			echo "You cannot book more then ".$maxHours." hours per week, you have ".($maxHours - $timeUsed)." hours left.";
+			return;
+		}
+	}
+	//**********************************************
+	
     $perm= new permClass;
- 
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();return;}
     if (!$perm->addBack($datetime)) {echo $perm->getWarning();return;}
 
     // $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
-    $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > now()";
+    $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > now()";
     if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
     //if (!$perm->addBack($datetime)) $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
     
@@ -290,7 +316,6 @@ function update(){
 	
     $sql="update entry set entry_user=".$user_id.", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots." where entry_id=". $entry;
     $resPDO = dbHelp::mysql_query2($sql.$extra) or die($sql.$extra);
-   // if (mysql_affected_rows()==0) {
     if (dbHelp::mysql_numrows2($resPDO) == 0) {
         echo "Entry info not updated.";
 		exit;

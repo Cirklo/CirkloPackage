@@ -17,7 +17,7 @@ $user_id = startSession();
 <script type="text/javascript" src="js/functions.js"></script>
 <script type="text/javascript" src="js/cloneFieldset.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
-<script type="text/javascript" src="js/autosuggest.js"></script>
+<script type="text/javascript" src="js/autoSuggest.js"></script>
 <script type="text/javascript">
 
 $(document).ready(function(){

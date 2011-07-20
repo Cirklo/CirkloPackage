@@ -156,6 +156,21 @@
 			return $sql;
 		}
 		
+		// Returns the sql string for the corresponding engine of between dates
+		public static function dateBetween($dateFieldName, $date1, $date2){
+			// $connect = dbHelp::getConnect();
+		
+			// switch($connect->getEngine()){
+				// case "mysql": //query to change database in mysql
+					$sql = $dateFieldName." between ".$date1." and ".$date2;
+				// break;
+				// case "pgsql"; //probably needs to be changed
+					// $sql = $dateFieldName." between '".$date1."'and '".$date2."'";
+				// break;
+			// }
+			return $sql;
+		}
+		
 		// Reads a script, expects a big line of sql statements seperated by ';'
 		public static function scriptRead($sql){
 			$connect = dbHelp::getConnect();
@@ -171,19 +186,19 @@
 		}
 		
 		public static function startTransaction($sql){
-			$resultMsg = 'success';
-			try{
+			// $resultMsg = 'success';
+			// try{
 				$connect = dbHelp::getConnect();
 				// $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 				$connect->beginTransaction();
 				$connect->exec($sql);
 				$connect->commit();
-			}
-			catch(PDOException $e){
-				$resultMsg = $e->getMessage();
+			// }
+			// catch(PDOException $e){
+				// $resultMsg = $e->getMessage();
 				// $connect->rollBack();
-			}
-			return $resultMsg;
+			// }
+			// return $resultMsg;
 		}
 	}
 ?>

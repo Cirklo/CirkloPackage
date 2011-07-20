@@ -258,7 +258,7 @@
 				
 					echo "<tr>";
 							echo "<td colspan=2 style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/admin/cookie.php'\" value='MakeCookie' />";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='admin/cookie.php'\" value='MakeCookie' />";
 							echo "</td>";
 					echo "<tr>";
 
@@ -381,5 +381,32 @@
 		if($mail->Send() === false){
 			throw new Exception("Unable to send the email, please check the mail settings.");
 		}
+	}
+	
+	// Returns all the number of lots used by a user in the week of the date given for a given resource, its resolution and the max ammount of hours a user can use the resource, and if
+	function getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource){
+		// convert datetime to time and get day of the week
+		$timeDate = mktime(0, 0, 0, $month, $day, $year);
+		$dayOfTheWeek = date('N', $timeDate);
+		$firstDayWeekSubtractor = $dayOfTheWeek - 1;
+		$lastDayWeekAdder = 7 - $dayOfTheWeek;
+		
+		// get the date of the first day of the week
+		$firstDayWeek = mktime(0, 0, 0, $month  , (int)$day - $firstDayWeekSubtractor, $year);
+		$firstDayDate = date('Ymd',$firstDayWeek);
+		
+		// get the date of the last day of the week
+		$lastDayWeek = mktime(0, 0, 0, $month  , (int)$day + $lastDayWeekAdder, $year);
+		$lastDayDate = date('Ymd',$lastDayWeek);
+		
+		// use the dateBetween method to get the number of slots
+		$sql = "select sum(entry_slots), resource_resolution, resource_maxhoursweek, resource_resp from resource, entry where resource_id = ".$resource." and entry_user = ".$user_id." and entry_status in (1,2) and entry_resource = ".$resource." and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
+		$res = dbHelp::mysql_query2($sql);
+		$arr = dbHelp::mysql_fetch_row2($res);
+		if(!isset($arr[0])){
+			$arr[0] = 0;
+		}
+
+		return $arr;
 	}
 ?>

@@ -201,7 +201,7 @@ $(document).ready(function(){
 			},
 			function(data){
 				if(data){
-					alert(data);
+					//alert(data);
 					var url="ajaxReport.php?type=4";
 					$.get(url,{},
 					function(data){
@@ -337,7 +337,7 @@ $(document).ready(function(){
 				alert(data);
 			});
 		}
-		window.close();
+	//	window.close();
 	});
 	
 	

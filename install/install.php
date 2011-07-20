@@ -486,7 +486,24 @@
 					
 			dbHelp::scriptRead($sqlDatumoConstraints);
 			copyFolderTo('pics', $_SESSION['path']."/pics");
+			copyFolderTo('admin', $_SESSION['path']."/admin");
 			
+//******* .htaccess ***********
+			if(($fileData = file_get_contents($_SESSION['path']."/admin/.htaccess")) == false){
+				throw new Exception("Wasn't able to open '.htaccess'.");
+			}
+			
+			$absPath = getcwd();
+			$absPath = str_replace('\\', '/', $absPath);
+			$absPath = str_ireplace('install', substr($_SESSION['path'], 3)."/admin", $absPath);
+			$fileData = str_replace('pathMarker',$_SESSION['path']."/admin/",$fileData);
+			wtlog('.htaccess path marker replaced successfully','a');
+
+			if(!file_put_contents($_SESSION['path']."/admin/.htaccess", $fileData)){
+				throw new Exception("Couldn't create the .htaccess file in '".$_SESSION['path']."/admin/");
+			}
+//*****************************
+
 			// Eventually change this if there are other softwares to install
 			if($software != "agendo"){
 				loadTriggers($sqlDatumoTriggers, $echoSeparator);

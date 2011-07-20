@@ -1,7 +1,7 @@
 <?php
 
-require_once("../Datumo2.0/.htconnect.php");
-require_once("../alert/class.phpmailer.php");
+require_once("../.htconnect.php");
+require_once("../../agendo/alert/class.phpmailer.php");
 
 //initiate classes
 $mail = new PHPMailer;
@@ -17,16 +17,20 @@ $sql = $conn->query($query);
 $row = $sql->fetch();
 $address = $row[0];
 
-$sql = $conn->query("SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_SMTPSecure, mainconfig_SMTPAuth FROM mainconfig WHERE mainconfig_id = 1");
-$row = $sql->fetch();
+$sql = $conn->query("SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'");
+for($i=0;$arr=$sql->fetch();$i++){
+	$row[$i]=$arr[1];
+}
+
 $mail->IsSMTP(); // telling the class to use SMTP
 $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-$mail->SMTPAuth   = $row[5];                  // enable SMTP authentication
-$mail->SMTPSecure = $row[4];                 // sets the prefix to the servier
-$mail->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
-$mail->Host       = $row[0];      // sets GMAIL as the SMTP server
-$mail->Username   = $row[3];  // GMAIL username
-$mail->Password   = $row[2];            // GMAIL password
+$mail->SMTPAuth   = $row[5];
+$mail->SMTPSecure = $row[4];
+$mail->Port       = $row[1];
+$mail->Host       = $row[0];
+$mail->Username   = $row[3];
+$mail->Password   = $row[2];
+
 $mail->SetFrom($row[3], 'Calendar Admin');
 $mail->AddReplyTo($row[3],"Calendar Admin");
 
@@ -38,7 +42,7 @@ $mail->Subject = "Calendar monitoring system";
 $mail->Body=$body;
 
 $mail->AddAddress($address, "");
-$mail->AddAddress("jlagarto@igc.gulbenkian.pt","");
+
 if(!$mail->Send()) {
 	echo "Mailer Error: " . $mail->ErrorInfo;
 } else {
