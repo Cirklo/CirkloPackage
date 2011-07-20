@@ -359,6 +359,7 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `resource_confirmtol` smallint(6) NOT NULL COMMENT 'In slots, Number of time slots of tolerance allowed before and after reservation time to confirm presence or equipment usage.',
   `resource_delhour` int(11) NOT NULL COMMENT 'In hours, minimum time before an entry starts.to delete it.',
   `resource_color` int(11) NOT NULL,
+  `resource_maxhoursweek` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`resource_id`),
   KEY `resource_type` (`resource_type`),
   KEY `resource_status` (`resource_status`),
@@ -372,7 +373,7 @@ CREATE TABLE IF NOT EXISTS `resource` (
 --
 
 INSERT INTO `resource` (`resource_id`, `resource_name`, `resource_type`, `resource_status`, `resource_maxdays`, `resource_starttime`, `resource_stoptime`, `resource_resp`, `resource_wikilink`, `resource_price`, `resource_resolution`, `resource_maxslots`, `resource_confIP`, `resource_confirmtol`, `resource_delhour`, `resource_color`) VALUES
-(1, 'Demo Resource', 1, 1, 7, 7, 22, 1, '', 1, 30, 8, '0.0.0.0', 0, 0, 5);
+(1, 'Demo Resource', 1, 1, 7, 7, 22, 1, '', 1, 30, 8, '0.0.0.0', 0, 0, 5, 0);
 -- --------------------------------------------------------
 
 --
