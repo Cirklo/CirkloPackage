@@ -496,7 +496,7 @@
 			$absPath = getcwd();
 			$absPath = str_replace('\\', '/', $absPath);
 			$absPath = str_ireplace('install', substr($_SESSION['path'], 3)."/admin", $absPath);
-			$fileData = str_replace('pathMarker',$_SESSION['path']."/admin/",$fileData);
+			$fileData = str_replace('pathMarker', $absPath."/admin/", $fileData);
 			wtlog('.htaccess path marker replaced successfully','a');
 
 			if(!file_put_contents($_SESSION['path']."/admin/.htaccess", $fileData)){
