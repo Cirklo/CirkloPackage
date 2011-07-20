@@ -74,7 +74,8 @@ function add(){
 	
 	//****************
 	$arr = getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource);
-	if($arr[3] != $user_id){
+
+	if($arr[3] != $user_id && $arr[2] != 0){
 		// check if the number of slots*resolution is bigger then the resource_maxhoursweek
 		// if so, return error and exit
 		$totalTime = ($arr[0] + $slots) * $arr[1] / 60;
@@ -250,12 +251,11 @@ function update(){
     $year=substr($datetime,0,4);
 	
 	$arr = getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource);
+	$totalSlots = $arr[0];
+	$resolution = $arr[1];
+	$maxHours = $arr[2];
 
-	if($arr[3] != $user_id){
-		$totalSlots = $arr[0];
-		$resolution = $arr[1];
-		$maxHours = $arr[2];
-		
+	if($arr[3] != $user_id && $maxHours != 0){
 		$sql="select entry_slots from entry where entry_id=". $entry;
 		$res=dbHelp::mysql_query2($sql) or die($sql);
 		$arr=dbHelp::mysql_fetch_row2($res);

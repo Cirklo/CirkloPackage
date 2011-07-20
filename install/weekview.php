@@ -350,11 +350,11 @@ echo "<table id='master' style='margin:auto' width=750>";
 						$year=substr($slotDate,0,4);
 						
 						$arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
+						$totalSlots = $arrSRM[0];
+						$resolution = $arrSRM[1];
+						$maxHours 	= $arrSRM[2];
 
-						if($arrSRM[3] != $user_id){
-							$totalSlots = $arrSRM[0];
-							$resolution = $arrSRM[1];
-							$maxHours 	= $arrSRM[2];
+						if($arrSRM[3] != $user_id && $maxHours != 0){
 							
 							$timeUsed = $totalSlots * $resolution/60;
 							$maxSlots = $maxHours * 60 / $resolution;
