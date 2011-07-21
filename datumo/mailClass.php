@@ -73,16 +73,18 @@ class mailClass extends PHPMailer{
 	       	
 			if(!$this->Send()) {
 	            //mail error
-	            return "Could not send mail!";
+	            $bool=false;
 	        } else {
 	            //mail OK
-	        	return "Mail successfully sent!";   
+	        	$bool=true;
 	        }
 			$this->ClearAddresses();	//clear addresses for the next loop
 			$this->ClearBCCs();
 			$this->ClearReplyTos();
 			sleep($delay);				//sleep after sending emails
 		}
+		if($bool)	echo "Mail successfully sent!";
+		else		echo "Mail not sent";
 	}
 }
 
