@@ -58,7 +58,9 @@ class mailClass extends PHPMailer{
 		$noAddressesPerTurn=15;	//number of addresses per email
 		$j=0;					//control counter
 		$noAddresses=sizeof($to);
+		echo $noAddresses."<br>";
 		$noEmails=ceil($noAddresses/$noAddressesPerTurn);
+		echo $noEmails."<br>";
 		for($i=1;$i<=$noEmails;$i++){
 			$this->CharSet="UTF-8";
 			$this->SetFrom($from, $from);
@@ -67,24 +69,22 @@ class mailClass extends PHPMailer{
 	        $this->Body=$msg;
 	        //loop through email addresses
 	       	while($j!=($noAddressesPerTurn*$i)){
+	       		echo $to[$j]."<br>";
 	       		$this->AddBCC($to[$j]);
 	       		$j++;	//increment counter
 	       	}
-	       	
-			if(!$this->Send()) {
-	            //mail error
-	            $bool=false;
-	        } else {
-	            //mail OK
-	        	$bool=true;
-	        }
+//			if(!$this->Send()) {
+//	            //mail error
+//	            $bool=false;
+//	        } else {
+//	            //mail OK
+//	        	$bool=true;
+//	        }
 			$this->ClearAddresses();	//clear addresses for the next loop
 			$this->ClearBCCs();
 			$this->ClearReplyTos();
 			sleep($delay);				//sleep after sending emails
 		}
-		if($bool)	echo "Mail successfully sent!";
-		else		echo "Mail not sent";
 	}
 }
 
