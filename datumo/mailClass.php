@@ -54,7 +54,7 @@ class mailClass extends PHPMailer{
 	}
 	
 	public function mailingList($subject, $to, $from, $msg){
-		$delay=1; 				//delay between emails, in seconds
+		$delay=4; 				//delay between emails, in seconds
 		$noAddressesPerTurn=15;	//number of addresses per email
 		$j=0;					//control counter
 		$noAddresses=sizeof($to);
@@ -79,7 +79,6 @@ class mailClass extends PHPMailer{
 	        }
 			$this->ClearAddresses();	//clear addresses for the next loop
 			$this->ClearBCCs();
-			$this->ClearReplyTos();
 			sleep($delay);				//sleep after sending emails
 		}
 		if($bool)	echo "Mail successfully sent";
