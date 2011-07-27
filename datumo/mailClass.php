@@ -56,7 +56,7 @@ class mailClass extends PHPMailer{
 	
 	public function mailingList($subject, $to, $from, $msg){
 		$delay=1; 				//delay between emails, in seconds
-		$noAddressesPerTurn=15;	//number of addresses per email
+		$noAddressesPerTurn=30;	//number of addresses per email
 		$j=0;					//control counter
 		$noAddresses=sizeof($to);
 		$noEmails=ceil($noAddresses/$noAddressesPerTurn);
