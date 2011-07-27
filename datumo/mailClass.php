@@ -24,6 +24,7 @@ class mailClass extends PHPMailer{
         $this->Host       = $row[0];      		// sets GMAIL as the SMTP server
         $this->Username   = $row[3];  			// GMAIL username
         $this->Password   = $row[2];            // GMAIL password
+        $this->SetFrom($row[3], $row[3]);
 	}
 	
 	/**
@@ -33,7 +34,7 @@ class mailClass extends PHPMailer{
 	
 	public function sendMail($subject, $to, $from, $msg){
 		$this->CharSet="UTF-8";
-		$this->SetFrom($from, $from);
+//		$this->SetFrom($from, $from);
         $this->AddReplyTo($from,$from);
 		$this->Subject = $subject;
         $this->Body = $msg;
@@ -61,7 +62,7 @@ class mailClass extends PHPMailer{
 		$noEmails=ceil($noAddresses/$noAddressesPerTurn);
 		for($i=1;$i<=$noEmails;$i++){
 			$this->CharSet="UTF-8";
-			$this->SetFrom($from, $from);
+//			$this->SetFrom($from, $from);
 	        $this->AddReplyTo($from,$from);
 			$this->Subject=$subject;
 	        $this->Body=$msg;
