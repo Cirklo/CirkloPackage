@@ -389,6 +389,10 @@
 		}
 		catch(Exception $e){
 			$msg = $e->getMessage();
+			$extraMsg = back();
+			if($extraMsg != ""){
+				$msg = $msg."\n".$extraMsg;
+			}
 		}
 		
 		wtlog($msg,'a');
@@ -547,11 +551,32 @@
 	}
 	
 	function back(){
-		require_once("../agendo/commonCode.php");
-		$sql = "drop database ".dbHelp::getSchemaName();
-		dbHelp::mysql_query2($sql);
-		rrmdir($_SESSION['path']);
+		$message = "";
+		
+		try{
+			require_once("../agendo/commonCode.php");
+		}
+		catch(Exception $e){
+			$message = $e.getMessage()."\n";
+		}
+
+		try{
+			$sql = "drop database ".dbHelp::getSchemaName();
+			dbHelp::mysql_query2($sql);
+		}
+		catch(Exception $e){
+			$message = $message.$e.getMessage()."\n";
+		}
+
+		try{
+			rrmdir($_SESSION['path']);
+		}
+		catch(Exception $e){
+			$message = $message.$e.getMessage()."\n";
+		}
+
 		session_destroy();
+		return $message;
 	}
 	
 	function rrmdir($dir) {

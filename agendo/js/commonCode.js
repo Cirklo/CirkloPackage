@@ -1,3 +1,18 @@
+$(document).ready(function(){
+$("#resourceSearch").focus(function(){
+	// if(document.getElementById('resourceSearch') != null){
+		$("#resourceSearch").autocomplete({
+			source: "../agendo/commonCode.php?autocomplete",
+			minLength: 2,
+			select: function(event, ui) {
+						window.location = "weekview.php?resource=" + ui.item.id;
+					},
+			dataType: "json"
+		});
+	// }
+});
+});
+
 function go (objIMG) {
     s=objIMG.src;
     objDIV=document.getElementById(objIMG.id + 'div');
@@ -88,7 +103,7 @@ function showMessage(msg, isError){
 	
 	// alert(msg);
 	$(document).ready(function(){
-		$.jnotify(msg, extra);
+			$.jnotify(msg, extra);
 		}
 	);
 }

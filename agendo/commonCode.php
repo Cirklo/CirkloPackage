@@ -11,6 +11,25 @@
 	// session_destroy();
 	require_once("__dbHelp.php");
 	
+	if(isset($_GET['autocomplete'])){
+		autocompleteAgendo();
+		exit;
+	}
+	
+	function autocompleteAgendo(){
+		$value = $_GET['term'];
+		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%'";
+		$res = dbHelp::mysql_query2($sql);
+		while($arr = dbHelp::mysql_fetch_row2($res)){
+			// if(stripos($arr[1], $value) !== false){
+				$row_array['id'] = $arr[0];
+				$row_array['value'] = $arr[1];
+				$json[] = $row_array;
+			// }
+		}
+		echo json_encode($json);
+	}
+
 	function logIn(){
 		$userLogin=$_POST['login'];
 		$pass=$_POST['pass'];
@@ -62,6 +81,8 @@
 		echo "<script type='text/javascript' src='../agendo/js/jquery.jnotify.js'></script>";
 		echo "<link href='../agendo/css/tipTip.css' rel='stylesheet' type='text/css'>";
 		echo "<script type='text/javascript' src='../agendo/js/jquery.tipTip.js'></script>";
+		echo "<link rel='stylesheet' type='text/css' href='../agendo/css/autocomplete.css'>";
+		echo "<script type='text/javascript' src='../agendo/js/jquery-ui-1.8.14.custom.min.js'></script>";
 	}
 
 	function showMsg($message, $isError = false, $import = false){
@@ -140,27 +161,21 @@
 	}
 
 	function cryptPassword($uncryptedPass){
-	//admin
-	//*B3580074E39C5F3D8A640E21295E2DC1098387F1
-		// Current encrypting method
-		// $sql="select password('". $uncryptedPass ."')";
-		// $res=dbHelp::mysql_query2($sql);
-		// $arrcheck=dbHelp::mysql_fetch_row2($res);
-		// return $arrcheck[0];
-		
-	//admin
-	//2127f97535023818d7add4a3c2428e06d382160daab440a9183690f18e285010
-		// The future way to encrypt the password
 		return hash('sha256', $uncryptedPass);
 	}
 	
 	// Buttons for help, videos, resources and user/management
 	function echoUserVideosResourceHelpLinks(){
 		echo "<div id='linksImages'>";
-			echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.open('http://www.cirklo.org/agendo_help.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1000,height=600')\" align='right'>";
-			echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right'>";
-			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right'>";
-			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right'>";
+			echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.open('http://www.cirklo.org/agendo_help.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1000,height=600')\" align='right' />";
+			echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right' />";
+			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right' />";
+			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right' />";
+			
+			// echo "<label style='font-size:12px;color:#F7C439;' title='Type the name of the resource you wish to find'>search";
+			// echo "&nbsp;";
+			// echo "<input style='font-size:12px;width:120px;height:18px' type='text' id='resourceSearch' /></label>";
+			// echo "&nbsp;";
 		echo "</div>";
 	}
 	
@@ -180,25 +195,43 @@
 	
 	// Resources div
 	function echoResourcesDiv(){
-		echo "<div id=resourcesdiv  align='center' style='padding:5px;display:none;position:absolute;left:540px;width:250px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
-			echo "<a href=index.php?class=0>All Resources</a><br>";
-			echo "<a href=index.php>Most used</a>";
-			echo "<hr>";
+		echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
+			echo "<div style='width:162px;overflow:auto;'>";
+				echo "<div style='color:#789095;text-align:left;width:100px;float:left;'>";
+					echo "<label>search</label>";
+					echo "<br>";
+					echo "<input type='text' id='resourceSearch' style='width:100px;font-size:11px;' title='Type the name of the resource you wish to find'/>";
+				echo "</div>";
+				
+				// echo "&nbsp;";
+			
+				echo "<div style='text-align:left;width:50px;float:left;margin-left:10px;margin-top:2px;'>";
+					echo "<a href='index.php?class=0'>All</a>";
+					echo "<br>";
+					echo "<a href='index.php'>Most used</a>";
+				echo "</div>";
+				
+				// echo "<div style='clear: both;'>";
+				// echo "</div>";
+			echo "</div>";
 			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
 			$res=dbHelp::mysql_query2($sql) or die ($sql);
-			for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
-				$arr=dbHelp::mysql_fetch_row2($res);
-				echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
+			$numRows = dbHelp::mysql_numrows2($res);
+			// echo "<div style='position:relative;'>";
+			if($numRows > 0){
+				echo "<hr>";
+				for ($i=0;$i<$numRows;$i++) {
+					$arr=dbHelp::mysql_fetch_row2($res);
+					echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
+				}
 			}
+			// echo "</div>";
+			// echo "<input type='button' id='resourceSearchButton' />";
 		echo "</div>";
 	}
 	
 	// User/management div
 	function echoUserDiv($phpFile, $resource){
-		// echo "<script type='text/javascript' src='../agendo/js/jquery-1.5.2.min.js'></script>";
-		// echo "<script type='text/javascript' src='../agendo/js/commonCode.js'></script>";
-
-		
 		// Used only for the horrible patch/hack of the checkfields function in the weekview.js, more details on that file
 		if($phpFile=='weekview')
 			echo "<script type='text/javascript'> setUsingSession(false) </script>";
