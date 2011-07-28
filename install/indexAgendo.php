@@ -77,7 +77,7 @@ echo "<table id='master' style='width:800' align=center>";
 			echo "<tr>";
 				$imgWidth=200;
 				echo "<td style='font-size:11px;text-align:left;padding:0px;margin:0px' width='".$imgWidth."'>";
-				echo "<img width='".$imgWidth."' style='cursor:pointer;' id=agendo title='agendo' src=pics/agendo.png onmouseover=\"this.src='pics/agendo_.png'\" onmouseout=\"this.src='pics/agendo.png'\" onclick=\"javascript:window.open('http://www.cirklo.org/agendo.php','_blank','directories=yes,status=yes,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1024,height=768')\" />";
+				echo "<img width='".$imgWidth."' style='cursor:pointer;' id=agendo title='agendo' src=pics/agendo.png onmouseover=\"this.src='pics/agendo_.png'\" onmouseout=\"this.src='pics/agendo.png'\" onclick=\"javascript:window.open('https://agendo.cirklo.org','_blank','directories=yes,status=yes,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1024,height=768')\" />";
 				echo "</td>";
 				
 				echo "<td align='right' >";
@@ -103,7 +103,7 @@ echo "<table id='master' style='width:800' align=center>";
 			
 			echo "<tr>";
 				echo "<td align='center'>";
-				echo "<font color=#FFF size=1.5px>Powered by <a href='http://agendo.cirklo.org' style='color:#F7C439' target='_blank'>Cirklo</a></font>";
+				echo "<font color=#FFF size=1.5px>Powered by <a href='http://www.cirklo.org' style='color:#F7C439' target='_blank'>Cirklo</a></font>";
 				echo "</td>";
 				
 				echo "<td align='right'>";
