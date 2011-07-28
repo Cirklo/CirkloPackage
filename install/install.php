@@ -22,92 +22,90 @@
 	echo "<center><img src=pics/cirklo.png></center>";
 	
 	echo "<table id='firstScreen' style='padding:10px'>";
-	echo "<tr>";
-	echo "<td>";
-	
-	echo "<table id='software'>";
-		echo "<tr>";
-			echo "<td align='center' valign='bottom'>";
-			echo "<label>";
-				echo "<img width=200 src='agendo.png' />";
-				echo "<br><text style='color:white'>Check to install Agendo </text><input type='checkbox' name='package' id='agendo' checked/>";
-			echo "</label>";
-			echo "</td>";
-		echo "</tr>";
-	echo "</table>";
-
-	echo "</td>";
-	echo "<td>";
-
-	// Eventually we will have postgresql and maybe others here
-	$engineArray[] = 'MySQL';
-	// htconnect data	
-	echo "<table id='htConnectTable'>";
 		echo "<tr>";
 			echo "<td>";
-			echo "<label id='dbEngineLabel'>Database engine</label>";
+			echo "<table id='software'>";
+				echo "<tr>";
+					echo "<td align='center' valign='bottom'>";
+					echo "<label>";
+						echo "<img width=200 src='agendo.png' />";
+						echo "<br><text style='color:white'>Check to install Agendo </text><input type='checkbox' name='package' id='agendo' checked/>";
+					echo "</label>";
+					echo "</td>";
+				echo "</tr>";
+			echo "</table>";
 			echo "</td>";
 			
 			echo "<td>";
-			echo "<select id='dbEngine' style='width:100%'>";
-			foreach($engineArray as $engineItem){
-				echo "<option value='".strtolower($engineItem)."'>".$engineItem."</option>";
-			}
-			echo "</select>";
+			// Eventually we will have postgresql and maybe others here
+			$engineArray[] = 'MySQL';
+			// htconnect data	
+			echo "<table id='htConnectTable'>";
+				echo "<tr>";
+					echo "<td>";
+					echo "<label id='dbEngineLabel'>Database engine</label>";
+					echo "</td>";
+					
+					echo "<td>";
+					echo "<select id='dbEngine' style='width:100%'>";
+					foreach($engineArray as $engineItem){
+						echo "<option value='".strtolower($engineItem)."'>".$engineItem."</option>";
+					}
+					echo "</select>";
+					echo "</td>";
+				echo "</tr>";
+				
+				echo "<tr>";
+					labelInputText('dbName', 'Database name', 'databasename', 'Choose a proper database name (needs to be a non existing database)');
+				echo "</tr>";
+				
+				echo "<tr>";
+					labelInputText('dbHost', 'Database host', 'localhost', '');
+				echo "</tr>";
+				
+				echo "<tr>";
+					labelInputText('dbUser', 'Database username', 'root', 'Database user with permissions to create databases and tables');
+				echo "</tr>";
+				
+				echo "<tr>";
+					echo "<td>";
+					echo "<label id='dbPassLabel'>Database password</label>";
+					echo "</td>";
+					
+					echo "<td>";
+					echo "<input id='dbPass' type='password' style='width:100%'></input>";
+					echo "</td>";
+
+					// echo "<td>";
+					// echo "<img id='dbPassImg' class='helpClass' src='pics/interrogation.png' title='".$helpText."'></input>";
+					// echo "</td>";
+				echo "</tr>";
+				
+				echo "<tr>";
+					labelInputText('path', 'Destination path', 'Cirklo', 'Relative path where the software will be installed within the root server');
+				echo "</tr>";
+				
+				// Uncomment later when its possible to isolate all the tables to remove in case user goes back
+				// echo "<tr>";
+					// echo "<td align='center' colspan=2>";
+						// echo "<input id='makeDB' type='checkbox' checked >Check to create database<P>";
+					// echo "</td>";
+				// echo "</tr>";
+			echo "</table>";
+
+
 			echo "</td>";
 		echo "</tr>";
-		
-		echo "<tr>";
-			labelInputText('dbName', 'Database name', 'databasename', 'Choose a proper database name (needs to be a non existing database)');
-		echo "</tr>";
-		
-		echo "<tr>";
-			labelInputText('dbHost', 'Database host', 'localhost', '');
-		echo "</tr>";
-		
-		echo "<tr>";
-			labelInputText('dbUser', 'Database username', 'root', 'Database user with permissions to create databases and tables');
-		echo "</tr>";
-		
-		echo "<tr>";
-			echo "<td>";
-			echo "<label id='dbPassLabel'>Database password</label>";
-			echo "</td>";
-			
-			echo "<td>";
-			echo "<input id='dbPass' type='password' style='width:100%'></input>";
-			echo "</td>";
 
-			// echo "<td>";
-			// echo "<img id='dbPassImg' class='helpClass' src='pics/interrogation.png' title='".$helpText."'></input>";
-			// echo "</td>";
-		echo "</tr>";
-		
 		echo "<tr>";
-			labelInputText('path', 'Destination path', 'Cirklo', 'Relative path where the software will be installed within the root server');
+				echo "<td align='center' style='padding:10px' colspan=2>";
+				echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id)></input>";
+				echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
+				echo "</td>";
+
+				// echo "<td align='center' style='padding:10px' colspan=2>";
+				// echo "</td>";
 		echo "</tr>";
-		
-		// Uncomment later when its possible to isolate all the tables to remove in case user goes back
-		// echo "<tr>";
-			// echo "<td align='center' colspan=2>";
-				// echo "<input id='makeDB' type='checkbox' checked >Check to create database<P>";
-			// echo "</td>";
-		// echo "</tr>";
-	echo "</table>";
-
-
-	echo "</td>";
-	echo "</tr>";
-
-	echo "<tr>";
-			echo "<td align='center' style='padding:10px' colspan=2>";
-			echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id)></input>";
-			echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
-			echo "</td>";
-
-			// echo "<td align='center' style='padding:10px' colspan=2>";
-			// echo "</td>";
-	echo "</tr>";
 	echo "</table>";
 
 
@@ -549,9 +547,11 @@
 	}
 	
 	function back(){
-		$message = "";
-
-		try{
+		$message = "No path was created yet";
+		$path = $_POST['path'];
+		
+		if(isset($path)){
+			$_SESSION['path'] = "../".$path;
 			require_once("../agendo/commonCode.php");
 			try{
 				$sql = "drop database ".dbHelp::getSchemaName();
@@ -570,10 +570,6 @@
 				$message = $message.$e.getMessage()."<br>";
 			}
 		}
-		catch(Exception $e){
-			$message = $e.getMessage()."\n";
-		}
-
 		echo $message;
 		session_destroy();
 	}
