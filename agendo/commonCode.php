@@ -211,8 +211,8 @@
 					echo "<a href='index.php'>Most used</a>";
 				echo "</div>";
 				
-				// echo "<div style='clear: both;'>";
-				// echo "</div>";
+				echo "<div style='clear: both;'>";
+				echo "</div>";
 			echo "</div>";
 			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
 			$res=dbHelp::mysql_query2($sql) or die ($sql);
