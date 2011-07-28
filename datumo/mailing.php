@@ -146,10 +146,10 @@ echo "To: ";
 //which tables are available for mailing?
 echo "<select name=mailList id=mailList onchange=listSelect()>";
 echo "<option value=0>Select a list...</option>";
-echo "<option value=all>All users</option>";
+//echo "<option value=all>All users</option>";
 echo "<option value=department>Department</option>";
 echo "<option value=resource>Resource users</option>";
-echo "<option value=resourcetype>Resource type</option>";
+//echo "<option value=resourcetype>Resource type</option>";
 echo "</select>";
 //div to insert new selector
 echo "<div lang=exp style='border:0px solid;position:relative;float:left;;overflow:auto;margin-top:20px' id=mailDiv>";
