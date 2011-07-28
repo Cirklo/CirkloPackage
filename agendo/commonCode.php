@@ -196,24 +196,31 @@
 	// Resources div
 	function echoResourcesDiv(){
 		echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
-			echo "<div style='width:162px;overflow:auto;'>";
-				echo "<div style='color:#789095;text-align:left;width:100px;float:left;'>";
-					echo "<label>search</label>";
-					echo "<br>";
-					echo "<input type='text' id='resourceSearch' style='width:100px;font-size:11px;' title='Type the name of the resource you wish to find'/>";
-				echo "</div>";
+			echo "<table>";
+			// echo "<div style='width:162px;overflow:auto;'>";
+				echo "<tr>";
+					echo "<td>";
+					echo "<div style='color:#789095;text-align:left;width:100px;'>";
+						echo "<label style='color:#789095'>search</label>";
+						echo "<br>";
+						echo "<input type='text' id='resourceSearch' style='width:100px;font-size:11px;' title='Type the name of the resource you wish to find'/>";
+					echo "</div>";
+					echo "</td>";
+
+					echo "<td>";
+					echo "<div style='text-align:left;width:50px;margin-left:10px;margin-top:2px;'>";
+						echo "<a href='index.php?class=0'>All</a>";
+						echo "<br>";
+						echo "<a href='index.php'>Most used</a>";
+					echo "</div>";
+					echo "</td>";
+				echo "<tr>";
 				
 				// echo "&nbsp;";
-			
-				echo "<div style='text-align:left;width:50px;float:left;margin-left:10px;margin-top:2px;'>";
-					echo "<a href='index.php?class=0'>All</a>";
-					echo "<br>";
-					echo "<a href='index.php'>Most used</a>";
-				echo "</div>";
-				
-				echo "<div style='clear: both;'>";
-				echo "</div>";
-			echo "</div>";
+				// echo "<div style='clear: both;'>";
+				// echo "</div>";
+			// echo "</div>";
+			echo "</table>";
 			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
 			$res=dbHelp::mysql_query2($sql) or die ($sql);
 			$numRows = dbHelp::mysql_numrows2($res);
