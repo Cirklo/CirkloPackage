@@ -228,7 +228,7 @@ function ManageEntries(action,ttime,tresolution) {
                         }   
                        tstarttime= parseInt(ttime)+(i-1)*(tresolution);
                         if (seed==0) exit;
-                        var entryDate = new Date(tdate.substring(0,4),parseInt(tdate.substring(4,6),10)-1,parseInt(tdate.substring(6,8),10)+j,Math.floor(tstarttime),Math.ceil((tstarttime-Math.floor(tstarttime))*60),'00');
+                        var entryDate = new Date(tdate.substring(0,4),parseInt(tdate.substring(4,6),10)-1,parseInt(tdate.substring(6,8),10)+j,Math.floor(tstarttime),Math.round((tstarttime-Math.floor(tstarttime))*60),'00');
                         ajaxEntries('GET','../agendo/process.php?' + 'slots=' + seed + '&datetime=' + formatDate(entryDate,"yyyyMMddHHmm") + '&resource=' + resource + '&assistance=' + getAssistance,true);
                         seed=0;
                         k=0;

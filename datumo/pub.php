@@ -75,7 +75,7 @@ class pubHandler{
 				AND pubpages_name='$target_page'
 				AND pubpages_position='pub1'";
 				$sql=$this->pdo->query($query);
-				if($sql->rowCount>0){				
+				if($sql->rowCount()>0){				
 					//left main div -> holds children
 					echo "<div style='
 						background-color:#F7C439;
