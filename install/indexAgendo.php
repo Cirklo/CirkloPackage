@@ -93,7 +93,8 @@ echo "<table id='master' style='width:800' align=center>";
 					$arrInst = dbHelp::mysql_fetch_row2($resInst);
 					echo "<tr>";
 						echo "<td align='left' style='padding-left:10px;padding-bottom:14px;vertical-align:bottom;'>";	
-						echo "<font size=5px style='color:#F7C439'><b>".$arrInst[1]."</b> Resource Scheduler</font>";
+						echo "<font size=5px style='color:#F7C439'><b>".$arrInst[1]."</b></font><br>";
+						echo "<font size=4x style='color:#F7C439'>Resource Scheduler</font>";
 						echo "</td>";	
 					echo "</tr>";
 				echo "</table>";
@@ -102,7 +103,7 @@ echo "<table id='master' style='width:800' align=center>";
 			
 			echo "<tr>";
 				echo "<td align='center'>";
-				echo "<font color=#FFF size=1.5px>Powered by <a href='http://www.cirklo.org' style='color:#F7C439' target='_blank'>Cirklo</a></font>";
+				echo "<font color=#FFF size=1.5px>Powered by <a href='http://agendo.cirklo.org' style='color:#F7C439' target='_blank'>Cirklo</a></font>";
 				echo "</td>";
 				
 				echo "<td align='right'>";
@@ -189,11 +190,16 @@ echo "<table id='master' style='width:800' align=center>";
 					//You tube feature videos
 					echo "<span ><a href='http://www.youtube.com/user/agendocirklo' target=_blank><img src=pics/youtube.png width=45px border=0 title='Feature videos'></a></span>";
 				echo "</div>"; 			
-				echo "<a href=http://www.mozilla-europe.org style='text-decoration:none'><font color=#FFFFFF size=1.5px>Optimized for Mozilla Firefox v4.0+</font></a>";
-				echo "<br>";
+				echo "<font color=#FFFFFF size=1.5px>Tested on</font>";
+				echo "<a href=http://www.mozilla-europe.org style='text-decoration:none'><font color=#FFFFFF size=1.5px> Firefox</font></a>";
+				echo "<a href=http://www.mozilla-europe.org style='text-decoration:none'><font color=#FFFFFF size=1.5px> Chrome, </font></a>";
+				echo "<a href=http://www.mozilla-europe.org style='text-decoration:none'><font color=#FFFFFF size=1.5px> Safari, </font></a><br>";
+				echo "<a href=http://www.mozilla-europe.org style='text-decoration:none'><font color=#FFFFFF size=1.5px> IOS, </font></a>";
+				echo "<a href=http://www.mozilla-europe.org style='text-decoration:none'><font color=#FFFFFF size=1.5px> Android</font></a><br>";
+				echo "";
 				$resVersion=dbHelp::mysql_query2("select configParams_value from configParams where configParams_name = 'AgendoVersion'");
 				$arrVersion = dbHelp::mysql_fetch_row2($resVersion);
-				echo "<font color=#FFFFFF size=1.5px>Agendo version ".$arrVersion[0]."</font>";
+				echo "<font color=#F7C439 size=1.5px>Agendo version ".$arrVersion[0]."</font>";
 				echo "</td>";
 				echo "<td>";
 					echo "<p style='text-align:right'>A user cannot damage any resource or, through his/her inaction, allow somebody else to damage it<br>";

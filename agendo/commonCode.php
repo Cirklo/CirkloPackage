@@ -18,7 +18,7 @@
 	
 	function autocompleteAgendo(){
 		$value = $_GET['term'];
-		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%'";
+		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
 		$res = dbHelp::mysql_query2($sql);
 		while($arr = dbHelp::mysql_fetch_row2($res)){
 			// if(stripos($arr[1], $value) !== false){
