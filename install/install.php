@@ -559,7 +559,7 @@
 				$message = "Database deleted.";
 			}
 			catch(Exception $e){
-				$message = $e.getMessage()."<br>";
+				$message = $e->getMessage()."<br>";
 			}
 
 			try{
@@ -567,7 +567,7 @@
 				$message = $message.$_SESSION['path']." folder removed.<br>";
 			}
 			catch(Exception $e){
-				$message = $message.$e.getMessage()."<br>";
+				$message = $message.$e->getMessage()."<br>";
 			}
 		}
 		echo $message;

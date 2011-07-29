@@ -34,10 +34,15 @@
 		}
 		
 		private static function setTimezone(){
-			$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
-			$res = dbHelp::mysql_query2($sql);
-			$arr = dbHelp::mysql_fetch_row2($res);
-			date_default_timezone_set($arr[0]);
+			try{
+				$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
+				$res = dbHelp::mysql_query2($sql);
+				$arr = dbHelp::mysql_fetch_row2($res);
+				date_default_timezone_set($arr[0]);
+			}
+			catch(Exception $e){
+				// not handled
+			}
 		}
 
 		public static function changeToDatabase($db){
