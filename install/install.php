@@ -556,7 +556,7 @@
 			try{
 				$sql = "drop database ".dbHelp::getSchemaName();
 				dbHelp::mysql_query2($sql);
-				$message = "Database deleted.";
+				$message = "Database deleted.<br>";
 			}
 			catch(Exception $e){
 				$message = $e->getMessage()."<br>";
