@@ -22,8 +22,11 @@ function back(){
 		document.getElementById('firstScreen').style.display='table';
 		document.getElementById('databaseData').style.display='none'
 		document.getElementById('makeHtConnect').disabled = false;
-		$.post('install.php', {functionName: 'back'});
-		showMessage('Changes undone.');
+		$.post('install.php', {functionName: 'back'},
+			function(phpMessage){
+				showMessage(phpMessage);
+			}
+		);
 	}
 }
 

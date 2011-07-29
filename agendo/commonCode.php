@@ -257,7 +257,7 @@
 						echo "</tr>";
 					echo "</table>";
 				}
-				echo "<table style='display:".$display."'>";
+				echo "<table style='display:".$display.";padding:6px;'>";
 					echo "<tr>";
 						echo "<td><label>User Name</label></td>";
 						echo "<td><input style='font-size:11px;' name=user_idm id=user_idm value='' onblur=ajaxUser(this) /></td>";

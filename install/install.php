@@ -102,9 +102,12 @@
 	echo "<tr>";
 			echo "<td align='center' style='padding:10px' colspan=2>";
 			echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id)></input>";
+			echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
 			echo "</td>";
-		echo "</tr>";
-		
+
+			// echo "<td align='center' style='padding:10px' colspan=2>";
+			// echo "</td>";
+	echo "</tr>";
 	echo "</table>";
 
 
@@ -325,6 +328,7 @@
 			if(!mkdir($path)){
 				throw new Exception("Wasn't able to create the '".$dataArray[5]."' folder.");
 			}
+			$_SESSION['path'] = $path;
 			
 			if(($fileData = file_get_contents('.htconnect.php')) == false){
 				throw new Exception("Wasn't able to create/find the '.htconnect.php'");
@@ -352,6 +356,7 @@
 			if(!file_put_contents($path."/".$filename, $fileData) || !copy(($filename = 'indexDatumo.php'), $path."/index.php") || !copy(($filename = 'nonconformities.php'), $path."/nonconformities.php")){
 				throw new Exception("Couldn't create the ".$filename." file in '".$path."'.");
 			}
+			require_once("../agendo/commonCode.php");
 			
 			$arrVersion = noHtconnectFetchRows("select version()", $dbEngine, $informationSchemaName, $dbHost, $dbUser, $dbPass);
 			$arrDB = noHtconnectFetchRows("CREATE DATABASE ".$dbName, $dbEngine, $informationSchemaName, $dbHost, $dbUser, $dbPass);
@@ -360,9 +365,6 @@
 				throw new Exception("You need at least Mysql ".$mysqlVersion." to proceed.");
 			}
 			
-			$_SESSION['path'] = $path;
-			require_once("../agendo/commonCode.php");
-
 			if(($sql = file_get_contents('DatumoBase.sql')) == false){
 				throw new Exception("Wasn't able to open 'DatumoBase.sql'.");
 			}
@@ -389,10 +391,6 @@
 		}
 		catch(Exception $e){
 			$msg = $e->getMessage();
-			$extraMsg = back();
-			if($extraMsg != ""){
-				$msg = $msg."\n".$extraMsg;
-			}
 		}
 		
 		wtlog($msg,'a');
@@ -552,31 +550,32 @@
 	
 	function back(){
 		$message = "";
-		
+
 		try{
 			require_once("../agendo/commonCode.php");
+			try{
+				$sql = "drop database ".dbHelp::getSchemaName();
+				dbHelp::mysql_query2($sql);
+				$message = "Database deleted.";
+			}
+			catch(Exception $e){
+				$message = $e.getMessage()."<br>";
+			}
+
+			try{
+				rrmdir($_SESSION['path']);
+				$message = $message.$_SESSION['path']." folder removed.<br>";
+			}
+			catch(Exception $e){
+				$message = $message.$e.getMessage()."<br>";
+			}
 		}
 		catch(Exception $e){
 			$message = $e.getMessage()."\n";
 		}
 
-		try{
-			$sql = "drop database ".dbHelp::getSchemaName();
-			dbHelp::mysql_query2($sql);
-		}
-		catch(Exception $e){
-			$message = $message.$e.getMessage()."\n";
-		}
-
-		try{
-			rrmdir($_SESSION['path']);
-		}
-		catch(Exception $e){
-			$message = $message.$e.getMessage()."\n";
-		}
-
+		echo $message;
 		session_destroy();
-		return $message;
 	}
 	
 	function rrmdir($dir) {
