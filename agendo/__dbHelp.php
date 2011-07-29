@@ -25,10 +25,21 @@
 				dbHelp::$schema = dbHelp::$connect->getSchemaName();
 				// Beware that w in MySQL is (0..6) and D in PostGre is (1..7)
 				dbHelp::$dateHash = array("i" => "MI", "H" => "HH24", "h" => "HH12", "d" => "DD", "w" => "ID", "m" => "MM", "M" => "Month", "Y" => "YYYY");
+				self::setTimezone();
+	// $date = new DateTime();
+	// $tz = $date->getTimezone();
+	// echo($tz->getName());
 			}
 			return dbHelp::$connect;
 		}
 		
+		private static function setTimezone(){
+			$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
+			$res = dbHelp::mysql_query2($sql);
+			$arr = dbHelp::mysql_fetch_row2($res);
+			date_default_timezone_set($arr[0]);
+		}
+
 		public static function changeToDatabase($db){
 			$connect = self::getConnect();
 			$connect->dbSelect($db);
