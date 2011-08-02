@@ -12,10 +12,11 @@ $user_id = startSession();
 <script type='text/javascript' src='js/jquery.cal.js'></script>
 <script type='text/javascript' src='js/jquery-ui-1.8.9.custom.min.js'></script>
 <script type='text/javascript' src='js/fullcalendar.js'></script>
+<script type='text/javascript' src='js/gcal.js'></script>
 <script type='text/javascript'>
 
 	$(document).ready(function() {
-	
+		
 		$('#calendar').fullCalendar({
 			editable: false,
 			events: "calendar_feed.php?regular",
@@ -25,14 +26,24 @@ $user_id = startSession();
 				right: 'month,agendaWeek,agendaDay'
 
 			},
-			/*eventRender: function(event, element) {
-		        element.qtip({
-		            content: event.description
-		        });
-		    },*/
+			defaultView: 'agendaWeek',
+			eventClick: function(event) {
+				resp=confirm("Do you want to export this entry to your personal calendar?");
+				if(resp){
+					//SEND EMAIL WITH THE .ICS ATTACHED
+					$.get("calendar_feed.php?export",{
+						events:event
+					},
+					function(data){
+						alert(data);
+					});
+				}
+			},
+			
 			loading: function(bool) {
 				if (bool) $('#loading').show();
-				else $('#loading').hide();
+				else	$('#loading').hide();
+				
 			}
 			
 		});
@@ -57,7 +68,7 @@ $user_id = startSession();
 		}
 
 	#calendar {
-		width: 900px;
+		width: 800px;
 		margin-left:20px;
 		margin-right: auto;
 		float:left;
@@ -99,7 +110,7 @@ try{
 	$sql=$conn->query($query);
 	//loop through all results
 	for($i=0;$row=$sql->fetch();$i++){
-		echo "<li style='list-style:none;text-align:left;'><input type=checkbox name=$row[0] id=$row[0] checked>";
+		echo "<li style='list-style:none;text-align:left;'><input type=checkbox name=$row[0] id=$row[0]>";
 		echo "<font color=#$row[2]>$row[1]</font>";
 		echo "</li>";	
 	}
@@ -119,6 +130,7 @@ try{
 } catch (Exception $e){
 	//do nothing
 }
+echo "<br><br>";
 echo "</div>";
 echo "<div id='loading' style='display:none'>loading...</div>";
 echo "<div id='calendar'></div>";

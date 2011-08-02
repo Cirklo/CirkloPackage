@@ -32,7 +32,7 @@ $(document).ready(function(){
 		                colNames: colN,						//column names
 		                pager: '#pager',					//navigation bar div id
 		                rowNum:10,							//default number of rows per page	
-		                rowList:[10,20,50],					//number of rows per page selector
+		                rowList:[10,20,50,100,200],					//number of rows per page selector
 		                multiselect: false,					//add checkboxes to each row of the table
 		                sortname: "",						//attribute order
 		                sortorder: 'desc',					//attribute order (ASC or DESC)
@@ -58,11 +58,20 @@ $(document).ready(function(){
 		                      {multipleSearch:true}, // search options
 		                      viewOptions
 		              );
-		           // add custom button to export the data to excel
+		              // add custom button to export the data to excel
 		              jQuery("#list").jqGrid('navButtonAdd','#pager',{
-		                     caption:"Export to Excel", 
+		                     caption:"Excel", 
+		                     title: "Export filtered results",
 		                     onClickButton: function () {
 		                    	 exportExcel("#list");
+		                     }
+		              });
+		              // add custom button to export the data to excel
+		              jQuery("#list").jqGrid('navButtonAdd','#pager',{
+		                     caption:"Export all", 
+		                     title: "Export all data to Excel",
+		                     onClickButton: function () {
+		                    	 allExcel("#list",report_id,extra);
 		                     }
 		              });
 		              // add custom button to print data
@@ -201,7 +210,7 @@ $(document).ready(function(){
 			},
 			function(data){
 				if(data){
-					//alert(data);
+				//	alert(data);
 					var url="ajaxReport.php?type=4";
 					$.get(url,{},
 					function(data){
@@ -334,10 +343,9 @@ $(document).ready(function(){
 				op:op, 
 				params:params
 				}, function (data){
-				alert(data);
+					alert(data);
 			});
 		}
-	//	window.close();
 	});
 	
 	
@@ -522,9 +530,25 @@ function deleteMe(a)
 	duplicate.parentNode.removeChild(duplicate);
 }
 
+function allExcel(grid, report_id, extra){
+	//capture column names
+	var mya=new Array();
+	mya=$(grid).getDataIDs();  // Get All IDs
+	var data=$(grid).getRowData(mya[0]);     // Get First row to get the labels
+	var colNames=new Array(); 
+	var j=0;
+	for (var i in data){colNames[j++]=i;}    // capture col names
+	
+	var url="excel.php?report&report_id="+report_id+"&columns="+colNames+extra;
+	document.forms[0].method='POST';
+	document.forms[0].action=url;  // send it to server which will open this contents in excel file
+	document.forms[0].target='_blank';
+	document.forms[0].submit();
+}
 
-function exportExcel(grid)
-{
+
+function exportExcel(grid){
+
     var mya=new Array();
     mya=$(grid).getDataIDs();  // Get All IDs
     var data=$(grid).getRowData(mya[0]);     // Get First row to get the labels

@@ -56,8 +56,8 @@ function startSession(){
 	//session_start();
 	$db = new dbConnection();
 	$database=$db->getDatabase();
-	//$_SESSION['user_id']=1;			//comment this line when not debugging
-	//$_SESSION['database']="datumo"; //comment this line when not debugging
+//	$_SESSION['user_id']=28;			//comment this line when not debugging
+//	$_SESSION['database']="requisitions"; //comment this line when not debugging
 	if(isset($_SESSION['user_id']) and $_SESSION['database']==$database){
 		$user = $_SESSION['user_id'];
 		return $user; 

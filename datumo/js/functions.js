@@ -21,6 +21,13 @@ function cleanForm(form){
 	}
 }
 
+function showColumnComments(){
+	if($(".columnComments").css("display")=="block"){
+		$(".columnComments").css("display","none");
+	} else {
+		$(".columnComments").css("display","block");
+	}
+}
 
 function showhide(id){
 	var obj = document.getElementById(id);

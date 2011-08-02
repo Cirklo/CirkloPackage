@@ -201,7 +201,7 @@ class reportClass{
 		$sql = $this->pdo->prepare("SELECT report_id, report_name, report_description FROM ".$this->pdo->getDatabase().".report WHERE report_id NOT IN (SELECT param_report FROM param) AND report_conf=1 OR (report_user=$user_id AND report_conf=2) ORDER BY report_name");
 		$sql->execute();
 		for($i=0;$row=$sql->fetch();$i++){
-			echo "<tr><td><a href=javascript:void(0) onclick=window.open('".$this->pdo->getFolder()."/report.php?report=$row[0]','_blank','height=550px,width=720px,scrollbars=yes'); title='$row[2]'>".$row[1]."</a></td></tr>";
+			echo "<tr><td><a href=javascript:void(0) onclick=window.open('".$this->pdo->getFolder()."/report.php?report=$row[0]','_blank','height=550px,width=850px,scrollbars=yes'); title='$row[2]'>".$row[1]."</a></td></tr>";
 		}
 		echo "</table>";
 	}

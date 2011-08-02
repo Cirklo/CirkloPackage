@@ -9,7 +9,7 @@ class errorClass{
 	public function __construct(){
 		$this->mail = new mailClass();	
 		//guy who will receive the error report
-		$this->error_report_email="jlagarto@igc.gulbenkian.pt";	
+		$this->error_report_email="bugs@support.org";	
 	}
 
 /**

@@ -151,7 +151,15 @@ $(document).ready(function() {
 	 */
 	
 	$("input[lang=__fk]").focus(function(){
-		$(this).simpleAutoComplete("autoSuggest.php?field="+this.id);
+		$(this).autocomplete({
+			source:"autoSuggest.php?field="+this.id,
+			minLength:1,
+			dataType:"json",
+			position: { 
+				my : "right top", 
+				at: "right bottom" 
+			}
+		});
 	});
 	
 	$("input").focus(function(){

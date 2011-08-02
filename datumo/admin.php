@@ -6,19 +6,18 @@ $user_id = startSession();
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>Datumo Administration Area</title>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="css/main.css" rel="stylesheet" type="text/css">
 <link href="css/autoSuggest.css" rel="stylesheet" type="text/css">
 <link href="css/CalendarControl.css" rel="stylesheet" type="text/css">
 <link href="css/styles.css" rel="stylesheet" type="text/css">
 <link href="css/tipTip.css" rel="stylesheet" type="text/css">
-<link href="css/jquery.alert.css" rel="stylesheet" type="text/css">
 <link href="css/jquery.jnotify.css" rel="stylesheet" type="text/css">
 
 <script type="text/javascript" src="js/jquery-1.5.1.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.14.custom.js"></script>
 <script type="text/javascript" src="js/jquery.init.js"></script>
 <script type="text/javascript" src="js/jquery.tipTip.js"></script>
-<script type="text/javascript" src="js/jquery.alert.js"></script>
 <script type="text/javascript" src="js/jquery.jnotify.js"></script>
 <script type="text/javascript" src="js/CalendarControl.js"></script>
 <script type="text/javascript" src="js/filters.js"></script>
@@ -180,6 +179,9 @@ echo "</tr></table>";
 //Do we have publicity in this page??
 $pub=new pubHandler();
 pageViews("");
+
+
+
 ?>
 
 

@@ -307,8 +307,7 @@ function createReport($user_id){
 	}catch(Exception $e){
 		$conn->rollBack();
 		echo $e->getMessage();
-//		echo "There's an error in your query. Please verify it. If the problem persists please contact the administrator";
-		exit();
+		echo "There's an error in your query. Please verify it. If the problem persists please contact the administrator";
 	}
 }
 

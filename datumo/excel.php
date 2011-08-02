@@ -3,18 +3,11 @@ header("Content-type: application/vnd.ms-excel;");
 header("Content-Disposition: attachment; filename='export-to-excel.xls'; ");
 require_once "session.php";
 $user_id=startSession();
-require_once "errorClass.php";
-//call class to handle errors
-$error=new errorClass();
+
 
 if(isset($_GET['oper'])){
 	$buffer = $_POST['csvBuffer'];
-	try{
-	    echo $buffer;
-	} catch (Exception $e){
-		//error report
-		$error->errorDisplay("Excel export through jqgrid",$objName,$e->getMessage());
-	}
+	echo $buffer;
 	exit();
 }
 
@@ -102,32 +95,57 @@ function fromReport($report) {
 	require_once "dispClass.php";
 	
 	//call database class
-	$db = new dbConnection();
+	$conn = new dbConnection();
 	
-	//get session variable
-	//echo $_SESSION['sql'];
-	$query=$_SESSION['sql'];
-	//SESSION['sql']=null;
-	//echo $query;
-	
-	//remove page limitation
-	$query=substr($query,0,strpos($query, "LIMIT"));
-	$sql=$db->prepare($query);
-	try{
-		$sql->execute();
-	} catch (Exception $e){
-		echo $e->getMessage();
+	//report id number
+	if(isset($_GET['report_id']))	$report_id=$_GET['report_id'];
+	//extra parameters operators
+	if(isset($_GET['extra_op'])){
+		$extra_op=$_GET['extra_op'];
+	} else {
+		$extra_op=null;
+	}
+	//extra parameters fields
+	if(isset($_GET['extra_fields'])){
+		$extra_fields=$_GET['extra_fields'];
+	} else {
+		$extra_fields=null;
+	}
+	//column names
+	if(isset($_GET['columns']))	{
+		$column_names=$_GET['columns'];
+		$column_names=explode(",", $column_names);
 	}
 	
+	//get columns names
+	$cols=array();
+	foreach ($column_names as $column){
+		$query="SELECT reprop_mask FROM reprop WHERE reprop_report=$report_id AND reprop_attribute='$column'";
+		$sql=$conn->query($query);
+		$row=$sql->fetch();
+		$cols[]=$row[0];	//set columns names into an array
+	}
+	
+	
+	//query the database for this report
+	$query="SELECT report_query FROM report WHERE report_id=$report_id";
+	$sql=$conn->query($query);
+	$row=$sql->fetch();
+	$query=$row[0];	//set query
+	
+	//write column headers to the excel sheet
+	foreach ($cols as $header){
+		echo $header."\t";
+	}
+	//start a new line
+	echo "\n";
+	
+	//remove page limitation
+	$sql=$conn->query($query);
 	//loop through all results and write each one of them to a spreadsheet
 	for($i=0;$row=$sql->fetch();$i++){
 		for($j=0;$j<$sql->columnCount();$j++){
-			if($fk[$j]!=$table and $fk[$j]!=""){
-				$display->getFKvalue($row[$j],$j);
-				echo $display->getFKatt()."\t";	
-			} else {
-				echo $row[$j]."\t";
-			}
+			echo $row[$j]."\t";
 		}
 		echo "\n";
 	}	

@@ -21,11 +21,24 @@ $(document).ready(function(){
 				right: 'month,agendaWeek,agendaDay'
 
 			},
+			defaultView: 'agendaWeek',
 			/*eventRender: function(event, element) {
 		        element.qtip({
 		            content: event.description
 		        });
 		    },*/
+			eventClick: function(event) {
+				resp=confirm("Do you want to export this entry to your personal calendar?");
+				if(resp){
+					//SEND EMAIL WITH THE .ICS ATTACHED
+					$.get("calendar_feed.php?export",{
+						events:event
+					},
+					function(data){
+						alert(data);
+					});
+				}
+			},
 			loading: function(bool) {
 				if (bool) $('#loading').show();
 				else $('#loading').hide();
@@ -52,6 +65,19 @@ $(document).ready(function(){
 				center: 'title',
 				right: 'month,agendaWeek,agendaDay'
 
+			},
+			defaultView: 'agendaWeek',
+			eventClick: function(event) {
+				resp=confirm("Do you want to export this entry to your personal calendar?");
+				if(resp){
+					//SEND EMAIL WITH THE .ICS ATTACHED
+					$.get("calendar_feed.php?export",{
+						events:event
+					},
+					function(data){
+						alert(data);
+					});
+				}
 			},
 			loading: function(bool) {
 				if (bool) $('#loading').show();

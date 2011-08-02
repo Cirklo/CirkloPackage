@@ -29,7 +29,7 @@ function cloneMe(a, val, origin)
 	// Increment counter
 	counter++;
 
-	// Find nearest parent tr
+	// Find nearest parent form
 	var original = a.parentNode;
 	while (original.nodeName.toLowerCase() != 'tr')
 	{
@@ -37,7 +37,7 @@ function cloneMe(a, val, origin)
 	}
 	
 	var duplicate = original.cloneNode(true);
-	
+
 	// form - Name + ID
 	var newForm = duplicate.getElementsByTagName('form');
 	for (var i = 0; i < newForm.length; i++)
@@ -47,17 +47,34 @@ function cloneMe(a, val, origin)
 		{
 			oldForm = formName.indexOf(suffix) == -1 ? formName : formName.substring(0, formName.indexOf(suffix));
 			newForm[i].name = oldForm + suffix + counter;
-			//alert(document.tableman.elements[oldName].value);
-			//newSelect[i].value = document.tableman.elements[oldName].value;
 		}
 		var CurForm = newForm[i];
+		
 	}
-
+	
 	// Input - Name + ID
-	var newInput = duplicate.getElementsByTagName('input');
-	if(!origin){
+	if(origin){
+		var newTd = duplicate.getElementsByTagName('td');
+		for (var i = 0; i < newTd.length; i++)
+		{
+			var tdName = newTd[i].name;
+			if (tdName)
+			{
+				oldName = tdName.indexOf(suffix) == -1 ? tdName : tdName.substring(0, tdName.indexOf(suffix));
+				newTd[i].name = oldName + suffix + counter;
+			}
+			var tdId = newTd[i].id;
+			if (tdId)
+			{	
+				oldId = tdId.indexOf(suffix) == -1 ? tdId : tdId.substring(0, tdId.indexOf(suffix));
+				newTd[i].id = oldId + suffix + counter;
+			}
+		}	
+		
+		var newInput = duplicate.getElementsByTagName('input');
 		for (var i = 0; i < newInput.length; i++)
 		{
+			CurForm.appendChild(newInput[i]);
 			var inputName = newInput[i].name;
 			if (inputName)
 			{
@@ -78,8 +95,9 @@ function cloneMe(a, val, origin)
 				}else{
 					newInput[i].id = oldId + suffix + counter;
 				}
-				 
-			}			
+			}
+			//hack to keep 
+			newTd[i+3].innerHTML=newInput[i].value;
 		}
 	}
 	// Select - Name + ID

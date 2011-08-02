@@ -127,7 +127,6 @@ for($i=0;$row=$sql->fetch();$i++){
 				break;
 		}
 		$ref=$qClass->prepareQuery(array($row[0],$conn->getDatabase(),"",""),3);
-		//echo "flag".$ref[0];
 		if($ref[0]!=""){
 			//search path to information schema
 			$conn->dbInfo();

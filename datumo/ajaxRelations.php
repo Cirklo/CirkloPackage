@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author João Lagarto	/ Nuno Moreno
+ * @author João Lagarto
  * @abstract Ajax handler request -> get referenced table
  * 
  *  */

@@ -88,7 +88,7 @@ class queryClass{
 		$this->sql[1] = "SELECT table_type, table_comment FROM tables WHERE table_name='".$this->vars[0]."' AND table_schema='".$this->vars[1]."'";
 		$this->sql[2] = "SELECT column_name, data_type, column_comment, character_maximum_length, column_default FROM columns WHERE table_schema='".$this->vars[1]."' AND table_name='".$this->vars[0]."'";
 		$this->sql[3] = "SELECT referenced_table_name FROM key_column_usage WHERE referenced_table_name<>'NULL' AND table_schema='".$this->vars[1]."' AND column_name='".$this->vars[0]."'";
-		$this->sql[4] = "SELECT ".$this->vars[0]."_id, ".$this->vars[2]." FROM ".$this->vars[3].".".$this->vars[0]." WHERE LOWER(".$this->vars[2].") regexp LOWER('".$this->vars[1]."') LIMIT 25";
+		$this->sql[4] = "SELECT ".$this->vars[0]."_id, ".$this->vars[2]." FROM ".$this->vars[3].".".$this->vars[0]." WHERE LOWER(".$this->vars[2].") regexp LOWER('".$this->vars[1]."')";
 		$this->sql[5] = "SELECT table_name, column_name FROM KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '".$this->vars[0]."' AND REFERENCED_TABLE_NAME = '".$this->vars[1]."'";
 		$this->sql[6] = "SELECT referenced_table_name FROM key_column_usage WHERE table_schema='".$this->vars[0]."' AND column_name='".$this->vars[1]."'";
 		$this->sql[7] = "SELECT user_login, message_title, message_text, NOW() FROM ".$this->vars[0].".message, ".$this->vars[0].".user WHERE user_id=message_from AND (message_to=".$this->vars[1]." OR message_to=message_from) ORDER BY message_date DESC LIMIT ".$this->vars[2];

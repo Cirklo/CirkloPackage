@@ -24,7 +24,7 @@ class mailClass extends PHPMailer{
         $this->Host       = $row[0];      		// sets GMAIL as the SMTP server
         $this->Username   = $row[3];  			// GMAIL username
         $this->Password   = $row[2];            // GMAIL password
-        $this->SetFrom($row[3], $row[3]);
+        $this->SetFrom($row[3],$row[3]);
 	}
 	
 	/**
@@ -32,7 +32,7 @@ class mailClass extends PHPMailer{
  * @param unknown_type $contact
  */
 	
-	public function sendMail($subject, $to, $from, $msg){
+	public function sendMail($subject, $to, $from, $msg, $att){
 		$this->CharSet="UTF-8";
 //		$this->SetFrom($from, $from);
         $this->AddReplyTo($from,$from);
@@ -45,6 +45,9 @@ class mailClass extends PHPMailer{
 	        	$this->AddAddress($target, "");
 	        }
         } 
+        if(isset($att)){
+        	$this->AddStringAttachment($att, "agendo.ics");
+        }
 		if(!$this->Send()) {
             //mail error
             return "Could not send mail!";
@@ -56,14 +59,14 @@ class mailClass extends PHPMailer{
 	
 	public function mailingList($subject, $to, $from, $msg){
 		$delay=1; 				//delay between emails, in seconds
-		$noAddressesPerTurn=30;	//number of addresses per email
+		$noAddressesPerTurn=15;	//number of addresses per email
 		$j=0;					//control counter
 		$noAddresses=sizeof($to);
 		$noEmails=ceil($noAddresses/$noAddressesPerTurn);
 		for($i=1;$i<=$noEmails;$i++){
 			$this->CharSet="UTF-8";
 //			$this->SetFrom($from, $from);
-	        $this->AddReplyTo($from,$from);
+	        $this->AddReplyTo($from);
 			$this->Subject=$subject;
 	        $this->Body=$msg;
 	        //loop through email addresses
@@ -71,6 +74,7 @@ class mailClass extends PHPMailer{
 	       		$this->AddBCC($to[$j]);
 	       		$j++;	//increment counter
 	       	}
+	       	
 			if(!$this->Send()) {
 	            //mail error
 	            $bool=false;
@@ -80,10 +84,11 @@ class mailClass extends PHPMailer{
 	        }
 			$this->ClearAddresses();	//clear addresses for the next loop
 			$this->ClearBCCs();
+			$this->ClearReplyTos();
 			sleep($delay);				//sleep after sending emails
 		}
-		if($bool)	echo "Mail successfully sent";
-		else 		echo "Mail not sent";
+		if($bool)	echo "Mail successfully sent!";
+		else		echo "Mail not sent";
 	}
 }
 

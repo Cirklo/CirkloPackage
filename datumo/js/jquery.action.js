@@ -11,7 +11,7 @@
   			nrows:20,					//number of rows to be displayed
   			order:"ASC",					//ASCending or DESCending order
   			colOrder:"",				//ordering column
-  			page:1,						//default page number
+  			page:1						//default page number
    	};
     	
    	// override the defaults
@@ -107,16 +107,20 @@
 	$.action.add=function(options){
 		//How many forms are there?
 		var len=document.forms.length;
+//		alert("noForms="+len);
+//		alert("noInserts="+noInserts);
 		//initialize arrays
 		json=[];
 		arr=[];
 		//loop through all inserts
-		for(var i=(len-noInserts); i<len;i++){
+		for(var i=len-noInserts; i<len;i++){
 			//set form name
 			var CurForm = document.forms[i];
+//			alert("Length:"+CurForm.length);
 			for(j=0;j<CurForm.length;j++){
 				value=CurForm[j].value;
 				arr.push(value);
+//				alert(value);
 			}
 			json.push({"insert":arr});
 			arr=[];

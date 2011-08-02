@@ -21,19 +21,6 @@ if(isset($_POST['action'])){
 	}
 }
 
-/**
- * 
- * TO DO LIST
- * 1-Null fields
- * 2-Fieldtype
- * 3-Fk validation ---> DONE
- * 4-Wild characters
- * 
- * 
- */
-
-
-
 class genObjClass{
 	private $conn;
 	private $regexp="/[^a-zA-Z0-9_ %\[/]\.\?\&\,\@\.\:\(\)%&-]/";
@@ -162,7 +149,7 @@ class genObjClass{
 				$query="INSERT INTO $objName VALUES (";
 				//loop through all table attributes
 				foreach ($table->header as $key){
-					
+
 					//nulls validation
 					if($table->nullable[$key]=="NO" and trim($row["insert"][$i]," ")==null and $i!=0)
 						throw new Exception("$key cannot be null");	

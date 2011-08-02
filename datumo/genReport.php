@@ -10,7 +10,6 @@ $user_id = startSession();
 
 <script type="text/javascript" src="js/jquery-1.5.1.js"></script>
 <script type="text/javascript" src="js/jquery.init.js"></script>
-<script type="text/javascript" src="js/jquery.cookie.js.js"></script>
 <script type="text/javascript" src="js/jquery.tipTip.js"></script>
 <script type="text/javascript" src="js/jquery.reports.js"></script>
 <script type="text/javascript" src="js/filters.js"></script>

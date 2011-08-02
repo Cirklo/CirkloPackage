@@ -14,7 +14,7 @@ $database = $conn->getDatabase();
 $conn->dbInfo();
 
 	
-if(isset($_REQUEST['query'])) $q=$_REQUEST['query'];
+if(isset($_GET['term'])) $q=$_GET['term'];
 if(isset($_GET['field'])) $field=$_GET['field'];
 
 //is it a filter?
@@ -70,18 +70,23 @@ try{
 } catch (Exception $e){
 	//do nothing
 }
-echo '<ul>'."\n";
-if ($sql->rowCount()>0)	{
-    for($i=0;$row=$sql->fetch();$i++){
-		$p = $row[1];
-		//highlight matching characters
-		//$p = preg_replace('/(' . $q . ')/i', '<span style="font-weight:bold;">$1</span>', $p);
-		echo "\t<li id=autocomplete_.$row[0]. rel=$row[0] title='($row[0]) $row[1]' onclick=\$('#$field').attr('alt','$row[0]')>".utf8_encode($row[1])."</li>\n";
-    }   
-} else {
-	echo "No results!";
+//echo '<ul>'."\n";
+//if ($sql->rowCount()>0)	{
+//    for($i=0;$row=$sql->fetch();$i++){
+//		$p = $row[1];
+//		//highlight matching characters
+//		//$p = preg_replace('/(' . $q . ')/i', '<span style="font-weight:bold;">$1</span>', $p);
+//		echo "\t<li id=autocomplete_.$row[0]. rel=$row[0] title='($row[0]) $row[1]' onclick=\$('#$field').attr('alt','$row[0]')>".utf8_encode($row[1])."</li>\n";
+//    }   
+//} else {
+//	echo "No results!";
+//}
+// echo '</ul>';
+for($i=0;$row=$sql->fetch();$i++){
+	$row_array['id']=$row[0];
+	$row_array['value']=$row[1];
+	$json[]=$row_array;
 }
- echo '</ul>';
 
-
+echo json_encode($json);
 ?>
