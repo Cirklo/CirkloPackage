@@ -699,8 +699,9 @@ class dispClass{
 		try{
 			$sql->execute();
 		} catch (Exception $e){
+			//echo $this->mainQuery;
 			//Display error in the screen
-			$this->error->errorDisplay($this->mainQuery,$objName,$e->getMessage(),"Could not execute query. <b>If the problem persists please contact the administrator! <a href=admin.php>Return to main menu</a></b>");
+			//$this->error->errorDisplay($this->mainQuery,$objName,$e->getMessage(),"Could not execute query. <b>If the problem persists please contact the administrator! <a href=admin.php>Return to main menu</a></b>");
 		}
 		$row = $sql->fetch();
 		return $row[0];
@@ -726,7 +727,6 @@ class dispClass{
 		echo "<tr><td><b>Table</b></td><td>$objName</td></tr>";		
 		echo "<tr><td><b>Rows</b></td><td>$nrows</td></tr>";
 		echo "<tr><td><b>Query</b></td><td>".$this->mainQuery."</td></tr>";
-		echo "<tr><td><b>Version</b></td><td>Datumo 2.0</td></tr>";
 		echo "</table>";
 	}
 	
@@ -933,6 +933,46 @@ class dispClass{
 		}
 	}
 	
+	/**
+	 * Method to display announcements
+	 * 
+	 */
+	
+	function displayMessage(){
+		$this->pdo->dbConn();
+		try{	//this is for the requisitions system
+			$query = "SELECT DISTINCT object_id, object_name 
+			FROM object, announcement 
+			WHERE announcement_object=object_id 
+			AND announcement_end_date > NOW() 
+			ORDER BY object_id";
+			$sql = $this->pdo->query($query);
+		} catch (Exception $e){	//this one is for Agendo, in case of there is no OBJECT table
+			$query = "SELECT DISTINCT resource_id, resource_name 
+			FROM resource, announcement 
+			WHERE announcement_object=resource_id 
+			AND announcement_end_date > NOW() 
+			ORDER BY resource_id";
+			$sql = $this->pdo->query($query);
+		}
+		for ($i=0;$row=$sql->fetch();$i++){
+			echo "<h3>".$row['object_name']."</h3>";
+			$query_="SELECT announcement_id, announcement_title, announcement_date 
+			FROM announcement 
+			WHERE announcement_object=$row[0] 
+			AND announcement_end_date > NOW()
+			ORDER BY announcement_date DESC";
+			$sql_=$this->pdo->query($query_);
+			echo "<ul class=list>";
+			for($j=0;$row_=$sql_->fetch();$j++){
+				echo "<li><b>$row_[2]:</b> <a href=javascript:void(0) onclick=window.open('announcement.php?announcement_id=$row_[0]','_blank','height=350px,width=300px,scrollbars=yes');>$row_[1]</a></li>";
+			}
+			echo "</ul>";
+		}
+		
+		
+		
+	}
 }
 
 ?>

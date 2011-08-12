@@ -531,7 +531,8 @@ function submitUser(resource) {
     if (checkfield(formObj.user_idm)) return;
     if (checkfield(formObj.user_passwd)) return;
     formObj.user_idm.value=formObj.user_idm.title;
-    formObj.action='../agendo/admin.php?resource=' + resource;
+//    formObj.action='../agendo/index.php?resource=' + resource;
+    formObj.action='../agendo/index.php?resource=' + resource;
     formObj.submit();
 }
 

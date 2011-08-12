@@ -136,7 +136,7 @@
 			echo "<div id='loggedAsDiv' align='right' valign='bottom'>";
 				echo "<label style='font-size:".$textSize.";color:".$textColor."'>Logged as ".$_SESSION['user_name']." ".$_SESSION['user_lastName']." | </label>";
 				echo "<a style='cursor:pointer;font-size:".$textSize.";color:".$textColor."' onmouseover=\"this.style.color='".$textColorHover."'\" onmouseout=\"this.style.color='".$textColor."'\" title='Click here to logoff' onclick=logOff('".$phpFile.".php',".$resource.")> Logoff</a>";
-				// echo "<a style='cursor:pointer;font-size:".$textSize.";color:".$textColor."' onmouseover=\"this.style.color='".$textColorHover."'\" onmouseout=\"this.style.color='".$textColor."'\" title='Click here to go to the admin area' onclick=\"window.location='../datumo/admin.php'\"> AdminArea</a>";
+				// echo "<a style='cursor:pointer;font-size:".$textSize.";color:".$textColor."' onmouseover=\"this.style.color='".$textColorHover."'\" onmouseout=\"this.style.color='".$textColor."'\" title='Click here to go to the admin area' onclick=\"window.location='../datumo/index.php'\"> AdminArea</a>";
 			echo "</div>";
 		}
 	}
@@ -257,7 +257,7 @@
 					echo "<table>";
 						echo "<tr>";
 							echo "<td style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='../datumo/admin.php'\" value='AdminArea' />";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='../datumo/index.php'\" value='AdminArea' />";
 							echo "</td>";
 						echo "</tr>";
 					echo "</table>";
@@ -296,7 +296,7 @@
 				
 					echo "<tr>";
 							echo "<td colspan=2 style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='admin/cookie.php'\" value='MakeCookie' />";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='admin/cookie.php'\" value='Resource Settings' />";
 							echo "</td>";
 					echo "<tr>";
 

@@ -47,12 +47,11 @@ class configClass{
 		//set search path to main database
 		$this->pdo->dbConn();
 		for($i=0;$i<sizeof($this->plugin);$i++){
-			echo "<tr><td colspan=2><hr></td></tr>";
-			echo "<tr><td>".$this->plugin[$i]."</td></tr>";
+			echo "<h3>".$this->plugin[$i]."</h3>";
 			$sql=$this->pdo->prepare("SELECT menu_name, menu_description, menu_url FROM ".$this->pdo->getDatabase().".menu WHERE menu_plugin IN (SELECT plugin_id FROM ".$this->pdo->getDatabase().".plugin WHERE plugin_name='".$this->plugin[$i]."') ORDER BY menu_id");
 			$sql->execute();
 			for($j=0;$row=$sql->fetch();$j++){
-				echo "<tr><td><a href=".$this->pdo->getFolder()."/$row[2] title='$row[1]'>$row[0]</a></td></tr>";
+				echo "<a href=$row[2] title='$row[1]'>$row[0]</a><br>";
 			}
 		}
 	}

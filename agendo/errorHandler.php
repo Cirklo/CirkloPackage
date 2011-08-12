@@ -53,7 +53,7 @@ class errorHandler extends PHPMailer{
             if($usertype != 0) { 
                 $url = "manager.php?table=$table&nrows=20&order=ASC";
             } else { //Regular user
-                $url = "admin.php";
+                $url = "index.php";
             }
         } else {
             $url = "calendar.igc.gulbenkian.pt";

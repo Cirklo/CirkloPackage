@@ -35,7 +35,7 @@
 
 <?php
 //********************************************
-$smallScript = "<script type='text/javascript'>alert('Please sign in to be able to access resources.');</script>"."<meta HTTP-EQUIV='REFRESH' content='0; url=./'>";
+$smallScript = "<script type='text/javascript'>alert('Please sign in to be able to access resources');</script>"."<meta HTTP-EQUIV='REFRESH' content='0; url=./'>";
 if(!secureIpSessionLogin()){
 	echo $smallScript;
 	exit;

@@ -8,7 +8,7 @@ $user_id=startSession();
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Basket display</title>
 <link href="../css/tipTip.css" rel="stylesheet" type="text/css">
-<link href="../css/requisitions.css" rel="stylesheet" type="text/css">
+<link href="css/requisitions.css" rel="stylesheet" type="text/css">
 <link href="../css/redmond/jquery-ui-1.8.9.custom.css" rel="stylesheet" type="text/css">
 <link href="../js/src/css/ui.jqgrid.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="../js/jquery-1.5.1.js"></script>

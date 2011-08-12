@@ -2,7 +2,7 @@
 require_once("session.php");
 $user_id = startSession();
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
@@ -20,7 +20,6 @@ $user_id = startSession();
 <script type="text/javascript" src="js/functions.js"></script>
 <script type="text/javascript" src="js/cloneFieldset.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
-<script type="text/javascript" src="js/autosuggest.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
 	$("*").tipTip(); //tiptip initialization
@@ -46,14 +45,13 @@ $(document).ready(function(){
 
 <?php
 
-require_once ("__dbConnect.php");
-require_once ("resClass.php");
-require_once ("dispClass.php");
-require_once ("searchClass.php");
-require_once ("queryClass.php");
-require_once ("reportClass.php");
-require_once ("treeClass.php");
-require_once ("queryClass.php");
+require_once "__dbConnect.php";
+require_once "resClass.php";
+require_once "dispClass.php";
+require_once "searchClass.php";
+require_once "queryClass.php";
+require_once "treeClass.php";
+require_once "queryClass.php";
 
 
 //http variables
@@ -86,23 +84,11 @@ if(isset($_GET['action'])){
 }
 
 //display menus
-$options=array("Options","Treeview ".$treeview->getTreeviewName(),"Report Details");
+$options=array("Treeview ".$treeview->getTreeviewName(),"Report Details");
 
 echo "<table border=0>";
 $display->options($options);
 echo "<tr>";
-echo "<td valign=top>";
-echo "<table border=0 align=left width=200px>";
-echo "<tr><td><a href=admin.php title='Return to the administration area'>Return to main menu</a></td></tr>";
-$display->userOptions(true,$user_id);
-//echo "<tr><td><a href=admin.php title='Return to the administration area'>Return to main menu</a></td></tr>";
-echo "<tr><td><hr></td></tr>";
-echo "<tr><td><b>List of available reports</b></td></tr>";
-echo "<tr><td>";
-$treeview->treeview_access($user_id);
-echo "</td></tr>";
-echo "</table>";
-echo "</td>";
 
 echo "<td width=300px valign=top>";
 //call class to dynamically generate the requested treeview

@@ -54,7 +54,8 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 				if(data.success){
 					phpFilePath = phpFilePath + "?resource="+resource;
 					if(loginToDatumo){
-						phpFilePath = "../datumo/admin.php";
+//						phpFilePath = "../datumo/index.php";
+						phpFilePath = "../datumo/";
 					}
 					window.location = phpFilePath;
 				}

@@ -178,6 +178,33 @@ hr{
 	
 	}
 	
+#section div.sidebar{
+	border:0px solid;
+	float:left;
+	width:150px;
+	font-size:10px;
+	height:100%;
+	padding-right:4px;
+}
+
+
+#section div.main{
+	border:0px solid;
+	height:100%;
+	overflow:auto;	
+}
+
+div.announcements{
+	position:relative;
+	border:1px solid;
+	border-color:#f7c439;
+	overflow:auto;
+	width:250px;
+	padding-left:20px;
+	padding-right:20px;
+	
+}
+	
 div.regular{
 	display:none;
 	position:absolute;
@@ -201,7 +228,7 @@ div.detailsTree{
 	-moz-border-radius: 10px;
 	border-radius: 10px;
 	}
-
+/*
 div.sidebar{
 	display:none;
 	position:relative;
@@ -210,10 +237,10 @@ div.sidebar{
 	background-color:#CCCC99;
 	z-index:99;
 	padding:3px;
-	-moz-border-radius: 10px;
-	border-radius: 10px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 	}	
-	
+	*/
 div.details{
 	display:none;
 	position:absolute;
@@ -272,6 +299,7 @@ iframe.gridDisp{
 }
 
 ul.list{
+	text-align:left;
 	list-style:none;		
 }
 

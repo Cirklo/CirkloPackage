@@ -416,7 +416,13 @@ $(document).ready(function(){
 				        }
 				        
 			        }
-			           
+			        
+			        
+			        //check contact
+			        if($("#contact").val()==""){
+			        	alert("You must enter a valid contact");
+			        	return;
+			        }
 			        
 			        //check if an account has been selected
 			        if($("#accountList").get(0).selectedIndex==0){
@@ -431,7 +437,8 @@ $(document).ready(function(){
 							  account:$("#accountList").val(),
 							  val:arr,
 							  ammount:total,
-							  iComments:iComments},
+							  iComments:iComments,
+							  contact:$("#contact").val()},
 							  //retrieve that from ajax request 
 							//select another div to display the notification
 							function(data){

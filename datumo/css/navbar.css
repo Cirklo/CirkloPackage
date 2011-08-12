@@ -1,0 +1,112 @@
+
+.navigation{ /*Navigation menu styling*/
+	width:100%;
+	margin:0;
+}
+
+#menu { /*Sets the background of your dropdown menu bar. Does not include submenu backgrounds.*/	
+	background: rgb(61,120,125);
+	display: block; 
+	
+}
+
+/* Styling anchor elements */
+#menu li a{
+	text-decoration:none;	
+	color:#e3f0db;
+	font-weight:bold;
+}
+
+#menu li:hover a{
+	text-decoration:none;	
+	color:#567b1b;
+	font-weight:bold;
+}
+
+#menu li{ /*Gives each menu item, and submenu item padding around the text, and removes bullets. Setting the position to relative gives a reference point for submenu positioning on every level. White space is set not to wrap so that longer menu items dont wrap to a second line.*/
+	padding: 1em; 
+	list-style: none; 
+	position: relative; 
+	white-space: nowrap; 
+}
+
+#menu > li{ /*Sets the first level of menu items only to display in a horizontal row with their baselines aligned. Display:inline-block allows you to center the list items by setting text-align center to the parent element, but float:left may be used instead. Zoom and (star)display basically make inline-block work in IE.*/
+	display: inline-block; 
+	vertical-align: bottom; 
+}
+
+#menu > li.login{
+	padding-left:40px;
+	font-weight:bold;
+	vertical-align: middle; 
+	color:#e3f0db;
+}
+	
+#menu ul { /*Removes list indent applied by most browsers' default styles.*/ 
+	padding: 0; 
+	margin: 0; 
+}
+
+#menu > li.external{
+	background:rgb(61,120,125);
+	float:right;
+	padding:0px;
+	padding-right:10px;
+	margin-top:4px;
+}
+
+#menu > li.external:hover{
+	background:rgb(61,120,125);
+}
+
+
+ul.dropdown ul{ /*This positions and hides submenus, which are any unordered list that is nested within an ordered list with the dropdown class. This also defines the submenu background color.*/
+	position: absolute; 
+	top: 100%; 
+	left: 0; 
+	visibility: hidden; 
+	background: #e3f0db; 
+	
+}
+
+ul.dropdown li:hover > ul{ /*Makes a submenu visible when you hover over its parent list item.*/
+	visibility: visible; 
+}
+
+ul.dropdown li:hover { /*This is your mouseover color for your whole dropdown menu.*/
+	background: #e3f0db; 
+}
+
+#menu > li.login:hover{
+	background:rgb(61,120,125);
+}
+
+ul.dropdown ul ul{ /*This positions second level submenus to the right instead of below their parent list item.*/
+	left: 100%; 
+	top: 0; 
+}
+
+.rtarrow { /*This adds an arrow image to list items with the class rtarrow. You must have an image file for this arrow.*/
+	padding-right: 15px; 
+	background: no-repeat right; 
+}
+
+#menu li:hover { /*This keeps the arrow on hovered items, this is necessary to reapply the arrow when the hover background color changes.*/ 
+	background: #f7c439 no-repeat right; 
+}
+
+
+/* setting borders to ul and li elements. These borders help us to clearly identify elements' boundaries.*/
+#menu ul {
+	border-left: 1px solid rgb(61,120,125);	
+	border-bottom: 1px solid rgb(61,120,125);	
+	border-right: 1px solid rgb(61,120,125);	
+}
+
+#menu ul li ul li{
+	border-top: 1px solid rgb(61,120,125);
+	padding:0.95em;	
+}
+
+
+/* End CSS Dropdown Menu Styles */

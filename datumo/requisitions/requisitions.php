@@ -177,6 +177,7 @@ function submitBasket($user_id){
 	if(isset($_GET['account']))		$account=$_GET['account'];
 	if(isset($_GET['ammount']))		$total=$_GET['ammount'];
 	if(isset($_GET['iComments']))	$iComments=$_GET['iComments'];
+	if(isset($_GET['contact']))		$contact=$_GET['contact'];
 	//if(isset($_GET['department']))	$department_name=$_GET['department'];
 	
 	$clause="";//initialize variable to build clause
@@ -205,6 +206,11 @@ function submitBasket($user_id){
 	}
 	//get current basket_id
 	$basket_id=$req->actBasket($type, $department_id);
+	
+	//update contact
+	$query = "UPDATE request SET request_contact='$contact' WHERE request_contact='' AND request_basket=$basket_id";
+	$conn->query($query);
+	
 	//update this basket	
 	$sql=$conn->prepare("UPDATE basket SET basket_state=1, basket_intObs='$iComments', basket_account=(SELECT account_id FROM $database.account WHERE account_number='$account'), basket_submit_date=NOW() WHERE basket_id=$basket_id");
 	try{

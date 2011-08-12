@@ -10,7 +10,11 @@ div.account{
 	line-height:20px; 
 	display:block;
 	width:400px;
-	height:200px;
+	height:310px;
 	display:block;
 }
 
+ul.list{
+	text-align:left;	
+	
+}

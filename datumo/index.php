@@ -1,9 +1,8 @@
 <?php
-
-require_once("session.php");
+require_once "session.php";
 $user_id = startSession();
+//echo $_SESSION['path'];
 ?>
-
 
 <!doctype html>  
 <!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
@@ -41,89 +40,41 @@ $user_id = startSession();
 <script type="text/javascript" src="js/cloneFieldset.js"></script>
 <script type="text/javascript" src="js/ajax.js"></script>
 <script type="text/javascript" src="requisitions/js/jquery.basket.js"></script>
-<script type="text/javascript">
-
-function listSelect(){
-	var url="functions.php";
-	$.get(url,{
-		type:1,
-		list:$("#mailList").val()},
-		function (data){
-			$("#mailDiv").html(data);
-		});
-}
-
-function sendMail(){
-	if($("#mailList").val()==0){
-		$.jnotify("You must select a valid target list");
-		return;
-	}
-	if($("#subject").val()=="" || $("#mailMessage").val()==""){
-		$.jnotify("You must enter all fields to send the email");
-		return;
-	}
-	if(!$("#mailSelector").val() && $("#mailList").val()!="all"){
-		$.jnotify("You must select a recipient list");
-		return;
-	}
-	var resp=confirm("Send email?");
-	if (resp){
-		document.body.style.cursor = 'wait';
-		var url="functions.php";
-		$.get(url,{
-			type:2,
-			list:$("#mailList").val(),
-			subject:$("#subject").val(),
-			message:$("#mailMessage").val(),
-			recipient:$("#mailSelector").val()},
-			function (data){
-				$.jnotify(data);
-				document.body.style.cursor = 'default';
-			});
-	}
-}
-
-</script>
 <!-- END JavaScript -->
 </head>
 <body>
-
-
-<?php
-
-/** @author João Lagarto
- * @copyright João Lagarto 2010
- * @version Requisition System 2.0
- * @license EUPL
- * @abstract Script to handle baskets depending on the basket type
- */
+<?php 
 
 //php includes
 require_once "__dbConnect.php";
 require_once "dispClass.php";
+require_once "queryClass.php";
 require_once "resClass.php";
-require_once "mailClass.php";
+require_once "searchClass.php";
 require_once "configClass.php";
+require_once "module.php";
 require_once "functions.php";
 require_once "menu.php";
 require_once "plotAux.php";
+require_once "pub.php";
 
 //php classes
 $conn=new dbConnection();
 $engine = $conn->getEngine();
 $display = new dispClass();
 $perm = new restrictClass();
+$search = new searchClass();
 $config = new configClass();
 $menu= new menu($user_id);
 
 //get user info
 $perm->userInfo($user_id);
 $login=$perm->getUserLogin();
-
+$level=$perm->getUserLevel();
 
 /******************************************************BEGIN OF HEADER******************************************************/
 echo "<header>";
-	echo "<h1>Datumo Administration Area: ".strtoupper($table)."</h1>";
+	echo "<h1>Datumo Administration Area</h1>";
 	//navigation bar display
 	echo "<nav class=navigation>";
 		echo "<ul class=dropdown id=menu>";
@@ -187,8 +138,25 @@ echo "<header>";
 	echo "</nav>";
 echo "</header>";
 /********************************************END OF HEADER / CONTENT GOES NEXT**********************************************/
-
-
+//set table types
+$type = array(); 
+$type[0] = "BASE TABLE";
+$type[1] = "VIEW";  
+//loop for all tables and views
+$tables = array();
+$table_type = array();
+//get tables to which this user has access. Get masks as well
+$tables = $perm->tableAccess($user_id);
+//get tables type (BASE TABLES or VIEW)
+$tableSettings=$display->tableview($tables[0]);
+//set table type array
+$table_type=$tableSettings[0];
+//set table comments array
+$table_description=$tableSettings[1];
+//count number of tables and views
+$table_type_count=array_count_values($table_type);
+//get icon picture
+$maskPic=$display->getMaskPic();
 
 //STARTING HTML LAYOUT
 echo "<section id=section>";
@@ -197,48 +165,79 @@ $config->checkPlugins();
 $config->compat();
 echo "</div>";
 
-//echo "<div class=main lang=exp>";
-echo "<div lang=exp style='border:0px solid;position:relative;float:left;padding-left:30px;margin-top:0px;width:500px'>";
-echo "<h3>Mailing tool</h3>";
-//email subject
-echo "<div lang=exp id=content style='position:relative;border:0px solid;'>";
-echo "Subject<br><input type=text name=subject id=subject size=60 maxlength=100>";
-echo "<input type=button name=sendMail id=sendMail value='Send email' onclick=sendMail()>";
+echo "<div class=main lang=exp>";
+echo "<table style='float:left'><tr>";
+for($j=0;$j<sizeof($type);$j++){
+	echo "<td valign=top>";
+	echo "<table border=0 align=left>";
+	echo "<tr><td>$title[$j]</td></tr>";
+	//are there any table or View available?
+	if(!isset($table_type_count[$type[$j]])) {
+		echo "<tr><td width=250px>No entries available</td></tr>";
+		//break;
+	}
+	for($i=0; $i<sizeof($tables[0]); $i++){
+		//set table
+		$objName=$tables[0][$i];
+		//set table mask
+		$tableMask=$tables[1][$i];
+		//verify if there is any VIEW or TABLE to be displayed and proceed accordingly	
+		if($table_type[$i]==$type[$j]){
+			//display table or view name (or mask if it exists)
+			echo "<tr><td>";
+			//search for an associated mask
+			echo "<input type=button name=$objName id=$objName value='$tableMask' class=callTables onclick=window.open('manager.php?table=$objName&nrows=20','_self') title='".$table_description[$i]."' style='background-image:url($maskPic[$i]);'>";	
+			//disabling admin area search. It takes too long to build the search fields due to the entensive information schema queries
+//			echo "<td><a href=javascript:void(0)>Search</a>";
+//			//regular search div
+//			echo "<div id='".$objName."_div' class=regular>";
+//			$display->fields($objName,$i,'admin');
+//			echo "</div>";
+			echo "</td>";
+			echo "<td>";
+			//Is there any table with quick search queries?	
+			if($search->qsearchFind($objName)){
+				echo "<a href=javascript:void(0)>Quick search</a>";	
+				//quick search div
+				echo "<div id='quicksearch_".$objName."' class=regular>";
+				echo "<table border=0>";
+				echo "<form name=qsearch$i method=post>";
+				echo "<tr><td><b>Search</b>&nbsp;&nbsp;<input type=text class=reg name=qsearch$objName id=qsearch$objName>&nbsp;&nbsp;<input type=image src=pics/magnifier.png onclick=qSubmit('".$objName."',$i)></td></tr>";
+				echo "</form>";
+				echo "<tr><td><b>Results to be displayed</b>&nbsp;&nbsp;<input type=text class=reg name=qsearchNrows_$i id=qsearchNrows_$i value=100 size=1></td></tr>";
+				echo "</table>";
+				echo "</div>";
+			}
+			echo "</td>";
+			echo "</tr>";
+		}
+	}
+	echo "</table>";
+	echo "</td>";
+}
 
-echo "</div>";
+echo "</tr></table>";
 
-echo "<div lang=exp style='position:relative;float:left;margin-top:20px;width:200px;border:0px solid'>";
-//to who are we going to send the email
-echo "To: ";
-//which tables are available for mailing?
-echo "<select name=mailList id=mailList onchange=listSelect()>";
-echo "<option value=0>Select a list...</option>";
-echo "<option value=all>All users</option>";
-echo "<option value=department>Department</option>";
-echo "<option value=resource>Resource users</option>";
-echo "<option value=resourcetype>Resource type</option>";
-echo "</select>";
-//div to insert new selector
-echo "<div lang=exp style='border:0px solid;position:relative;float:left;;overflow:auto;margin-top:20px' id=mailDiv>";
-echo "</div>";
-echo "</div>";
-echo "<divlang=exp  style='position:relative;float:right;padding-left:10px;margin-top:10px;margin-right:20px;'>";
-echo "Message<br>";
-echo "<textarea name=mailMessage id=mailMessage rows=10 cols=30></textarea>";
-echo "</div>";
+//display announcements only to internal users
+if($level!=3){
+	echo "<div class=announcements id=announcements lang=exp>";
+	$display->displayMessage();
+	echo "</div>";
+}	
 
-//send email button
+//Do we have publicity in this page??
+$pub=new pubHandler();
+pageViews("");
 echo "</div>";
-
 echo "</section>";
 
 
+/****************************************************END OF CONTENT*********************************************************/
 
 
-
-/*********************************************************************************************/
 
 
 ?>
+
 </body>
 </html>

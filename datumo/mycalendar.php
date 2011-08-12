@@ -97,7 +97,7 @@ $conn=new dbConnection();
 
 
 echo "<div id='options' style='text-align:left'>";
-echo "<a href=admin.php>Return to main menu</a>";
+echo "<a href=index.php>Return to main menu</a>";
 echo "<br><br>";
 echo "Select resource(s) to display<br>";
 $query="SELECT DISTINCT resource_id, resource_name, color_code

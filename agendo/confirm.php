@@ -65,15 +65,14 @@ $res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(
 		echo "<tr><td>Could not send email. Please check your network connection and try again!<br><br></td></tr>";
 		echo "<tr><td><a href='application.php'>Return</a></td></tr>";
 	} else { //mail OK
-		echo "<tr><td>Mail successfully sent!<br><br></td></tr>";
+		echo "<tr><td>Your request has been successfully sent! Please wait for admin confirmation.<br><br></td></tr>";
 		echo "<tr><td>Thank you for register in agendo&reg; reservation system. As soon as your registration is complete you will receive a password through email or SMS.<br><br></td></tr>";
-		echo "<tr><td>You can login at <a href='http://calendar.igc.gulbenkian.pt'>http://calendar.igc.gulbenkian.pt</a> to change your password and check your permissions.<br><br></td></tr>";
+		echo "<tr><td>You can login at <a href='https://agendo.cirklo.org'>https://agendo.cirklo.org</a> to change your password and check your permissions.<br><br></td></tr>";
 		echo "<tr><td>If you wish to use other equipment please go to the reservation system <a href='http://calendar.igc.gulbenkian.pt'>homepage</a> and submit the 'New permission' form.</td></tr>";
 		echo "<tr><td>You can also check our feature videos to learn how the reservation system works and how to proceed in any situation.<br><br></td></tr>";
 		echo "<tr><td>You can find further information on our website at <a href='www.cirklo.org'>www.cirklo.org</a>.</a></td></tr>";
 		echo "<tr>";
-		echo "<td align=left valign=top><a href='http://www.facebook.com/pages/Cirklo/152674671417637?ref=ts'><img src=".$_SESSION['path']."/pics/facebook_logo.png border=0></a>";
-		echo "<a href='http://twitter.com/cirklo2010'><img src=".$_SESSION['path']."/pics/twitter_logo.png border=0></a></td>";
+		echo "<td align=left valign=top><a href='http://www.facebook.com/pages/Cirklo/152674671417637?ref=ts'><img src=".$_SESSION['path']."/pics/fb.png border=0></a></td>";
 		echo "</tr>";
 		echo "<tr><td><a href=# onclick='window.close()'>Exit</a></td></tr>";
 }

@@ -1085,6 +1085,7 @@ INSERT INTO `mask` (`mask_table`, `mask_name`, `mask_pic`) VALUES
 ('pubref', 'Publicity reference', NULL),
 ('reprop', 'Report properties', NULL),
 ('search', 'Quick search settings', NULL),
+('plot', 'Plot settings', NULL),
 ('resaccess', 'Field restrictions', NULL);
 
 
@@ -1112,7 +1113,7 @@ INSERT INTO `menu` (`menu_id`, `menu_name`, `menu_description`, `menu_plugin`, `
 (1, 'My Calendar', 'Personal calendar', 1, 'mycalendar.php'),
 (2, 'Image upload', 'Resource image uploader', 1, 'resupload.php'),
 (3, 'Reservations', 'Return to reservation system', 1, '../pathMarker/index.php'),
-(4, 'Make cookie', 'Set up resource for local confirmation', 1, '../pathMarker/admin/cookie.php'),
+(4, 'Check in', 'Set up resource for local confirmation', 1, '../pathMarker/admin/cookie.php'),
 (5, 'Mailing', 'Mailing list tool', 1, 'mailing.php');
 
 
@@ -1152,6 +1153,23 @@ CREATE TABLE IF NOT EXISTS `param` (
   PRIMARY KEY (`param_id`),
   KEY `param_report` (`param_report`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=3 ;
+
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `plot`
+--
+
+CREATE TABLE IF NOT EXISTS `plot` (
+  `plot_id` int(11) NOT NULL AUTO_INCREMENT,
+  `plot_title` varchar(30) NOT NULL,
+  `plot_table` varchar(20) NOT NULL,
+  `plot_x_axis` varchar(20) NOT NULL,
+  `plot_y_axis` varchar(20) NOT NULL,
+  `plot_type` varchar(10) NOT NULL COMMENT 'options: spline; column',
+  PRIMARY KEY (`plot_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 
 -- --------------------------------------------------------

@@ -47,6 +47,7 @@ $res->userInfo($user_id);
 if($res->getUserLevel()!=2){
 	echo "<div id=accountContainer class=account>";
 	echo "<table>";
+	echo "<tr><td>Contact</td><td><input type=text name=contact id=contact></td></tr>";
 	echo "<tr><td colspan=2>Internal comments</td></tr>";
 	echo "<tr><td colspan=2><textarea name=iComments id=iComments rows=5 cols=45></textarea></td></tr>";
 	echo "<tr><td colspan=2>Select an account to proceed</td></tr>";

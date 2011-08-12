@@ -18,11 +18,9 @@ if(isset($_GET['logout'])){	logout();}
 if(isset($_GET['pwd'])){	recoverPwd();}
 
 function login(){
-	//includes
-	require_once ("genObjClass.php");
+	
 	//call classes
 	$db = new dbConnection();
-	$genObj = new genObjClass();
 	$database=$db->getDatabase();
 	
 	//posted variables
@@ -31,7 +29,7 @@ function login(){
 	
 	if(!isset($_POST['passCrypted']) || $_POST['passCrypted']!='true'){
 		//crypt password
-		$user_passwd = $genObj->cryptPass($user_passwd);
+		$user_passwd = cryptPass($user_passwd);
 	}
 	
 	$sql = $db->prepare("SELECT user_id FROM ".$db->getDatabase().".user WHERE user_login='$user_login' AND user_passwd='$user_passwd'");
@@ -82,11 +80,9 @@ function notlogged(){
 function recoverPwd(){
 	//includes
 	require_once ("mailClass.php");
-	require_once ("genObjClass.php");
 	//call class
 	$mail = new mailClass();
 	$db = new dbConnection();
-	$genObj = new genObjClass();
 
 	//http variables
 	if(isset($_GET['email'])){ $user_email = $_GET['email'];}
@@ -98,7 +94,7 @@ function recoverPwd(){
 	//is there any user with this email?
 	if($sql->rowCount()>0){
 		$newpass=createPwd();
-		$newpass_crypt=$genObj->cryptPass($newpass);
+		$newpass_crypt=cryptPass($newpass);
 		$row = $sql->fetch();
 		$login = $row[0];
 		$query="UPDATE ".$db->getDatabase().".user SET user_passwd='$newpass_crypt' WHERE user_login='$login'";
@@ -122,6 +118,11 @@ function recoverPwd(){
 	
 	
 }
+
+function cryptPass($value){
+	return hash("sha256",$value);
+}
+
 
 
 function createPwd(){

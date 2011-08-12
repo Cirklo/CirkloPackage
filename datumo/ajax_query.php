@@ -212,11 +212,10 @@ class genObjClass{
 		}
 		return $table;
 	}
-	
-    function cryptPass($value){
-    	return hash("sha256",$value);
-    }
-	
+
+	function cryptPass($value){
+		return hash("sha256",$value);
+	}
 }
 
 

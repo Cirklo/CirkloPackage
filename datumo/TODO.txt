@@ -1,0 +1,8 @@
+Create Chart reports. Wizard to do this.
+
+Title
+X-axis
+Y-axis
+Spline
+Column
+Allow multiple axis -> different Y data. X-axis data must remain the asame
