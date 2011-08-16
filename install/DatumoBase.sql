@@ -1167,7 +1167,7 @@ CREATE TABLE IF NOT EXISTS `plot` (
   `plot_table` varchar(20) NOT NULL,
   `plot_x_axis` varchar(20) NOT NULL,
   `plot_y_axis` varchar(20) NOT NULL,
-  `plot_type` varchar(10) NOT NULL COMMENT 'options: spline; column',
+  `plot_type` varchar(10) NOT NULL COMMENT 'options: spline or column',
   PRIMARY KEY (`plot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
