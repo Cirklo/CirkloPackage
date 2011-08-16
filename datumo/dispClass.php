@@ -964,7 +964,7 @@ class dispClass{
 			ORDER BY announcement_date DESC";
 			$sql_=$this->pdo->query($query_);
 			echo "<ul class=list>";
-			if($sql->rowCount()){
+			if($sql_->rowCount()){
 				for($j=0;$row_=$sql_->fetch();$j++){
 					echo "<li><b>$row_[2]:</b> <a href=javascript:void(0) onclick=window.open('announcement.php?announcement_id=$row_[0]','_blank','height=350px,width=300px,scrollbars=yes');>$row_[1]</a></li>";
 				}
