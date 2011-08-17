@@ -299,7 +299,7 @@ echo "<table border=0>";
 echo "<tr>";
 if($perm->getUpdate()) {echo "<td><input type=button name=upd id=upd value=Update></td>";}
 if($perm->getDelete()) {echo "<td><input type=button name=del id=del value=Delete></td>";}
-if($perm->getUpdate() or $perm->getDelete()) $r=true;
+if($perm->getUpdate() or $perm->getDelete() or $perm->getInsert()) $r=true;
 //set order
 //Regular filter
 echo "<td><input type=button name=filter_$table id=filter_$table value=Search>";
