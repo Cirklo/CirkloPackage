@@ -35,6 +35,7 @@ separator = 'IRSEPARATOR';
 systemSeparator = 'IRSYSTEMSEPARATOR';
 detectedErrorOnJS = false;
 messageToShow = '';
+aContinents = [];
 function postMe(functionName){
 	data = [];
 	
@@ -67,6 +68,7 @@ function postMe(functionName){
 							document.getElementById('databaseData').style.display='table';
 							
 							selectBox = document.getElementById('countries');
+							selectBox.length = 0;
 							for(var position in serverData.countries){
 								newSelectElement = document.createElement('option');
 								newSelectElement.value = position;
@@ -78,6 +80,48 @@ function postMe(functionName){
 									selectBox.add(newSelectElement);// IE only
 								}
 							}
+							
+							selectBox = document.getElementById('timezoneContinents');
+							selectBox.length = 0;
+							var tempContinent = '';
+							var tempArray = [];
+							var subCity;
+							for(var position in serverData.timezones){
+								newSelectElement = document.createElement('option');
+								timezoneArray = serverData.timezones[position].split("/");
+								
+								subCity = "";
+								if(timezoneArray[0] == tempContinent){
+									tempArray = aContinents[tempContinent];
+									if(timezoneArray[1] != null){
+										if(timezoneArray[2] != null){
+											subCity = "/" + timezoneArray[2];
+										}
+										tempArray[tempArray.length] = timezoneArray[1] + subCity;
+										aContinents[tempContinent] = tempArray;
+									}
+								}
+								else{
+									tempContinent = timezoneArray[0];
+									if(timezoneArray[1] != null){
+										tempArray = [];
+										if(timezoneArray[2] != null){
+											subCity = "/" + timezoneArray[2];
+										}
+										tempArray[0] = timezoneArray[1] + subCity;
+										aContinents[tempContinent] = tempArray;
+									}
+									newSelectElement.value = timezoneArray[0];
+									newSelectElement.text = timezoneArray[0];
+									try{
+										selectBox.add(newSelectElement, null);
+									}
+									catch(ex){
+										selectBox.add(newSelectElement);// IE only
+									}
+								}
+							}
+							getTimezones(serverData.timezones[0].split("/")[0]);
 						}
 						else if (functionName == 'applySql'){
 							extraText = "<br><a href='../" + document.getElementById('path').value + "/index.php?class=0'>Click here to start</a>";
@@ -99,6 +143,24 @@ function postMe(functionName){
 country = 1;
 function getCountry(value){
 	country = value;
+}
+
+function getTimezones(value){
+	citiesArray = aContinents[value];
+	selectBox = document.getElementById('timezoneCities');
+	selectBox.length = 0;
+	for(position in citiesArray){
+		newSelectElement = document.createElement('option');
+		content = citiesArray[position];
+		newSelectElement.value = content;
+		newSelectElement.text = content;
+		try{
+			selectBox.add(newSelectElement, null);
+		}
+		catch(ex){
+			selectBox.add(newSelectElement);// IE only
+		}
+	}
 }
 
 software = 'datumo';
@@ -160,11 +222,18 @@ function getDBData(){
 	instituteAddress = 	document.getElementById('instituteAddress').value;
 	institutePhone = 	document.getElementById('institutePhone').value;
 	department = 		document.getElementById('department').value;
+	
+	timezoneContinent =	document.getElementById('timezoneContinents');
+	timezoneCity = 		document.getElementById('timezoneCities');
+	if(timezoneCity.selectedIndex != -1)
+		timezone = timezoneContinent.options[timezoneContinent.selectedIndex].value + "/" + timezoneCity.options[timezoneCity.selectedIndex].value;
+	else
+		timezone = timezoneContinent.options[timezoneContinent.selectedIndex].value;
 	// sendEmailChecked = 	document.getElementById('sendEmailChecked').checked;
 	
 	dataArray = [adminId, adminPass, adminFirst, adminLast, adminPhone, adminExt, adminMobile, adminMail,
 	        instituteName, instituteShort, instituteUrl, instituteMail, institutePass, instituteHost, institutePort,
-			instituteSecure, instituteAuth, instituteAddress, institutePhone, country, department, software];
+			instituteSecure, instituteAuth, instituteAddress, institutePhone, country, department, software, timezone];
 			// instituteSecure, instituteAuth, instituteAddress, institutePhone, country, department, software, sendEmailChecked];
 	
 	// Error checking for dbdata

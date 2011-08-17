@@ -45,8 +45,7 @@ CREATE TABLE IF NOT EXISTS `board` (
 
 INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
 (12, 'AgendoVersion', '1.5'),
-(13, 'bookingHour', '9'),
-(14, 'timezone', '');
+(13, 'bookingHour', '9');
 
 -- --------------------------------------------------------
 --

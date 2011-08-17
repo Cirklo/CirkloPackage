@@ -82,7 +82,7 @@
 				echo "</tr>";
 				
 				echo "<tr>";
-					labelInputText('path', 'Destination path', 'Cirklo', 'Relative path where the software will be installed within the root server');
+					labelInputText('path', 'Destination path', 'Cirklo', 'In the install parent folder');
 				echo "</tr>";
 				
 				// Uncomment later when its possible to isolate all the tables to remove in case user goes back
@@ -166,7 +166,7 @@
 						echo "<tr>";
 							echo "<td align='right' colspan=2>";
 							echo "<label>";
-								// echo "<text>Send email </text><input type='checkbox' name='sendEmailChecked' id='sendEmailChecked' checked/>";
+							// echo "<text>Send email </text><input type='checkbox' name='sendEmailChecked' id='sendEmailChecked' checked/>";
 							echo "<text>An email will be sent to Cirklo for registration</text>";
 							echo "</label>";
 							echo "</td>";						
@@ -202,7 +202,7 @@
 							echo "</td>";
 							
 							echo "<td>";
-							echo "<select id='countries' onclick='getCountry(this.value)'>";
+							echo "<select id='countries' onclick='getCountry(this.value)' style='width:100%'>";
 							echo "</select>";
 							echo "</td>";
 						echo "</tr>";
@@ -215,6 +215,27 @@
 							labelInputText('institutePhone', 'Phone number ', '', "The phone number of your institute");
 						echo "</tr>";
 
+						echo "<tr>";
+							echo "<td>";
+							echo "<label>Timezone</label>";
+							echo "</td>";
+							
+							echo "<td>";
+							echo "<select id='timezoneContinents' onclick='getTimezones(this.value)' style='width:100%'>";
+							echo "</select>";
+							echo "</td>";
+						echo "</tr>";
+
+						echo "<tr>";
+							echo "<td>";
+							echo "<label></label>";
+							echo "</td>";
+							
+							echo "<td>";
+							echo "<select id='timezoneCities' onclick='teste()' style='width:100%;max-width:153px;'>";
+							echo "</select>";
+							echo "</td>";
+						echo "</tr>";
 					echo "</table>";
 				echo "</fieldset>";
 			echo "</td>";
@@ -386,6 +407,9 @@
 				$countries[$arr[0]] = $arr[1];
 			}
 			$json->countries = $countries;
+			
+			// sends the timezones available from php
+			$json->timezones = timezone_identifiers_list();
 		}
 		catch(Exception $e){
 			$msg = $e->getMessage();
@@ -435,6 +459,7 @@
 			$instituteCountry = $dataArray[19];
 			$department = 		$dataArray[20];
 			$software =			$dataArray[21];
+			$timezone =			$dataArray[22];
 			// $sendEmail =		$dataArray[22];
 			// $makeDB = 		(boolean)$dataArray[16];
 			// $dbName = 		$dataArray[17];
@@ -481,7 +506,8 @@
 					(7, 'email', '".$instituteMail."'),
 					(8, 'smtpsecure', '".$instituteSecure."'),
 					(9, 'smtpauth', '".$instituteAuth."'),
-					(10,'publicity', '0')";
+					(10,'publicity', '0'),
+					(14,'timezone', '".$timezone."')";
 			dbHelp::mysql_query2($sql);	
 					
 			dbHelp::scriptRead($sqlDatumoConstraints);
