@@ -148,17 +148,42 @@ function getCountry(value){
 function getTimezones(value){
 	citiesArray = aContinents[value];
 	selectBox = document.getElementById('timezoneCities');
-	selectBox.length = 0;
+	selectBox.options.length = 0;
+	while (selectBox.firstChild) {
+		selectBox.removeChild(selectBox.firstChild);
+	}
+	// alert(selectBox.length);
+	var tempGroup = null;
 	for(position in citiesArray){
-		newSelectElement = document.createElement('option');
-		content = citiesArray[position];
-		newSelectElement.value = content;
-		newSelectElement.text = content;
-		try{
-			selectBox.add(newSelectElement, null);
+		content = citiesArray[position].split('/');
+		if(content.length > 1){
+			if(tempGroup == null){
+				tempGroup = document.createElement('optgroup');
+				tempGroup.id = "city" + content[0];
+				tempGroup.label = content[0];
+				try{
+					selectBox.add(tempGroup, null);
+				}
+				catch(ex){
+					selectBox.add(tempGroup);// IE only
+				}
+			}
+			newSelectElement = document.createElement('option');
+			newSelectElement.value = content[0] + "/" + content[1];
+			newSelectElement.text = content[1];
+			tempGroup.appendChild(newSelectElement);
 		}
-		catch(ex){
-			selectBox.add(newSelectElement);// IE only
+		else{
+			tempGroup = null;
+			newSelectElement = document.createElement('option');
+			newSelectElement.value = content[0];
+			newSelectElement.text = content[0];
+			try{
+				selectBox.add(newSelectElement, null);
+			}
+			catch(ex){
+				selectBox.add(newSelectElement);// IE only
+			}
 		}
 	}
 }

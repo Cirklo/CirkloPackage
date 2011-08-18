@@ -224,6 +224,10 @@
 							echo "<select id='timezoneContinents' onclick='getTimezones(this.value)' style='width:100%'>";
 							echo "</select>";
 							echo "</td>";
+
+							echo "<td>";
+							echo "<img id='timezoneImg' class='helpClass' src='pics/interrogation.png' title='Pick the continent and country/city of the timezone you want the server to be in'></input>";
+							echo "</td>";
 						echo "</tr>";
 
 						echo "<tr>";
@@ -232,7 +236,7 @@
 							echo "</td>";
 							
 							echo "<td>";
-							echo "<select id='timezoneCities' onclick='teste()' style='width:100%;max-width:153px;'>";
+							echo "<select id='timezoneCities' style='width:100%;max-width:153px;'>";
 							echo "</select>";
 							echo "</td>";
 						echo "</tr>";
