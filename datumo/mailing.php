@@ -193,7 +193,7 @@ echo "</header>";
 //STARTING HTML LAYOUT
 echo "<section id=section>";
 echo "<div class=sidebar lang=exp>";
-$config->checkPlugins();
+$config->checkPlugins($level);
 $config->compat();
 echo "</div>";
 

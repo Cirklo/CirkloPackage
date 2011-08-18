@@ -95,6 +95,7 @@ class importerClass{
 	}
 	
 	function FindForeignKeys($fullheader){
+		$this->conn->dbInfo();
 		//check if the field is a foreign key
 		$query="SELECT referenced_table_name 
 		FROM key_column_usage 
@@ -270,6 +271,13 @@ class importerClass{
 	
 	
 	function delete($option){
+		//check if matching key is a foreign key value or not
+		if(($ref=$this->FindForeignKeys($this->matchingKey))){
+			$key = $this->getForeignKeyValue($this->matchingKeyValue,$ref);		
+		} else {
+			$key = $this->matchingKeyValue;
+		}
+		
 		$query=false;
 		switch($option){
 			case "0":
@@ -281,12 +289,25 @@ class importerClass{
 				break;
 			case "2":
 				//delete entries only related with matching key (if it exists)
-				$query="DELETE FROM ".$this->objName." WHERE ".$this->matchingKey."='".$this->matchingKeyValue."'";
+				//$sql="DELETE FROM $table WHERE ".$table."_id NOT IN (SELECT request_number FROM request WHERE request_origin='product') AND ".$table."_id<>0 AND $field IN (SELECT vendor_id FROM vendor WHERE vendor_name='$match') AND product_type=1";
+				switch ($this->objName){
+					case "product":
+						$query="DELETE FROM product WHERE ".$this->matchingKey."='$key' AND product_id NOT IN (SELECT request_number FROM request WHERE request_origin='product') AND product_id<>0";
+						break;
+					case "account":
+						$query="DELETE FROM account WHERE ".$this->matchingKey."='$key' AND account_id NOT IN (SELECT basket_account FROM basket)";
+					case "vendor":
+						$query="DELETE FROM vendor WHERE ".$this->matchingKey."='$key' AND vendor_id NOT IN (SELECT product_vendor FROM product) AND vendor_id NOT IN (SELECT myproduct_vendor FROM myproduct)";
+						break;
+					default:
+						$query="DELETE FROM ".$this->objName." WHERE ".$this->matchingKey."='$key'";
+				}
 				break;
 		}
+		
 		return $query;
 	}
-
+	
 	function insert($arr){
 		//initialize query to insert data 
 		$query="INSERT INTO ".$this->objName." (";

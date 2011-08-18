@@ -25,17 +25,23 @@ class configClass{
 	 * @abstract Query the database for plugins
 	 */
 	
-	public function checkPlugins(){
+	public function checkPlugins($level){
 		//set search path to main database
 		$this->pdo->dbConn();
-		$sql=$this->pdo->prepare("SELECT * FROM ".$this->pdo->getDatabase().".plugin");
-		$sql->execute();
-		for($i=0;$row=$sql->fetch();$i++){
-			$arr[]=$row[1];
+		if($level!=3){	//do not allow external users to view internal plugins
+			$sql=$this->pdo->prepare("SELECT * FROM plugin");
+			$sql->execute();
+			for($i=0;$row=$sql->fetch();$i++){
+				$arr[]=$row[1];
+			}
+			$this->plugin=$arr;
+			//call method to find submenus
+			$this->checkSubmenus();
 		}
-		$this->plugin=$arr;
-		//call method to find submenus
-		$this->checkSubmenus();
+		if($level==0 or $level==3){	//allow admins and external users to view extra plugins
+			$this->checkExtras();
+			
+		}
 	}
 	
 	/**
@@ -53,6 +59,19 @@ class configClass{
 			for($j=0;$row=$sql->fetch();$j++){
 				echo "<a href=$row[2] title='$row[1]'>$row[0]</a><br>";
 			}
+		}
+	}
+	
+	public function checkExtras(){
+		$query="SELECT extra_name, extra_description, extra_url FROM extra";
+		try{
+			$sql=$this->pdo->query($query);
+			if($sql->rowCount()>0)	echo "<h3>External plugins</h3>";
+			for($i=0;$row=$sql->fetch();$i++){
+				echo "<a href=$row[2] target=_blank title='$row[1]'>$row[0]</a><br>";
+			}
+		} catch (Exception $e){
+			echo "External plugins not available";
 		}
 	}
 	

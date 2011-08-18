@@ -86,7 +86,7 @@ class genObjClass{
 						throw new Exception("Invalid characters found at: ".$row["update"][$i]);	
 						
 					//password encryption
-					if($table->comment[$key]=="pwd"){
+					if($table->comment[$key]=="pwd" and strlen($row["update"][$i])<64){
 						$row["update"][$i]=$this->cryptPass($row["update"][$i]);
 					}
 					

@@ -30,6 +30,22 @@ In the end of the validation, the script must show all errors found in the csv f
  * permanently active
  */
 
+/**
+ * Display warnings
+ * 
+ * 1 - Display rules to import new products
+ * 2 - Is it important to distinguish between economato and external products?
+ * 3 - Allow different delete options depending on the target table
+ * 4 - Develop index page
+ * 6 - Develop different delete options according with the above tables but always allow a more general delete (FOR ANY TABLE)
+ * 7 - New options available
+ * 		- Introduce option to import directly with the foreign key id not the value
+ * 		- Display table headers according with the chosen table
+ * 		- Display rejected characters
+ * 		- Create specific rule for economato
+ */
+
+
 
 
 ?>

@@ -1,5 +1,4 @@
 <?php
-
 //PHP includes
 require_once "../session.php";
 startSession();
@@ -91,7 +90,7 @@ try{
 					if($isForeignKey[$fileHeaders[$i]])//is a foreign key 
 						$data[$i]=$importer->getForeignKeyValue($data[$i],$isForeignKey[$fileHeaders[$i]]);
 					//write data to array
-					$dataArray[]=$data[$i];
+					$dataArray[]=utf8_encode($data[$i]);
 					//check which action to take
 					if($fileHeaders[$i]==$unique){
 						$action=$importer->checkUnique($data[$i]);

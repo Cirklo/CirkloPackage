@@ -999,6 +999,19 @@ CREATE TABLE IF NOT EXISTS `department` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 
+--
+-- Estrutura da tabela `extra`
+--
+
+CREATE TABLE IF NOT EXISTS `extra` (
+  `extra_id` int(11) NOT NULL AUTO_INCREMENT,
+  `extra_name` varchar(15) COLLATE utf8_bin NOT NULL,
+  `extra_description` varchar(30) COLLATE utf8_bin NOT NULL,
+  `extra_url` varchar(50) COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`extra_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+
+
 -- --------------------------------------------------------
 
 --

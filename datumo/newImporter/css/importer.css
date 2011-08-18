@@ -1,0 +1,142 @@
+@CHARSET "ISO-8859-1";
+
+body{
+	margin:auto;
+	background: #164f55;
+	font-family:Verdana, Geneva, sans-serif; 
+	font-size:12px; 
+	line-height:20px; 
+    text-align: justify;
+    color:#f7c439;
+	
+}
+
+
+fieldset{
+	width:980px;
+	margin:auto;
+	padding:20px;
+}
+
+table{
+	line-height:20px;
+}
+
+table.errors{
+	font-size:9px;
+	line-height:15px;	
+	border:0px solid #fff;
+	position:relative;
+}
+
+table.errors td{
+	border:1px solid #fff;
+	padding-right:10px;
+}
+
+span.title{
+	font-size:12px; 
+	font-weight:bold;
+	color:#f7c439;
+}
+
+span.desc{
+	font-size:9px;
+	color:#fff;
+}
+
+div.rules{
+	margin-top:-10px;
+	width:450px;
+	float:left;	
+	padding-right:70px;	
+}
+
+div.rules ol{
+	padding-left:20px;
+}
+
+div.rules ol li{
+	font-size:10px; 
+	color:#f7c439;
+}
+
+
+div.validation{
+	width:980px;
+	margin:auto;
+	border:0px solid #fff;	
+	
+}
+
+div.success{
+	width:500px;
+	margin:auto;
+	margin-top:20px;
+	padding:20px;
+	border:1px solid #f7c439;
+	color:#fff;
+	font-weight:bold;
+	text-transform:uppercase;
+}
+
+div.links{
+	padding-top:10px;
+	border:0px solid #fff;
+	overflow:auto;
+	text-align:center;
+}
+
+div.error{
+	margin:auto;
+	margin-top:20px;
+	padding:20px;	
+	font-weight:bold;
+	text-transform:uppercase;
+	color:#fff;
+	border:1px solid #f7c439;
+	text-align:center;
+	
+}
+
+div.legend{
+	width:100%;
+	border:0px solid #fff;;
+}
+
+div.errorDetails{
+	width:980px;
+	overflow:auto;	
+}
+
+div.smallDetails{
+	width:300px;
+	border:0px solid #fff;
+	position:relative;
+	float:left;
+}
+
+span.rowIdentifier{
+	color:#fff;
+	font-weight:bold;
+}
+
+hr{
+	border:none;	
+	border-top:1px #fff solid;
+	height: 1px;
+	background-color: #fff;
+}
+
+h1,h2,h3{
+	color:#fff;	
+}
+
+a{
+	color:#fff;	
+}
+
+a:hover{
+	color:#f7c439;
+}
+
