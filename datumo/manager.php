@@ -129,6 +129,7 @@ if(isset($_GET['page'])) { //page to be shown
 //get user info
 $perm->userInfo($user_id);
 $login=$perm->getUserLogin();
+$level=$perm->getUserLevel();
 
 //HACK to fill the advanced filter 
 if($stype==2)	echo "<body onload=getSearchVars('$table')>";
@@ -172,12 +173,12 @@ echo "<header>";
 						}
 						echo "</ul>";
 					echo "</li>";
-					//display export to Excel option if the current table is a view
-					if($display->checkTableType($table))
+					//display export to Excel option if the current table is a view or if user is a system administrator
+					if(isset($table) and ($display->checkTableType($table) or $level==0))
 						echo "<li><a href=excel.php?table=$table title='Export data to xls file'>Export to Excel</a></li>";
 				echo "</ul>";
 			echo "</li>";
-			echo "<li><a href=http://www.cirklo.org/agendo_help.php target=_blank>Help</a></li>";
+			echo "<li><a href=http://www.cirklo.org/datumo_help.php target=_blank>Help</a></li>";
 			echo "<li><a href=javascript:void(0) onclick=window.open('helpdesk.php','_blank','height=400px,width=365px,resizable=no,menubar=no')>Helpdesk</a>";
 			echo "<li><a>About</a>";
 				echo "<ul class=dropdown>";
