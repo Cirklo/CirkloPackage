@@ -9,25 +9,51 @@ require_once "../__dbConnect.php";
 $conn=new dbConnection();
 
 if(isset($_GET['ajax'])){
-	if(isset($_GET['vendor']))	$vendor_name=$_GET['vendor'];
-	$query="SELECT 1 FROM vendor WHERE vendor_name='$vendor_name'";
-	$sql=$conn->query($query);
-	if($sql->rowCount()){
-		echo "<li><b>This is a registered vendor</b></li>";
-		$query="SELECT DISTINCT vendor_id FROM vendor, product WHERE product_vendor=vendor_id AND vendor_name='$vendor_name'";
+	if(isset($_GET['manufacturer'])){
+		$manufacturer_name=$_GET['manufacturer'];
+		$query="SELECT 1 FROM manufacturer WHERE manufacturer_name='$manufacturer_name'";
 		$sql=$conn->query($query);
-		echo "<br>";
-		if($sql->rowCount()==1){
-			echo "<li><span style='color:#00FF00'>There are products registered for this vendor</span></li>";
+		if($sql->rowCount()){
+			echo "<li><b>This is a registered manufacturer</b></li>";
+			$query="SELECT DISTINCT manufacturer_id 
+				FROM manufacturer, product 
+				WHERE product_manufacturer=manufacturer_id 
+				AND manufacturer_name='$manufacturer_name'";
+			$sql=$conn->query($query);
+			echo "<br>";
+			if($sql->rowCount()==1){
+				echo "<li><span style='color:#00FF00'>There are products registered for this manufacturer</span></li>";
+			} else {
+				echo "<li><span style='color:#FF0000'>No products registered</span></li>";
+			}
 		} else {
-			echo "<li><span style='color:#FF0000'>No products registered</span></li>";
+			echo "<li><b>This is an unregistered manufacturer</b></li>";
+			echo "<br>";
+			echo "<li>If you choose to import a file with this manufacturer, a new entry will be created in the database</li>";
 		}
-	} else {
-		echo "<li><b>This is an unregistered vendor</b></li>";
-		echo "<br>";
-		echo "<li>If you choose to import a file from this vendor, a new entry will be created in the database</li>";
+	} elseif(isset($_GET['vendor'])){
+		$vendor_name=$_GET['vendor'];
+		$query="SELECT 1 FROM vendor WHERE vendor_name='$vendor_name'";
+		$sql=$conn->query($query);
+		if($sql->rowCount()){
+			echo "<li><b>This is a registered vendor</b></li>";
+			$query="SELECT DISTINCT vendor_id 
+				FROM vendor, product 
+				WHERE product_vendor=vendor_id 
+				AND vendor_name='$vendor_name'";
+			$sql=$conn->query($query);
+			echo "<br>";
+			if($sql->rowCount()==1){
+				echo "<li><span style='color:#00FF00'>There are products registered for this vendor</span></li>";
+			} else {
+				echo "<li><span style='color:#FF0000'>No products registered</span></li>";
+			}
+		} else {
+			echo "<li><b>This is an unregistered vendor</b></li>";
+			echo "<br>";
+			echo "<li>If you choose to import a file with this vendor, a new entry will be created in the database</li>";
+		}
 	}
-	
 	exit;
 }
 
@@ -64,7 +90,16 @@ $(document).ready(function(){
 		});
 	});
 
-	$("#validate").click(function(){
+	$("#validateManufacturer").click(function(){
+		$.get("extra.php?ajax",{
+			manufacturer:$("#product_manufacturer").val()
+		},
+		function(data){
+			$("#extraInfo").html(data);
+		});
+	});
+
+	$("#validateVendor").click(function(){
 		$.get("extra.php?ajax",{
 			vendor:$("#product_vendor").val()
 		},
@@ -103,15 +138,24 @@ if(isset($_GET['fields'])){	//check for table headers
 }
 
 if(isset($_GET['check'])){
-	echo "Type the vendor's name";
-	echo "<input type=text name=product_vendor id=product_vendor lang=__fk class=fk size=40>";	
-	echo "<input type=button name=validate id=validate value='Validate vendor'>";
+	echo "Type the manufacturer's name";
+	echo "<input type=text name=product_manufacturer id=product_manufacturer lang=__fk class=fk size=40>";	
+	echo "<input type=button name=validateManufacturer id=validateManufacturer value='Validate manufacturer'>";
 	echo "<hr>";
 	echo "<div id=extraInfo>";
 	echo "</div>";
 	
 }
 
+if(isset($_GET['checkVendor'])){
+	echo "Type the vendor's name";
+	echo "<input type=text name=product_vendor id=product_vendor lang=__fk class=fk size=40>";	
+	echo "<input type=button name=validateVendor id=validateVendor value='Validate vendor'>";
+	echo "<hr>";
+	echo "<div id=extraInfo>";
+	echo "</div>";
+	
+}
 
 
 

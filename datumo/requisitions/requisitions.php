@@ -394,12 +394,11 @@ function updateAccount($budget,$basket_id){
 function checkBudget($account, $total){
 	//call classes
 	$conn=new dbConnection();
-	$database=$conn->getDatabase(); //write current database to a local variable
 	//update account budget
-	$sql=$conn->prepare("SELECT account_budget FROM account WHERE account_id=$account");
+	$sql=$conn->prepare("SELECT account_budget FROM account WHERE account_number=$account");
 	$sql->execute();
 	$row=$sql->fetch();
-	if($row[0]<$total){
+	if($row[0]>$total){
 		return true;
 	} else {
 		return false;

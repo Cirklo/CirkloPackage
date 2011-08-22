@@ -265,7 +265,7 @@ try{
 	//Display 3 links
 	//go back link
 	echo "<div class=links>";
-	echo "<a href=options.php>back</a>&nbsp;&nbsp;";	
+	echo "<a href=index.php>back</a>&nbsp;&nbsp;";	
 	//refresh link
 	echo "<a href=javascript:window.location.reload()>refresh</a>&nbsp;&nbsp;";
 	//start import
@@ -277,7 +277,7 @@ try{
 	echo "</div>";
 	echo "<div class=links>";
 	//go back link
-	echo "<a href=options.php>back</a>&nbsp;&nbsp;";	
+	echo "<a href=index.php>back</a>&nbsp;&nbsp;";	
 	//refresh link
 	echo "<a href=javascript:window.location.reload()>refresh</a>&nbsp;&nbsp;";
 	echo "</div>";
