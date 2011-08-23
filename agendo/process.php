@@ -180,12 +180,8 @@ function del(){
     $perm = new permClass;
 	
     $seekentry = "";
-    // $sqlResp = "SELECT resource_resp FROM resource where resource_id=".$resource;
-    // $resResp = dbHelp::mysql_query2($sql) or die($sql);
-	// $arrResp = dbHelp::mysql_fetch_row2($res);
-	// if($arrResp[0] != $user_id)
-	
 	$tempUser = $user_id;
+	$found = false;
 	if(isset($_GET['impersonate'])){
 		$tempUser = $_GET['impersonate'];
 	}
@@ -210,14 +206,14 @@ function del(){
     }
 
     $sqlResp = "SELECT resource_resp FROM resource where resource_id=".$resource;
-    $resResp = dbHelp::mysql_query2($sql) or die($sql);
-	$arrResp = dbHelp::mysql_fetch_row2($res);
+    $resResp = dbHelp::mysql_query2($sqlResp) or die($sqlResp);
+	$arrResp = dbHelp::mysql_fetch_row2($resResp);
     if(!$perm->setPermission($user_id,$resource,$user_passwd)){
 		echo $perm->getWarning();
 		return;
 	}
 	
-	if(!$found && $arrResp[0] != $tempUser){
+	if(!$found && $tempUser != $arrResp[0]){
 		echo "Wrong user!";
 		return;
 	}
