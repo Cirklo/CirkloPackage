@@ -12,8 +12,7 @@
 		call_user_func($_POST['functionName']);
 		exit;
 	}
-	// logIn($resource, $user_id, $pwd, $logOff);
-	// logIn();
+
 	importJs();
 	initSession();
 ?>
@@ -51,9 +50,10 @@ $resource=clean_input($_GET['resource']);
 $ressql = "select resource_status from resource where resource_id = ".$resource;
 $res = dbHelp::mysql_query2($ressql) or die($ressql);
 $arr = dbHelp::mysql_fetch_row2($res);
-$imResstatus5 = false;
-if($arr[0] == 5){
-	$imResstatus5 = true;
+$imResstatus5 = ($arr[0] == 5);
+// $imResstatus5 = false;
+// if($arr[0] == 5){
+	// $imResstatus5 = true;
 	// if (isset($_COOKIE["resourceStatus"]) && $_COOKIE["resourceStatus"] == 5){
 		// $ressql = "select resinterface_phpfile from resinterface where resinterface_resource = ".$resource;
 		// $res = dbHelp::mysql_query2($ressql) or die($ressql);
@@ -61,7 +61,7 @@ if($arr[0] == 5){
 		// echo "<meta HTTP-EQUIV='REFRESH' content='0; url=".$arr[0]."?resource=".$resource."'>";
 		// exit;
 	// }
-}
+// }
 // ***********************************************************
 
 if (isset($_GET['update'])) {$update=clean_input($_GET['update']);$entry=clean_input($_GET['update']);} else {$update=0;} ;
@@ -497,16 +497,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						echo "<tr><td colspan=2><hr></td></tr>";
 
-						echo "<tr><td colspan=2 align=justify>";
-							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\">";
-							echo "<input type=button style='width:60px' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\">";
-							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\"><br>";
-							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\">";
-							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\">";
-						echo "</td></tr>";
-						
-						echo "<tr><td colspan=2><hr></td></tr>";
-
 					// Used to hide buttons
 					}
 					//*********************
@@ -522,13 +512,58 @@ echo "<table id='master' style='margin:auto' width=750>";
 				echo "</form>";
 				//GET announcements
 
-					echo "<table border=0 align=left>";
+					echo "<table align=left style='width:100%;padding:2px;'>";
+						// *************************************************************************
+						// Checks if the user logged is the one responsible for the current resource
+						if(isset($_SESSION['user_id'])){
+							$sqlResp = "select 1 from resource where resource_id = ".$calendar->getResource()." and resource_resp = ".$_SESSION['user_id'];
+							$resResp = dbHelp::mysql_query2($sqlResp);
+							if(dbHelp::mysql_numrows2($resResp) > 0){
+								echo "<tr>";
+									echo "<td colspan=2>";
+									echo "<label>Perform action as:</label>";
+									echo "</td>";
+								echo "</tr>";
+							
+								$sqlResp = "select user_id, user_firstname, user_lastname from user";
+								$resResp = dbHelp::mysql_query2($sqlResp);
+								echo "<tr>";
+									echo "<td>";
+									echo "<input type='checkbox' id='impersonateCheck' onchange='impersonateCheckChange()' />";
+									echo "</td>";
+									
+									echo "<td>";
+									// echo "<input type='text' id='usersList' onclick='impersonateCheckActive(true)' disabled/>";
+									echo "<input type='text' id='usersList' onclick='impersonateCheckChange(true)'/>";
+									echo "</td>";
+								echo "</tr>";
+								
+								// echo "<tr>";
+									// echo "<td colspan=2>";
+									// echo "<hr>";
+									// echo "</td>";
+								// echo "</tr>";
+							echo "<tr><td colspan=2><hr></td></tr>";
+						}
+						}
+						// *************************************************************************
+
+						echo "<tr><td colspan=2 align='center'>";
+							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\">";
+							echo "<input type=button style='width:60px' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\">";
+							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\"><br>";
+							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\">";
+							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\">";
+						echo "</td></tr>";
+						
+						echo "<tr><td colspan=2><hr></td></tr>";
+
 						echo "<tr>";
-							echo "<td><b>Announcements</b></td>";
+							echo "<td colspan=2><b>Announcements</b></td>";
 						echo "</tr>";
 						
 						echo "<tr>";
-							echo "<td>";
+							echo "<td colspan=2>";
 							$message->announcement($resource);
 							echo "</td>";
 						echo"</tr>";
@@ -550,6 +585,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 			
 		echo "</tr>";
 echo "</table>";
+
 //Do we have publicity in this page??
 require_once "../datumo/pub.php";
 $pub=new pubHandler($resource);

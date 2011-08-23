@@ -178,6 +178,7 @@ table.entry {
  table.entryinner {
 	border: 0px solid #EAE8D5;
 	padding:2px;
+	width:100%;
  }
  
 div.entrydiv{
@@ -185,7 +186,7 @@ div.entrydiv{
  text-align:center;
  padding:2px;
 }
- 
+
 div.resourcediv{
  border: 0px solid #EAE8D5;
  width: 174px;

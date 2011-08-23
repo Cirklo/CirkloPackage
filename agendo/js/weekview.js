@@ -14,7 +14,44 @@ var path = '';
 
 //bgcolor2='document..backgroundColor; // just to set bgcolor2 at the beggining
 
+	var impersonateUser = '';
+	$(document).ready(function(){
+		if(document.getElementById('usersList') != null){
+			$("#usersList").focus(function(){
+				$("#usersList").autocomplete({
+					source: "../agendo/commonCode.php?usersList",
+					minLength: 2,
+					select: function(event, ui) {
+								impersonateUser = ui.item.id;
+							},
+					dataType: "json"
+				});
+			});
+		}
+		else{
+			impersonateUser = '';
+		}
+	});
+	
+	function impersonateCheckChange(check){
+		element = document.getElementById('impersonateCheck');
+
+		if(check != null){
+			element.checked = check;
+		}
+		else{
+			element.check = !element.check;
+		}
+		if(!element.checked){
+			impersonateUser = '';
+			document.getElementById('usersList').value = "";
+		}
+	}
   
+	// function impersonateCheckActive(){
+		// document.getElementById('impersonateCheck').checked = true;
+	// }
+	
     document.onmousedown= function () {
         mousedown=0;
         window.clearInterval(mousedownTimeout);
@@ -157,7 +194,10 @@ function ManageEntries(action,ttime,tresolution) {
     document.getElementById('code').style.backgroundColor='#aaaaaa';
     bgcolor=document.getElementById('code').style.backgroundColor;    
     
-    
+    var	impersonateUrl = "";
+	if(impersonateUser != ''){
+		impersonateUrl = "&impersonate=" + impersonateUser;
+	}
     switch(action) {
         case 'del':
 			detectedUser = true;
@@ -167,7 +207,7 @@ function ManageEntries(action,ttime,tresolution) {
                     if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)) {
                         //alert(cell.style.backgroundColor);
                         document.getElementById('entry').value=cell.title;
-                        ajaxEntries('GET','../agendo/process.php?deleteall=0&resource=' + resource ,true);
+                        ajaxEntries('GET','../agendo/process.php?deleteall=0&resource=' + resource + impersonateUrl ,true);
                         //alert ("No entries were selected");
                     }
                 }
@@ -180,7 +220,7 @@ function ManageEntries(action,ttime,tresolution) {
             // if (entry!='0' && detectedUser) {
                 var resp=confirm('All associated entries will be deleted!');
                 if (!(resp)) return;
-                ajaxEntries('GET','../agendo/process.php?deleteall=1&resource=' + resource,true);
+                ajaxEntries('GET','../agendo/process.php?deleteall=1&resource=' + resource + impersonateUrl,true);
                 clear_table(table,false);
             }
         break;
@@ -229,7 +269,7 @@ function ManageEntries(action,ttime,tresolution) {
                        tstarttime= parseInt(ttime)+(i-1)*(tresolution);
                         if (seed==0) exit;
                         var entryDate = new Date(tdate.substring(0,4),parseInt(tdate.substring(4,6),10)-1,parseInt(tdate.substring(6,8),10)+j,Math.floor(tstarttime),Math.round((tstarttime-Math.floor(tstarttime))*60),'00');
-                        ajaxEntries('GET','../agendo/process.php?' + 'slots=' + seed + '&datetime=' + formatDate(entryDate,"yyyyMMddHHmm") + '&resource=' + resource + '&assistance=' + getAssistance,true);
+                        ajaxEntries('GET','../agendo/process.php?' + 'slots=' + seed + impersonateUrl + '&datetime=' + formatDate(entryDate,"yyyyMMddHHmm") + '&resource=' + resource + '&assistance=' + getAssistance,true);
                         seed=0;
                         k=0;
                     } else if(cell.title!='0' && document.getElementById('addButton').value=='All' && cell.style.backgroundColor==bgcolor2 )  {
@@ -263,7 +303,7 @@ function ManageEntries(action,ttime,tresolution) {
                     if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)) {
                         //alert(cell.style.backgroundColor);
                             document.getElementById('entry').value=cell.title;
-                            ajaxEntries('GET','../agendo/process.php?&resource=' + resource,true);
+                            ajaxEntries('GET','../agendo/process.php?&resource=' + resource + impersonateUrl,true);
                             clear_table(table,false);                 
                     } else {
                        //alert ("No entries were selected");

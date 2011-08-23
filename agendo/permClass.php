@@ -41,8 +41,8 @@ class permClass {
 
 function setPermission($user,$resource,$passwd) {
 
-    $this->User=$user;
-    $this->Resource=$resource;
+    $this->User = $user;
+    $this->Resource = $resource;
 	
 	// Gets the crypted password from the given user
     $sql="select user_passwd from ".dbHelp::getSchemaName().".user where user_id=". $user;
@@ -54,8 +54,10 @@ function setPermission($user,$resource,$passwd) {
     $res=dbHelp::mysql_query2($sql);
     $arrpwdadmin=dbHelp::mysql_fetch_row2($res);
     
-	// Checks if the responsible's password matches the given one
-    if ($arrpwdadmin[0]==$passwd){
+	//// Checks if the responsible's password matches the given one
+    // if ($arrpwdadmin[0]==$passwd){
+	// Checks if user is the resource responsible
+    if ($arrpwdadmin[1] == $user && $arrpwdadmin[0] == $passwd){
         $this->WasAdmin=true;
 		$sql="select '1111', resource_maxdays, resource_maxslots, resource_status, resource_delhour, resource_resolution from resource where resource_id=". $resource;
 		$res=dbHelp::mysql_query2($sql) or die ($sql);

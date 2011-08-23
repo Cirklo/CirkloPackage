@@ -112,15 +112,23 @@ function add(){
     $weekahead=$datetime;
     $notify=new alert($resource);   
     if ($repeat=='false') $enddate='999999999999';
+	
+	$tempUser = $user_id;
+	if(isset($_GET['impersonate'])){
+		$tempUser = $_GET['impersonate'];
+	}
     //building the repetition pattern
     while ((substr($weekahead,0,8)<=$enddate) && ($w<53)) {
         if (!$perm->addAhead($weekahead, $slots)) {echo $perm->getWarning();exit;}
         if (!$perm->checkOverlap($weekahead,$slots)) {echo $perm->getWarning();exit;}
-        $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(".$user_id.",".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."," . $slots .",". $assistance ."," . $arrrep[0] .",". $EntryStatus . "," . $resource . ", '".date('Y-m-d H:i:s',time())."',NULL)";
+        // $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(".$user_id.",".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."," . $slots .",". $assistance ."," . $arrrep[0] .",". $EntryStatus . "," . $resource . ", '".date('Y-m-d H:i:s',time())."',NULL)";
+        $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(".$tempUser.",".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."," . $slots .",". $assistance ."," . $arrrep[0] .",". $EntryStatus . "," . $resource . ", '".date('Y-m-d H:i:s',time())."',NULL)";
         dbHelp::mysql_query2($sql) or die($sql);
 
         // $sql="SELECT LAST_INSERT_ID()";
-        $sql="SELECT entry_id from entry where entry_user = ".$user_id." and entry_datetime = ".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')." and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
+		// impersonate user here by get
+        // $sql="SELECT entry_id from entry where entry_user = ".$user_id." and entry_datetime = ".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')." and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
+        $sql="SELECT entry_id from entry where entry_user = ".$tempUser." and entry_datetime = ".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')." and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
         $res=dbHelp::mysql_query2($sql) or die($sql);
         $last=dbHelp::mysql_fetch_row2($res);
 		
@@ -166,24 +174,53 @@ function del(){
     $entry=clean_input($_GET['entry']);
     $seekentry='';
     // Gets the all the users, entry_ids and status of the given entry_id date, of a given resource
-    $sql="SELECT entry_user,entry_id,entry_status FROM entry where entry_datetime in (select entry_datetime from entry where entry_id=".$entry.") and entry_resource=".$resource." AND entry_status IN ( 1, 2, 4 ) order by entry_id";
-    $res=dbHelp::mysql_query2($sql) or die($sql);
-    $found=false;
-    $perm= new permClass;
-    for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
-        $arr=dbHelp::mysql_fetch_row2($res);
+    $sql = "SELECT entry_user,entry_id,entry_status FROM entry where entry_datetime in (select entry_datetime from entry where entry_id=".$entry.") and entry_resource=".$resource." AND entry_status IN ( 1, 2, 4 ) order by entry_id";
+    $res = dbHelp::mysql_query2($sql) or die($sql);
+    $found = false;
+    $perm = new permClass;
+	
+    $seekentry = "";
+    // $sqlResp = "SELECT resource_resp FROM resource where resource_id=".$resource;
+    // $resResp = dbHelp::mysql_query2($sql) or die($sql);
+	// $arrResp = dbHelp::mysql_fetch_row2($res);
+	// if($arrResp[0] != $user_id)
+	
+	$tempUser = $user_id;
+	if(isset($_GET['impersonate'])){
+		$tempUser = $_GET['impersonate'];
+	}
+
+    // for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
+    while($arr=dbHelp::mysql_fetch_row2($res)) {
+		if($seekentry == ""){
+			$seekentry=$arr[1];
+		}
+        // $arr=dbHelp::mysql_fetch_row2($res);
 		// Checks if the current user from the $res list is allowed to delete the current entry
-        if($perm->setPermission($arr[0],$resource,$user_passwd)){
+        // if($perm->setPermission($arr[0],$resource,$user_passwd)){
 		// Checks if the given user is allowed to delete the current entry
         // if($perm->setPermission($arr[0],$resource,$user_passwd) && $arr[0]==$user_id){
-           $found=true;
-            $seekentry=$arr[1];
+		if($tempUser == $arr[0]){
+			$found=true;
+			$seekentry=$arr[1];
 			// Not used anymore
             // $user_id=$arr[0];//it might be the admin logging in
             break;
         }
     }
-    if (!$found) {echo $perm->getWarning();return;}
+
+    $sqlResp = "SELECT resource_resp FROM resource where resource_id=".$resource;
+    $resResp = dbHelp::mysql_query2($sql) or die($sql);
+	$arrResp = dbHelp::mysql_fetch_row2($res);
+    if(!$perm->setPermission($user_id,$resource,$user_passwd)){
+		echo $perm->getWarning();
+		return;
+	}
+	
+	if(!$found && $arrResp[0] != $tempUser){
+		echo "Wrong user!";
+		return;
+	}
     
     $deleteall=$_GET['deleteall'];
     if ($entry!=$arr[1]) $deleteall=0; //delete from monitor does not allow delete all 
@@ -226,7 +263,6 @@ function del(){
         
         //always notify if it was deleted from admin
         if($perm->getWasAdmin()) $notify->fromAdmin('delete');
-  	// writeToFile("c:/a.txt", "bla");
     }
 }
 
@@ -286,7 +322,15 @@ function update(){
     $sql="select entry_datetime,entry_resource,entry_user from entry where entry_id=". $entry;
     $resdt=dbHelp::mysql_query2($sql) or die($sql);
     $arrdt=dbHelp::mysql_fetch_row2($resdt);
-    if ($user_id!=$arrdt[2]) {echo "Wrong User";exit;} // if update not from same user
+
+	// check impersonate user here by get *************************************************************************************************************
+	// $tempUser = $user_id;
+	// if(isset($_GET['impersonate'])){
+		// $tempUser = $_GET['impersonate'];
+	// }
+
+    // if ($tempUser!=$arrdt[2]) {echo "Wrong User";exit;} // if update not from same user
+    if ($user_id!=$arrdt[2] && !$perm->getWasAdmin()) {echo "Wrong User";exit;} // if update not from same user
 	
 	//************************************
 	// if resource needs confirmation by resp or user
@@ -314,7 +358,9 @@ function update(){
     }
 	//************************************
 	
-    $sql="update entry set entry_user=".$user_id.", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots." where entry_id=". $entry;
+	// impersonate user here by get *********************************************************************************************************************
+    // $sql="update entry set entry_user=".$tempUser.", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots." where entry_id=". $entry;
+    $sql="update entry set entry_user=".$arrdt[2].", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots." where entry_id=". $entry;
     $resPDO = dbHelp::mysql_query2($sql.$extra) or die($sql.$extra);
     if (dbHelp::mysql_numrows2($resPDO) == 0) {
         echo "Entry info not updated.";
@@ -399,10 +445,15 @@ function monitor(){
 		echo "You cannot monitor entries in the past";
 		exit;
 	}
-
 	
+	// impersonate user here by get
+	$tempUser = $user_id;
+	if(isset($_GET['impersonate'])){
+		$tempUser = $_GET['impersonate'];
+	}
+
 	// Block of code changed to stop users from getting in the waiting list more then once
-    $sql="select * from entry where entry_user = ".$user_id." and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id=".$entry.")";
+    $sql="select * from entry where entry_user = ".$tempUser." and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id=".$entry.")";
     $res=dbHelp::mysql_query2($sql) or die($sql);
     $arr=dbHelp::mysql_fetch_row2($res);
     // if ($arr[1]==$user_id) {echo "User already on the waiting list!";exit;};
@@ -416,12 +467,13 @@ function monitor(){
     $arr=dbHelp::mysql_fetch_row2($res);
     // end of block change
 	
-    $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(" . $user_id . ",'" .$arr[2] . "',". $arr[3] . ",". $arr[4] . ",". $arrrep[0] . ",4," .$arr[7]. ",'".date('Y-m-d H:i:s',time())."',NULL)";  
+		// impersonate user here by get
+    $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(" . $tempUser . ",'" .$arr[2] . "',". $arr[3] . ",". $arr[4] . ",". $arrrep[0] . ",4," .$arr[7]. ",'".date('Y-m-d H:i:s',time())."',NULL)";  
     dbHelp::mysql_query2($sql) or die($sql);
     
     // $sql="SELECT LAST_INSERT_ID()";
 	// $sql="SELECT entry_id from entry where entry_user = ".$user_id." and entry_datetime = (".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i').") and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
-	$sql="SELECT entry_id from entry where entry_user = ".$user_id." and entry_datetime = '".$arr[2]."' and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
+	$sql="SELECT entry_id from entry where entry_user = ".$tempUser." and entry_datetime = '".$arr[2]."' and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
     $res=dbHelp::mysql_query2($sql) or die($sql);
     $last=dbHelp::mysql_fetch_row2($res);
         
@@ -480,7 +532,6 @@ function confirm(){
 	$arr = dbHelp::mysql_fetch_row2($res);
     $sql="delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id<>".$entry." and entry_resource=" . $resource;
     dbHelp::mysql_query2($sql) or die($sql);
-    
 }
 
 function addcomments(){

@@ -16,6 +16,11 @@
 		exit;
 	}
 	
+	if(isset($_GET['usersList'])){
+		getUsersList();
+		exit;
+	}
+
 	function autocompleteAgendo(){
 		$value = $_GET['term'];
 		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
@@ -27,6 +32,25 @@
 		}
 		echo json_encode($json);
 	}
+
+function getUsersList(){
+	// $value = $_GET['term'];
+	// $sql = "select user_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
+	$value = explode(' ', $_GET['term']);
+	if(sizeOf($value) > 1){
+		$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+	}
+	else{
+		$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+	}
+	$res = dbHelp::mysql_query2($sql);
+	while($arr = dbHelp::mysql_fetch_row2($res)){
+		$row_array['id'] = $arr[0];
+		$row_array['value'] = $arr[1]." ".$arr[2]." (".$arr[3].")";
+		$json[] = $row_array;
+	}
+	echo json_encode($json);
+}
 
 	function logIn(){
 		$userLogin=$_POST['login'];
