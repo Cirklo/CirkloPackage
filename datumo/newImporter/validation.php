@@ -145,7 +145,6 @@ try{
 							}
 						}
 					}
-					
 					//check if the unique key is really unique
 					if($fileHeaders[$i]==$matchingKey){
 						$uniqueValidation[]=$data[$i];
@@ -201,17 +200,18 @@ try{
 	$arr=array_count_values($importer->getRowsAffected());
 
 	//display success Message
-	
-	if(!$importer->fkExists($matchingKeyValue, $isForeignKey[$matchingKey]))
-		throw new Exception ("Matching key not found in the database: $matchingKey -> $matchingKeyValue");
-	else{
-		echo "<div class=success>";
-		echo "File successfully checked. Ready to start importing the file.";
-		if($matchingKey){
-			echo "<br><br>";
-			echo "Your matching key is <input type=text name=matchingKey id=matchingKey value='$matchingKeyValue' size=50 readonly>";
+	if($matchingKey){
+		if(!$importer->fkExists($matchingKeyValue, $isForeignKey[$matchingKey]))
+			throw new Exception ("Matching key not found in the database: $matchingKey -> $matchingKeyValue");
+		else{
+			echo "<div class=success>";
+			echo "File successfully checked. Ready to start importing the file.";
+			if($matchingKey){
+				echo "<br><br>";
+				echo "Your matching key is <input type=text name=matchingKey id=matchingKey value='$matchingKeyValue' size=50 readonly>";
+			}
+			echo "</div>";
 		}
-		echo "</div>";
 	}
 	//are there any errors at all?
 	if(sizeof($arr)>0){
@@ -265,22 +265,22 @@ try{
 	//Display 3 links
 	//go back link
 	echo "<div class=links>";
-	echo "<a href=options.php>back</a>&nbsp;&nbsp;";	
+	echo "<a href=index.php>back</a>&nbsp;&nbsp;";	
 	//refresh link
 	echo "<a href=javascript:window.location.reload()>refresh</a>&nbsp;&nbsp;";
 	//start import
 	echo "<a href=javascript:void(0) onclick=startImport('$objName','$unique','$matchingKey','$delOption','$path','".implode(",",$errorArray)."')>start import</a>";
 	echo "</div>";
-	} catch (Exception $e){
-		echo "<div class=error>";
-		echo "<font color=#FF0000>Error:</font> ".$e->getMessage();
-		echo "</div>";
-		echo "<div class=links>";
-		//go back link
-		echo "<a href=options.php>back</a>&nbsp;&nbsp;";	
-		//refresh link
-		echo "<a href=javascript:window.location.reload()>refresh</a>&nbsp;&nbsp;";
-		echo "</div>";
+} catch (Exception $e){
+	echo "<div class=error>";
+	echo "<font color=#FF0000>Error:</font> ".$e->getMessage().$query;
+	echo "</div>";
+	echo "<div class=links>";
+	//go back link
+	echo "<a href=index.php>back</a>&nbsp;&nbsp;";	
+	//refresh link
+	echo "<a href=javascript:window.location.reload()>refresh</a>&nbsp;&nbsp;";
+	echo "</div>";
 }
 echo "</div>";
 ?>

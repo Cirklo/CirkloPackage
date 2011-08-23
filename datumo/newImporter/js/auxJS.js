@@ -50,10 +50,7 @@ function ajaxEquiDD(objTagOri,objNameDest) {
     if($("#cbMatching").attr("checked") && objNameDest=="targetUnique"){
     	//dont know why I can't do this straight. Must set a small timeout in order to work
     	setTimeout("ajaxEquiDD('targetTable','targetMatching');",100);
-    	
     }
-    
-    
 }
 
 function goValidation(){
@@ -76,7 +73,7 @@ function goValidation(){
 		return;
 	}
 	if(file==""){	//file validation -> do not check if it is the right extension or not. Just checks if it has a file or not
-		$.jnotify("Select a file to proceed");
+		$.jnotify("Select a file to proceed",true);
 		document.body.style.cursor = "default";
 		return;
 	}
@@ -87,7 +84,7 @@ function goValidation(){
 	 * dataErase option 2 - Delete only matching key related
 	 */
 	if(!$("#cbMatching").attr("checked") && $("#dataErase").val()==2){
-		$.jnotify("You have to enable matching key option in order to delete related data");
+		$.jnotify("You have to enable matching key option in order to delete related data",true);
 		document.body.style.cursor = "default";
 		return;
 	}
@@ -99,11 +96,10 @@ function goValidation(){
 		ask="You are about to insert new data into the table "+targetTable+". Proceed?";
 		break;
 	case "1":
-
-		ask="You are about to delete all data from the table "+targetTable+" and insert new data from the file. Proceed?";
+		ask="WARNING! You are about to delete all data from the table "+targetTable+" and insert new data from the file. Proceed?";
 		break;
 	case "2":
-		ask="You are about to replace all data from the table "+targetTable+" that matches the value in your file's " +
+		ask="WARNING! You are about to replace all data from the table "+targetTable+" that matches the value in your file's " +
 				"matching key. Proceed?";
 		break;
 	}
@@ -112,7 +108,7 @@ function goValidation(){
 		CurForm.action = "validation.php";
 		CurForm.submit();
 	} else {
-		alert("Action denied by user");
+		alert("Action cancelled by user");
 		document.body.style.cursor = "default";
 		return;
 	}
@@ -137,7 +133,7 @@ function startImport(objName, unique, matchingKey, delOption, filename, errorArr
 			path:filename,
 			error:errorArray
 		}, function(data){
-			$.jnotify(data);
+			$.jnotify(data,true);
 			document.body.style.cursor="default";
 		});
 	} else {
