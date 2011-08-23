@@ -1,3 +1,4 @@
+Datumo v2.2.1
 New features
 
 - Enhanced interface
