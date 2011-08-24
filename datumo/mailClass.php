@@ -66,9 +66,9 @@ class mailClass extends PHPMailer{
 		for($i=1;$i<=$noEmails;$i++){
 			$this->CharSet="UTF-8";
 //			$this->SetFrom($from, $from);
+  			$this->ClearReplyTos();
 	        $this->AddReplyTo($from);
-	        $this->ClearReplyTos();
-			$this->Subject=$subject;
+	      	$this->Subject=$subject;
 	        $this->Body=$msg;
 	        //loop through email addresses
 	       	while($j!=($noAddressesPerTurn*$i)){
