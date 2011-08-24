@@ -159,7 +159,7 @@ function mailingList(){
 			echo "This email will be sent to all registered users";
 			break;
 		case "department":	//select department
-			$query="SELECT department_id, department_name FROM department";
+			$query="SELECT department_id, department_name FROM department ORDER BY department_name";
 			$sql=$conn->query($query);
 			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
 			//loop through all deps
@@ -169,7 +169,7 @@ function mailingList(){
 			echo "</select>";
 			break;
 		case "resource":	//select resource
-			$query="SELECT resource_id, resource_name FROM resource";
+			$query="SELECT resource_id, resource_name FROM resource ORDER BY resource_name";
 			$sql=$conn->query($query);
 			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
 			//loop through all deps
@@ -179,7 +179,7 @@ function mailingList(){
 			echo "</select>";
 			break;
 		case "resourcetype":			//select resourceType
-			$query="SELECT resourcetype_id, resourcetype_name FROM resourcetype";
+			$query="SELECT resourcetype_id, resourcetype_name FROM resourcetype ORDER BY resource_typename";
 			$sql=$conn->query($query);
 			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
 			//loop through all deps
