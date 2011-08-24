@@ -332,9 +332,9 @@ function nonconf(){
     for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
         // mysql_data_seek($res,$i);
         $arr=dbHelp::mysql_fetch_array2($res);      
-        $msg="You did not confirm your entry on " . $arr['resource_name'] . ". Please justify to ". $arr['resp'];
+        $msg="You did not confirm your entry on " . $arr['resource_name'] . ". Please justify to ". $arr['resp']."\n";
         switch ($arr['user_alert']) {
-        case 2:
+        case 2:	//by sms
             try {
                 $msg=str_replace(' ','%20',$msg);
                 echo $msg;
@@ -344,8 +344,9 @@ function nonconf(){
                 echo $ex;
             }
         break;
-        case 1:
+        case 1:	//by email
                 $this->Subject="No confirmation on ". $arr['date'] ;
+                $this->ClearReplyTos();	//clear replys before receiving any email
                 $this->AddReplyTo($this->UserEmail,$this->UserFullName);
                 $this->Body=$msg;
                 $address = $arr['user_email'];
