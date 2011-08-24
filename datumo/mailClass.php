@@ -67,11 +67,12 @@ class mailClass extends PHPMailer{
 			$this->CharSet="UTF-8";
 //			$this->SetFrom($from, $from);
 	        $this->AddReplyTo($from);
+	        $this->ClearReplyTos();
 			$this->Subject=$subject;
 	        $this->Body=$msg;
 	        //loop through email addresses
 	       	while($j!=($noAddressesPerTurn*$i)){
-	       		$this->AddBCC($to[$j]);
+	       		if($to[$j])	$this->AddBCC($to[$j]);
 	       		$j++;	//increment counter
 	       	}
 	       	
