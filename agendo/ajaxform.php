@@ -23,8 +23,8 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     $id = $_GET['val'];    
     if($id != 0){
         $sql = "SELECT institute_name FROM institute, department WHERE institute_id = department_inst AND department_id = $id";
-        $res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-        $row = dbHelp::mysql_fetch_row2($res);
+        $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+        $row = dbHelp::fetchRowByIndex($res);
         echo $row[0];
     } else {
         //do nothing
@@ -38,15 +38,15 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     else $train = "no";
     
     // $sql = "SELECT password('$pwd')";
-    // $res = dbHelp::mysql_query2($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-    // $row = dbHelp::mysql_fetch_row2($res);
+    // $res = dbHelp::query($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    // $row = dbHelp::fetchRowByIndex($res);
     // $pwd = $row[0];
     // $sql = "SELECT user_passwd, CONCAT(user_firstname,' ',user_lastname),user_email from ".dbHelp::getSchemaName().".user WHERE user_login = '".$user_login."'";
     $pwd = cryptPassword($pwd);
     $sql = "SELECT user_passwd,user_firstname,user_lastname,user_email from ".dbHelp::getSchemaName().".user WHERE user_login = '".$user_login."'";
-    $res = dbHelp::mysql_query2($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-    $row = dbHelp::mysql_fetch_row2($res);
-    $nrows = dbHelp::mysql_numrows2($res);
+    $res = dbHelp::query($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    $row = dbHelp::fetchRowByIndex($res);
+    $nrows = dbHelp::numberOfRows($res);
     // $user_name = $row[1];
     // $user_email = $row[2];
     $user_name = $row[1]." ".$row[2];
@@ -62,8 +62,8 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     }
     
     $sql = "SELECT permissions_resource FROM permissions WHERE permissions_user IN (SELECT user_id from ".dbHelp::getSchemaName().".user WHERE user_login='$user_login') AND permissions_resource = $resource";
-    $res = dbHelp::mysql_query2($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-    if(dbHelp::mysql_numrows2($res) != 0){
+    $res = dbHelp::query($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    if(dbHelp::numberOfRows($res) != 0){
         echo "<script type='text/javascript'>";
         // echo "alert('You already have permissions to use this resource. Please contact the equipment administrator for more information!');";
         echo "showMessage('You already have permissions to use this resource. Please contact the equipment administrator for more information!');";
@@ -73,32 +73,45 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     }
     
     $sql = "SELECT user_email, resource_name from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_id = ".$resource;
-    $res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-    $row = dbHelp::mysql_fetch_row2($res);
+    $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    $row = dbHelp::fetchRowByIndex($res);
     
     $resp = $row[0];
     $resource = $row[1];
     
     //Send email both to the user and to the administrator
     // $sql = "SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_smtpsecure, mainconfig_smtpauth FROM mainconfig WHERE mainconfig_id = 1";
-    // $res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-    // $row = dbHelp::mysql_fetch_row2($res);
+    // $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    // $row = dbHelp::fetchRowByIndex($res);
 	$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-	$res = dbHelp::mysql_query2($sql);
-	for($i=0; $arr = dbHelp::mysql_fetch_row2($res); $i++){
-		$row[$i] = $arr[1];
+	$res = dbHelp::query($sql);
+	$configArray = array();
+	for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
+		$configArray[$arr[0]] = $arr[1];
 	}
-    
+	$mail->SMTPAuth   = $configArray['smtpauth'];
+	$mail->SMTPSecure = $configArray['smtpsecure'];
+	$mail->Port       = $configArray['port'];
+	$mail->Host       = $configArray['host'];
+	$mail->Username   = $configArray['email'];
+	$mail->Password   = $configArray['password'];
     $mail->IsSMTP(); // telling the class to use SMTP
     $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-    $mail->SMTPAuth   = $row[5];                  // enable SMTP authentication
-    $mail->SMTPSecure = $row[4];                 // sets the prefix to the servier
-    $mail->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
-    $mail->Host       = $row[0];      // sets GMAIL as the SMTP server
-    $mail->Username   = $row[3];  // GMAIL username
-    $mail->Password   = $row[2];            // GMAIL password
-    $mail->SetFrom($row[3], "Calendar administration");
-    $mail->AddReplyTo($row[3],"Calendar administration");   
+    $mail->SetFrom($configArray['email'], "Calendar administration");
+    $mail->AddReplyTo($configArray['email'],"Calendar administration");   
+
+	// for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
+		// $row[$i] = $arr[1];
+	// }
+    
+    // $mail->SMTPAuth   = $row[5];                  // enable SMTP authentication
+    // $mail->SMTPSecure = $row[4];                 // sets the prefix to the servier
+    // $mail->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
+    // $mail->Host       = $row[0];      // sets GMAIL as the SMTP server
+    // $mail->Username   = $row[3];  // GMAIL username
+    // $mail->Password   = $row[2];            // GMAIL password
+    // $mail->SetFrom($row[3], "Calendar administration");
+    // $mail->AddReplyTo($row[3],"Calendar administration");   
     
     $msg = "The user $user_name is requesting permission to use $resource.\n\n";
     $msg .= "login: $user_login\n";

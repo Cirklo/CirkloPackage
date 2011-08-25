@@ -30,8 +30,8 @@ foreach ($_POST as $key=>$value){
         $key = str_replace('_', ' ',$key);
         if($key == 'Department' or $key == 'Resource' or $key == 'Resourcetype'){
             $sql = "SELECT ".strtolower($key)."_name FROM ".strtolower($key)." WHERE ".strtolower($key)."_id = $value";
-            $res = dbHelp::mysql_query2($sql) or die ($sql); //mysql_error().$sql); //$sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', '')
-            $row = dbHelp::mysql_fetch_row2($res);
+            $res = dbHelp::query($sql) or die ($sql); //mysql_error().$sql); //$sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', '')
+            $row = dbHelp::fetchRowByIndex($res);
             $value = $row[0];
         }
         echo "<tr><td>$key</td><td><input type=text class=reg name='$key' id='$key' value='$value' readonly=readonly size=35></td></tr>";

@@ -22,23 +22,37 @@ class errorHandler extends PHPMailer{
     function __construct() {
     
         // $sql = "SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_smtpsecure, mainconfig_smtpauth FROM mainconfig WHERE mainconfig_id = 1";
-        // $res = dbHelp::mysql_query2($sql) or die ($sql);
-        // $row = dbHelp::mysql_fetch_row2($res);
+        // $res = dbHelp::query($sql) or die ($sql);
+        // $row = dbHelp::fetchRowByIndex($res);
 		$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-		$res = dbHelp::mysql_query2($sql);
-		for($i=0; $arr = dbHelp::mysql_fetch_row2($res); $i++){
-			$row[$i] = $arr[1];
+		$res = dbHelp::query($sql);
+		$configArray = array();
+		for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
+			$configArray[$arr[0]] = $arr[1];
 		}
-        $this->IsSMTP(); // telling the class to use SMTP
-        $this->SMTPDebug  = 1;           // enables SMTP debug information (for testing)
-        $this->Host       = $row[0];     // sets GMAIL as the SMTP server
-        $this->Port       = $row[1];     // set the SMTP port for the GMAIL server   
-        $this->Password   = $row[2];     // GMAIL password
-        $this->Username   = $row[3]; 	 // GMAIL username
-        $this->SMTPSecure = $row[4];     // sets the prefix to the servier
-        $this->SMTPAuth   = $row[5];     // enable SMTP authentication
-        $this->SetFrom($row[3], "Calendar Admin");
-        $this->AddReplyTo($row[3],"Calendar Admin");
+		$this->SMTPAuth   = $configArray['smtpauth'];
+		$this->SMTPSecure = $configArray['smtpsecure'];
+		$this->Port       = $configArray['port'];
+		$this->Host       = $configArray['host'];
+		$this->Username   = $configArray['email'];
+		$this->Password   = $configArray['password'];
+		$this->IsSMTP(); // telling the class to use SMTP
+		$this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
+		$this->SetFrom($configArray['email'], "Calendar administration");
+		$this->AddReplyTo($configArray['email'],"Calendar administration");   
+		// for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
+			// $row[$i] = $arr[1];
+		// }
+        // $this->IsSMTP(); // telling the class to use SMTP
+        // $this->SMTPDebug  = 1;           // enables SMTP debug information (for testing)
+        // $this->Host       = $row[0];     // sets GMAIL as the SMTP server
+        // $this->Port       = $row[1];     // set the SMTP port for the GMAIL server   
+        // $this->Password   = $row[2];     // GMAIL password
+        // $this->Username   = $row[3]; 	 // GMAIL username
+        // $this->SMTPSecure = $row[4];     // sets the prefix to the servier
+        // $this->SMTPAuth   = $row[5];     // enable SMTP authentication
+        // $this->SetFrom($row[3], "Calendar Admin");
+        // $this->AddReplyTo($row[3],"Calendar Admin");
    }
     
     function sqlError($type, $num, $query, $table, $user_id){
@@ -108,15 +122,15 @@ class errorHandler extends PHPMailer{
     
     function getUser($id){ //get user login
         $sql = "SELECT user_login from ".dbHelp::getSchemaName().".user WHERE user_id =".$id;
-        $res = dbHelp::mysql_query2($sql);
-        $row = dbHelp::mysql_fetch_row2($res);
+        $res = dbHelp::query($sql);
+        $row = dbHelp::fetchRowByIndex($res);
         return $row[0];
     }
     
     function getAdmin($id){ //Search for any administration entry // Doesnt give problems in postgrsql
         $sql = "SELECT admin_table FROM admin WHERE admin_user = '".$id."' GROUP BY admin_table ORDER BY admin_table ASC";
-        $result = dbHelp::mysql_query2($sql);
-        $num_rows = dbHelp::mysql_numrows2($result);
+        $result = dbHelp::query($sql);
+        $num_rows = dbHelp::numberOfRows($result);
         return $num_rows;
     }
 }

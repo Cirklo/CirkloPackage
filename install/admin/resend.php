@@ -18,21 +18,34 @@ $row = $sql->fetch();
 $address = $row[0];
 
 $sql = $conn->query("SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'");
+$configArray = array();
 for($i=0;$arr=$sql->fetch();$i++){
-	$row[$i]=$arr[1];
+	$configArray[$arr[0]] = $arr[1];
 }
-
+$mail->SMTPAuth   = $configArray['smtpauth'];
+$mail->SMTPSecure = $configArray['smtpsecure'];
+$mail->Port       = $configArray['port'];
+$mail->Host       = $configArray['host'];
+$mail->Username   = $configArray['email'];
+$mail->Password   = $configArray['password'];
 $mail->IsSMTP(); // telling the class to use SMTP
 $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-$mail->SMTPAuth   = $row[5];
-$mail->SMTPSecure = $row[4];
-$mail->Port       = $row[1];
-$mail->Host       = $row[0];
-$mail->Username   = $row[3];
-$mail->Password   = $row[2];
+$mail->SetFrom($configArray['email'], "Calendar administration");
+$mail->AddReplyTo($configArray['email'], "Calendar administration");   
+// for($i=0;$arr=$sql->fetch();$i++){
+	// $row[$i]=$arr[1];
+// }
 
-$mail->SetFrom($row[3], 'Calendar Admin');
-$mail->AddReplyTo($row[3],"Calendar Admin");
+// $mail->IsSMTP(); // telling the class to use SMTP
+// $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
+// $mail->SMTPAuth   = $row[5];
+// $mail->SMTPSecure = $row[4];
+// $mail->Port       = $row[1];
+// $mail->Host       = $row[0];
+// $mail->Username   = $row[3];
+// $mail->Password   = $row[2];
+// $mail->SetFrom($row[3], 'Calendar Admin');
+// $mail->AddReplyTo($row[3],"Calendar Admin");
 
 $body = "Alarm\n\n";
 $body.= date('Y-m-d H:i:s',time())." ".$msg;

@@ -24,8 +24,8 @@
 	function autocompleteAgendo(){
 		$value = $_GET['term'];
 		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
-		$res = dbHelp::mysql_query2($sql);
-		while($arr = dbHelp::mysql_fetch_row2($res)){
+		$res = dbHelp::query($sql);
+		while($arr = dbHelp::fetchRowByIndex($res)){
 			$row_array['id'] = $arr[0];
 			$row_array['value'] = $arr[1];
 			$json[] = $row_array;
@@ -43,8 +43,8 @@ function getUsersList(){
 	else{
 		$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
 	}
-	$res = dbHelp::mysql_query2($sql);
-	while($arr = dbHelp::mysql_fetch_row2($res)){
+	$res = dbHelp::query($sql);
+	while($arr = dbHelp::fetchRowByIndex($res)){
 		$row_array['id'] = $arr[0];
 		$row_array['value'] = $arr[1]." ".$arr[2]." (".$arr[3].")";
 		$json[] = $row_array;
@@ -72,14 +72,14 @@ function getUsersList(){
 				$pass = cryptPassword($pass);
 			}
 			$sql= "select user_firstname, user_lastname, user_passwd, user_id from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
-			$res=dbHelp::mysql_query2($sql) or die ($sql);
+			$res=dbHelp::query($sql) or die ($sql);
 
-			if (dbHelp::mysql_numrows2($res) == 0){
+			if (dbHelp::numberOfRows($res) == 0){
 				$json->success = false;
 				$json->msg = "Wrong Login!";
 			}
 			else{
-				$arr=dbHelp::mysql_fetch_row2($res);
+				$arr=dbHelp::fetchRowByIndex($res);
 				$_SESSION['user_name'] = $arr[0];
 				$_SESSION['user_lastName'] = $arr[1];
 				$_SESSION['user_pass'] = $arr[2];
@@ -170,11 +170,11 @@ function getUsersList(){
 			$pass = cryptPassword($pass);
 
 		$sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = '".$user."' and user_passwd = '".$pass."'";
-		$res=dbHelp::mysql_query2($sql) or die ($sql);
-		if(dbHelp::mysql_numrows2($res) <= 0)
+		$res=dbHelp::query($sql) or die ($sql);
+		if(dbHelp::numberOfRows($res) <= 0)
 			echo "Wrong Login";
 		else{
-			$arr=dbHelp::mysql_fetch_row2($res);
+			$arr=dbHelp::fetchRowByIndex($res);
 			$_SESSION['user_id'] = $arr[0];
 			$_SESSION['user_pass'] = $pass;
 			$_SESSION['database'] = dbHelp::getSchemaName();
@@ -205,11 +205,11 @@ function getUsersList(){
 	function echoVideosDiv(){
 		echo "<div id=videodiv align='center' style='cursor:pointer;padding:5px;display:none;position:absolute;width:150px;color:#444444;background-color:#FFFFFF;opacity:0.9;'>";
 			$sql= "select media_name, media_link, media_description from media order by media_name";
-			$res=dbHelp::mysql_query2($sql) or die ($sql);
+			$res=dbHelp::query($sql) or die ($sql);
 			$vidWidth = 640;
 			$vidHeight = 480;
-			for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
-				$arr=dbHelp::mysql_fetch_row2($res);
+			for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
+				$arr=dbHelp::fetchRowByIndex($res);
 				echo "<a title='".$arr[2]."' onclick=\"javascript:window.open('".$arr[1]."','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=no,width=".$vidWidth.",height=".$vidHeight."')\">".$arr[0]."</a><br>";
 			}
 		echo "</div>";		
@@ -244,13 +244,13 @@ function getUsersList(){
 			// echo "</div>";
 			echo "</table>";
 			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
-			$res=dbHelp::mysql_query2($sql) or die ($sql);
-			$numRows = dbHelp::mysql_numrows2($res);
+			$res=dbHelp::query($sql) or die ($sql);
+			$numRows = dbHelp::numberOfRows($res);
 			// echo "<div style='position:relative;'>";
 			if($numRows > 0){
 				echo "<hr>";
 				for ($i=0;$i<$numRows;$i++) {
-					$arr=dbHelp::mysql_fetch_row2($res);
+					$arr=dbHelp::fetchRowByIndex($res);
 					echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
 				}
 			}
@@ -380,18 +380,18 @@ function getUsersList(){
 	// returns true if the user is either logged or has the right ip.
 	function secureIpSessionLogin(){
 		$sqlFlag = "select configParams_value from configParams where configParams_name ='secureresources'";
-		$resFlag=dbHelp::mysql_query2($sqlFlag);
-		$arrFlag=dbHelp::mysql_fetch_row2($resFlag);
+		$resFlag=dbHelp::query($sqlFlag);
+		$arrFlag=dbHelp::fetchRowByIndex($resFlag);
 		if($arrFlag[0] == '1'){
 			if(isset($_SESSION['user_name']) && $_SESSION['user_name'] != ''){
 				return true;
 			}
 			
 			$sqlFlag = "select allowedips_iprange from allowedips";
-			$resFlag=dbHelp::mysql_query2($sqlFlag);
+			$resFlag=dbHelp::query($sqlFlag);
 			$ip = $_SERVER['REMOTE_ADDR'];
 			$ip = substr($ip, 0, strripos($ip, '.'));
-			while($arrFlag=dbHelp::mysql_fetch_row2($resFlag)){
+			while($arrFlag=dbHelp::fetchRowByIndex($resFlag)){
 				if($arrFlag[0] == $ip){
 					return true;
 				}
@@ -405,7 +405,7 @@ function getUsersList(){
 		return array(0 => "IRSYSTEMSEPARATOR", 1 => "IRSEPARATOR");
 	}
 	
-	function sendMail($subject, $address, $message, $replyToPerson, $userDbSettings, $auth, $secure, $port, $host, $username, $password){
+	function sendMail($subject, $address, $message, $replyToPerson, $userDbSettings, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
 		require_once("../agendo/alert/class.phpmailer.php");
 		$mail = new PHPMailer();
 		
@@ -413,16 +413,17 @@ function getUsersList(){
 		$mail->SMTPDebug  = 1;
 		if($userDbSettings){
 			$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-			$res = dbHelp::mysql_query2($sql);
-			for($i=0;$arr=dbHelp::mysql_fetch_row2($res);$i++){
-				$row[$i]=$arr[1];
+			$res = dbHelp::query($sql);
+			$configArray = array();
+			for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
+				$configArray[$arr[0]] = $arr[1];
 			}
-			$mail->SMTPAuth   = $row[5];
-			$mail->SMTPSecure = $row[4];
-			$mail->Port       = $row[1];
-			$mail->Host       = $row[0];
-			$mail->Username   = $row[3];
-			$mail->Password   = $row[2];
+			$mail->SMTPAuth   = $configArray['smtpauth'];
+			$mail->SMTPSecure = $configArray['smtpsecure'];
+			$mail->Port       = $configArray['port'];
+			$mail->Host       = $configArray['host'];
+			$mail->Username   = $configArray['email'];
+			$mail->Password   = $configArray['password'];
 		}
 		else{
 			$mail->SMTPAuth   = $auth;
@@ -433,9 +434,9 @@ function getUsersList(){
 			$mail->Password   = $password;
 		}	
 		
-		$mail->SetFrom($username, $replyToPerson);
+		$mail->SetFrom($mail->Username, $replyToPerson);
 		$mail->Subject = $subject;
-		$mail->AddReplyTo($username, $replyToPerson);
+		$mail->AddReplyTo($mail->Username, $replyToPerson);
 
 		$mail->Body = $message;
 		$mail->AddAddress($address, "");
@@ -463,8 +464,8 @@ function getUsersList(){
 		
 		// use the dateBetween method to get the number of slots
 		$sql = "select sum(entry_slots), resource_resolution, resource_maxhoursweek, resource_resp from resource, entry where resource_id = ".$resource." and entry_user = ".$user_id." and entry_status in (1,2) and entry_resource = ".$resource." and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
-		$res = dbHelp::mysql_query2($sql);
-		$arr = dbHelp::mysql_fetch_row2($res);
+		$res = dbHelp::query($sql);
+		$arr = dbHelp::fetchRowByIndex($res);
 		if(!isset($arr[0])){
 			$arr[0] = 0;
 		}

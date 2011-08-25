@@ -8,9 +8,9 @@
 		echo "<table style='margin:auto;'>";
 		// $sql = "select resource_name, type_name, pricetype_name, price_value from resource, type, pricetype, price where price_resource = resource_id and resource_type = type_id and price_type = pricetype_id order by resource_name";
 		$sql = "SELECT resource_name, resourcetype_name, pricetype_name, price_value FROM resource, resourcetype, pricetype, price WHERE price_resource = resource_id AND resource_type = resourcetype_id AND price_type = pricetype_id ORDER BY resource_name, pricetype_name";
-		$res = dbHelp::mysql_query2($sql);
+		$res = dbHelp::query($sql);
 		$name = '';
-		if(dbHelp::mysql_numrows2($res) > 0){
+		if(dbHelp::numberOfRows($res) > 0){
 			echo "<tr>";
 				echo "<td>";
 				echo "Resource";
@@ -29,7 +29,7 @@
 				echo "</td>";
 			echo "</tr>";
 
-			while($arr = dbHelp::mysql_fetch_row2($res)){
+			while($arr = dbHelp::fetchRowByIndex($res)){
 				echo "<tr>";
 				if($name == $arr[0]){
 					echo "<td></td><td></td>";

@@ -28,10 +28,10 @@ call_user_func($type);
 */
 function resource() {
     $value=clean_input($_GET['value']);
-    $res=dbHelp::mysql_query2("select resource_id,resource_name from resource where resource_status<>2 and resource_type=" . $value);
-    for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
+    $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type=" . $value);
+    for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
         // mysql_data_seek($res,$i);
-        $arr=dbHelp::mysql_fetch_array2($res);
+        $arr=dbHelp::fetchRowByName($res);
         echo "<name>" . $arr['resource_name'];
         echo "<value>" . $arr['resource_id'];
     }
@@ -46,8 +46,8 @@ function resource() {
 function user() {
     $value=clean_input($_GET['value']);
     $sql="select user_login,user_id from ".dbHelp::getSchemaName().".user where user_login like '" . $value . "%'";
-    $res=dbHelp::mysql_query2($sql) or die ($sql);
-    $arr=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql) or die ($sql);
+    $arr=dbHelp::fetchRowByIndex($res);
     echo $arr[0];
     // echo "|" . $arr[1];
     echo "|" . $arr[0];
@@ -72,15 +72,15 @@ function admin() {
     $tag=clean_input($_GET['tag']);
     $table=clean_input($_GET['table']);
     $sql="show fields from $table";
-    $res=dbHelp::mysql_query2($sql) or die ($sql);
+    $res=dbHelp::query($sql) or die ($sql);
     // mysql_data_seek($res,0);
-    $field1=dbHelp::mysql_fetch_row2($res);
+    $field1=dbHelp::fetchRowByIndex($res);
     // mysql_data_seek($res,1);
-    $field2=dbHelp::mysql_fetch_row2($res);
+    $field2=dbHelp::fetchRowByIndex($res);
     
     $sql="select " . $field2[0] . ",". $field1[0] . " from $table where lower(" . $field2[0] . ") like lower('" . $value . "%')";
-    $res=dbHelp::mysql_query2($sql) or die ($sql);
-    $arr=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql) or die ($sql);
+    $arr=dbHelp::fetchRowByIndex($res);
     echo $arr[0];
     echo "|" . $arr[1];
 }
@@ -90,12 +90,12 @@ function DisplayUserInfo() {
     // $sql="select concat(user_firstname, ' ', user_lastname) name,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,date_format(entry_datetime,'%H:%i') s,date_format(date_add(entry_datetime,interval resource_resolution*entry_slots minute),'%H:%i') e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,date_format(entry_datetime,'%H:%i') s,date_format(date_add(entry_datetime,interval resource_resolution*entry_slots minute),'%H:%i') e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
 	$sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
-    $res=dbHelp::mysql_query2($sqlAux) or die ($sqlAux);
-    $arr=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sqlAux) or die ($sqlAux);
+    $arr=dbHelp::fetchRowByIndex($res);
 	
     $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
-    $res=dbHelp::mysql_query2($sql) or die ($sql);
-    $arr=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql) or die ($sql);
+    $arr=dbHelp::fetchRowByIndex($res);
     echo "<table>";
     echo "<tr><td>Time: </td><td>" . $arr[8] ."-" .$arr[9] ."</td></tr>";
     echo "<tr><td>Name: </td><td>" . $arr[0] . " " . $arr[1] . "</td></tr>";
@@ -114,9 +114,9 @@ function DisplayUserInfo() {
 function DisplayEntryInfo() {
     $entry=clean_input($_GET['entry']);
     $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and  xfieldsval_entry=".$entry." group by xfields_id, xfields_type";
-    $res=dbHelp::mysql_query2($sql) or die ($sql);
+    $res=dbHelp::query($sql) or die ($sql);
     
-	while($arr=dbHelp::mysql_fetch_row2($res)){
+	while($arr=dbHelp::fetchRowByIndex($res)){
 		if($arr[2] == 2 || $arr[2] == 3)
 			echo "document.getElementById('".$arr[0].$arr[3]."').checked=".$arr[1].";";
 		else

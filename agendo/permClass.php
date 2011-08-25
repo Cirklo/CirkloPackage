@@ -46,13 +46,13 @@ function setPermission($user,$resource,$passwd) {
 	
 	// Gets the crypted password from the given user
     $sql="select user_passwd from ".dbHelp::getSchemaName().".user where user_id=". $user;
-    $res=dbHelp::mysql_query2($sql);
-    $arrpwd=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arrpwd=dbHelp::fetchRowByIndex($res);
 	
 	// Gets the password and id of the resource responsible
     $sql="select user_passwd,user_id from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp and resource_id=" . $resource;
-    $res=dbHelp::mysql_query2($sql);
-    $arrpwdadmin=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arrpwdadmin=dbHelp::fetchRowByIndex($res);
     
 	//// Checks if the responsible's password matches the given one
     // if ($arrpwdadmin[0]==$passwd){
@@ -60,13 +60,13 @@ function setPermission($user,$resource,$passwd) {
     if ($arrpwdadmin[1] == $user && $arrpwdadmin[0] == $passwd){
         $this->WasAdmin=true;
 		$sql="select '1111', resource_maxdays, resource_maxslots, resource_status, resource_delhour, resource_resolution from resource where resource_id=". $resource;
-		$res=dbHelp::mysql_query2($sql) or die ($sql);
-		$arr=dbHelp::mysql_fetch_row2($res);
+		$res=dbHelp::query($sql) or die ($sql);
+		$arr=dbHelp::fetchRowByIndex($res);
     } else {
         $this->WasAdmin=false;
 		$sql="select permissions_level, resource_maxdays, resource_maxslots, resource_status, resource_delhour, resource_resolution from permissions,resource where permissions_resource=resource_id and permissions_user=". $this->User ." and permissions_resource=". $resource;
-		$res=dbHelp::mysql_query2($sql) or die ($sql);
-		$arr=dbHelp::mysql_fetch_row2($res);
+		$res=dbHelp::query($sql) or die ($sql);
+		$arr=dbHelp::fetchRowByIndex($res);
 
 		// instead of lpad(bin...)
 		$arr[0] = decbin($arr[0]);
@@ -93,8 +93,8 @@ function setPermission($user,$resource,$passwd) {
 
 function getUser($entry){
     $sql="select entry_user from entry where entry_user=" . $entry;
-    $res=dbHelp::mysql_query2($sql);
-    $arr=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arr=dbHelp::fetchRowByIndex($res);
     $this->User=$arr[0];
 }
 
@@ -144,8 +144,8 @@ function addAhead($date, $slots)     {
 		$lastSlotEnds = strtotime($date) + ($slots*$this->Resolution*60);// time format
         
 		$sql = "select configParams_value from configParams where configParams_name = 'bookingHour'";
-		$res = dbHelp::mysql_query2($sql);
-		$arr = dbHelp::mysql_fetch_row2($res);
+		$res = dbHelp::query($sql);
+		$arr = dbHelp::fetchRowByIndex($res);
 		$hour = $arr[0];
 		
         $Tday=date("d");
@@ -191,18 +191,18 @@ function confirmEntry($entry){
     $this->warning='';
     $cookie='';
     $sql="select user_id,resource_status,resource_confIP,resource_confirmtol,resource_resolution from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp and resource_id=" . $this->Resource;
-    $res=dbHelp::mysql_query2($sql);
-    $arrStatus=dbHelp::mysql_fetch_array2($res);
+    $res=dbHelp::query($sql);
+    $arrStatus=dbHelp::fetchRowByName($res);
     $sql="select ".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i')." date, entry_datetime,entry_slots,entry_user  from entry where entry_id=". $entry;
-    $res=dbHelp::mysql_query2($sql);
-    $arrEntry=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arrEntry=dbHelp::fetchRowByIndex($res);
     
 	// confirms that is using an equipment
 	// select entry_id, entry_datetime from entry where date_format(entry_datetime, '%Y%m%d')='20110323' and date_format(entry_datetime, '%H%i')>'1500' and entry_resource=5 and entry_status not in (2,3)
     $sql="select entry_id, entry_datetime from entry where ".dbHelp::getFromDate('entry_datetime','%Y%m%d')."='" . substr($arrEntry[0],0,8) ."' and ".dbHelp::getFromDate('entry_datetime','%H%i').">'". substr($arrEntry[0],8,4) . "' and entry_resource=". $this->Resource ." and entry_status not in (2,3)" ;
-    $res=dbHelp::mysql_query2($sql) or die ($sql);
+    $res=dbHelp::query($sql) or die ($sql);
     //echo $sql;
-    if (dbHelp::mysql_numrows2($res)==0) $this->warning="You might be the last. Confirm with next user!";
+    if (dbHelp::numberOfRows($res)==0) $this->warning="You might be the last. Confirm with next user!";
     
     switch ($arrStatus['resource_status']) {
     case 4:  // equipment that only manager can confirm entries
@@ -266,8 +266,8 @@ function confirmEntry($entry){
 function getEntryStatus(){
     
     $sql="select resource_status from resource where resource_id=" . $this->Resource;
-    $res=dbHelp::mysql_query2($sql);
-    $arrStatus=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arrStatus=dbHelp::fetchRowByIndex($res);
     
     switch ($arrStatus[0]) {
     case 0:
@@ -302,8 +302,8 @@ function getEntryStatus(){
 function checkOverlap($datetime,$slots) {
     //201010100915
     $sql="select resource_resolution from resource where resource_id=" . $this->Resource;
-    $res=dbHelp::mysql_query2($sql);
-    $arrRes=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arrRes=dbHelp::fetchRowByIndex($res);
     $this->Resolution=$arrRes[0];
     //echo $datetime;
 	//2011.02.25.16.30
@@ -318,12 +318,12 @@ function checkOverlap($datetime,$slots) {
     // $sql="select entry_id from entry where entry_datetime< date_add(str_to_date(". $datetime . ",'%Y%m%d%H%i'),interval ". ($this->Resolution* $slots) . " minute) and  str_to_date(". $datetime .",'%Y%m%d%H%i') <date_add(entry_datetime, interval " . $this->Resolution ."*entry_slots minute) and entry_status in (1,2) and entry_resource=". $this->Resource;
     // $sql="select entry_id from entry where entry_datetime < ".dbHelp::date_add(dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i'),$this->Resolution*$slots,'minute')." and ".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i')." < ".dbHelp::date_add('entry_datetime',$this->Resolution*$slots, 'minute')." and entry_status in (1,2) and entry_resource=". $this->Resource;
     $sql="select entry_id, entry_slots*".$this->Resolution." from entry where entry_datetime < ".dbHelp::date_add(dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i'),$this->Resolution*$slots,'minute')." and entry_status in (1,2) and entry_resource=". $this->Resource;
-    $res=dbHelp::mysql_query2($sql);
+    $res=dbHelp::query($sql);
 	$bool = false;
-	while($arr = dbHelp::mysql_fetch_row2($res)){
+	while($arr = dbHelp::fetchRowByIndex($res)){
 		$sql="select entry_id from entry where entry_id = ".$arr[0]." and ".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i')." < ".dbHelp::date_add('entry_datetime',$arr[1], 'minute');
-		$resAux=dbHelp::mysql_query2($sql);
-		if(dbHelp::mysql_numrows2($resAux)>0){
+		$resAux=dbHelp::query($sql);
+		if(dbHelp::numberOfRows($resAux)>0){
 			$bool = true;
 			break;
 		}
@@ -333,8 +333,8 @@ function checkOverlap($datetime,$slots) {
    // $sql="select entry_id from entry where str_to_date('$datetime','%Y%m%d%H%i') >= entry_datetime and str_to_date('$datetime','%Y%m%d%H%i') <date_add(entry_datetime, interval ".$this->Resolution."*entry_slots minute) and entry_status in (1,2) and entry_resource=" . $this->Resource;
     //$sql="select entry_id from entry where entry_datetime between str_to_date('" . $datetime . "','%Y%m%d%H%i') and date_add('" . $year . "-" . $month . "-".$day . " ".$hour.":".$min ."', interval " . $this->Resolution."*entry_slots minute) and entry_status in (1,2) and entry_resource=" . $this->Resource;
 	
-	// $res=dbHelp::mysql_query2($sql);
-    // if (dbHelp::mysql_numrows2($res)>0) {
+	// $res=dbHelp::query($sql);
+    // if (dbHelp::numberOfRows($res)>0) {
 
     if ($bool) {
         //$year=substr($endtime,0,4);

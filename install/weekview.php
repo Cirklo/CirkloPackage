@@ -48,16 +48,16 @@ $resource=clean_input($_GET['resource']);
 
 // Used to hide buttons, and show or not, a custom interface
 $ressql = "select resource_status from resource where resource_id = ".$resource;
-$res = dbHelp::mysql_query2($ressql) or die($ressql);
-$arr = dbHelp::mysql_fetch_row2($res);
+$res = dbHelp::query($ressql) or die($ressql);
+$arr = dbHelp::fetchRowByIndex($res);
 $imResstatus5 = ($arr[0] == 5);
 // $imResstatus5 = false;
 // if($arr[0] == 5){
 	// $imResstatus5 = true;
 	// if (isset($_COOKIE["resourceStatus"]) && $_COOKIE["resourceStatus"] == 5){
 		// $ressql = "select resinterface_phpfile from resinterface where resinterface_resource = ".$resource;
-		// $res = dbHelp::mysql_query2($ressql) or die($ressql);
-		// $arr = dbHelp::mysql_fetch_row2($res);
+		// $res = dbHelp::query($ressql) or die($ressql);
+		// $arr = dbHelp::fetchRowByIndex($res);
 		// echo "<meta HTTP-EQUIV='REFRESH' content='0; url=".$arr[0]."?resource=".$resource."'>";
 		// exit;
 	// }
@@ -118,12 +118,14 @@ echo "</div>";
 
 //for displaying calendar
 // $sql = "SELECT mainconfig_institute, mainconfig_shortname, mainconfig_url FROM mainconfig WHERE mainconfig_id = 1";
-// $res = dbHelp::mysql_query2($sql);
-// $institute = dbHelp::mysql_fetch_row2($res);
+// $res = dbHelp::query($sql);
+// $institute = dbHelp::fetchRowByIndex($res);
 $sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='institute' or configParams_name='shortname' or configParams_name='url'";
-$res = dbHelp::mysql_query2($sql);
-for($i=0; $arr = dbHelp::mysql_fetch_row2($res); $i++){
-	$institute[$i] = $arr[1];
+$res = dbHelp::query($sql);
+$instituteArray = array();
+for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
+	// $institute[$i] = $arr[1];
+	$instituteArray[$arr[0]] = $arr[1];
 }
 
 //This is where msgs are displayed (changed)
@@ -131,7 +133,8 @@ echo "<div id='msg' style=\"top:200;left:178px;width:574px;height:50;filter:alph
 	echo $msg;
 echo "</div>";
 echo "<div style='margin:auto;width:1024px;height:100%;height:100%;'>";
-echo "<title>".strtoupper($institute[1])." Reservations</title>";
+// echo "<title>".strtoupper($institute[1])." Reservations</title>";
+echo "<title>".strtoupper($instituteArray['shortname'])." Reservations</title>";
 // echo "<center>";
 echo "<table id='master' style='margin:auto' width=750>";
 	echo "<tr>";
@@ -142,12 +145,14 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "<table style='height:100%'>";
 						echo "<tr>";
 							echo "<td style='padding-left:10px'>";
-							echo "<h1><a href=index.php>".strtoupper($institute[1])." Reservations</a></h1>";
+							// echo "<h1><a href=index.php>".strtoupper($institute[1])." Reservations</a></h1>";
+							echo "<h1><a href=index.php>".strtoupper($instituteArray['shortname'])." Reservations</a></h1>";
 							echo "</td>";
 						echo "</tr>";
 						echo "<tr>";
 							echo "<td style='padding-left:10px'>";
-							echo "<h3><a href='http://".$institute[2]."'>".$institute[0]."</a></h3>";
+							// echo "<h3><a href='http://".$institute[2]."'>".$institute[0]."</a></h3>";
+							echo "<h3><a href='http://".$instituteArray['url']."'>".$instituteArray['institute']."</a></h3>";
 							echo "</td>";
 						echo "</tr>";
 						echo "<tr>";
@@ -198,8 +203,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 					echo "<td>";
 					echo "<h1 style='color:#cc8888'>".$calendar->getResourceName()." not available for reservations</h1>";
 					$sql ="SELECT user_firstname,user_lastname,user_email from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp";
-					$res = dbHelp::mysql_query2($sql);
-					$arr = dbHelp::mysql_fetch_array2($res);
+					$res = dbHelp::query($sql);
+					$arr = dbHelp::fetchRowByName($res);
 					echo "<h2>Please contact ".$arr['user_firstname']." ".$arr['user_lastname']."</h2>";
 					echo "<a href=weekview.php?resource=" . ($calendar->getResource() -1) . "&date=" . $calendar->getStartDate() . "><img border=0 src=pics/resminus.png></a>";
 					echo "<a href=weekview.php?resource=" . ($calendar->getResource() +1) . "&date=" . $calendar->getStartDate() . "><img border=0 src=pics/resplus.png></a>";
@@ -215,15 +220,15 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." group by xfields_id, xfields_type";
 				
 				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=".$calendar->getEntry();
-				$res = dbHelp::mysql_query2($sqlWeekDay);
-				$arr1 = dbHelp::mysql_fetch_row2($res);
+				$res = dbHelp::query($sqlWeekDay);
+				$arr1 = dbHelp::fetchRowByIndex($res);
 				$sqlWeekNumber = "select ".dbHelp::getFromDate("'".$arr1[0]."'",'%w');
-				$res = dbHelp::mysql_query2($sqlWeekNumber);
-				$arr2 = dbHelp::mysql_fetch_row2($res);
+				$res = dbHelp::query($sqlWeekNumber);
+				$arr2 = dbHelp::fetchRowByIndex($res);
 				$sqle="select entry_user, entry_repeat, ".dbHelp::getFromDate(dbHelp::date_sub("'".$arr1[0]."'",$arr2[0],'day'),'%Y%m%d')." as date, ".dbHelp::getFromDate('entry_datetime','%h')." as dateHour, ".dbHelp::getFromDate('entry_datetime','%i')." as dateMinutes, entry_slots from entry where entry_id=".$calendar->getEntry();
 				
-				$rese=dbHelp::mysql_query2($sqle);
-				$arre= dbHelp::mysql_fetch_array2($rese);
+				$rese=dbHelp::query($sqle);
+				$arre= dbHelp::fetchRowByName($rese);
 				$calendar->setStartDate($arre['date']);
 				$calendar->setCalRepeat($arre['entry_repeat']);
 				$user=$arre['entry_user'];
@@ -237,16 +242,16 @@ echo "<table id='master' style='margin:auto' width=750>";
 				
 				// $sqle="select entry_user, entry_repeat, @d:= date_format(date_sub(entry_datetime,interval 1 day),'%Y%m%d'),  @wd:=date_format(@d,'%w'), date_format(date_sub(@d, interval @wd day),'%Y%m%d') as date, date_format(entry_datetime,'%h') + date_format(entry_datetime,'%i')/60 as starttime, entry_slots from entry where entry_id=".$calendar->getEntry();
 				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=".$calendar->getEntry();
-				$res = dbHelp::mysql_query2($sqlWeekDay);
-				$arr1 = dbHelp::mysql_fetch_row2($res);
+				$res = dbHelp::query($sqlWeekDay);
+				$arr1 = dbHelp::fetchRowByIndex($res);
 				
 				$sqlWeekNumber = "select ".dbHelp::getFromDate("'".$arr1[0]."'",'%w');
-				$res = dbHelp::mysql_query2($sqlWeekNumber);
-				$arr2 = dbHelp::mysql_fetch_row2($res);
+				$res = dbHelp::query($sqlWeekNumber);
+				$arr2 = dbHelp::fetchRowByIndex($res);
 				
 				$sqle="select entry_user, entry_repeat, ".dbHelp::getFromDate(dbHelp::date_sub("'".$arr1[0]."'",$arr2[0],'day'),'%Y%m%d')." as date, ".dbHelp::getFromDate('entry_datetime','%h')." as dateHour, ".dbHelp::getFromDate('entry_datetime','%i')." as dateMinutes, entry_slots from entry where entry_id=".$calendar->getEntry();
-				$rese=dbHelp::mysql_query2($sqle);
-				$arre= dbHelp::mysql_fetch_array2($rese);
+				$rese=dbHelp::query($sqle);
+				$arre= dbHelp::fetchRowByName($rese);
 				
 				$calendar->setStartDate($arre['date']);
 				$calendar->setCalRepeat($arre['entry_repeat']);
@@ -268,8 +273,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 		// ************************************************************    entry div stuff here   ***************************************************************************
 		echo "<td style='vertical-align:top;height:100%;'>";
 		
-			$res=dbHelp::mysql_query2($sql);
-			$nxfields=dbHelp::mysql_numrows2($res);
+			$res=dbHelp::query($sql);
+			$nxfields=dbHelp::numberOfRows($res);
 
 			echo "<div id=entrydiv class=entrydiv>";
 				echo "<form name=entrymanage id=entrymanage >";
@@ -281,11 +286,11 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "<tr>";
 								echo "<td>";
 								$sql="select resource_status,resource_id from resource where resource_status not in (0,2) order by resource_name";
-								$resResources=dbHelp::mysql_query2($sql);
+								$resResources=dbHelp::query($sql);
 								$nextDetected = false;
 								$currentDetected = false;
 								// Loop that finds the previous and next "line" composed of resourceStatus and resourceId of the $calendar->getResource() id
-								while($resArray = dbHelp::mysql_fetch_row2($resResources)){
+								while($resArray = dbHelp::fetchRowByIndex($resResources)){
 									$currentId = $resArray[1];
 									if($calendar->getResource()!=$currentId){
 										if(!$currentDetected){
@@ -384,8 +389,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					// similar stuff
 					$sqlSimilar = "select similarresources_similar, resource_name from resource, (select similarresources_similar from similarresources where similarresources_resource = ".$resource.") as similars where resource_id = similarresources_similar";
-					$resSimilar = dbHelp::mysql_query2($sqlSimilar);
-					if(dbHelp::mysql_numrows2($resSimilar)>0){
+					$resSimilar = dbHelp::query($sqlSimilar);
+					if(dbHelp::numberOfRows($resSimilar)>0){
 						echo "<tr>";
 							echo "<td colspan=2>Similar Resources</td>";
 						echo "</tr>";
@@ -393,7 +398,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "<tr>";
 							echo "<td colspan=2>";
 							echo "<select id='similarResources' class='similar'>";
-							while($arrSimilar = dbHelp::mysql_fetch_row2($resSimilar)){
+							while($arrSimilar = dbHelp::fetchRowByIndex($resSimilar)){
 								echo "<option value='".$arrSimilar[0]."' onclick='similarResources(this.value)'>".$arrSimilar[1]."</option>";
 							}
 							echo "</select>";
@@ -441,7 +446,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 						// xfieldsinputtype: 1 = input, 2 = singlepickcheckbox, 3 = multipickcheckbox
 						$formerName;
 						for ($i=0;$i<$nxfields;$i++){
-							$arrxfields= dbHelp::mysql_fetch_array2($res);
+							$arrxfields= dbHelp::fetchRowByName($res);
 							$extraHtml = '';
 							echo "<tr>";
 								if($arrxfields['xfields_type'] == 1){
@@ -517,8 +522,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 						// Checks if the user logged is the one responsible for the current resource
 						if(isset($_SESSION['user_id'])){
 							$sqlResp = "select 1 from resource where resource_id = ".$calendar->getResource()." and resource_resp = ".$_SESSION['user_id'];
-							$resResp = dbHelp::mysql_query2($sqlResp);
-							if(dbHelp::mysql_numrows2($resResp) > 0){
+							$resResp = dbHelp::query($sqlResp);
+							if(dbHelp::numberOfRows($resResp) > 0){
 								echo "<tr>";
 									echo "<td colspan=2>";
 									echo "<label>Perform action as:</label>";
@@ -526,7 +531,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 								echo "</tr>";
 							
 								$sqlResp = "select user_id, user_firstname, user_lastname from user";
-								$resResp = dbHelp::mysql_query2($sqlResp);
+								$resResp = dbHelp::query($sqlResp);
 								echo "<tr>";
 									echo "<td>";
 									echo "<input type='checkbox' id='impersonateCheck' onchange='impersonateCheckChange()' />";

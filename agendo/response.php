@@ -13,31 +13,31 @@
 require_once("commonCode.php");
 require_once("functions.php");
 $db = dbHelp::getDatabase();
-dbHelp::mysql_select_db2('information_schema');
+dbHelp::selectDb('information_schema');
 
 $id = $_GET['id'];
 $value = clean_input($_GET['val']);
 
 $sql = "SELECT REFERENCED_TABLE_NAME FROM KEY_COLUMN_USAGE where REFERENCED_TABLE_NAME <> 'null' AND COLUMN_NAME = '".$id."' AND TABLE_SCHEMA LIKE '".$db."'";
-$resf = dbHelp::mysql_query2($sql);
-while($row = dbHelp::mysql_fetch_row2($resf))
+$resf = dbHelp::query($sql);
+while($row = dbHelp::fetchRowByIndex($resf))
 {
 	$table = $row[0];
 	
 }
 
-dbHelp::mysql_select_db2($db);
+dbHelp::selectDb($db);
 
 $sql = "show fields from ".$table;
-$res = dbHelp::mysql_query2($sql) or die ($sql);
+$res = dbHelp::query($sql) or die ($sql);
 // mysql_data_seek($res,0);
-$field1 = dbHelp::mysql_fetch_row2($res);
+$field1 = dbHelp::fetchRowByIndex($res);
 // mysql_data_seek($res,1);
-$field2 = dbHelp::mysql_fetch_row2($res); 
+$field2 = dbHelp::fetchRowByIndex($res); 
 
 $sql="select " . $field2[0] . ",". $field1[0] . " from $table where lower(" . $field2[0] . ") like lower('" . $value . "%')";
-$res = dbHelp::mysql_query2($sql) or die ($sql);
-$arr = dbHelp::mysql_fetch_row2($res);
+$res = dbHelp::query($sql) or die ($sql);
+$arr = dbHelp::fetchRowByIndex($res);
 echo $arr[1];
 
 ?>

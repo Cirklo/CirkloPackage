@@ -155,8 +155,8 @@ class cal extends phpCollection{
     function __construct ($Resource,$update=0){
 		// require_once("__dbHelp.php");
         $sql="select * from resource,resstatus,".dbHelp::getSchemaName().".user where resource_status=resstatus_id and user_id=resource_resp and resource_id=" . $Resource;
-        $res=dbHelp::mysql_query2($sql) or die ($sql);
-        $arrresource= dbHelp::mysql_fetch_array2($res);
+        $res=dbHelp::query($sql) or die ($sql);
+        $arrresource= dbHelp::fetchRowByName($res);
 		$this->setResource($Resource);
         $this->setStartTime($arrresource['resource_starttime']);
         $this->setEndTime($arrresource['resource_stoptime']);
@@ -173,8 +173,8 @@ class cal extends phpCollection{
         $this->Update=$update;
         $this->Price=$arrresource['resource_price'];
         $sql="SELECT DISTINCT pics_path FROM pics WHERE pics_resource=".$arrresource['resource_id'];
-        $res=dbHelp::mysql_query2($sql) or die ($sql);
-        $arrresource= dbHelp::mysql_fetch_array2($res);
+        $res=dbHelp::query($sql) or die ($sql);
+        $arrresource= dbHelp::fetchRowByName($res);
         $this->ResourceImage=$arrresource['pics_path'];
     }
     function setStartTime($arg) {$this->StartTime=$arg;$this->SlotStart=$this->StartTime;}
@@ -274,8 +274,8 @@ class cal extends phpCollection{
                     // $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status, date_format(entry_datetime,'%H')+ date_format(entry_datetime,'%i')/60 time,entry_slots from entry,".dbHelp::getSchemaName().".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and date_format(entry_datetime,'%Y%m%d')=". $this->Day . " and date_format(entry_datetime,'%H%i')=" . date('Hi',$this->SlotStart) . " order by entry_id";
                     // $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status,entry_slots from entry,".dbHelp::getSchemaName().".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".dbHelp::getFromDate('entry_datetime','%Y%m%d')."='". $this->Day . "' and ".dbHelp::getFromDate('entry_datetime','%H%i')."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
                     $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status, entry_slots from entry,".$schemaName.".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".$sqlDate1."='". $this->Day . "' and ".$sqlDate2."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
-                    $res=dbHelp::mysql_query2($sql) or die ($sql);
-                    $arr= dbHelp::mysql_fetch_array2($res);
+                    $res=dbHelp::query($sql) or die ($sql);
+                    $arr= dbHelp::fetchRowByName($res);
                     $cell->setStartDate($this->Day);
                     if ($arr['entry_id']!='') {
                         $cell->setNSlots($arr['entry_slots']);
@@ -283,9 +283,9 @@ class cal extends phpCollection{
                         if ($arr['entry_repeat']==$this->CalRepeat) $cell->setRepeat($this->CalRepeat);
                         $cell->setUser($arr['user_login']);
                         $cell->setStartTime($this->SlotStart);
-                        if (dbHelp::mysql_numrows2($res)>1){
+                        if (dbHelp::numberOfRows($res)>1){
                             // mysql_data_seek($res,1);
-                            $arr= dbHelp::mysql_fetch_array2($res);
+                            $arr= dbHelp::fetchRowByName($res);
                             //$cell->setStatus(4);
                             $cell->setNextUser($arr['user_login']);
                             //echo $arr['entry_id'];
@@ -342,8 +342,8 @@ class cal extends phpCollection{
 	
 	public function monitor($resource){
     	$sql="SELECT DISTINCT equip_resourceid FROM equip, resource WHERE resource_id=equip_resourceid AND resource_name='$resource'";
-    	$res=dbHelp::mysql_query2($sql) or die ($sql);
-        if(dbHelp::mysql_numrows2($res)==0){
+    	$res=dbHelp::query($sql) or die ($sql);
+        if(dbHelp::numberOfRows($res)==0){
         	return false;
         } else {
         	return true;

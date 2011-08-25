@@ -43,8 +43,8 @@ echo "<tr><td width=100px>Resource Type</td><td>";
 echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
 $sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
 echo "<option id=0>Select Resource...</option>";
-$res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-while($row = dbHelp::mysql_fetch_row2($res)){
+$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+while($row = dbHelp::fetchRowByIndex($res)){
     echo "<option value='".$row[0]."'>".$row[1]."</option>";
 }
 echo "</select></td></tr>";

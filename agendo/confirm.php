@@ -27,36 +27,50 @@ foreach($_POST as $key=>$value){
 }
 
 // $sql = "SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_smtpsecure, mainconfig_smtpauth FROM mainconfig WHERE mainconfig_id = 1";
-// $res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-// $row = dbHelp::mysql_fetch_row2($res);
+// $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+// $row = dbHelp::fetchRowByIndex($res);
 $sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-$res = dbHelp::mysql_query2($sql);
-for($i=0; $arr = dbHelp::mysql_fetch_row2($res); $i++){
-	$row[$i] = $arr[1];
+$res = dbHelp::query($sql);
+$configArray = array();
+for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
+	$configArray[$arr[0]] = $arr[1];
 }
-
+$mail->SMTPAuth   = $configArray['smtpauth'];
+$mail->SMTPSecure = $configArray['smtpsecure'];
+$mail->Port       = $configArray['port'];
+$mail->Host       = $configArray['host'];
+$mail->Username   = $configArray['email'];
+$mail->Password   = $configArray['password'];
 $mail->IsSMTP(); // telling the class to use SMTP
 $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-$mail->SMTPAuth   = $row[5];                  // enable SMTP authentication
-$mail->SMTPSecure = $row[4];                 // sets the prefix to the servier
-$mail->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
-$mail->Host       = $row[0];      // sets GMAIL as the SMTP server
-$mail->Username   = $row[3];  // GMAIL username
-$mail->Password   = $row[2];            // GMAIL password
-$mail->SetFrom($row[3], "Calendar Admin");
-$mail->AddReplyTo($row[3],"Calendar Admin");
+$mail->SetFrom($configArray['email'], "Calendar administration");
+$mail->AddReplyTo($configArray['email'],"Calendar administration");   
+// for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
+	// $row[$i] = $arr[1];
+// }
+
+// $mail->IsSMTP(); // telling the class to use SMTP
+// $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
+// $mail->SMTPAuth   = $row[5];                  // enable SMTP authentication
+// $mail->SMTPSecure = $row[4];                 // sets the prefix to the servier
+// $mail->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
+// $mail->Host       = $row[0];      // sets GMAIL as the SMTP server
+// $mail->Username   = $row[3];  // GMAIL username
+// $mail->Password   = $row[2];            // GMAIL password
+// $mail->SetFrom($row[3], "Calendar Admin");
+// $mail->AddReplyTo($row[3],"Calendar Admin");
 
 // Would only send an email to the person responsible for the equipment
 $sql = "SELECT user_email from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_name LIKE '$resource'";
 
 // Sends to all users with admin level (Bugworkers)
 // $sql = "SELECT user_email from ".dbHelp::getSchemaName().".user WHERE user_level = 0";
-$res = dbHelp::mysql_query2($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
 // Used when there was just one responsible
-// $row = dbHelp::mysql_fetch_row2($res);
+// $row = dbHelp::fetchRowByIndex($res);
 	$mail->Subject = "Calendar administration: new user";
 	$mail->Body = $msg;
-	while ($row = dbHelp::mysql_fetch_row2($res)){
+	while ($row = dbHelp::fetchRowByIndex($res)){
 		$mail->AddAddress($row[0], "");
 	}
 

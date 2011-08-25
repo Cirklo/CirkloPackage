@@ -405,8 +405,8 @@
 			// gets the data in countries table and sends it to javascript via msg
 			$countries = array();
 			$sql = "select country_id, country_name from country";
-			$res = dbHelp::mysql_query2($sql);
-			while($arr = dbHelp::mysql_fetch_row2($res)){
+			$res = dbHelp::query($sql);
+			while($arr = dbHelp::fetchRowByIndex($res)){
 				// $countries = $countries.$echoSeparator.$arr[0].$echoSeparator.$arr[1];
 				$countries[$arr[0]] = $arr[1];
 			}
@@ -489,15 +489,15 @@
 			
 			$sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
 					(1, '".$adminId."', '".cryptPassword($adminPass)."', '".$adminFirst."', '".$adminLast."', 1, '".$adminPhone."', '".$adminExt."', '".$adminMobile."', '".$adminMail."', 1, 0)";
-			dbHelp::mysql_query2($sql);	
+			dbHelp::query($sql);	
 			
 			$sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
 					(1, '".$institute."', '".$instituteAddress."', '".$institutePhone."', ".$instituteCountry.", 0)";
-			dbHelp::mysql_query2($sql);	
+			dbHelp::query($sql);	
 			
 			$sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
 					(1, '".$department."', 1, 1)";
-			dbHelp::mysql_query2($sql);	
+			dbHelp::query($sql);	
 			
 			$sql = "INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
 					(0, 'institute', '".$institute."'),
@@ -512,7 +512,7 @@
 					(9, 'smtpauth', '".$instituteAuth."'),
 					(10,'publicity', '0'),
 					(14,'timezone', '".$timezone."')";
-			dbHelp::mysql_query2($sql);	
+			dbHelp::query($sql);	
 					
 			dbHelp::scriptRead($sqlDatumoConstraints);
 			copyFolderTo('pics', $_SESSION['path']."/pics");
@@ -585,7 +585,7 @@
 			require_once("../agendo/commonCode.php");
 			try{
 				$sql = "drop database ".dbHelp::getSchemaName();
-				dbHelp::mysql_query2($sql);
+				dbHelp::query($sql);
 				$message = "Database deleted.<br>";
 			}
 			catch(Exception $e){
@@ -644,8 +644,8 @@
 		$tables = getBetweenArray($sql, 'CREATE TABLE IF NOT EXISTS', '(');
 		$sqlExisting = "select table_name from information_schema.tables where table_schema = '".dbHelp::getSchemaName()."'";
 		$foundTable = "";
-		$res = dbHelp::mysql_query2($sqlExisting);
-		$arr = dbHelp::mysql_fetch_row2($res);
+		$res = dbHelp::query($sqlExisting);
+		$arr = dbHelp::fetchRowByIndex($res);
 		if(!empty($arr)){
 			for($i = 0; $i<sizeOf($tables); $i++){
 					if(in_array(str_replace('`', '', $tables[$i]), $arr, true)){
@@ -676,7 +676,7 @@
 		$triggers = getBetweenArray($sql, "DELIMITER //", "//", $separator);
 		for($i=0;$i<sizeOf($triggers);$i++){
 			// inserts current trigger
-			dbHelp::mysql_query2($triggers[$i]);
+			dbHelp::query($triggers[$i]);
 		}
 	}
 	

@@ -36,8 +36,8 @@
 		private static function setTimezone(){
 			try{
 				$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
-				$res = dbHelp::mysql_query2($sql);
-				$arr = dbHelp::mysql_fetch_row2($res);
+				$res = dbHelp::query($sql);
+				$arr = dbHelp::fetchRowByIndex($res);
 				date_default_timezone_set($arr[0]);
 			}
 			catch(Exception $e){
@@ -57,26 +57,26 @@
 			$prepSql->execute();
 		}
 		
-		public static function mysql_query2($sql){
+		public static function query($sql){
 			$connect = dbHelp::getConnect();
 			$prepSql = $connect->prepare($sql);
 			$prepSql->execute();
 			return $prepSql;
 		}
 		
-		public static function mysql_numrows2($prepSql){
+		public static function numberOfRows($prepSql){
 			return $prepSql->rowCount();
 		}
 		
-		public static function mysql_fetch_array2($prepSql){
+		public static function fetchRowByName($prepSql){
 			return $prepSql->fetch(PDO::FETCH_ASSOC);
 		}
 		
-		public static function mysql_fetch_row2($prepSql){
+		public static function fetchRowByIndex($prepSql){
 			return $prepSql->fetch(PDO::FETCH_NUM);
 		}
 
-		public static function mysql_select_db2($db){
+		public static function selectDb($db){
 			dbHelp::getConnect()->dbSelect($db);
 		}
 		

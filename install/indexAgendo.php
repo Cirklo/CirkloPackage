@@ -89,8 +89,8 @@ echo "<table id='master' style='width:800' align=center>";
 					echo "</tr>";
 					
 					$sqlInst = "SELECT configParams_name, configParams_value from configParams where configParams_name='institute'";
-					$resInst = dbHelp::mysql_query2($sqlInst);
-					$arrInst = dbHelp::mysql_fetch_row2($resInst);
+					$resInst = dbHelp::query($sqlInst);
+					$arrInst = dbHelp::fetchRowByIndex($resInst);
 					echo "<tr>";
 						echo "<td align='left' style='padding-left:10px;padding-bottom:14px;vertical-align:bottom;'>";	
 						echo "<font size=5px style='color:#F7C439'><b>".$arrInst[1]."</b></font><br>";
@@ -132,8 +132,8 @@ echo "<table id='master' style='width:800' align=center>";
 				echo "<td class=title_ >Share</td>";
 			echo "</tr>";
 			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
-			$res=dbHelp::mysql_query2($sql) or die ($sql);
-			for($i=0;$arr=dbHelp::mysql_fetch_row2($res);$i++){
+			$res=dbHelp::query($sql) or die ($sql);
+			for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
 				if ($i==0) $max = $arr[0];
 				echo "<tr>";
 					$varFlag = "href=weekview.php?resource=" . $arr[2];
@@ -154,8 +154,8 @@ echo "<table id='master' style='width:800' align=center>";
 				echo "<td class=title_>All Resources</td>";
 				echo "<td class=title_>Resource Type</td><td class=title_ >Permission Type</td>";
 			echo "</tr>";
-			$resResource=dbHelp::mysql_query2($sql);
-			while($arrResource=dbHelp::mysql_fetch_row2($resResource)){
+			$resResource=dbHelp::query($sql);
+			while($arrResource=dbHelp::fetchRowByIndex($resResource)){
 				$varFlag = "href=weekview.php?resource=" . $arrResource[3];
 				$smallScript = "style='cursor:pointer' onclick='$.jnotify(\"Please sign in to be able to access resources.\")'";
 				if(!secureIpSessionLogin()){
@@ -196,8 +196,8 @@ echo "<table id='master' style='width:800' align=center>";
 				echo "<a href=http://www.apple.com/safari style='text-decoration:none'><font color=#FFFFFF size=1.5px> Safari, </font></a>";
 				echo "<a href=http://www.apple.com/ios style='text-decoration:none'><font color=#f6961a size=1.5px> iOS, </font></a>";
 				echo "<a href=http://www.android.com style='text-decoration:none'><font color=#f6961a size=1.5px> Android</font></a><br>";
-				$resVersion=dbHelp::mysql_query2("select configParams_value from configParams where configParams_name = 'AgendoVersion'");
-				$arrVersion = dbHelp::mysql_fetch_row2($resVersion);
+				$resVersion=dbHelp::query("select configParams_value from configParams where configParams_name = 'AgendoVersion'");
+				$arrVersion = dbHelp::fetchRowByIndex($resVersion);
 				echo "<font color=#F7C439 size=1.5px>Agendo version ".$arrVersion[0]."</font>";
 				echo "</td>";
 				echo "<td>";
