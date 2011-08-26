@@ -713,7 +713,7 @@ INSERT INTO `confidentiality` (`confidentiality_id`, `confidentiality_name`) VAL
 --
 
 CREATE TABLE IF NOT EXISTS `configParams` (
-  `configParams_id` int(11) NOT NULL,
+  `configParams_id` int(11) NOT NULL AUTO_INCREMENT,
   `configParams_name` varchar(45) NOT NULL,
   `configParams_value` varchar(45) NOT NULL,
   PRIMARY KEY (`configParams_id`),
@@ -722,7 +722,7 @@ CREATE TABLE IF NOT EXISTS `configParams` (
 
 
 INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
-(11, 'DatumoVersion', '2.1');
+(11, 'DatumoVersion', '2.2');
 
 -- --------------------------------------------------------
 

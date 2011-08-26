@@ -163,6 +163,21 @@ $(document).ready(function() {
 	});
 	
 	
+	//foreign key insert form
+	$("input[lang=__fk]").keypress(function(e){
+		if(e.which==13 && e.ctrlKey) {
+			e.preventDefault();
+			//check field id 
+			$.get("functions.php?type=3",{
+				field:this.id
+			}, function (data){
+				if(data.length>1)
+					window.open("insert.php?table="+data,"_blank","width=275px,height=300px,scrollbars=yes,menubar=no");
+			});
+			
+		}
+	});
+	
 	/**
 	 * Method to highlight all checked boxes 
 	 * 

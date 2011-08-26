@@ -12,6 +12,9 @@ if(isset($_GET['type']) and !isset($_GET['sidx'])){
 		case 2:
 			sendMail();
 			break;
+		case 3:
+			checkTable();
+			break;
 	}
 }
 
@@ -281,5 +284,35 @@ function sendMail(){
 	$output=$mail->mailingList($subject,$address,$from,$message);
 	echo $output;
 }
+
+
+function checkTable(){
+	//PHP includes
+	require_once "session.php";
+	$user_id=startSession();
+	require_once "__dbConnect.php";
+	require_once "queryClass.php";
+	require_once "resClass.php";
+	
+	//call classes
+	$conn=new dbConnection();	
+	$q=new queryClass();
+	$perm=new restrictClass();
+	
+	//url variables
+	if(isset($_GET['field']))	$attr=$_GET['field'];
+	
+	//get table from the sent attribute
+	$arr=array($attr,$conn->getDatabase(),'','');
+	$row=$q->prepareQuery($arr, 3);
+	$objName=$row[0];
+	
+	//check if this user has permissions to insert a new entry in the target table
+	$perm->tablePermissions($objName, $user_id);
+	if($perm->getInsert()) {	//user has permissions to insert
+		echo $objName;
+	}
+}
+
 
 ?>
