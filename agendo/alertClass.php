@@ -40,33 +40,47 @@ private $RespAlert;
 function __construct($resource=0) {
     
     // $sql = "SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_smtpsecure, mainconfig_smtpauth FROM mainconfig WHERE mainconfig_id = 1";
-    // $res = dbHelp::mysql_query2($sql) or die ("Error while making the query -> " . $sql);
-    // $row = dbHelp::mysql_fetch_row2($res);
+    // $res = dbHelp::query($sql) or die ("Error while making the query -> " . $sql);
+    // $row = dbHelp::fetchRowByIndex($res);
 	
 	$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-	$res = dbHelp::mysql_query2($sql);
-	for($i=0; $arr = dbHelp::mysql_fetch_row2($res); $i++){
-		$row[$i] = $arr[1];
+	$res = dbHelp::query($sql);
+	$configArray = array();
+	for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
+		$configArray[$arr[0]] = $arr[1];
 	}
-	
-	$this->IsSMTP(); // telling the class to use SMTP
+	$this->SMTPAuth   = $configArray['smtpauth'];
+	$this->SMTPSecure = $configArray['smtpsecure'];
+	$this->Port       = $configArray['port'];
+	$this->Host       = $configArray['host'];
+	$this->Username   = $configArray['email'];
+	$this->Password   = $configArray['password'];
+    $this->IsSMTP(); // telling the class to use SMTP
     $this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-    $this->SMTPAuth   = $row[5];                  // enable SMTP authentication
-    $this->SMTPSecure = $row[4];                 // sets the prefix to the servier
-    $this->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
+    $this->SetFrom($configArray['email'], "Calendar administration");
+    $this->AddReplyTo($configArray['email'],"Calendar administration");   
+	// for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
+		// $row[$i] = $arr[1];
+	// }
+	
+	// $this->IsSMTP(); // telling the class to use SMTP
+    // $this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
+    // $this->SMTPAuth   = $row[5];                  // enable SMTP authentication
+    // $this->SMTPSecure = $row[4];                 // sets the prefix to the servier
+    // $this->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
     
-    $this->Host       = $row[0];      // sets GMAIL as the SMTP server
-    $this->Username   = $row[3];  // GMAIL username
-    $this->Password   = $row[2];            // GMAIL password
-    $this->SetFrom($row[3], 'Calendar Admin');
-    $this->AddReplyTo($row[3],"Calendar Admin");
+    // $this->Host       = $row[0];      // sets GMAIL as the SMTP server
+    // $this->Username   = $row[3];  // GMAIL username
+    // $this->Password   = $row[2];            // GMAIL password
+    // $this->SetFrom($row[3], 'Calendar Admin');
+    // $this->AddReplyTo($row[3],"Calendar Admin");
   
     $this->Resource=$resource;
     
     // $sql="select user_id,user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id=". $this->Resource;
     $sql="select user_id,user_email,user_mobile, user_firstname,user_lastname,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id=". $this->Resource;
-    $res=dbHelp::mysql_query2($sql);
-    $arr=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arr=dbHelp::fetchRowByIndex($res);
     
     // $this->ResourceResp=$arr[0];
     // $this->RespEmail=$arr[1];
@@ -84,8 +98,8 @@ function __construct($resource=0) {
     $this->ResourceResolution=$arr[7];
     
 	// ??
-    // $res=dbHelp::mysql_query2($sql);
-    // $arr=dbHelp::mysql_fetch_array2($res);
+    // $res=dbHelp::query($sql);
+    // $arr=dbHelp::fetchRowByName($res);
 }
 /**
    * Sets user info: email and full name
@@ -97,8 +111,8 @@ function setUser($user_id){
     
     // $sql="select concat(user_firstname,' ',user_lastname) name,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
     $sql="select user_firstname,user_lastname,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
-    $res=dbHelp::mysql_query2($sql);
-    $arruser=dbHelp::mysql_fetch_row2($res);
+    $res=dbHelp::query($sql);
+    $arruser=dbHelp::fetchRowByIndex($res);
     // $this->UserFullName=$arruser[0];
     // $this->UserEmail=$arruser[1];
     // $this->UserMobile=$arruser[2];
@@ -129,13 +143,13 @@ function getResourceResp(){
 function toWaitList($type){
     
     // $sql="select @edt:=entry_datetime,@res:=entry_resource from entry where entry_id=". $this->LastEntry;
-    // $res=dbHelp::mysql_query2($sql);
+    // $res=dbHelp::query($sql);
     // $sql="select user_mobile,user_email,date_format(entry_datetime,'%d, %M %Y') d, date_format(entry_datetime,'%H:%i') t,resource_name, user_alert from entry,".dbHelp::getSchemaName().".user,resource where entry_resource=resource_id and entry_user=user_id and entry_status=4 and entry_datetime=@edt and entry_resource=@res order by entry_id";
     $sql="select user_mobile,user_email,".dbHelp::getFromDate('entry_datetime','%d, %M %Y')." as d, ".dbHelp::getFromDate('entry_datetime','%H:%i')." as t,resource_name, user_alert from entry,".dbHelp::getSchemaName().".user,resource where entry_resource=resource_id and entry_user=user_id and entry_status=4 and (entry_datetime, entry_resource) in (select entry_datetime,entry_resource from entry where entry_id=". $this->LastEntry.") order by entry_id";
-    $res=dbHelp::mysql_query2($sql);
-    $arrStatus=dbHelp::mysql_fetch_array2($res);
+    $res=dbHelp::query($sql);
+    $arrStatus=dbHelp::fetchRowByName($res);
         
-    if (dbHelp::mysql_numrows2($res)>0) {
+    if (dbHelp::numberOfRows($res)>0) {
         switch ($type) {
             case 'delete':
                 $msg="You are booked for using " . $this->ResourceName . "  at " . $arrStatus['t'] . " on the " .   $arrStatus['d'] . ". Confirm and update on website. ";
@@ -224,9 +238,9 @@ END:VCALENDAR";
         case 'update':
 		
 			// $sql="select xfields_label, xfieldsval_value from xfields, xfieldsval where xfieldsval_entry = ".$this->LastEntry." and xfieldsval_field = xfields_id";
-			// $res=dbHelp::mysql_query2($sql);
+			// $res=dbHelp::query($sql);
 			// $fields = '';
-			// while ($arr = dbHelp::mysql_fetch_row2($res)){
+			// while ($arr = dbHelp::fetchRowByIndex($res)){
 				// $fields = " with field ".$arr[0]." = ".$arr[1].",";
 			// }
 			// if($fields != '')
@@ -281,8 +295,8 @@ END:VCALENDAR";
 function recover($user_id){
     // $sql="select user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
     $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
-    $res=dbHelp::mysql_query2($sql);
-    $arr=dbHelp::mysql_fetch_array2($res);
+    $res=dbHelp::query($sql);
+    $arr=dbHelp::fetchRowByName($res);
     $vowels="aeiyou";
     $consonants="bcdfghjklmnpqrstvwxz";
     $pwd='';
@@ -295,7 +309,7 @@ function recover($user_id){
     }
     // $sql="update user set user_passwd = password('$pwd') where user_id=". $user_id;
     $sql="update user set user_passwd = '".cryptPassword($pwd)."' where user_login='". $user_id."'";
-    $res=dbHelp::mysql_query2($sql) or die('Password not updated');
+    $res=dbHelp::query($sql) or die('Password not updated');
     switch ($arr['user_alert']) {
     case 2:
         try {
@@ -328,13 +342,13 @@ function nonconf(){
     
     // $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,date_format(entry_datetime,'%d %M at %H:%i') as date from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and date_add(entry_datetime, interval resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60 minute) between now() and date_add(now(),interval 60 minute) and entry_user=user_id and entry_resource=resource_id and resource_status<>4";
     $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute')." and entry_user=user_id and entry_resource=resource_id and resource_status<>4";
-    $res=dbHelp::mysql_query2($sql) or die($sql);
-    for ($i=0;$i<dbHelp::mysql_numrows2($res);$i++) {
+    $res=dbHelp::query($sql) or die($sql);
+    for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
         // mysql_data_seek($res,$i);
-        $arr=dbHelp::mysql_fetch_array2($res);      
-        $msg="You did not confirm your entry on " . $arr['resource_name'] . ". Please justify to ". $arr['resp']."\n";
+        $arr=dbHelp::fetchRowByName($res);      
+        $msg=date("Y-m-d H:i")." You did not confirm your entry on " . $arr['resource_name'] . ". Please justify to ". $arr['resp'];
         switch ($arr['user_alert']) {
-        case 2:	//by sms
+        case 2:
             try {
                 $msg=str_replace(' ','%20',$msg);
                 echo $msg;
@@ -344,10 +358,10 @@ function nonconf(){
                 echo $ex;
             }
         break;
-        case 1:	//by email
+        case 1:
                 $this->Subject="No confirmation on ". $arr['date'] ;
-                $this->ClearReplyTos();	//clear replys before receiving any email
-                $this->AddReplyTo($this->UserEmail,$this->UserFullName);
+				$this->ClearReplyTos();	//clear replys before receiving any email
+				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
                 $this->Body=$msg;
                 $address = $arr['user_email'];
                 $this->AddAddress($address, "");
@@ -378,8 +392,8 @@ function fromAdmin($type,$extra=''){
         }
         
         $sql="select user_id,user_email,".dbHelp::getFromDate('entry_datetime','%d, %M %Y')." as d, ".dbHelp::getFromDate('entry_datetime','%H:%i')." as t,user_mobile, user_alert, entry_comments from entry,".dbHelp::getSchemaName().".user,resource where entry_user=user_id and entry_id=". $this->LastEntry;
-        $res=dbHelp::mysql_query2($sql);
-        $arr=dbHelp::mysql_fetch_array2($res);
+        $res=dbHelp::query($sql);
+        $arr=dbHelp::fetchRowByName($res);
         //if ($arr['user_id']==$this->ResourceResp) exit;
         switch ($type) {
         case 'update':
