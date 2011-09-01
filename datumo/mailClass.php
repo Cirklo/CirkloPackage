@@ -13,32 +13,18 @@ class mailClass extends PHPMailer{
 		
 		$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
 		$sql = $this->pdo->query($sql);
-		$configArray = array();
 		for($i=0;$arr=$sql->fetch();$i++){
-			$configArray[$arr[0]] = $arr[1];
+			$row[$i]=$arr[1];
 		}
-		$this->SMTPAuth   = $configArray['smtpauth'];
-		$this->SMTPSecure = $configArray['smtpsecure'];
-		$this->Port       = $configArray['port'];
-		$this->Host       = $configArray['host'];
-		$this->Username   = $configArray['email'];
-		$this->Password   = $configArray['password'];
 		$this->IsSMTP(); // telling the class to use SMTP
-		$this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-		$this->SetFrom($configArray['email'], $configArray['email']);
-		
-		// for($i=0;$arr=$sql->fetch();$i++){
-			// $row[$i]=$arr[1];
-		// }
-		// $this->IsSMTP(); // telling the class to use SMTP
-        // $this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-        // $this->SMTPAuth   = $row[5];                  // enable SMTP authentication
-        // $this->SMTPSecure = $row[4];                 // sets the prefix to the servier
-        // $this->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
-        // $this->Host       = $row[0];      		// sets GMAIL as the SMTP server
-        // $this->Username   = $row[3];  			// GMAIL username
-        // $this->Password   = $row[2];            // GMAIL password
-        // $this->SetFrom($row[3],$row[3]);
+        $this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
+        $this->SMTPAuth   = $row[5];                  // enable SMTP authentication
+        $this->SMTPSecure = $row[4];                 // sets the prefix to the servier
+        $this->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
+        $this->Host       = $row[0];      		// sets GMAIL as the SMTP server
+        $this->Username   = $row[3];  			// GMAIL username
+        $this->Password   = $row[2];            // GMAIL password
+        $this->SetFrom($row[3],$row[3]);
 	}
 	
 	/**
@@ -80,9 +66,9 @@ class mailClass extends PHPMailer{
 		for($i=1;$i<=$noEmails;$i++){
 			$this->CharSet="UTF-8";
 //			$this->SetFrom($from, $from);
-  			$this->ClearReplyTos();
+	        $this->ClearReplyTos();
 	        $this->AddReplyTo($from);
-	      	$this->Subject=$subject;
+	        $this->Subject=$subject;
 	        $this->Body=$msg;
 	        //loop through email addresses
 	       	while($j!=($noAddressesPerTurn*$i)){

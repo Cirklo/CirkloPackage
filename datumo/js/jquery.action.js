@@ -11,7 +11,8 @@
   			nrows:20,					//number of rows to be displayed
   			order:"ASC",					//ASCending or DESCending order
   			colOrder:"",				//ordering column
-  			page:1						//default page number
+  			page:1,						//default page number
+  			ext:"manager.php"			//source
    	};
     	
    	// override the defaults
@@ -135,12 +136,15 @@
 			action: options.action,		//SQL action
 			arr:json						//target ids
 		},function(data){
-//			alert(data);
+			//alert(data);
 			//throw error if changes were not commited
 			if(data){	$.jnotify(data); return;}
 			//submit filter and keep the current page
-			filter("table", options.objName, "", options.order, options.colOrder,options.page,options.action);
-
+			if(options.ext=="manager.php"){
+				filter("table", options.objName, "", options.order, options.colOrder,options.page,options.action);
+			} else {
+				$.jnotify("Record successfully inserted");
+			}
 		});
 	};
 	

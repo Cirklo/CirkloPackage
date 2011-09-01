@@ -171,7 +171,7 @@ echo "<div class=main lang=exp>";
 
 
 $perm->userInfo($user_id);
-if($perm->getUserLevel()!=0){
+if($perm->getUserLevel()==2){
 	echo "<font color=#FF0000>You don't have permission to access this resource</font>";
 	exit();
 }
