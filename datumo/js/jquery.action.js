@@ -65,7 +65,7 @@
 			action: options.action,		//SQL action
 			id:arr						//target ids
 		},function(data){
-			if(data.length>1){	$.jnotify(data);return;	}
+			if(data){	$.jnotify(data);return;	}
 			//submit filter and keep the current page
 			filter("table", options.objName, "", options.order, options.colOrder,options.page,options.action);
 		});
@@ -99,7 +99,7 @@
 			arr:json						//target ids
 		},function(data){
 			//throw error if changes were not commited
-			if(data.length>1){	$.jnotify(data); return;}
+			if(data){	$.jnotify(data); return;}
 			//submit filter and keep the current page
 			filter("table", options.objName, "", options.order, options.colOrder,options.page,options.action);
 		});
@@ -138,7 +138,7 @@
 		},function(data){
 			//alert(data);
 			//throw error if changes were not commited
-			if(data.length>1){	$.jnotify(data); return;}
+			if(data){	$.jnotify(data); return;}
 			//submit filter and keep the current page
 			if(options.ext=="manager.php"){
 				filter("table", options.objName, "", options.order, options.colOrder,options.page,options.action);
