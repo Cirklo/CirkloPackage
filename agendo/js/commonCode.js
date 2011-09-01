@@ -35,6 +35,13 @@ function go (objIMG) {
     }
 }
 
+// used in application.php
+function getUserInfo(){
+	return userInfo;
+}
+
+// firstName = lastName = email = login = '';
+var userInfo = new Array();
 function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	formObj=document.getElementById('edituser');
 	passCrypted = false;
@@ -42,7 +49,8 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	if(user==null){
 		if (checkfield(formObj.user_idm)) return;
 		if (checkfield(formObj.user_passwd)) return;
-		user = formObj.user_idm.value = formObj.user_idm.title;
+		// user = formObj.user_idm.value = formObj.user_idm.title;
+		user = formObj.user_idm.value;
 		pass = formObj.user_passwd.value;
 	}
 	else{
@@ -52,12 +60,22 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	$.post("index.php", {functionName:'logIn', login:user, pass:pass, passCrypted:passCrypted},
 			function(data){
 				if(data.success){
-					phpFilePath = phpFilePath + "?resource="+resource;
-					if(loginToDatumo){
-//						phpFilePath = "../datumo/index.php";
-						phpFilePath = "../datumo/";
+					//****imap******
+					if(data.makeUser != null && data.makeUser){
+						userInfo['login'] = user;
+						userInfo['pass'] = pass;
+						userInfo['email'] = data.email;
+						window.open('../agendo/application.php?makeUser', 'NewUser', 'width=400,height=400');
 					}
-					window.location = phpFilePath;
+					//**************
+					else{
+						phpFilePath = phpFilePath + "?resource="+resource;
+						if(loginToDatumo){
+							// phpFilePath = "../datumo/index.php";
+							phpFilePath = "../datumo/";
+						}
+						window.location = phpFilePath;
+					}
 				}
 				else{
 					showMessage(data.msg);
@@ -99,12 +117,21 @@ function showMessage(msg, isError){
 	
 	// what should happen is its an error message
 	if(isError){
-		extra = 'error';
+		$(document).ready(function(){
+				$.jnotify(msg, 'error', true);
+			}
+		);
+	}
+	else{
+		$(document).ready(function(){
+				$.jnotify(msg);
+			}
+		);
 	}
 	
 	// alert(msg);
-	$(document).ready(function(){
-			$.jnotify(msg, extra);
-		}
-	);
+	// $(document).ready(function(){
+			// $.jnotify(msg, extra);
+		// }
+	// );
 }

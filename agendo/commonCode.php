@@ -58,41 +58,82 @@ function getUsersList(){
 		// $resource=$_GET['resource'];
 		$passCrypted=$_POST['passCrypted'];
 
-		if(
-			!isset($userLogin) ||
-			!isset($pass) ||
-			!isset($passCrypted)
-			// !isset($resource)
-		){
-			$json->success = false;
-			$json->msg = "Did not get all the data needed to login.";
-		}
-		else{
-			if($passCrypted == 'false'){
-				$pass = cryptPassword($pass);
-			}
-			$sql= "select user_firstname, user_lastname, user_passwd, user_id from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
-			$res=dbHelp::query($sql) or die ($sql);
-
-			if (dbHelp::numberOfRows($res) == 0){
-				$json->success = false;
-				$json->msg = "Wrong Login!";
+		try{
+			if(
+				!isset($userLogin) ||
+				!isset($pass) ||
+				!isset($passCrypted)
+				// !isset($resource)
+			){
+				// $json->success = false;
+				// $json->msg = "Did not get all the data needed to login.";
+				throw new Exception("Did not get all the data needed to login.");
 			}
 			else{
-				$arr=dbHelp::fetchRowByIndex($res);
-				$_SESSION['user_name'] = $arr[0];
-				$_SESSION['user_lastName'] = $arr[1];
-				$_SESSION['user_pass'] = $arr[2];
-				$_SESSION['user_id'] = $arr[3];
-				$_SESSION['database'] = dbHelp::getSchemaName();
+				if($passCrypted == 'false'){
+					$pass = cryptPassword($pass);
+				}
+				
+				//****** check for the imap login ******
+				$externalLogin = false;
+				$sql = "select configParams_name, configParams_value from configParams where configParams_name = 'imapCheck' or configParams_name = 'imapHost' or configParams_name = 'imapMailServer'";
+				$res = dbHelp::query($sql) or die ($sql);
+				$configArray = array();
+				while($arr=dbHelp::fetchRowByIndex($res)){
+					$configArray[$arr[0]] = $arr[1];
+				}
+				$message = "Wrong Login!";
+				if(sizeof($configArray) == 3 && $configArray['imapCheck'] == 1 && $configArray['imapHost'] != '' && $configArray['imapMailServer'] != ''){
+					$email = $userLogin."@".$configArray['imapMailServer'];
+					// {imap.gmail.com:993/imap/ssl}INBOX
+					$inbox = @imap_open("{".$configArray['imapHost']."}INBOX", $email, $_POST['pass']);
+					// if login to imap is successfull then $externalLogin = true;
+					if(!$inbox){
+						$message = imap_last_error();
+					}
+					else{
+						imap_close($inbox);
+						$externalLogin = true;
+					}
+				}
+				//*****************************************
+				
+				$sql= "select user_firstname, user_lastname, user_passwd, user_id from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
+				$res=dbHelp::query($sql) or die ($sql);
+				if (dbHelp::numberOfRows($res) == 0){
+					// ********** Imap section *********
+					if($externalLogin){
+						// send user to the make new user(aplication.php) screen (with the login, pass and email already filled, from session?)
+						$json->email = $email;
+						$json->makeUser = true;
+					}
+					// *********************************
+					else{
+						// $json->success = false;
+						// $json->msg = "Wrong Login!";
+						throw new Exception($message);
+					}
+				}
+				else{
+					$arr=dbHelp::fetchRowByIndex($res);
+					$_SESSION['user_name'] = $arr[0];
+					$_SESSION['user_lastName'] = $arr[1];
+					$_SESSION['user_pass'] = $arr[2];
+					$_SESSION['user_id'] = $arr[3];
+					$_SESSION['database'] = dbHelp::getSchemaName();
 
-				$json->success = true;
-				$json->firstName = $arr[0];
-				$json->lastName = $arr[1];
-				// $json->resourceId = $resource;
+					// $json->success = true;
+					$json->firstName = $arr[0];
+					$json->lastName = $arr[1];
+					// $json->resourceId = $resource;
+				}
 			}
+			$json->success = true;
 		}
-		
+		catch(Exception $e){
+			$json->success = false;
+			$json->msg = $e->getMessage();
+		}
 		echo json_encode($json);
 	}
 
@@ -286,10 +327,18 @@ function getUsersList(){
 						echo "</tr>";
 					echo "</table>";
 				}
+				
+				$sql = "select 1 from configParams where configParams_name = 'imapCheck' and configParams_value = 1";
+				$res = dbHelp::query($sql);
+				$arr = dbHelp::fetchRowByIndex($res);
+				$action = "onblur='ajaxUser(this)'";
+				if(dbHelp::numberOfRows($res) > 0){
+					$action = "";
+				}
 				echo "<table style='display:".$display.";padding:6px;'>";
 					echo "<tr>";
 						echo "<td><label>User Name</label></td>";
-						echo "<td><input style='font-size:11px;' name=user_idm id=user_idm value='' onblur=ajaxUser(this) /></td>";
+						echo "<td><input style='font-size:11px;' name='user_idm' id='user_idm' value='' ".$action."/></td>";
 					echo "</tr>";
 					
 					echo "<tr>";

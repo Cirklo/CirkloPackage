@@ -6,7 +6,7 @@
 -- Limitadores para a tabela `admin`
 --
 ALTER TABLE `admin`
-  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`admin_user`) REFERENCES `user` (`user_id`),
+  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`admin_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `admin_ibfk_2` FOREIGN KEY (`admin_permission`) REFERENCES `access` (`access_id`);
 
  
@@ -61,7 +61,7 @@ ALTER TABLE `reprop`
 -- Limitadores para a tabela `resaccess`
 --
 ALTER TABLE `resaccess`
-  ADD CONSTRAINT `resaccess_ibfk_1` FOREIGN KEY (`resaccess_user`) REFERENCES `user` (`user_id`);
+  ADD CONSTRAINT `resaccess_ibfk_1` FOREIGN KEY (`resaccess_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE;
 
 
 --

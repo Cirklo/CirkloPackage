@@ -2,7 +2,6 @@
 -- Constraints for dumped tables
 --
 
-
 --
 -- Constraints for table `announcement`
 --
@@ -63,7 +62,6 @@ ALTER TABLE `price`
 ALTER TABLE `pubref`
   ADD CONSTRAINT `pubref_ibfk_2` FOREIGN KEY (`pubref_reference`) REFERENCES `resourcetype` (`resourcetype_id`),
   ADD CONSTRAINT `pubref_ibfk_1` FOREIGN KEY (`pubref_pub`) REFERENCES `pub` (`pub_id`);
-
 
 --
 -- Constraints for table `resinterface`

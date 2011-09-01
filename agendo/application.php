@@ -1,5 +1,29 @@
 <?php
 require_once("commonCode.php");
+
+if(isset($_POST['makeUser']) && $_POST['makeUser'] == true){
+	makeUser();
+	exit;
+}
+
+function makeUser(){
+	try{
+		$dataArray = $_POST['dataArray'];
+		//INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
+		$sql = "insert into ".dbHelp::getSchemaName().".user (user_login, user_passwd, user_firstname, user_lastname, user_dep, user_phone, user_phonext, user_mobile, user_email, user_alert, user_level)
+				values('".$dataArray[0]."', '".cryptPassword($dataArray[1])."', '".$dataArray[2]."', '".$dataArray[3]."', '".$dataArray[4]."', '".$dataArray[5]."', '".$dataArray[6]."', '".$dataArray[7]."', '".$dataArray[8]."', '1', '2')";
+		dbHelp::query($sql);
+		$json->success = true;
+		$json->message = "User inserted";
+	}
+	catch(Exception $e){
+		$json->success = false;
+		$json->message = $e->getMessage();
+	}
+	// wtf($json->success."--".$json->message);
+	echo json_encode($json);
+}
+
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -30,7 +54,7 @@ function getValue(id,target){
     url="ajaxdpt.php?val=" + val;
     xmlhttp.open("GET", url, false);
     xmlhttp.send(null);
-			    
+
     var str = xmlhttp.responseText;
     document.getElementById(target).value = str;
 }
@@ -40,81 +64,187 @@ function checktrain(id){
     document.getElementById(str).checked = document.getElementById(id).checked;
 }
 
+userLogin = '';
+userPass = '';
+var userInfoArray = new Array();
+function setValues(){
+	try{
+		userLogin = opener.document.getElementById('user_idm').value;
+		userPass = opener.document.getElementById('user_passwd').value;
+		
+		userInfoArray = opener.getUserInfo();
+		if(userInfoArray.length > 0){
+			document.getElementById('Email').value = userInfoArray['email'];
+		}
+	}
+	catch(error){
+		alert(error);
+	}
+}
+
+function makeNewUser(){
+	// alert('making user');
+	var dataArray = new Array();
+	dataArray[0] = userLogin; // undefined?
+	dataArray[1] = userPass; // undefined?
+	dataArray[2] = document.getElementById('First name').value;
+	dataArray[3] = document.getElementById('Last name').value;
+	departments = document.getElementById('Department');
+	dataArray[4] = departments.options[departments.selectedIndex].value;
+	dataArray[5] = document.getElementById('Phone').value;
+	dataArray[6] = document.getElementById('Phone extension').value;
+	dataArray[7] = document.getElementById('Mobile').value;
+	dataArray[8] = document.getElementById('Email').value;
+	notEmpty = true;
+	for(i=0;i<dataArray.length;i++){
+		if(dataArray[i] == ''){
+			notEmpty = false;
+			break;
+		}
+	}
+	if(notEmpty){
+		$.post('application.php', {	makeUser:true, 'dataArray[]': dataArray},
+			function(serverData){
+				// alert(serverData.message+"----"+serverData.success);
+				alert(serverData);
+				showMessage(serverData.message, !serverData.success);
+				opener.document.getElementById('user_idm').value = '';
+				opener.document.getElementById('user_passwd').value = '';
+			},
+			'json')
+			.error(
+				function(error) {
+					showMessage("Error: " + error.responseText, true);
+				}
+			)
+		;
+	}
+	else{
+		showMessage("Please fill all fields", true);
+	}
+}
+
+window.onload = function()
+{
+	setValues();
+}
 </script>
 
 <?php
 // require_once(".htconnect.php");
 // require_once("__dbHelp.php");
 require_once("errorHandler.php");
+importJs();
 
 $error = new errorHandler;
+// echo " <input type=text name='asd' id='asd' value='asdqwe'/> ";
 
-echo "<form method=post name=application>";
-echo "<table><tr><td><font size=5px>Personal information</font></td></tr>";
-echo "<tr><td><font size=2px>All fields are mandatory</font></td></tr></table>";
-echo "<table border=0>";
-echo "<tr><td colspan=2><br></td></tr>";
-echo "<tr><td width=100px>First name</td><td><input type=text name='First name' id='First name'></td></tr>";
-echo "<tr><td>Last name</td><td><input type=text name='Last name' id='Last name'></td></tr>";
-echo "<tr><td>Department</td><td><select name='Department' id='Department' onchange=\"javascript:getValue(this.id,'Institute');\">";
-echo "<option value='0'>--- Select / Other ---</option>";
-$sql = "SELECT department_id, department_name FROM department ORDER BY department_name";
-$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-while($row = dbHelp::fetchRowByIndex($res)){
-    echo "<option value='".$row[0]."'>".$row[1]."</option>";
-}
-echo "</select>";
-echo "\tOther <input type=text name='GEDepartment' id='GEDepartment' value=''>";
-echo "</td></tr>";
-echo "<tr><td>Institute</td><td><input type=text    name=Institute id=Institute size=35></td></tr>";
-echo "<tr><td>Work phone</td><td><input type=text name=Phone id=Phone></td></tr>";
-echo "<tr><td>Phone extension</td><td><input type=text name='Phone extension' id='Phone extension'></td></tr>";
-echo "<tr><td>Mobile</td><td><input type=text name='Mobile' id='Mobile'></td></tr>";
-echo "<tr><td>Email</td><td><input type=text name='Email' id='Email'></td></tr>";
-echo "<tr><td><br></td><td></td></tr>";
-echo "</table>";
+$newUser = isset($_GET['makeUser']);
+echo "<form method=post name='application' id='application'>";
+	echo "<table>";
+		echo "<tr>";
+			echo "<td><font size=5px>Personal information</font></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td><font size=2px>All fields are mandatory</font></td>";
+		echo "</tr>";
+	echo "</table>";
 
-echo "<table><tr><td><font size=5px>Select the resource you want to use</font></td></tr>";
-echo "<tr><td><font size=2px>If you don't know how to use the equipment ask for assistance</font></td></tr></table>";
-echo "<table border=0>";
-echo "<tr><td colspan=2><br></td></tr>";
-echo "<tr><td width=100px>Resource Type</td><td>";
-echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
-$sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
-echo "<option id=0>Select Resource...</option>";
-$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-while($row = dbHelp::fetchRowByIndex($res)){
-    echo "<option value='".$row[0]."'>".$row[1]."</option>";
-}
-echo "</select></td></tr>";
+	echo "<table border=0>";
+		echo "<tr><td colspan=2><br></td></tr>";
+		echo "<tr>";
+			echo "<td width=100px>First name</td>";
+			echo "<td><input type=text name='First name' id='First name'></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Last name</td>";
+			echo "<td><input type=text name='Last name' id='Last name'></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Department</td>";
+			echo "<td>";
+				echo "<select name='Department' id='Department' onchange=\"javascript:getValue(this.id,'Institute');\">";
+				echo "<option value='0'>--- Select / Other ---</option>";
+				$sql = "SELECT department_id, department_name FROM department ORDER BY department_name";
+				$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+				while($row = dbHelp::fetchRowByIndex($res)){
+					echo "<option value='".$row[0]."'>".$row[1]."</option>";
+				}
+				echo "</select>";
+				if($newUser){
+					$extra = "type='hidden'";
+				}
+				else{
+					$extra = "type='text'";
+					echo "\tOther ";
+				}
+				echo "<input ".$extra." name='GEDepartment' id='GEDepartment' value='' />";
+			echo "</td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Institute</td>";
+			echo "<td><input type=text name=Institute id=Institute size=35></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Work phone</td>";
+			echo "<td><input type=text name=Phone id='Phone'></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Phone extension</td>";
+			echo "<td><input type=text name='Phone extension' id='Phone extension'></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Mobile</td>";
+			echo "<td><input type=text name='Mobile' id='Mobile'></td>";
+		echo "</tr>";
+		echo "<tr>";
+			echo "<td>Email</td>";
+			echo "<td><input type=text name='Email' id='Email'></td>";
+		echo "</tr>";
+		echo "<tr><td><br></td><td></td></tr>";
+	echo "</table>";
 
-echo "<tr><td>Resource</td><td><select name=Resource id=Resource></select></td></tr>";
-echo "<tr><td><br></td><td></td></tr>";
-echo "</table>";
-/*
-echo "<table><tr><td><font size=5px>Select the resources you would like to use</font></td></tr>";
-echo "<tr><td><font size=2px>You have to select at least one resource</font></td></tr></table>";
-echo "<table border=0 cellspacing='10'>";
-echo "<tr><td colspan=4><br></td></tr>";
-echo "<tr><td colspan=2><br></td><td align=center></td><td align=center>Require training?</td></tr>";
+	if(!$newUser){
+		echo "<table><tr><td><font size=5px>Select the resource you want to use</font></td></tr>";
+			echo "<tr>";
+				echo "<td><font size=2px>If you don't know how to use the equipment ask for assistance</font></td>";
+			echo "</tr>";
+		echo "</table>";
+		
+		echo "<table border=0>";
+			echo "<tr>";
+				echo "<td colspan=2><br></td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td width=100px>Resource Type</td>";
+				echo "<td>";
+					echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
+					$sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
+					echo "<option id=0>Select Resource...</option>";
+					$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+					while($row = dbHelp::fetchRowByIndex($res)){
+						echo "<option value='".$row[0]."'>".$row[1]."</option>";
+					}
+					echo "</select>";
+				echo "</td>";
+			echo "</tr>";
+			echo "<tr>";
+				echo "<td>Resource</td>";
+				echo "<td><select name=Resource id=Resource></select></td>";
+			echo "</tr>";
+			echo "<tr><td><br></td><td></td></tr>";
+		echo "</table>";
 
-$sql = "SELECT type_id, type_name FROM type";
-$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-while ($row = dbHelp::fetchRowByName($res)){
-    $newsql = "SELECT resource_name, resource_id FROM resource, type WHERE resource_type = type_id AND resource_type = ".$row[0];
-    $newres = dbHelp::query($newsql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $newsql, '', ''));
-    if(dbHelp::numberOfRows($newres) == 0) {} //do nothing
-    else{
-        echo "<tr><td colspan=4><strong><font size=2px>".$row[1]."</font></strong></td></tr>";
-        while($line = dbHelp::fetchRowByName($newres)){
-            echo "<tr><td></td><td>".$line[0]."</td><td align=center><input type=checkbox name='__".$line[0]."' id='__".$line[0]."' ></td><td align=center><input type=checkbox name='__".$line[0]."_train' id='__".$line[0]."_train' onchange=\"javascript:checktrain(this.id);\"></td></tr>";
-        }
-    }
-}
-echo "<tr><td colspan=3><br></td></tr>";*/
-echo "<table border=0>";
-echo "<tr><td><input type=button value=Submit onclick=\"javascript:validate_form();\"></td></tr>";
-echo "</table>";
+		echo "<table border=0>";
+			echo "<tr><td><input type=button value=Submit onclick=\"javascript:validate_form();\"></td></tr>";
+		echo "</table>";
+	}
+	else{
+		echo "<table border=0>";
+			echo "<tr><td><input type=button value=Submit onclick='makeNewUser()'></td></tr>";
+		echo "</table>";
+	}
+
 echo "</form>";
 
 ?>
