@@ -182,7 +182,7 @@ function mailingList(){
 			echo "</select>";
 			break;
 		case "resourcetype":			//select resourceType
-			$query="SELECT resourcetype_id, resourcetype_name FROM resourcetype ORDER BY resource_typename";
+			$query="SELECT resourcetype_id, resourcetype_name FROM resourcetype ORDER BY resourcetype_name";
 			$sql=$conn->query($query);
 			echo "<select multiple size=9 style='width:200px' name=mailSelector id=mailSelector>";
 			//loop through all deps
