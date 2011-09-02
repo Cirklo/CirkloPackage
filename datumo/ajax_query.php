@@ -41,7 +41,7 @@ class genObjClass{
 				$query="DELETE FROM $objName WHERE ".$objName."_id=$row";
 				$this->conn->query($query);
 			}
-			echo false;
+			//echo false;
 		} catch (Exception $e){
 			$error="Value is currently being used by another table";
 			echo $error;
@@ -114,7 +114,7 @@ class genObjClass{
 				$this->conn->query($query);
 			}
 			$this->conn->commit();
-			echo false;
+			//echo false;
 		} catch (Exception $e){
 			$this->conn->rollBack();
 			echo $e->getMessage();
@@ -186,7 +186,7 @@ class genObjClass{
 				$this->conn->query($query);
 			}
 			$this->conn->commit();
-			echo false;
+			//echo false;
 		} catch (Exception $e){
 			$this->conn->rollBack();
 			echo $e->getMessage();
