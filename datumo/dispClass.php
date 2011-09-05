@@ -119,7 +119,7 @@ class dispClass{
 			echo "<td><input type=text name=$row[0]_f_ id=$row[0]_f_";
 			//is it a foreign key?
 			if($this->FKtable[$i]!='' and $this->FKtable[$i]!=$objName) {
-				if($_POST[$row[0]."_f_"] != ''){
+				if(trim($_POST[$row[0]."_f_"]," ") != null){
 					$this->getFKvalue($_POST[$row[0]."_f_"], $i);
 					$value=$this->FKvalue;
 				} else {
@@ -314,7 +314,7 @@ class dispClass{
 		//Was it called by advanced filter??
 		if(!$filter){
 			foreach($this->vars as $key=>$value){
-				if($value==" ")	continue;
+				if($value==" ")	continue;	//hack for Google Chrome
 				//it comes from filter
 				if(substr($key,strlen($key)-3,strlen($key))=="_f_")
 					$key=substr($key,0,strlen($key)-3);
