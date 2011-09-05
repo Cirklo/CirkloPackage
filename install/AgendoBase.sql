@@ -97,17 +97,6 @@ CREATE TABLE IF NOT EXISTS `equip` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='monitored equipment' AUTO_INCREMENT=1 ;
 
 
---
--- Table structure for table `interfacerooms`
---
-
-CREATE TABLE IF NOT EXISTS `interfacerooms` (
-  `interfacerooms_id` int(11) NOT NULL AUTO_INCREMENT,
-  `interfacerooms_name` varchar(45) NOT NULL,
-  PRIMARY KEY (`interfacerooms_id`),
-  UNIQUE KEY `interfacerooms_name_UNIQUE` (`interfacerooms_name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Rooms that have resources that use a custom interface' AUTO_INCREMENT=1 ;
-
 -- --------------------------------------------------------
 --
 -- Dumping data for table `mask`
@@ -130,7 +119,6 @@ INSERT INTO `mask` (`mask_table`, `mask_name`, `mask_pic`) VALUES
 ('parameter','Monitoring parameters',NULL),
 ('permlevel','Permissions level',NULL),
 ('repetition','Auxiliary table',NULL),
-('resinterface','Resource interfaces',NULL),
 ('resourcetype','Resource types',NULL),
 ('resstatus','Resource status',NULL),
 ('status','Reservation status',NULL),
@@ -321,26 +309,6 @@ CREATE TABLE IF NOT EXISTS `repetition` (
   `repetition_code` varchar(20) COLLATE utf8_bin NOT NULL,
   KEY `repetition_id` (`repetition_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
-
-
--- --------------------------------------------------------
-
---
--- Table structure for table `resinterface`
---
-
-CREATE TABLE IF NOT EXISTS `resinterface` (
-  `resinterface_id` int(11) NOT NULL AUTO_INCREMENT,
-  `resinterface_resource` int(11) NOT NULL,
-  `resinterface_phpfile` varchar(200) COLLATE utf8_bin NOT NULL,
-  `resinterface_room` int(11) DEFAULT NULL,
-  PRIMARY KEY (`resinterface_id`),
-  KEY `resinterface_resource` (`resinterface_resource`),
-  KEY `resinterface_room` (`resinterface_room`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Contains custom interfaces for a specific resource' AUTO_INCREMENT=1 ;
-
-INSERT INTO `resinterface` (`resinterface_id`, `resinterface_resource`, `resinterface_phpfile`, `resinterface_room`) VALUES
-(1, 2, 'tabletIndex.php', NULL);
 
 -- --------------------------------------------------------
 --

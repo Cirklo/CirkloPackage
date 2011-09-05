@@ -7,7 +7,7 @@ INSERT INTO `configparams` (`configParams_name`, `configParams_value`) VALUES
 UPDATE configParams SET configParams_value='1.5.2' WHERE configParams_name='AgendoVersion';
 
 -- 2011-09-05
--- Added an interface for simplified login (usually for tablets)
-INSERT INTO `resinterface` (`resinterface_resource`, `resinterface_phpfile`, `resinterface_room`) VALUES
-(2, 'tabletIndex.php', NULL);
+-- Added an interface for simplified login (usually for tablets)(changed)
+DROP TABLE `resinterface`;
+DROP TABLE `interfacerooms`;
 UPDATE configParams SET configParams_value='1.5.3' WHERE configParams_name='AgendoVersion';

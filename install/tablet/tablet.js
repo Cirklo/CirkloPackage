@@ -26,6 +26,10 @@ function returnButton(buttonId){
 	currentInput.value += buttonId;
 }
 
+function clearPin(){
+	document.getElementById('pin').value = '';
+}
+
 function loginLogout(functionName, resource){
 	pin = document.getElementById('pin').value;
 	document.getElementById('pin').value = '';

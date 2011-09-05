@@ -15,16 +15,16 @@ echo "<link href='tablet/tablet.css' rel='stylesheet' type='text/css'>";
 echo "<script type='text/javascript' src='tablet/tablet.js'></script>";
 
 try{
-	if (isset($_COOKIE["customInterface"])){
+	// if (isset($_COOKIE["customInterface"])){
 		showResources($_COOKIE["customInterface"]);
 
 		if(isset($_GET['message'])){
 			showMsg($_GET['message']);
 		}
-	}
-	else{
-		makeCookie();
-	}
+	// }
+	// else{
+		// makeCookie();
+	// }
 }
 catch(Exception $e){
 	showMsg($e->getMessage());
@@ -32,8 +32,9 @@ catch(Exception $e){
 }
 
 // one tablet per room
-function showResources($cookieValue){
-	$sql = "select distinct resinterface_resource, resource_name from resinterface, resource where resinterface_room=".$cookieValue." and resinterface_resource = resource_id";
+// function showResources($cookieValue){
+function showResources(){
+	$sql = "select distinct resource_id, resource_name from resource where resource_status = 5";
 	$res = dbHelp::query($sql);
 	if(dbHelp::numberOfRows($res) > 0){
 		echo "<div id='resources' style='text-align:center;margin:auto;padding-left:7px;padding-right:7px;'>";
@@ -91,11 +92,11 @@ function resBeingUsed($resource){
 
 function cronTask(){
 	try{
-		$sql = "select distinct resinterface_resource, resource_resolution, resource_maxslots, resource_name, user_firstname, user_lastname, user_email, user_phone, resource_starttime, resource_stoptime, user_id from resinterface, resource, user where resinterface_resource = resource_id and resource_resp = user_id";
+		$sql = "select distinct resource_id, resource_resolution, resource_maxslots, resource_name, user_firstname, user_lastname, user_email, user_phone, resource_starttime, resource_stoptime, user_id from resource, user where resource_status = 5 and resource_resp = user_id";
 		$res = dbHelp::query($sql);
 		if(dbHelp::numberOfRows($res) > 0){
 			while($arr=dbHelp::fetchRowByIndex($res)){
-				if(($resData = resBeingUsed($arr[0])) != false){ // $arr[0] = resinterface_resource
+				if(($resData = resBeingUsed($arr[0])) != false){ // $arr[0] = resource_id
 					$slots = ceil(((time() - strtotime($resData[6])) / 60.0) / $arr[1]); // $resData[6] = entry_datetime, $arr[1] = resource_resolution
 					$currentTime = dbHelp::convertDateStringToTimeStamp(date("YmdHi", time()),'%Y%m%d%H%i');
 					
