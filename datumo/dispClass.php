@@ -121,13 +121,17 @@ class dispClass{
 			if($this->FKtable[$i]!='' and $this->FKtable[$i]!=$objName) {
 				if($_POST[$row[0]."_f_"] != ''){
 					$this->getFKvalue($_POST[$row[0]."_f_"], $i);
-					$value = $this->FKvalue;
+					$value=$this->FKvalue;
 				} else {
-					$value = "";
+					$value="";
 				}
 				echo " class=fk lang=__fk "; //set this as a FK input
 			} else {
-				$value = $_POST[$row[0]."_f_"];
+				if($_POST[$row[0]."_f_"] != ''){
+					$value = $_POST[$row[0]."_f_"];
+				} else {
+					$value="";
+				}
 				echo " class=reg ";
 				if($this->datatype[$this->fullheader[$i]]=="date" or $this->datatype[$this->fullheader[$i]]=="datetime")
 					echo " onfocus=showCalendarControl(this) readonly=readonly";
