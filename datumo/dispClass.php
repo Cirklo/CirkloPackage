@@ -314,7 +314,7 @@ class dispClass{
 		//Was it called by advanced filter??
 		if(!$filter){
 			foreach($this->vars as $key=>$value){
-				if($value==" ")	continue;	//hack for Google Chrome
+				$value=trim($value," ");	//hack for Google Chrome
 				//it comes from filter
 				if(substr($key,strlen($key)-3,strlen($key))=="_f_")
 					$key=substr($key,0,strlen($key)-3);
