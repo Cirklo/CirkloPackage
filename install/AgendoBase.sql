@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `board` (
 
 
 INSERT INTO `configParams` (`configParams_name`, `configParams_value`) VALUES
-('AgendoVersion', '1.5.2'),
+('AgendoVersion', '1.5.3'),
 ('bookingHour', '9'),
 ('imapCheck', '0'),
 ('imapHost', ''),
@@ -106,8 +106,9 @@ CREATE TABLE IF NOT EXISTS `interfacerooms` (
   `interfacerooms_name` varchar(45) NOT NULL,
   PRIMARY KEY (`interfacerooms_id`),
   UNIQUE KEY `interfacerooms_name_UNIQUE` (`interfacerooms_name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Rooms that have resources that use a custom interface' AUTO_INCREMENT=1 ;-- --------------------------------------------------------
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Rooms that have resources that use a custom interface' AUTO_INCREMENT=1 ;
 
+-- --------------------------------------------------------
 --
 -- Dumping data for table `mask`
 --
@@ -338,8 +339,10 @@ CREATE TABLE IF NOT EXISTS `resinterface` (
   KEY `resinterface_room` (`resinterface_room`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Contains custom interfaces for a specific resource' AUTO_INCREMENT=1 ;
 
--- --------------------------------------------------------
+INSERT INTO `resinterface` (`resinterface_id`, `resinterface_resource`, `resinterface_phpfile`, `resinterface_room`) VALUES
+(1, 2, 'tabletIndex.php', NULL);
 
+-- --------------------------------------------------------
 --
 -- Table structure for table `resource`
 --

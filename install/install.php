@@ -517,6 +517,7 @@
 			dbHelp::scriptRead($sqlDatumoConstraints);
 			copyFolderTo('pics', $_SESSION['path']."/pics");
 			copyFolderTo('admin', $_SESSION['path']."/admin");
+			copyFolderTo('tablet', $_SESSION['path']."/tablet");
 			
 //******* .htaccess ***********
 			if(($fileData = file_get_contents($_SESSION['path']."/admin/.htaccess")) == false){
@@ -542,6 +543,7 @@
 			else{
 				if(
 				!copy(($filename = 'indexAgendo.php'), $_SESSION['path']."/index.php") || 
+				!copy(($filename = 'tabletIndex.php'), $_SESSION['path']."/tabletIndex.php") || 
 				!copy(($filename = 'weekview.php'), $_SESSION['path']."/weekview.php")
 				){
 					throw new Exception("Couldn't create the '".$filename."' file in '".$_SESSION['path']."'.");
