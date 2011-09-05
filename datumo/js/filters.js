@@ -19,10 +19,10 @@ function filter(name, objName, j, order, colOrder,page,comeFromAction){
 	var CurForm = eval("document."+name);
 	for(var i=0;i<(CurForm.length-1);i++){
 		if(CurForm[i].alt==""){
+			var newId=CurForm[i].id;
+			url="ajax.php?val=" + CurForm[i].value + "&var=" + newId.substring(0,newId.length-3);
+			var str = ajaxRequest(url);
 			if(CurForm[i].lang=='__fk'){
-				var newId=CurForm[i].id;
-				url="ajax.php?val=" + CurForm[i].value + "&var=" + newId.substring(0,newId.length-3);
-				var str = ajaxRequest(url);
 				CurForm[i].value = str;	
 			}
 		} else {
