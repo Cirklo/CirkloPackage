@@ -22,6 +22,10 @@
 	}
 
 	// set_error_handler("iHateWarnings", E_WARNING);
+	// function iHateWarnings($errno, $errstr){
+		// throw new Exception($errstr);
+	// }
+	
 	
 	function autocompleteAgendo(){
 		$value = $_GET['term'];
@@ -36,8 +40,6 @@
 	}
 
 	function getUsersList(){
-		// $value = $_GET['term'];
-		// $sql = "select user_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
 		$value = explode(' ', $_GET['term']);
 		if(sizeOf($value) > 1){
 			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
@@ -54,10 +56,6 @@
 		echo json_encode($json);
 	}
 
-	// function iHateWarnings($errno, $errstr){
-		// throw new Exception($errstr);
-	// }
-	
 	function logIn(){
 		$userLogin=$_POST['login'];
 		$pass=$_POST['pass'];
@@ -90,12 +88,9 @@
 				// {imap.gmail.com:993/imap/ssl}INBOX
 				// $inbox = @imap_open("{".$configArray['imapHost']."}", $email, $_POST['pass']);
 				$inbox = @imap_open("{".$configArray['imapHost']."}", $userLogin, $_POST['pass']);
-				// wtf('passed');
-				// wtf("{".$configArray['imapHost']."}" ."---". $email ."---". $_POST['pass']);
 				// if login to imap is successfull then $externalLogin = true;
 				if(!$inbox){
 					// $message = imap_last_error();
-					// $message = imap_errors();
 					$message = '';
 					foreach(imap_errors() as $error){
 						$message = $error."<br>".$message;
@@ -125,8 +120,6 @@
 				}
 				// *********************************
 				else{
-					// $json->success = false;
-					// $json->msg = "Wrong Login!";
 					throw new Exception($message);
 				}
 			}
@@ -182,9 +175,6 @@
 	// Initializes the session, checks if it timesOut and if needsToBeLogged it doesnt allow the page where 
 	// this function is to be entered without a user being logged in
 	function initSession($needsToBeLogged=false){
-		// error_reporting(0);
-		// require_once("permClass.php");
-		
         // $maxNoActivity = 10*60; // Seconds of session duration of no activity
 		// $difference = (time() - $_SESSION['activeTime']);
 		// if(isset($_SESSION['user_id']) && $difference > $maxNoActivity && isset($_SESSION['activeTime'])){
@@ -205,7 +195,6 @@
 		session_start();
 		session_unset();
 		session_destroy();
-		// echo "<meta HTTP-EQUIV='REFRESH' content='0; url=./'>";
 	}
 	
 	function loggedInAs($phpFile, $resource){
@@ -216,7 +205,6 @@
 			echo "<div id='loggedAsDiv' align='right' valign='bottom'>";
 				echo "<label style='font-size:".$textSize.";color:".$textColor."'>Logged as ".$_SESSION['user_name']." ".$_SESSION['user_lastName']." | </label>";
 				echo "<a style='cursor:pointer;font-size:".$textSize.";color:".$textColor."' onmouseover=\"this.style.color='".$textColorHover."'\" onmouseout=\"this.style.color='".$textColor."'\" title='Click here to logoff' onclick=logOff('".$phpFile.".php',".$resource.")> Logoff</a>";
-				// echo "<a style='cursor:pointer;font-size:".$textSize.";color:".$textColor."' onmouseover=\"this.style.color='".$textColorHover."'\" onmouseout=\"this.style.color='".$textColor."'\" title='Click here to go to the admin area' onclick=\"window.location='../datumo/index.php'\"> AdminArea</a>";
 			echo "</div>";
 		}
 	}
@@ -249,11 +237,6 @@
 			echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right' />";
-			
-			// echo "<label style='font-size:12px;color:#F7C439;' title='Type the name of the resource you wish to find'>search";
-			// echo "&nbsp;";
-			// echo "<input style='font-size:12px;width:120px;height:18px' type='text' id='resourceSearch' /></label>";
-			// echo "&nbsp;";
 		echo "</div>";
 	}
 	
@@ -275,7 +258,6 @@
 	function echoResourcesDiv(){
 		echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
 			echo "<table>";
-			// echo "<div style='width:162px;overflow:auto;'>";
 				echo "<tr>";
 					echo "<td>";
 					echo "<div style='color:#789095;text-align:left;width:100px;'>";
@@ -293,16 +275,11 @@
 					echo "</div>";
 					echo "</td>";
 				echo "<tr>";
-				
-				// echo "&nbsp;";
-				// echo "<div style='clear: both;'>";
-				// echo "</div>";
-			// echo "</div>";
 			echo "</table>";
+			
 			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
 			$res=dbHelp::query($sql) or die ($sql);
 			$numRows = dbHelp::numberOfRows($res);
-			// echo "<div style='position:relative;'>";
 			if($numRows > 0){
 				echo "<hr>";
 				for ($i=0;$i<$numRows;$i++) {
@@ -310,8 +287,6 @@
 					echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
 				}
 			}
-			// echo "</div>";
-			// echo "<input type='button' id='resourceSearchButton' />";
 		echo "</div>";
 	}
 	
