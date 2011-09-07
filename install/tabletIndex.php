@@ -16,7 +16,8 @@ echo "<script type='text/javascript' src='tablet/tablet.js'></script>";
 
 try{
 	// if (isset($_COOKIE["customInterface"])){
-		showResources($_COOKIE["customInterface"]);
+		// showResources($_COOKIE["customInterface"]);
+		showResources();
 
 		if(isset($_GET['message'])){
 			showMsg($_GET['message']);
@@ -76,7 +77,7 @@ function showResources(){
 		echo "</div>";
 	}
 	else{
-		throw new Exception("No resources associated to this room.");
+		throw new Exception("No resources available for this interface.");
 	}
 }
 

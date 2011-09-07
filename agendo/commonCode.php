@@ -21,6 +21,8 @@
 		exit;
 	}
 
+	// set_error_handler("iHateWarnings", E_WARNING);
+	
 	function autocompleteAgendo(){
 		$value = $_GET['term'];
 		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
@@ -33,100 +35,113 @@
 		echo json_encode($json);
 	}
 
-function getUsersList(){
-	// $value = $_GET['term'];
-	// $sql = "select user_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
-	$value = explode(' ', $_GET['term']);
-	if(sizeOf($value) > 1){
-		$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+	function getUsersList(){
+		// $value = $_GET['term'];
+		// $sql = "select user_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
+		$value = explode(' ', $_GET['term']);
+		if(sizeOf($value) > 1){
+			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+		}
+		else{
+			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+		}
+		$res = dbHelp::query($sql);
+		while($arr = dbHelp::fetchRowByIndex($res)){
+			$row_array['id'] = $arr[0];
+			$row_array['value'] = $arr[1]." ".$arr[2]." (".$arr[3].")";
+			$json[] = $row_array;
+		}
+		echo json_encode($json);
 	}
-	else{
-		$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
-	}
-	$res = dbHelp::query($sql);
-	while($arr = dbHelp::fetchRowByIndex($res)){
-		$row_array['id'] = $arr[0];
-		$row_array['value'] = $arr[1]." ".$arr[2]." (".$arr[3].")";
-		$json[] = $row_array;
-	}
-	echo json_encode($json);
-}
 
+	// function iHateWarnings($errno, $errstr){
+		// throw new Exception($errstr);
+	// }
+	
 	function logIn(){
 		$userLogin=$_POST['login'];
 		$pass=$_POST['pass'];
 		// $resource=$_GET['resource'];
 		$passCrypted=$_POST['passCrypted'];
+		if($passCrypted == 'false'){
+			$pass = cryptPassword($pass);
+		}
+		$externalLogin = false;
+		$message = "Wrong Login!";
 
 		try{
-			if(
-				!isset($userLogin) ||
-				!isset($pass) ||
-				!isset($passCrypted)
-				// !isset($resource)
-			){
-				// $json->success = false;
-				// $json->msg = "Did not get all the data needed to login.";
-				throw new Exception("Did not get all the data needed to login.");
-			}
-			else{
-				if($passCrypted == 'false'){
-					$pass = cryptPassword($pass);
-				}
-				
+			// if(
+				// !isset($userLogin) ||
+				// !isset($pass) ||
+				// !isset($passCrypted)
+			// ){
+				// throw new Exception("Did not get all the data needed to login.");
+			// }
+			// else{
 				//****** check for the imap login ******
-				$externalLogin = false;
-				$sql = "select configParams_name, configParams_value from configParams where configParams_name = 'imapCheck' or configParams_name = 'imapHost' or configParams_name = 'imapMailServer'";
-				$res = dbHelp::query($sql) or die ($sql);
-				$configArray = array();
-				while($arr=dbHelp::fetchRowByIndex($res)){
-					$configArray[$arr[0]] = $arr[1];
-				}
-				$message = "Wrong Login!";
-				if(sizeof($configArray) == 3 && $configArray['imapCheck'] == 1 && $configArray['imapHost'] != '' && $configArray['imapMailServer'] != ''){
-					$email = $userLogin."@".$configArray['imapMailServer'];
-					// {imap.gmail.com:993/imap/ssl}INBOX
-					$inbox = @imap_open("{".$configArray['imapHost']."}INBOX", $email, $_POST['pass']);
-					// if login to imap is successfull then $externalLogin = true;
-					if(!$inbox){
-						$message = imap_last_error();
+			$sql = "select configParams_name, configParams_value from configParams where configParams_name = 'imapCheck' or configParams_name = 'imapHost' or configParams_name = 'imapMailServer'";
+			$res = dbHelp::query($sql) or die ($sql);
+			$configArray = array();
+			while($arr=dbHelp::fetchRowByIndex($res)){
+				$configArray[$arr[0]] = $arr[1];
+			}
+			if(sizeof($configArray) == 3 && $configArray['imapCheck'] == 1 && $configArray['imapHost'] != '' && $configArray['imapMailServer'] != ''){
+				$email = $userLogin."@".$configArray['imapMailServer'];
+				// {imap.gmail.com:993/imap/ssl}INBOX
+				// $inbox = @imap_open("{".$configArray['imapHost']."}", $email, $_POST['pass']);
+				$inbox = @imap_open("{".$configArray['imapHost']."}", $userLogin, $_POST['pass']);
+				// wtf('passed');
+				// wtf("{".$configArray['imapHost']."}" ."---". $email ."---". $_POST['pass']);
+				// if login to imap is successfull then $externalLogin = true;
+				if(!$inbox){
+					// $message = imap_last_error();
+					// $message = imap_errors();
+					$message = '';
+					foreach(imap_errors() as $error){
+						$message = $error."<br>".$message;
 					}
-					else{
-						imap_close($inbox);
-						$externalLogin = true;
-					}
-				}
-				//*****************************************
-				
-				$sql= "select user_firstname, user_lastname, user_passwd, user_id from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
-				$res=dbHelp::query($sql) or die ($sql);
-				if (dbHelp::numberOfRows($res) == 0){
-					// ********** Imap section *********
-					if($externalLogin){
-						// send user to the make new user(aplication.php) screen (with the login, pass and email already filled, from session?)
-						$json->email = $email;
-						$json->makeUser = true;
-					}
-					// *********************************
-					else{
-						// $json->success = false;
-						// $json->msg = "Wrong Login!";
-						throw new Exception($message);
-					}
+					throw new Exception($message);
 				}
 				else{
-					$arr=dbHelp::fetchRowByIndex($res);
-					$_SESSION['user_name'] = $arr[0];
-					$_SESSION['user_lastName'] = $arr[1];
-					$_SESSION['user_pass'] = $arr[2];
-					$_SESSION['user_id'] = $arr[3];
-					$_SESSION['database'] = dbHelp::getSchemaName();
-
-					// $json->success = true;
-					$json->firstName = $arr[0];
-					$json->lastName = $arr[1];
-					// $json->resourceId = $resource;
+					imap_close($inbox);
+					$externalLogin = true;
 				}
+			}
+		}
+		catch(Exception $e){
+			$json->success = false;
+			$json->msg = $e->getMessage();
+		}
+		//*****************************************
+		try{
+			$sql= "select user_firstname, user_lastname, user_passwd, user_id from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
+			$res=dbHelp::query($sql) or die ($sql);
+			if (dbHelp::numberOfRows($res) == 0){
+				// ********** Imap section *********
+				if($externalLogin){
+					// send user to the make new user(aplication.php) screen (with the login, pass and email already filled, from session?)
+					$json->email = $email;
+					$json->makeUser = true;
+				}
+				// *********************************
+				else{
+					// $json->success = false;
+					// $json->msg = "Wrong Login!";
+					throw new Exception($message);
+				}
+			}
+			else{
+				$arr=dbHelp::fetchRowByIndex($res);
+				$_SESSION['user_name'] = $arr[0];
+				$_SESSION['user_lastName'] = $arr[1];
+				$_SESSION['user_pass'] = $arr[2];
+				$_SESSION['user_id'] = $arr[3];
+				$_SESSION['database'] = dbHelp::getSchemaName();
+
+				// $json->success = true;
+				$json->firstName = $arr[0];
+				$json->lastName = $arr[1];
+				// $json->resourceId = $resource;
 			}
 			$json->success = true;
 		}

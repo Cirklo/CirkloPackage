@@ -36,15 +36,18 @@ function go (objIMG) {
 }
 
 // used in application.php
+var email = '';
+// var userInfo = new Array();
 function getUserInfo(){
-	return userInfo;
+	// return userInfo;
+	return email;
 }
 
 // firstName = lastName = email = login = '';
-var userInfo = new Array();
 function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	formObj=document.getElementById('edituser');
 	passCrypted = false;
+	document.body.style.cursor = 'wait';
 
 	if(user==null){
 		if (checkfield(formObj.user_idm)) return;
@@ -62,9 +65,10 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 				if(data.success){
 					//****imap******
 					if(data.makeUser != null && data.makeUser){
-						userInfo['login'] = user;
-						userInfo['pass'] = pass;
-						userInfo['email'] = data.email;
+						// userInfo['login'] = user;
+						// userInfo['pass'] = pass;
+						// userInfo['email'] = data.email;
+						email = data.email;
 						window.open('../agendo/application.php?makeUser', 'NewUser', 'width=400,height=400');
 					}
 					//**************
@@ -78,14 +82,20 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 					}
 				}
 				else{
-					showMessage(data.msg);
+					showMessage(data.msg, true);
 				}
 			}
 			,"json"
 		)
 		.error(
 			function(error) {
-				showMessage(error.responseText);
+				showMessage(error.responseText, true);
+				document.body.style.cursor = 'default';
+			}
+		)
+		.complete(
+			function(){
+				document.body.style.cursor = 'default';
 			}
 		)
 	;

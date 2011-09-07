@@ -73,8 +73,11 @@ function setValues(){
 		userPass = opener.document.getElementById('user_passwd').value;
 		
 		userInfoArray = opener.getUserInfo();
-		if(userInfoArray.length > 0){
-			document.getElementById('Email').value = userInfoArray['email'];
+		// if(userInfoArray.length > 0){
+		if(userInfoArray != ''){
+			// document.getElementById('Email').value = userInfoArray['email'];
+			document.getElementById('Email').value = userInfoArray;
+			document.getElementById('Email').setAttribute('readonly','readonly');
 		}
 	}
 	catch(error){
@@ -106,7 +109,6 @@ function makeNewUser(){
 		$.post('application.php', {	makeUser:true, 'dataArray[]': dataArray},
 			function(serverData){
 				// alert(serverData.message+"----"+serverData.success);
-				alert(serverData);
 				showMessage(serverData.message, !serverData.success);
 				opener.document.getElementById('user_idm').value = '';
 				opener.document.getElementById('user_passwd').value = '';
