@@ -67,10 +67,12 @@ $conn->dbConn();
 
 //Somehow need to check available values
 $having=$perm->restrictAttribute($user_id, $table);
+if($having!="")	$having=" HAVING ".$having;
+else $having="";
 
 //query number 4 -> necessary in order to select specific query from vault
 $sql = $conn->prepare($query->getSQL(4).$having); 
-echo $query->getSQL(4).$having;
+//echo $query->getSQL(4).$having;
 try{
 	$sql->execute();
 } catch (Exception $e){
