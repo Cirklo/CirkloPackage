@@ -42,7 +42,7 @@ function plot(){
 	$table=$row["plot_table"];
 	
 	//retrieving data to build plot
-	$query="SELECT $x_axis, $y_axis FROM $table";
+	$query="SELECT ".$table."_$x_axis, ".$table."_$y_axis FROM $table";
 	$sql=$conn->query($query);
 		
 	//loop through every row of the table
