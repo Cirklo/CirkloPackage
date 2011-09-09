@@ -196,7 +196,7 @@ echo "<br><br>";
 //upload options
 $max_file_size=1000000;
 echo "<input type=hidden name=MAX_FILE_SIZE value='$max_file_size'>";
-echo "<label for=file>Image to upload </label><br>";
+echo "<label for=file>Image to upload (image name must not include spaces)</label><br>";
 echo "<input id=file type=file name=file size=40>";
 echo "<br><br>";
 echo "<input id=submit type=submit name=submit value=Submit onclick=imageValidation()>";
