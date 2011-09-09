@@ -35,7 +35,7 @@ catch(Exception $e){
 // one tablet per room
 // function showResources($cookieValue){
 function showResources(){
-	$sql = "select distinct resource_id, resource_name from resource where resource_status = 5";
+	$sql = "select distinct resource_id, resource_name, pics_path from resource, pics where resource_status = 5 and pics_resource = resource_id";
 	$res = dbHelp::query($sql);
 	if(dbHelp::numberOfRows($res) > 0){
 		echo "<div id='resources' style='text-align:center;margin:auto;padding-left:7px;padding-right:7px;'>";
@@ -66,7 +66,7 @@ function showResources(){
 				
 				echo "<br>";
 				echo "<div class=".$resClassName." onclick=\"resourceClick(".$arr[0].", '".$action."')\">";
-					echo "<img src='./pics/resource".$arr[0].".png' class='resourceImg' title='".$title."'/>";
+					echo "<img src='./pics/".$arr[2]."' class='resourceImg' title='".$title."'/>";
 					echo "<div class='busyUserInfo'>";
 						echo $extra;
 					echo "</div>";

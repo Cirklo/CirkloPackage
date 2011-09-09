@@ -223,7 +223,8 @@ function confirmEntry($entry){
             return false;    
         }
         
-        if ($arrEntry[3]!=$this->User and $arrStatus['user_id']!=$this->User) {
+        // if ($arrEntry[3]!=$this->User and $arrStatus['user_id']!=$this->User) {
+        if ($arrEntry[3]!=$this->User) {
             $this->warning='Wrong User' ;
             return false;
         }

@@ -109,7 +109,7 @@
 		}
 		//*****************************************
 		try{
-			$sql= "select user_firstname, user_lastname, user_passwd, user_id from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
+			$sql= "select user_firstname, user_lastname, user_passwd, user_id, user_level from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
 			$res=dbHelp::query($sql) or die ($sql);
 			if (dbHelp::numberOfRows($res) == 0){
 				// ********** Imap section *********
@@ -125,6 +125,10 @@
 			}
 			else{
 				$arr=dbHelp::fetchRowByIndex($res);
+				if($arr[4] == '3'){ // Inactive account
+					throw new Exception("This account is inactive.");
+				}
+			
 				$_SESSION['user_name'] = $arr[0];
 				$_SESSION['user_lastName'] = $arr[1];
 				$_SESSION['user_pass'] = $arr[2];

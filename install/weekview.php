@@ -502,9 +502,25 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						echo "<tr><td colspan=2><hr></td></tr>";
 
+					// Used to hide buttons
+					}
+					//*********************
+					echo "</table>";
+				
+				echo "<input name=action lang=send style='visibility:hidden;font-size:0px' value='' id=action>";
+				//echo "<input name=maxslots  style='visibility:hidden;font-size:0px' value='' id=maxslots>";
+				echo "<input name=code lang=send style='visibility:hidden;font-size:0px' value='' id=code>";
+				echo "<input name=resource lang=send style='visibility:hidden;font-size:0px' value=". $calendar->getResource() . " id=resource>";
+				echo "<input name=entry lang=send style='visibility:hidden;font-size:0px' value=". $calendar->getEntry(). " id=entry>";
+				echo "<input name=update lang=send style='visibility:hidden;font-size:0px' value=". $update. " id=update>";
+				echo "<input name=tdate style='visibility:hidden;font-size:0px' value=". $calendar->getStartDate() . " id=tdate>";
+				echo "</form>";
+				//GET announcements
+
+					echo "<table align=left style='width:100%;padding:2px;'>";
 						// *************************************************************************
 						// Checks if the user logged is the one responsible for the current resource
-						if(isset($_SESSION['user_id'])){
+						if(isset($_SESSION['user_id']) && $imResstatus5 != 5){
 							$sqlResp = "select 1 from resource where resource_id = ".$calendar->getResource()." and resource_resp = ".$_SESSION['user_id'];
 							$resResp = dbHelp::query($sqlResp);
 							if(dbHelp::numberOfRows($resResp) > 0){
@@ -547,22 +563,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 						
 						echo "<tr><td colspan=2><hr></td></tr>";
 
-					// Used to hide buttons
-					}
-					//*********************
-					echo "</table>";
-				
-				echo "<input name=action lang=send style='visibility:hidden;font-size:0px' value='' id=action>";
-				//echo "<input name=maxslots  style='visibility:hidden;font-size:0px' value='' id=maxslots>";
-				echo "<input name=code lang=send style='visibility:hidden;font-size:0px' value='' id=code>";
-				echo "<input name=resource lang=send style='visibility:hidden;font-size:0px' value=". $calendar->getResource() . " id=resource>";
-				echo "<input name=entry lang=send style='visibility:hidden;font-size:0px' value=". $calendar->getEntry(). " id=entry>";
-				echo "<input name=update lang=send style='visibility:hidden;font-size:0px' value=". $update. " id=update>";
-				echo "<input name=tdate style='visibility:hidden;font-size:0px' value=". $calendar->getStartDate() . " id=tdate>";
-				echo "</form>";
-				//GET announcements
-
-					echo "<table align=left style='width:100%;padding:2px;'>";
 						
 						echo "<tr>";
 							echo "<td colspan=2><b>Announcements</b></td>";
