@@ -70,6 +70,7 @@ $having=$perm->restrictAttribute($user_id, $table);
 
 //query number 4 -> necessary in order to select specific query from vault
 $sql = $conn->prepare($query->getSQL(4).$having); 
+echo $query->getSQL(4).$having;
 try{
 	$sql->execute();
 } catch (Exception $e){
