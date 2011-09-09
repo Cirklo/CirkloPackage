@@ -98,10 +98,10 @@ echo "<div class=next>";
 echo "<a href=javascript:void(0) id=nextFields>Next</a>";
 echo "</div>";
 echo "<hr>";
-echo "<div id=fields></div>";
-echo "<div id=clauses></div>";
-echo "<div id=groupOrder></div>";
-echo "<div id=inputParameters></div>";
-echo "<div id=reportInfo></div>";
+echo "<div id=fields style='position:relative;float:left'></div>";
+echo "<div id=clauses style='position:relative;float:left'></div>";
+echo "<div id=groupOrder style='position:relative;float:left'></div>";
+echo "<div id=inputParameters style='position:relative;float:left'></div>";
+echo "<div id=reportInfo style='position:relative;float:left'></div>";
 echo "</fieldset>";
 ?>
