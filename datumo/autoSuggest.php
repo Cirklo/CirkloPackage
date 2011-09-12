@@ -5,9 +5,11 @@ require_once "session.php";
 $user_id=startSession();
 require_once "__dbConnect.php";
 require_once "queryClass.php";
+require_once "resClass.php";
 
 $conn = new dbConnection(); $conn->dbConn();
 $query = new queryClass();
+$perm =  new restrictClass();
 $engine = $conn->getEngine();
 $database = $conn->getDatabase();
 //change search path to information schema
@@ -63,8 +65,14 @@ $query->engineHandler($engine);
 //change main database
 $conn->dbConn();
 
+//Somehow need to check available values
+$having=$perm->restrictAttribute($user_id, $table);
+if($having!="")	$having=" HAVING ".$having;
+else $having="";
+
 //query number 4 -> necessary in order to select specific query from vault
-$sql = $conn->prepare($query->getSQL(4)); 
+$sql = $conn->prepare($query->getSQL(4).$having); 
+//echo $query->getSQL(4).$having;
 try{
 	$sql->execute();
 } catch (Exception $e){
