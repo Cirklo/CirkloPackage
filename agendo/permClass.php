@@ -224,7 +224,7 @@ function confirmEntry($entry){
         }
         
         // if ($arrEntry[3]!=$this->User and $arrStatus['user_id']!=$this->User) {
-        if ($arrEntry[3]!=$this->User) {
+        if ($arrEntry[3]!=$this->User && !$this->WasAdmin) {
             $this->warning='Wrong User' ;
             return false;
         }
