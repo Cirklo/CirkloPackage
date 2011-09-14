@@ -21,12 +21,6 @@
 		exit;
 	}
 
-	// set_error_handler("iHateWarnings", E_WARNING);
-	// function iHateWarnings($errno, $errstr){
-		// throw new Exception($errstr);
-	// }
-	
-	
 	function autocompleteAgendo(){
 		$value = $_GET['term'];
 		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
