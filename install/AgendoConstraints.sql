@@ -85,8 +85,10 @@ ALTER TABLE `similarresources`
 --
 ALTER TABLE `xfields`
   ADD CONSTRAINT `xfields_ibfk_1` FOREIGN KEY (`xfields_type`) REFERENCES `xfieldsinputtype` (`xfieldsinputtype_id`),
-  ADD CONSTRAINT `xfields_ibfk_2` FOREIGN KEY (`xfields_resource`) REFERENCES `resource` (`resource_id`);
-
+  ADD CONSTRAINT `xfields_ibfk_2` FOREIGN KEY (`xfields_resource`) REFERENCES `resource` (`resource_id`),
+  ADD CONSTRAINT `xfields_ibfk_3` FOREIGN KEY (`xfields_placement`) REFERENCES `xfieldsplacement` (`xfieldsplacement_id`);
+  
+  
 --
 -- Constraints for table `xfieldsval`
 --

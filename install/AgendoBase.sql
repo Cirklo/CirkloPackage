@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `board` (
 
 
 INSERT INTO `configParams` (`configParams_name`, `configParams_value`) VALUES
-('AgendoVersion', '1.5.3'),
+('AgendoVersion', '1.5.4'),
 ('bookingHour', '9'),
 ('imapCheck', '0'),
 ('imapHost', ''),
@@ -450,10 +450,12 @@ CREATE TABLE IF NOT EXISTS `xfields` (
   `xfields_label` varchar(32) COLLATE utf8_bin NOT NULL,
   `xfields_type` int(11) NOT NULL,
   `xfields_resource` int(11) NOT NULL,
+  `xfields_placement` int(11) NOT NULL,
   PRIMARY KEY (`xfields_id`),
   KEY `xfields_type` (`xfields_type`),
-  KEY `xfields_resource` (`xfields_resource`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+  KEY `xfields_resource` (`xfields_resource`),
+  KEY `xfields_placement` (`xfields_placement`)
+  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -475,7 +477,8 @@ CREATE TABLE IF NOT EXISTS `xfieldsinputtype` (
 INSERT INTO `xfieldsinputtype` (`xfieldsinputtype_id`, `xfieldsinputtype_type`) VALUES
 (1, 'TextBox'),
 (2, 'CheckBoxSinglePick'),
-(3, 'CheckBoxMultiPick');
+(3, 'CheckBoxMultiPick'),
+(4, 'NumericOnlyInput');
 
 -- --------------------------------------------------------
 
