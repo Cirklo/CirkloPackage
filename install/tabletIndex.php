@@ -82,7 +82,8 @@ function showResources(){
 }
 
 function resBeingUsed($resource){
-	$sql = "select user_firstname, user_lastname, user_phone, user_phonext, user_email, entry_id, entry_datetime, entry_repeat from user, entry, (select max(entry_id) as maxentry from entry) as maxSelect where entry_id = maxentry and entry_resource=".$resource." and entry_status = 5 and entry_user = user_id";
+	// $sql = "select user_firstname, user_lastname, user_phone, user_phonext, user_email, entry_id, entry_datetime, entry_repeat from user, entry, (select max(entry_id) as maxentry from entry) as maxSelect where entry_id = maxentry and entry_resource=".$resource." and entry_status = 5 and entry_user = user_id";
+	$sql = "select user_firstname, user_lastname, user_phone, user_phonext, user_email, maxentry, entry_datetime, entry_repeat from user, entry, (select max(entry_id) as maxentry from entry where entry_resource = ".$resource.") as maxSelect where entry_resource=".$resource." and entry_status = 5 and entry_user = user_id and entry_id = maxentry";
 	$res = dbHelp::query($sql);
 	if(dbHelp::numberOfRows($res) > 0){
 		return dbHelp::fetchRowByIndex($res);
@@ -116,21 +117,20 @@ function cronTask(){
 					// if currentTime == resource_endtime
 					// send email, set status to logged out
 					else if($currentTimeSecs == $endTimeSecs){
-						notifyUserAndResp($arr[3], $resData[0]." ".$resData[1], $resData[2], $resData[3], $resData[4], $arr[6]);
 						echo "Resource stop time reached.";
+						notifyUserAndResp($arr[3], $resData[0]." ".$resData[1], $resData[2], $resData[3], $resData[4], $arr[6]);
 					}
 					// if currentTime > resource_starttime and currentTime < resource_endtime
 					// update number of slots, if maxSlotNumber*i is reached send email
 					else if($currentTimeSecs > $startTimeSecs && $currentTimeSecs < $endTimeSecs){
 						if(($slots - 1) % $arr[2] == 0){ // $arr[2] = resource_maxslots
 							// $arr[3] = resource_name, $resData[0] = user first name, $resData[1] = user last name, $resData[2] = user Phone number, $resData[3] = user Phone extension, $resData[4] = user Email, $arr[6] = responsible's email
+							echo "Maximum slot time reached.\n";
 							notifyUserAndResp($arr[3], $resData[0]." ".$resData[1], $resData[2], $resData[3], $resData[4], $arr[6]);
-							echo "Maximum slot time reached.";
 						}
 						else{
-							echo "Number of slots update.";
+							echo "Number of slots update.\n";
 						}
-						
 					}
 					dbHelp::query($sql);
 				}
@@ -145,6 +145,7 @@ function cronTask(){
 	catch(Exception $e){
 		echo "\nError:\n".str_replace("<br>", "\n", $e->getMessage())."\n"."(".date('d/m/Y H:i').")"."\n\n";
 	}
+	// echo "\n ->".$sql;
 }
 
 function notifyUserAndResp($resource_name, $usersName, $usersPhoneNumber, $usersPhoneExtension, $usersEmail, $respEmail){

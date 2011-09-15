@@ -212,7 +212,7 @@ div.resourcediv{
 	padding:2px;
  }
 
-input.inpbox, select.similar {
+input.inpbox, select.similar, input.numericXfield {
 	font-size:12px;
 	width:122px;
 	background:#EAE8E5;

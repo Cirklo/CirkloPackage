@@ -77,17 +77,6 @@ if (isset($_GET['msg'])) {$msg =$_GET['msg'];} else {$msg ='';} ;
 //##############################################
 echo "<body onload=init(" . $calendar->getStatus() . "," . $calendar->getMaxSlots() . ")>";
 
-
-// for displaying user info
-echo "<div id=DisplayUserInfo style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'></div>";
-//for displaying user confirmation comments
-echo "<div id=InputComments style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
-    echo "<form name=entrycomments id=entrycomments>";
-    echo "<textarea name=txtcomments id=txtcomments rows=3 cols=25></textarea>";
-    echo "</form>";
-    echo "<center><a href=\"javascript:addcomments(0)\">add comment</a>&nbsp;&nbsp;&nbsp;";
-    echo "<a href=\"javascript:addcomments()\">everything ok!</a>";
-echo "</div>";
 //for displaying help
 echo "<div id=help style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
 echo "<p style='text-align:center'>Equipment status: " . $calendar->getStatusName()."</p>";
@@ -217,7 +206,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 			if (isset($_GET['entry'])){
 				$entry=clean_input($_GET['entry']);
 				$calendar->setEntry($entry);
-				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." group by xfields_id, xfields_type";
+				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
 				
 				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=".$calendar->getEntry();
 				$res = dbHelp::query($sqlWeekDay);
@@ -238,7 +227,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 				
 			} elseif ($update!=0) {
 				$calendar->setEntry($update);
-				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." group by xfields_id, xfields_type";
+				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
 				
 				// $sqle="select entry_user, entry_repeat, @d:= date_format(date_sub(entry_datetime,interval 1 day),'%Y%m%d'),  @wd:=date_format(@d,'%w'), date_format(date_sub(@d, interval @wd day),'%Y%m%d') as date, date_format(entry_datetime,'%h') + date_format(entry_datetime,'%i')/60 as starttime, entry_slots from entry where entry_id=".$calendar->getEntry();
 				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=".$calendar->getEntry();
@@ -264,21 +253,18 @@ echo "<table id='master' style='margin:auto' width=750>";
 					$entrystart=0;
 					$nslots=1;
 					$user='';
-					$sql ="SELECT xfields_name, xfields_label, xfields_type, xfields_id from xfields, xfieldsinputtype where xfields_resource=". $calendar->getResource()." group by xfields_id, xfields_type";
+					$sql ="SELECT xfields_name, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsinputtype where xfields_resource=". $calendar->getResource()." and xfields_placement = 1  group by xfields_id, xfields_type";
 			}
 // **************************************************    end of calendar stuff being done      **********************************************************
-			
-			
+
+
 	echo "<tr>";
 		// ************************************************************    entry div stuff here   ***************************************************************************
 		echo "<td style='vertical-align:top;height:100%;'>";
-		
 			$res=dbHelp::query($sql);
 			$nxfields=dbHelp::numberOfRows($res);
-
 			echo "<div id=entrydiv class=entrydiv>";
 				echo "<form name=entrymanage id=entrymanage >";
-				// echo "<tr><td colspan=3>";
 				echo "<table id=entryinner class=entryinner align=center>";
 					echo "<tr>";
 						echo "<td colspan=2>";
@@ -301,8 +287,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 											$nextDetected = true;
 										}
 									}
-									else
+									else{
 										$currentDetected = true;
+									}
 								}
 
 								$n=0;
@@ -440,44 +427,53 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "<script type='text/javascript'>Calendar.setup({inputField	 : 'enddate',baseField    : 'element_2',button: 'enddate',ifFormat: '%Y %e, %D',onSelect: selectDate});	</script>";
 
 						// ********************************** Xfields echoing *****************************
-						if($nxfields > 0)
+						if($nxfields > 0){
 							echo "<tr><td colspan=2><hr></td></tr>";
-						
-						// xfieldsinputtype: 1 = input, 2 = singlepickcheckbox, 3 = multipickcheckbox
-						$formerName;
-						for ($i=0;$i<$nxfields;$i++){
-							$arrxfields= dbHelp::fetchRowByName($res);
-							$extraHtml = '';
-							echo "<tr>";
-								if($arrxfields['xfields_type'] == 1){
-									if ($calendar->getEntry()!=0)
-										$extraHtml = "value='" . $arrxfields['xfieldsval_value']. "'";
-									echo "<td colspan=2>";
-									echo $arrxfields['xfields_label'];
-									echo "<br><input lang=send onkeypress='return noenter()' class=inpbox  id='".$arrxfields['xfields_name'].$arrxfields['xfields_id']."' name='".$arrxfields['xfields_label']."' ".$extraHtml.">";
-									echo "</td>";
-								}
-								else if($arrxfields['xfields_type'] == 2 || $arrxfields['xfields_type'] == 3){
-									if($formerName != $arrxfields['xfields_name']){
-										echo "<tr><td colspan=2>".$arrxfields['xfields_name']."</td></tr>";
-										echo "<tr><td colspan=2>";
-											echo "<table id='".$arrxfields['xfields_name']."'>";
-											echo "</table>";
-										echo "</td></tr>";
+							
+							// xfieldsinputtype: 1 = input, 2 = singlepickcheckbox, 3 = multipickcheckbox
+							$formerName;
+							for ($i=0;$i<$nxfields;$i++){
+								$arrxfields= dbHelp::fetchRowByName($res);
+								$extraHtml = '';
+								echo "<tr>";
+									if($arrxfields['xfields_type'] == 1){
+										if ($calendar->getEntry()!=0)
+											$extraHtml = "value='" . $arrxfields['xfieldsval_value']. "'";
+										echo "<td colspan=2>";
+										echo $arrxfields['xfields_label'];
+										echo "<br><input lang=send onkeypress='return noenter()' class=inpbox  id='".$arrxfields['xfields_name']."-".$arrxfields['xfields_id']."' name='".$arrxfields['xfields_label']."' ".$extraHtml.">";
+										echo "</td>";
 									}
-									if ($calendar->getEntry()!=0 && $arrxfields['xfieldsval_value']=='true')
-										$extraHtml = 'checked';
-										
-										//****
-									echo "<script type='text/javascript'>";
-									echo "addRadioOrCheck('".$arrxfields['xfields_name']."','".$arrxfields['xfields_id']."','".$arrxfields['xfields_label']."','".$arrxfields['xfields_type']."');";
-									echo "</script>";
-										//****
-								
-								}
-								// $formerInputType = $arrxfields['xfields_type'];
-								$formerName = $arrxfields['xfields_name'];
-							echo "</tr>";
+									elseif($arrxfields['xfields_type'] == 4){// input numeric
+										if ($calendar->getEntry()!=0)
+											$extraHtml = "value='" . $arrxfields['xfieldsval_value']. "'";
+										echo "<td colspan=2>";
+										echo $arrxfields['xfields_label'];
+										echo "<br><input lang=send onkeypress='return noenter()' class=numericXfield  id='".$arrxfields['xfields_name']."-".$arrxfields['xfields_id']."' name='".$arrxfields['xfields_label']."' ".$extraHtml.">";
+										echo "</td>";
+									}
+									else if($arrxfields['xfields_type'] == 2 || $arrxfields['xfields_type'] == 3){
+										if($formerName != $arrxfields['xfields_name']){
+											echo "<tr><td colspan=2>".$arrxfields['xfields_name']."</td></tr>";
+											echo "<tr><td colspan=2>";
+												echo "<table id='".$arrxfields['xfields_name']."'>";
+												echo "</table>";
+											echo "</td></tr>";
+										}
+										if ($calendar->getEntry()!=0 && $arrxfields['xfieldsval_value']=='true')
+											$extraHtml = 'checked';
+											
+											//****
+										echo "<script type='text/javascript'>";
+										echo "addRadioOrCheck('".$arrxfields['xfields_name']."','".$arrxfields['xfields_id']."','".$arrxfields['xfields_label']."','".$arrxfields['xfields_type']."');";
+										echo "</script>";
+											//****
+									
+									}
+									// $formerInputType = $arrxfields['xfields_type'];
+									$formerName = $arrxfields['xfields_name'];
+								echo "</tr>";
+							}
 						}
 						// ********************************* /Xfields echoing *****************************
 
@@ -598,7 +594,54 @@ $pub=new pubHandler($resource);
 pageViews($resource);
 
 echo "</div>";
-echo "</body></html>";
+
+
+// for displaying user info
+echo "<div id=DisplayUserInfo style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'></div>";
+$sql = "select xfields_type, xfields_label, xfields_name, xfields_id from xfields where xfields_placement = 2 and xfields_resource = ".$resource;
+$res = dbHelp::query($sql);
+//for displaying user confirmation comments
+echo "<div id=InputComments style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
+	if(dbHelp::numberOfRows($res) > 0){
+		echo "<form id='confirmXfields'>";
+		while($arr = dbHelp::fetchRowByName($res)){
+			if($arr['xfields_type'] == '1'){// input text
+				echo "<label>".$arr['xfields_label']."</label>";
+				echo "<br><input lang=send onkeypress='return noenter()' class=inpbox  id='".$arr['xfields_name']."-".$arr['xfields_id']."' name='".$arr['xfields_label']."'><br>";
+			}
+			elseif($arr['xfields_type'] == '4'){// input numeric
+				echo "<label>".$arr['xfields_label']."</label>";
+				echo "<br><input lang=send onkeypress='return noenter()' class=numericXfield  id='".$arr['xfields_name']."-".$arr['xfields_id']."' name='".$arr['xfields_label']."'><br>";
+			}
+			elseif($arr['xfields_type'] == '2' || $arr['xfields_type'] == '3'){// radio or checkbox
+				if($formerName != $arr['xfields_name']){
+					echo "<label>".$arr['xfields_name']."</label><br>";
+					echo "<table id='".$arr['xfields_name']."'>";
+					echo "</table>";
+				}
+				// ****
+				echo "<script type='text/javascript'>";
+				echo "addRadioOrCheck('".$arr['xfields_name']."','".$arr['xfields_id']."','".$arr['xfields_label']."','".$arr['xfields_type']."');";
+				echo "</script>";
+				// ****
+			}
+			$formerName = $arr['xfields_name'];
+			echo "&nbsp";
+		}
+		echo "</form>";
+	}
+	
+    echo "<form name=entrycomments id=entrycomments>";
+		echo "<textarea name=txtcomments id=txtcomments rows=3 cols=25></textarea>";
+    echo "</form>";
+	
+    echo "<center><a href=\"javascript:addcomments(0)\">add comment</a>&nbsp;&nbsp;&nbsp;";
+    echo "<a href=\"javascript:addcomments()\">everything ok!</a>";
+echo "</div>";
+
+
+echo "</body>";
+echo "</html>";
 
 
 ?>

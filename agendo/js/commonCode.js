@@ -43,6 +43,25 @@ function getUserInfo(){
 	return email;
 }
 
+function textIsNumeric(textToCheck){
+	for(var i = 0; i < textToCheck.length; i++){
+		if(!textIsNumericAux(textToCheck.charAt(i))){
+			return false
+		}
+	}
+	return true;
+}
+
+function textIsNumericAux(charToCheck){
+	allowedChars = '0123456789';
+	for(var i = 0; i < allowedChars.length; i++){
+		if(allowedChars.charAt(i) == charToCheck){
+			return true;
+		}
+	}
+	return false;
+}
+
 // firstName = lastName = email = login = '';
 function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	formObj=document.getElementById('edituser');

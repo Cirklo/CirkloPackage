@@ -133,12 +133,12 @@ function add(){
         $last=dbHelp::fetchRowByIndex($res);
 		
 		// xfieldsinputtype: 1 = input, 2 = singlepickcheckbox, 3 = multipickcheckbox
-        $sql="select xfields_name, xfields_id, xfields_label, xfields_type from xfields where xfields_resource=".$resource." group by xfields_id, xfields_type";
+        $sql="select xfields_name, xfields_id, xfields_label, xfields_type from xfields where xfields_resource=".$resource." and xfields_placement = 1 group by xfields_id, xfields_type";
         $res=dbHelp::query($sql) or die($sql);
         $extra= array();
 		while($arr=dbHelp::fetchRowByIndex($res)){
 			$val = '';
-			$val=clean_input($_GET[$arr[0].$arr[1]]);
+			$val=clean_input($_GET[$arr[0]."-".$arr[1]]);
 
             // eval("\$$var='$val';");
 			if(($arr[3] == 2 || $arr[3] == 3) && $val=='true')
@@ -531,7 +531,6 @@ function confirm(){
 }
 
 function addcomments(){
-    
     $resource=clean_input($_GET['resource']);
     $entry=clean_input($_GET['entry']);
     $comments=clean_input($_GET['comments']);
@@ -549,4 +548,17 @@ function addcomments(){
 		echo "Comment added";
 	}
 }
+
+function addCommentsXfields(){
+	$entry = $_POST['entry'];
+	$resource = $_POST['resource'];
+	$idArray = $_POST['idArray'];
+	foreach($idArray as $id => $value){
+		if($value != 'undefined'){
+			$sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$entry.",".$id.",'".$value."')";
+			dbHelp::query($sql);
+		}
+	}
+}
+
 ?>

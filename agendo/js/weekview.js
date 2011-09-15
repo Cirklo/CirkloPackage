@@ -11,6 +11,7 @@ var fadeCount;
 var usingSession;
 var detectedUser;
 var path = '';
+var numericXfield = 'numericXfield';// if changing this, change the style.css class name as well
 
 //bgcolor2='document..backgroundColor; // just to set bgcolor2 at the beggining
 
@@ -347,7 +348,9 @@ function ManageEntries(action,ttime,tresolution) {
     } //
   //  
 }
+
 function addcomments(entry) {
+	myForm=document.getElementById('entrycomments');
     if (entry==0){
         if (window.XMLHttpRequest){
             xmlhttp=new XMLHttpRequest();
@@ -358,16 +361,66 @@ function addcomments(entry) {
         entry=document.getElementById('entry').value;
         resource=document.getElementById('resource').value;
         user_id=document.getElementById('user_id').title;
-        myForm=document.getElementById('entrycomments');
         if (myForm[0].value!='') {
             var re = /\'/g;
             myForm[0].value=myForm[0].value.replace(re," ");
-            //alert(myForm[0].value);
             url='../agendo/process.php?resource=' + resource +'&entry=' + entry + '&user_id=' + user_id + '&action=addcomments&comments='+ myForm[0].value;
             xmlhttp.open('GET', url , true);
             xmlhttp.send(null);
         }
     }
+	
+	// post comment values
+	nodes = document.getElementById('confirmXfields');// form allows to list the elements without garbage in the middle
+	var idArray = new Array();
+	var filled = true;	
+	var lastTableName = "";
+	try{
+		for(i=0; i<nodes.length; i++){
+			fieldId = nodes[i].id.split('-');
+			if(lastTableName != nodes[i].name){
+				if(!filled){
+					throw new Error("Please fill all fields");
+				}
+				else{
+					filled = false;
+					lastTableName = nodes[i].name;
+				}
+			}
+			if(nodes[i].type == 'radio' || nodes[i].type == 'checkbox'){
+				idArray[fieldId[1]] = nodes[i].checked;
+				if(nodes[i].checked){
+					filled = true;
+				}
+			}
+			else if(nodes[i].className == numericXfield){
+				if(!textIsNumeric(nodes[i].value)){
+					throw new Error('Not a numeric value');
+				}
+				idArray[fieldId[1]] = nodes[i].value;
+				if(nodes[i].value != ''){
+					filled = true;
+				}
+			}
+			else{
+				idArray[fieldId[1]] = nodes[i].value;
+				if(nodes[i].value != ''){
+					filled = true;
+				}
+			}
+		}
+		// Used for the last "element" of the form (not checked in the for)
+		if(!filled){
+			throw new Error("Please fill all fields");
+		}
+	}
+	catch(err){
+		showMessage(err.message);
+		return;
+	}
+	
+	$.post('../agendo/process.php?action=addCommentsXfields', {entry: document.getElementById('entry').value, resource: resource, idArray: idArray});
+	//*********************
     
     ajaxEntries('GET','../agendo/process.php?resource=' + resource,true);
     clear_table(table,false); 
@@ -391,11 +444,8 @@ function checkIfNotCheckedAux(field, last){
 	if(field.checked)
 		atLeastOneChecked = true;
 	nonChecked = false;	
-	// if(last || (nameTable != '' && nameTable != field.name)){
 	if(last){
-	// alert(nameTable+'--'+field.name);
 		if(!atLeastOneChecked){
-			// alert('field blablabla error');
 			document.getElementById('msg').innerHTML = "Field " + nameTable + " required!";
 			showfade('msg',fadeConstant);
 			clear_table(document.getElementById('caltable'),true);
@@ -426,10 +476,15 @@ function ajaxEntries(method,url,nosync){
     switch(action) {
     case 'add':
         for (nelements=0;nelements<objForm.length;nelements++){
-// alert(objForm[nelements].name);
 			// its over 9000!!!!
 			if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
 				return;
+			else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
+				document.getElementById('msg').innerHTML = "Not a numeric value";
+				showfade('msg',fadeConstant);
+				clear_table(document.getElementById('caltable'),true);
+				return;
+			}
             else if (checkfield(objForm[nelements]))
 				return;
         }
@@ -440,6 +495,12 @@ function ajaxEntries(method,url,nosync){
 			// its over 9000!!!!
 			if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
 				return;
+            else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
+				document.getElementById('msg').innerHTML = "Not a numeric value";
+				showfade('msg',fadeConstant);
+				clear_table(document.getElementById('caltable'),true);
+				return;
+			}
             else if (checkfield(objForm[nelements]))
 				return;
         }
@@ -455,7 +516,13 @@ function ajaxEntries(method,url,nosync){
             // its over 9000!!!!
 			if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
 				return;
-            else if (checkfield(objForm[nelements]))
+			else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
+				document.getElementById('msg').innerHTML = "Not a numeric value";
+				showfade('msg',fadeConstant);
+				clear_table(document.getElementById('caltable'),true);
+				return;
+			}
+           else if (checkfield(objForm[nelements]))
 				return;
         }
 		
@@ -466,7 +533,6 @@ function ajaxEntries(method,url,nosync){
     }
 	
     objForm.user_id.value=objForm.user_id.title;
-    
     // builds post string
     for (nelements=0;nelements<objForm.length;nelements++){
         if (objForm[nelements].lang=='send') {
@@ -577,6 +643,8 @@ function submitUser(resource) {
 }
 
 function addRadioOrCheck(tableName, id, label, type){
+	beginHtml = "<tr><td colspan=2>";
+	endHtml = "</td></tr>";
 	// name = tableName + id;
 	name = tableName;
 	typeName = 'checkbox';
@@ -584,7 +652,7 @@ function addRadioOrCheck(tableName, id, label, type){
 		// name = tableName;
 		typeName = 'radio';
 	}
-	extraHtml = "<tr><td colspan=2><label><input lang='send' type='" + typeName + "' name=" + name + " id=" + tableName + id + " value='" + checkedValue + "'>&nbsp;" + label + "</label></td></tr>";
+	extraHtml = beginHtml + "<label><input lang='send' type='" + typeName + "' name=" + name + " id=" + tableName + "-" + id + " value='" + checkedValue + "'>&nbsp;" + label + "</label>" + endHtml;
 	document.getElementById(tableName).innerHTML = document.getElementById(tableName).innerHTML + extraHtml;
 }
 
@@ -597,7 +665,6 @@ function checkfield(field) {
 	}
 	
     if (field.value=='') {
-
 		field.focus();
         if (document.getElementById('msg').innerHTML != "Field " + field.name + " required!")
 			document.getElementById('msg').innerHTML = "Field " + field.name + " required!";
@@ -607,7 +674,6 @@ function checkfield(field) {
         return true;
     }
     return false;
-    
 }
 
 function similarResources(value){

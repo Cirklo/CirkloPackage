@@ -113,14 +113,14 @@ function DisplayUserInfo() {
 
 function DisplayEntryInfo() {
     $entry=clean_input($_GET['entry']);
-    $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and  xfieldsval_entry=".$entry." group by xfields_id, xfields_type";
+    $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=".$entry." and xfields_placement = 1 group by xfields_id, xfields_type";
     $res=dbHelp::query($sql) or die ($sql);
     
 	while($arr=dbHelp::fetchRowByIndex($res)){
 		if($arr[2] == 2 || $arr[2] == 3)
-			echo "document.getElementById('".$arr[0].$arr[3]."').checked=".$arr[1].";";
+			echo "document.getElementById('".$arr[0]."-".$arr[3]."').checked=".$arr[1].";";
 		else
-			echo "document.getElementById('".$arr[0].$arr[3]."').value='".$arr[1]."';";
+			echo "document.getElementById('".$arr[0]."-".$arr[3]."').value='".$arr[1]."';";
     }
 }
 
