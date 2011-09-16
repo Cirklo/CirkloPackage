@@ -498,6 +498,16 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						echo "<tr><td colspan=2><hr></td></tr>";
 
+						echo "<tr><td colspan=2 align='center'>";
+							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\">";
+							echo "<input type=button style='width:60px' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\">";
+							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\"><br>";
+							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\">";
+							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\">";
+						echo "</td></tr>";
+						
+						echo "<tr><td colspan=2><hr></td></tr>";
+
 					// Used to hide buttons
 					}
 					//*********************
@@ -548,16 +558,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 							}
 						}
 						// *************************************************************************
-
-						echo "<tr><td colspan=2 align='center'>";
-							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\">";
-							echo "<input type=button style='width:60px' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\">";
-							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\"><br>";
-							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\">";
-							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\">";
-						echo "</td></tr>";
-						
-						echo "<tr><td colspan=2><hr></td></tr>";
 
 						
 						echo "<tr>";

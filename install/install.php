@@ -396,7 +396,7 @@
 			wtlog('Path marker replaced successfully','a');
 
 			// throws exception if error
-			tablesAlreadyExist($sql);
+			// tablesAlreadyExist($sql); // not being used since the database is not created if it already exists
 
 			// throws exception if error
 			// imports part of the database
@@ -561,7 +561,7 @@
 					throw new Exception("Failed to open '".$currentFile."'.");
 				}
 				
-				tablesAlreadyExist($sqlAgendo);
+				// tablesAlreadyExist($sqlAgendo); // not being used since the database is not created if it already exists
 
 				dbHelp::scriptRead($sqlAgendo);
 				dbHelp::scriptRead($sqlAgendoContraints);
@@ -642,7 +642,6 @@
 	}
 	
 	function tablesAlreadyExist($sql){
-		$msg = $success;
 		$tables = getBetweenArray($sql, 'CREATE TABLE IF NOT EXISTS', '(');
 		$sqlExisting = "select table_name from information_schema.tables where table_schema = '".dbHelp::getSchemaName()."'";
 		$foundTable = "";
@@ -650,10 +649,10 @@
 		$arr = dbHelp::fetchRowByIndex($res);
 		if(!empty($arr)){
 			for($i = 0; $i<sizeOf($tables); $i++){
-					if(in_array(str_replace('`', '', $tables[$i]), $arr, true)){
-						$foundTable = $tables[$i];
-						throw new Exception("Table ".$tables[$i]." already exists.");
-					}
+				if(in_array(str_replace('`', '', $tables[$i]), $arr, true)){
+					$foundTable = $tables[$i];
+					throw new Exception("Table ".$tables[$i]." already exists.");
+				}
 			}
 		}
 	}
