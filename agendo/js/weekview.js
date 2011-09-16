@@ -331,9 +331,9 @@ function ManageEntries(action,ttime,tresolution) {
                         objForm=document.getElementById('entrymanage');
                         
                             document.getElementById('entry').value=cell.title;
-                            myDiv=document.getElementById('InputComments');
-                            AssignPosition(myDiv);
-                            myDiv.style.display = "block";                
+							myDiv = document.getElementById('InputComments');
+							AssignPosition(myDiv);
+							myDiv.style.display = "block";                
                             //ajaxEntries('GET','process.php?&resource=' + resource,true,resource,tdate);
                             //clear_table(table,false);                 
                     } else {
@@ -373,53 +373,55 @@ function addcomments(entry) {
 	// post comment values
 	nodes = document.getElementById('confirmXfields');// form allows to list the elements without garbage in the middle
 	var idArray = new Array();
-	var filled = true;	
+	var filled = true;
 	var lastTableName = "";
-	try{
-		for(i=0; i<nodes.length; i++){
-			fieldId = nodes[i].id.split('-');
-			if(lastTableName != nodes[i].name){
-				if(!filled){
-					throw new Error("Please fill all fields");
+	if(nodes != null){
+		try{
+			for(i=0; i<nodes.length; i++){
+				fieldId = nodes[i].id.split('-');
+				if(lastTableName != nodes[i].name){
+					if(!filled){
+						throw new Error("Please fill all fields");
+					}
+					else{
+						filled = false;
+						lastTableName = nodes[i].name;
+					}
+				}
+				if(nodes[i].type == 'radio' || nodes[i].type == 'checkbox'){
+					idArray[fieldId[1]] = nodes[i].checked;
+					if(nodes[i].checked){
+						filled = true;
+					}
+				}
+				else if(nodes[i].className == numericXfield){
+					if(!textIsNumeric(nodes[i].value)){
+						throw new Error('Not a numeric value');
+					}
+					idArray[fieldId[1]] = nodes[i].value;
+					if(nodes[i].value != ''){
+						filled = true;
+					}
 				}
 				else{
-					filled = false;
-					lastTableName = nodes[i].name;
+					idArray[fieldId[1]] = nodes[i].value;
+					if(nodes[i].value != ''){
+						filled = true;
+					}
 				}
 			}
-			if(nodes[i].type == 'radio' || nodes[i].type == 'checkbox'){
-				idArray[fieldId[1]] = nodes[i].checked;
-				if(nodes[i].checked){
-					filled = true;
-				}
-			}
-			else if(nodes[i].className == numericXfield){
-				if(!textIsNumeric(nodes[i].value)){
-					throw new Error('Not a numeric value');
-				}
-				idArray[fieldId[1]] = nodes[i].value;
-				if(nodes[i].value != ''){
-					filled = true;
-				}
-			}
-			else{
-				idArray[fieldId[1]] = nodes[i].value;
-				if(nodes[i].value != ''){
-					filled = true;
-				}
+			// Used for the last "element" of the form (not checked in the for)
+			if(!filled){
+				throw new Error("Please fill all fields");
 			}
 		}
-		// Used for the last "element" of the form (not checked in the for)
-		if(!filled){
-			throw new Error("Please fill all fields");
+		catch(err){
+			showMessage(err.message);
+			return;
 		}
+		
+		$.post('../agendo/process.php?action=addCommentsXfields', {entry: document.getElementById('entry').value, resource: resource, idArray: idArray});
 	}
-	catch(err){
-		showMessage(err.message);
-		return;
-	}
-	
-	$.post('../agendo/process.php?action=addCommentsXfields', {entry: document.getElementById('entry').value, resource: resource, idArray: idArray});
 	//*********************
     
     ajaxEntries('GET','../agendo/process.php?resource=' + resource,true);
