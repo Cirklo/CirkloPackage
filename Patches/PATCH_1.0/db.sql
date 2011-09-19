@@ -27,7 +27,7 @@ INSERT INTO `xfieldsplacement` (`xfieldsplacement_name`) VALUES
 ('Confirmation');
 
 ALTER TABLE `xfields` ADD COLUMN `xfields_placement` INT NOT NULL  AFTER `xfields_resource`;
-UPDATE xfields SET xfields_placement=1 WHERE xfields_placement is null;
+UPDATE xfields SET xfields_placement=1 WHERE xfields_placement=0;
 
 ALTER TABLE `xfields` ADD INDEX ( `xfields_placement` );
 ALTER TABLE `xfields` ADD FOREIGN KEY ( `xfields_placement` ) REFERENCES `xfieldsplacement` (

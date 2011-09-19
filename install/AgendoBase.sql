@@ -452,10 +452,11 @@ CREATE TABLE IF NOT EXISTS `xfields` (
   `xfields_resource` int(11) NOT NULL,
   `xfields_placement` int(11) NOT NULL,
   PRIMARY KEY (`xfields_id`),
+  UNIQUE KEY `xfields_label` (`xfields_label`),
   KEY `xfields_type` (`xfields_type`),
   KEY `xfields_resource` (`xfields_resource`),
   KEY `xfields_placement` (`xfields_placement`)
-  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -480,6 +481,25 @@ INSERT INTO `xfieldsinputtype` (`xfieldsinputtype_id`, `xfieldsinputtype_type`) 
 (3, 'CheckBoxMultiPick'),
 (4, 'NumericOnlyInput');
 
+
+--
+-- Table structure for table `xfieldsplacement`
+--
+
+CREATE TABLE IF NOT EXISTS `xfieldsplacement` (
+  `xfieldsplacement_id` int(11) NOT NULL AUTO_INCREMENT,
+  `xfieldsplacement_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`xfieldsplacement_id`),
+  UNIQUE KEY `xfieldsplacement_name` (`xfieldsplacement_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines the xfieldsplacement, either on confirmation div or reservation' AUTO_INCREMENT=1 ;
+
+--
+-- Dumping data for table `xfieldsplacement`
+--
+
+INSERT INTO `xfieldsplacement` (`xfieldsplacement_name`) VALUES 
+('Reservation'),
+('Confirmation');
 -- --------------------------------------------------------
 
 --

@@ -82,7 +82,7 @@
 				echo "</tr>";
 				
 				echo "<tr>";
-					labelInputText('path', 'Destination path', 'Cirklo', 'In the install parent folder');
+					labelInputText('path', 'Destination path', 'Cirklo', 'In the install parent folder(if parentFolder/install then the destination will be parentFolder/destinationPath)');
 				echo "</tr>";
 				
 				// Uncomment later when its possible to isolate all the tables to remove in case user goes back
