@@ -68,11 +68,11 @@ function add(){
     $resource=clean_input($_GET['resource']);
 	
 	//201102251200
-    $day=substr($datetime,6,2);
-    $month=substr($datetime,4,2);
     $year=substr($datetime,0,4);
-	
+    $month=substr($datetime,4,2);
+    $day=substr($datetime,6,2);
 	//****************
+	
 	$arr = getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource);
 
 	if($arr[3] != $user_id && $arr[2] != 0){

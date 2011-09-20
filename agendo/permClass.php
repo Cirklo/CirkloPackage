@@ -171,14 +171,15 @@ function addAhead($date, $slots)     {
 }
 
 //if there is the possibility to add an entry back in time
-function addBack($date)      {
-        
-    if ( substr($this->Permission,1,1)) {
+function addBack($date){
+    if (substr($this->Permission,1,1)) {
         return true;
     }
-   // echo date("YmdHi");
-   // echo $date;
-    if (date("YmdHi")>$date) {
+	
+	$datePlusOneSlot = date("YmdHi", strtotime($date) + $this->Resolution*60);
+    // if (date("YmdHi")>$date) {
+	// allows to book an entry in a slot that is "occuring"
+    if (date("YmdHi") > $datePlusOneSlot) {
         $this->warning='You cannot add entries in the past';
         return false;
     }  else {
