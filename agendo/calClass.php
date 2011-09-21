@@ -250,6 +250,7 @@ class cal extends phpCollection{
 		$schemaName = dbHelp::getSchemaName();
 		// to catch entries in use and stop them from being seen on weekview if theres already a "normal" entry in a specific time for resource type = quickscheduling
 		$hourMinArray = array();
+		$oneTooMany = false;
         while ($nline<($this->EndTime-$this->StartTime)/(self::$Resolution/60)) {
             echo "<tr>";
             //$this->SlotStart=$this->StartTime+ self::$Resolution*$nline;
@@ -284,7 +285,7 @@ class cal extends phpCollection{
 					
                     $cell->setStartDate($this->Day);
                     if ($arr['entry_id']!='') {
-					
+				
 						// for resource status = quick scheduling, to prevent "regular" entries from becoming overlapped by "in use" ones
 						$oneTooMany = false;
 						if($arr['resource_status'] == 5){
@@ -307,8 +308,8 @@ class cal extends phpCollection{
                         $cell->setUser($arr['user_login']);
                         $cell->setStartTime($this->SlotStart);
                         if (dbHelp::numberOfRows($res)>1){
-                            // mysql_data_seek($res,1);
-                            // $arr= dbHelp::fetchRowByName($res);
+                         // mysql_data_seek($res,1);
+                            $arr= dbHelp::fetchRowByName($res);
                             //$cell->setStatus(4);
                             $cell->setNextUser($arr['user_login']);
                             $cell->setNextEntry($arr['entry_id']);
