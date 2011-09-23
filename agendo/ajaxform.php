@@ -4,9 +4,9 @@ importJs();
 ?>
 <script type="text/javascript">
 function checklogin(type){
-    // alert("Invalid " + type + "! Please try again.");
-    showMessage("Invalid " + type + "! Please try again.");
+    alert("Invalid " + type + "! Please try again.");
     window.location = "newperm.php";
+    // showMessage("Invalid " + type + "! Please try again.");
 }
 </script>
 
@@ -53,7 +53,7 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     $user_email = $row[3];
     
     if($nrows == 0){
-        echo "<script type='text/javascript'>checklogin('user name');</script>";
+        echo "<script type='text/javascript'>checklogin('user login');</script>";
         exit();
     }
     if($pwd != $row[0]){
@@ -61,12 +61,12 @@ if(isset($_GET['val'])){ //new user form -> ajax response
         exit();
     }
     
-    $sql = "SELECT permissions_resource FROM permissions WHERE permissions_user IN (SELECT user_id from ".dbHelp::getSchemaName().".user WHERE user_login='$user_login') AND permissions_resource = $resource";
+    $sql = "SELECT permissions_resource FROM permissions WHERE permissions_user IN (SELECT user_id from ".dbHelp::getSchemaName().".user WHERE user_login='".$user_login."') AND permissions_resource = ".$resource."";
     $res = dbHelp::query($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
     if(dbHelp::numberOfRows($res) != 0){
         echo "<script type='text/javascript'>";
-        // echo "alert('You already have permissions to use this resource. Please contact the equipment administrator for more information!');";
-        echo "showMessage('You already have permissions to use this resource. Please contact the equipment administrator for more information!');";
+        echo "alert('You already have permissions to use this resource. Please contact the equipment administrator for more information!');";
+        // echo "showMessage('You already have permissions to use this resource. Please contact the equipment administrator for more information!');";
         echo "window.close();";
         echo "</script>";
         exit();
@@ -75,7 +75,6 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     $sql = "SELECT user_email, resource_name from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_id = ".$resource;
     $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
     $row = dbHelp::fetchRowByIndex($res);
-    
     $resp = $row[0];
     $resource = $row[1];
     

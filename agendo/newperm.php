@@ -32,27 +32,39 @@ require_once("errorHandler.php");
 //call classes
 $error = new errorHandler;
 
-echo "<table><tr><td><font size=5px>Permission to use a resource</font></td></tr>";
-echo "<tr><td><font size=2px>All fields are mandatory</font></td></tr></table>";
+echo "<table>";
+	echo "<tr><td><font size=5px>Permission to use a resource</font></td></tr>";
+	echo "<tr><td><font size=2px>All fields are mandatory</font></td></tr>";
+echo "</table>";
+
 echo "<br>";
+
 echo "<table border=0>";
-echo "<form method=post name=permission>";
-echo "<tr><td>User name</td><td><input type=text name='user_login' id='user_login'></td></tr>";
-echo "<tr><td>Password</td><td><input type=password name='pwd' id='pwd'></td></tr>";
-echo "<tr><td width=100px>Resource Type</td><td>";
-echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
-$sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
-echo "<option id=0>Select Resource...</option>";
-$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
-while($row = dbHelp::fetchRowByIndex($res)){
-    echo "<option value='".$row[0]."'>".$row[1]."</option>";
-}
-echo "</select></td></tr>";
-echo "<tr><td>Resource</td><td><select name=Resource id=Resource></select></td></tr>";
-echo "<tr><td>Training</td><td><input type=checkbox name=assistance id=assistance></td></tr>";
-echo "</form>";
-echo "<tr><td><br></td></tr>";
-echo "<tr><td colspan=2><input type=button value=Submit onclick=\"javascript:checkpermission();\"</td></tr>";
+	echo "<form method=post name=permission>";
+		echo "<tr><td>User login</td><td><input type=text name='user_login' id='user_login'></td></tr>";
+		
+		echo "<tr><td>Password</td><td><input type=password name='pwd' id='pwd'></td></tr>";
+		
+		echo "<tr><td width=100px>Resource Type</td><td>";
+		
+		echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
+			echo "<option id=0>Select Resource...</option>";
+			// $sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
+			$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id";
+			$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+			while($row = dbHelp::fetchRowByIndex($res)){
+				echo "<option value='".$row[0]."'>".$row[1]."</option>";
+			}
+		echo "</select></td></tr>";
+		
+		echo "<tr><td>Resource</td><td><select name=Resource id=Resource></select></td></tr>";
+		
+		echo "<tr><td>Training</td><td><input type=checkbox name=assistance id=assistance></td></tr>";
+	echo "</form>";
+	
+	echo "<tr><td><br></td></tr>";
+	
+	echo "<tr><td colspan=2><input type=button value=Submit onclick=\"javascript:checkpermission();\"</td></tr>";
 echo "</table>";
 
 ?>
