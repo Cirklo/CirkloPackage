@@ -342,7 +342,24 @@ echo "Password updated";
 function nonconf(){
     
     // $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,date_format(entry_datetime,'%d %M at %H:%i') as date from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and date_add(entry_datetime, interval resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60 minute) between now() and date_add(now(),interval 60 minute) and entry_user=user_id and entry_resource=resource_id and resource_status<>4";
-    $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date, entry_datetime from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute')." and entry_user=user_id and resource_id=entry_resource and resource_status<>4";
+	// $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date, entry_datetime from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute')." and entry_user=user_id and resource_id=entry_resource and resource_status<>4";
+    $sql = "select 
+				user_email,
+				user_mobile,
+				user_alert,
+				resource_name,
+				entry_id,
+				entry_datetime,
+				".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date,
+				(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,
+				(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert
+			from ".dbHelp::getSchemaName().".user, entry, resource 
+			where 
+				entry_status=2 and 
+				entry_user=user_id and 
+				resource_id=entry_resource and 
+				resource_status<>4 and 
+				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
     $res=dbHelp::query($sql) or die($sql);
     // for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
         // mysql_data_seek($res,$i);
@@ -361,7 +378,7 @@ function nonconf(){
             }
         break;
         case 1:
-                $this->Subject="No confirmation on ". $arr['date'] ;
+                $this->Subject="No confirmation on ".$arr['date'];
 				$this->ClearReplyTos();	//clear replys before receiving any email
 				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
                 $this->Body=$msg;
@@ -369,7 +386,7 @@ function nonconf(){
                 $this->AddAddress($address, "");
                 echo $msg;
                 if(!$this->Send()) {
-                    echo "Mailer Error: " . $this->ErrorInfo;
+                    echo "Mailer Error: ".$this->ErrorInfo;
                 } else {
                     //echo "Message sent!";
                 }

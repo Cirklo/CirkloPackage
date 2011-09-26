@@ -221,7 +221,8 @@ echo "<form method=post name='application' id='application'>";
 				echo "<td width=100px>Resource Type</td>";
 				echo "<td>";
 					echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
-					$sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
+					// $sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
+					$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id";
 					echo "<option id=0>Select Resource...</option>";
 					$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
 					while($row = dbHelp::fetchRowByIndex($res)){
