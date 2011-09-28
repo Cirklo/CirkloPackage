@@ -384,7 +384,7 @@ function update(){
     $res=dbHelp::query($sql) or die($sql);
     while($arr=dbHelp::fetchRowByIndex($res)) {
 		$val = '';
-		$val=clean_input($_GET[$arr[0].$arr[1]]);
+		$val=clean_input($_GET[$arr[0]."-".$arr[1]]);
 		
         $extra[$arr[0]]=$val;
         // eval("\$$var='$val';");
