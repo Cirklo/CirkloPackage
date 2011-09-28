@@ -460,12 +460,15 @@ echo "<table id='master' style='margin:auto' width=750>";
 												echo "</table>";
 											echo "</td></tr>";
 										}
-										if ($calendar->getEntry()!=0 && $arrxfields['xfieldsval_value']=='true')
+										
+										$extraHtml = '';
+										if ($calendar->getEntry()!=0 && $arrxfields['xfieldsval_value']=='true'){
 											$extraHtml = 'checked';
+										}
 											
 											//****
 										echo "<script type='text/javascript'>";
-										echo "addRadioOrCheck('".$arrxfields['xfields_name']."','".$arrxfields['xfields_id']."','".$arrxfields['xfields_label']."','".$arrxfields['xfields_type']."');";
+										echo "addRadioOrCheck('".$arrxfields['xfields_name']."','".$arrxfields['xfields_id']."','".$arrxfields['xfields_label']."','".$arrxfields['xfields_type']."', '".$extraHtml."');";
 										echo "</script>";
 											//****
 									
