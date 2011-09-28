@@ -64,7 +64,8 @@ class calCell {
      * @method: tagging a calendar cell with slottype in arguments : 0 without entry, 1 with regular entry, 2 pre-reserve,3 deleted,4 monitored, 9 (not defined) for error status (eg did not confirm)
      * @param: resource
      */ 
-    function designSlot ($slotType) {
+	 // $nlineXweekday = nline-weekday
+    function designSlot ($slotType, $nlineXweekday = "") {
         $cellbgLight='#ffffff';
         // case there is an entry
         if ($this->EntryStatus==1) $cellbgStrong=cal::RegCellColorOn;
@@ -96,9 +97,13 @@ class calCell {
             $extra = $extra . " style='background:$cellgrey'";
             break;
         }
-        
-        echo "<td align=center lang=". $cellbgLight . " title=" . $this->Entry ." width=10% " . $extra ." rowspan=". $this->NSlots .">". $this->Tag ."</td>\n";        
-        
+
+		if($nlineXweekday != ''){
+			echo "<td id='".$nlineXweekday."' align=center lang=". $cellbgLight . " title=" . $this->Entry ." width=10% " . $extra ." rowspan=". $this->NSlots .">". $this->Tag ."</td>\n";        
+		}
+		else{
+			echo "<td align=center lang=". $cellbgLight . " title=" . $this->Entry ." width=10% " . $extra ." rowspan=". $this->NSlots .">". $this->Tag ."</td>\n";        
+		}
     }    
 }
 
@@ -248,20 +253,32 @@ class cal extends phpCollection{
 		$sqlDate1 = dbHelp::getFromDate('entry_datetime','%Y%m%d');
 		$sqlDate2 = dbHelp::getFromDate('entry_datetime','%H%i');
 		$schemaName = dbHelp::getSchemaName();
+		
+		// Resource status = 5 (or quick scheduling) stuff
 		// to catch entries in use and stop them from being seen on weekview if theres already a "normal" entry in a specific time for resource type = quickscheduling
-		$hourMinArray = array();
-		$oneTooMany = false;
+		// $hourMinArray = array();
+		// Array that will be used to add entries to the current nline
+		// $prevEntryArray = array();
+		// Array that will be used to add entries to the next nline
+		// $nextEntryArray = array();
+		// Array that contains previous and next array of slots to be added for each day of the week
+		// $weekPrevNextEntryArray = array(1,2,3,4,5,6,7);
+		
+		// $weekdayNline = array(1,2,3,4,5,6,7);
+		$quickSchedule = false;
+		$sql = "select resource_status from resource where resource_id = ".$this->getResource();
+		$res = dbHelp::query($sql);
+		$arr = dbHelp::fetchRowByIndex($res);
+		if($arr[0] == 5){
+			$quickSchedule = true;
+		}
+		// *************************************************
         while ($nline<($this->EndTime-$this->StartTime)/(self::$Resolution/60)) {
             echo "<tr>";
-            //$this->SlotStart=$this->StartTime+ self::$Resolution*$nline;
             $this->SlotStart=mktime($this->StartTime,self::$Resolution*$nline);
             $this->Duration=self::$Resolution;
-            //$from=floor($this->SlotStart) . "." . ($this->SlotStart - floor($this->SlotStart))*60;
-            //$to=floor($this->SlotStart + $this->Duration) . "." . ($this->SlotStart + $this->Duration-floor($this->SlotStart + $this->Duration))*60;
             $from=date("H.i",$this->SlotStart);
             $to=date("H.i",mktime($this->StartTime,self::$Resolution*($nline+1)));
-            //$to=date("H.i",mktime($this->StartTime+self::$Resolution*($nline+1),0));
-            //$txt= number_format($from,2) . "-" . number_format($to,2);
             $txt=$from."-".$to;
             echo "<td align=center width=10% class=date >". $txt ."</td>\n";
 
@@ -270,68 +287,100 @@ class cal extends phpCollection{
                     //start day always a monday
                     $cell= new calCell;
                     $this->Day=date("Ymd",mktime(0,0,0,substr($this->StartDate,4,2),substr($this->StartDate,6,2)+$weekday,substr($this->StartDate,0,4)));
-                    // $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status, entry_slots from entry,".$schemaName.".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".$sqlDate1."='". $this->Day . "' and ".$sqlDate2."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
-					if($oneTooMany){
-						$sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status, entry_slots, resource_status from entry,".$schemaName.".user, resource where resource_id = entry_resource and entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".$sqlDate1."='". $this->Day . "' and ".$sqlDate2."='" . date('Hi',$otherStartTime) . "' order by entry_id";
-						$res=dbHelp::query($sql) or die ($sql);
-						$arr= dbHelp::fetchRowByName($res);
-						$arr['entry_slots']--;
-					}
-					else{
-						$sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status, entry_slots, resource_status from entry,".$schemaName.".user, resource where resource_id = entry_resource and entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".$sqlDate1."='". $this->Day . "' and ".$sqlDate2."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
-						$res=dbHelp::query($sql) or die ($sql);
-						$arr= dbHelp::fetchRowByName($res);
-					}
-					
+                    $sql = "select 
+								user_login,
+								entry_id,
+								entry_user,
+								entry_repeat,
+								entry_status,
+								entry_slots
+							from
+								entry,
+								".$schemaName.".user
+							where 
+								entry_status<>3 and 
+								entry_resource=" . $this->getResource() ." and 
+								user_id=entry_user and 
+								".$sqlDate1."='". $this->Day . "' and 
+								".$sqlDate2."='" . date('Hi',$this->SlotStart) . "' 
+							order by entry_id";
+					$res = dbHelp::query($sql) or die ($sql);
+					$arr = dbHelp::fetchRowByName($res);
                     $cell->setStartDate($this->Day);
+					
                     if ($arr['entry_id']!='') {
-				
-						// for resource status = quick scheduling, to prevent "regular" entries from becoming overlapped by "in use" ones
-						$oneTooMany = false;
-						if($arr['resource_status'] == 5){
-							if(isset($hourMinArray[$weekday.date('Hi',$this->SlotStart)])){
-								$oneTooMany = true;
-								$otherStartTime = mktime($this->StartTime,self::$Resolution*($nline));
-								$hourMinArray[$weekday.date('Hi',$this->SlotStart)] = null;
-								continue;
-							}
-							else{
-								$entryEndedAt = $weekday.date('Hi',mktime($this->StartTime,self::$Resolution*($nline + (int)$arr['entry_slots'] - 1)));
-								$hourMinArray[$entryEndedAt] = $arr['entry_status'];
-							}
-						}
-						// ************************************************************************************************************
-						
                         $cell->setNSlots($arr['entry_slots']);
                         $cell->setEntry($arr['entry_id']);
                         if ($arr['entry_repeat']==$this->CalRepeat) $cell->setRepeat($this->CalRepeat);
                         $cell->setUser($arr['user_login']);
                         $cell->setStartTime($this->SlotStart);
-                        if (dbHelp::numberOfRows($res)>1){
-                         // mysql_data_seek($res,1);
-                            $arr= dbHelp::fetchRowByName($res);
-                            //$cell->setStatus(4);
-                            $cell->setNextUser($arr['user_login']);
-                            $cell->setNextEntry($arr['entry_id']);
+						
+						// if(isset($hourMinArray[$weekday.date('Hi',$this->SlotStart)])){
+							// $ignoreFirstSlot = true;
+						// }
+						// else{
+							// $entryEndedAt = $weekday.date('Hi',mktime($this->StartTime,self::$Resolution*($nline + (int)$arr['entry_slots'] - 1)));
+							// $hourMinArray[$entryEndedAt] = $nextEntryArray;
+						// }	
+							
+						// Displays the second entry persons name
+                        if (dbHelp::numberOfRows($res) > 1 && !$quickSchedule){
+							$arr = dbHelp::fetchRowByName($res);
+							//$cell->setStatus(4);
+							$cell->setNextUser($arr['user_login']);
+							$cell->setNextEntry($arr['entry_id']);
                         }
+						
+						// Quick schedule weekview "fix"
+						$nlineXweekday = "";
+						if($quickSchedule){
+							$tempArr = $arr;
+							while($arr = dbHelp::fetchRowByName($res)){
+								$cell->setNSlots($arr['entry_slots']);
+								$cell->setEntry($arr['entry_id']);
+								$cell->setUser($arr['user_login']);
+								$tempArr = $arr;
+							}
+							$arr = $tempArr;
+							if(isset($weekdayNline[$weekday])){
+								$weekdayNlineExploded = explode('-', $weekdayNline[$weekday]);
+								$entryLastSlot = (int)$weekdayNlineExploded[0] + (int)$weekdayNlineExploded[1] - 1;
+								// wtf($entryLastSlot, 'a');
+								if($nline == $entryLastSlot){
+									// Javascript function that reduces on rowspan of the entry that ends where this one starts by id
+									echo "<script type='text/javascript'>";
+									echo "calendarReduceRowSpan('".$weekdayNline[$weekday]."');";
+									echo "</script>";
+								}
+							}
+							
+							$weekdayNline[$weekday] = $nline."-".$cell->getNSlots();
+							$nlineXweekday = $weekdayNline[$weekday];
+						}
+						// *******************************************
                         $cell->setEntryStatus($arr['entry_status']);
-                        if ($this->Update!=$cell->getEntry()){
+						
+						// If the action is not a update?
+                        if ($this->Update != $cell->getEntry()){
                             //$cell->setTag("<a onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\ onmouseout=\"HideContent('DisplayUserInfo')\" href=weekview.php?resource=" . $this->Resource . "&entry=" . $cell->getEntry(). ">" . $cell->getUser() ."</a><br><a onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\" href=#>" . $cell->getNextUser() ."</a>" );
                             $cell->setTag("<li style='list-style:none;padding:1px;cursor:pointer;' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getUser() ."<br><li style='list-style:none;cursor:pointer' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getNextUser() ."</li>" );
-                            for ($j=0;$j<$cell->getNSlots();$j++){
-								$this->Slot[$nline+$j][$weekday]=1;
+							for ($j=0;$j<$cell->getNSlots();$j++){
+								$this->Slot[$nline+$j][$weekday] = 1;
 							}
-                            $cell->designslot(1);
-							$this->add($cell->getEntry(),$cell);
+							// $cell->designslot(1);
+							$cell->designslot(1, $nlineXweekday);
+							// useless line, where is the get for this or any sort of use??
+							// $this->add($cell->getEntry(),$cell);
                         } else {
                             $updatecount=$cell->getNSlots()-1;
                             $cell->setEntry(0);
                             $updDay=$this->Day;
                             $cell->setNSlots(1); 
                             $cell->designSlot(2);
-                            $this->add($ncells. "empty",$cell);
+							
+							// useless line, where is the get for this or any sort of use??
+							// $this->add($ncells. "empty",$cell);
                         }
-                        //$nline=$nline+$cell->getNSlots()-1;
                         
                     } else {
                         $cell->setNSlots(1);
@@ -339,7 +388,7 @@ class cal extends phpCollection{
                         $cell->setUser('');
                         $cell->setStartTime($this->SlotStart);
                         $cell->setTag('');
-                        if ($this->Slot[$nline][$weekday]!=1)
+                        if ($this->Slot[$nline][$weekday]!=1){
                             if ($this->Update==0) {
                                 $cell->designSlot(0);
                             } else {
@@ -349,9 +398,12 @@ class cal extends phpCollection{
                                     $updatecount=$updatecount-1;
                                 } else {
                                     $cell->designSlot(0);
-                                };
+                                }
                             }
-                        $this->add($ncells. "empty",$cell);
+						}
+						// useless line, where is the get for this or any sort of use??
+						// $this->add($ncells. "empty",$cell);
+						
                     } //case it doesn't have an entry
                     //echo $cell->getEntry();
                     //$cell->designSlot();

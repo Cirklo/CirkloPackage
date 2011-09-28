@@ -611,37 +611,40 @@ function showFadeAux(element, count){
 }
 
 function init(s,m){
-    document.getElementById('enddate').value = formatDate(curDate,"yyyy-M-dd");
-    if (document.getElementById('entry').value!='0') {
-        if (document.getElementById('update').value!='0') {
-			table=document.getElementById('caltable');
-			clear_table(table);
-			document.getElementById('updateButton').value='Change';
-            document.getElementById('confirmButton').value='Cancel';
-            button_visibility(true,true,true,false,false);
-        } else {
-            button_visibility(true,false,true,true,true);
-        }
-        
-        
-    } else {
-        button_visibility(true,true,true,true,true);
-    }
-	document.getElementById('msg').style.visibility='hidden';
-	showfade('msg', fadeConstant);
-    //The behavior will depend on this
-    res_status=s;
-    res_maxslots=m;
+	if(document.getElementById('enddate') != null){
+		document.getElementById('enddate').value = formatDate(curDate,"yyyy-M-dd");
+		if (document.getElementById('entry').value!='0') {
+			if (document.getElementById('update').value!='0') {
+				table=document.getElementById('caltable');
+				clear_table(table);
+				document.getElementById('updateButton').value='Change';
+				document.getElementById('confirmButton').value='Cancel';
+				button_visibility(true,true,true,false,false);
+			} else {
+				button_visibility(true,false,true,true,true);
+			}
+			
+			
+		} else {
+			button_visibility(true,true,true,true,true);
+		}
+		document.getElementById('msg').style.visibility='hidden';
+		showfade('msg', fadeConstant);
+		//The behavior will depend on this
+		res_status=s;
+		res_maxslots=m;
+	}
 }
 
 function submitUser(resource) {
-    formObj=document.getElementById('edituser');
-    if (checkfield(formObj.user_idm)) return;
-    if (checkfield(formObj.user_passwd)) return;
-    formObj.user_idm.value=formObj.user_idm.title;
-//    formObj.action='../agendo/index.php?resource=' + resource;
-    formObj.action='../agendo/index.php?resource=' + resource;
-    formObj.submit();
+    if((formObj=document.getElementById('edituser')) != null){
+		if (checkfield(formObj.user_idm)) return;
+		if (checkfield(formObj.user_passwd)) return;
+		formObj.user_idm.value=formObj.user_idm.title;
+	//    formObj.action='../agendo/index.php?resource=' + resource;
+		formObj.action='../agendo/index.php?resource=' + resource;
+		formObj.submit();
+	}
 }
 
 function addRadioOrCheck(tableName, id, label, type, checked){
@@ -680,4 +683,10 @@ function checkfield(field) {
 
 function similarResources(value){
 	window.location="./weekview.php?resource=" + value;
+}
+
+function calendarReduceRowSpan(id){
+	if((element = document.getElementById(id)) != null){
+		element.rowSpan--;
+	}
 }

@@ -478,7 +478,7 @@ function monitor(){
 	$res=dbHelp::query($sql) or die($sql);
 	while($arrx=dbHelp::fetchRowByIndex($res)){
 		// $var=$arrx[0];
-		$val=clean_input($_GET[$arrx[0].$arrx[1]]);
+		$val=clean_input($_GET[$arrx[0]."-".$arrx[1]]);
 		// eval("\$$var='$val';");
 		$sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arrx[1].",'".$val."')";
 		dbHelp::query($sql) or die($sql);
