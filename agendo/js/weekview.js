@@ -644,7 +644,7 @@ function submitUser(resource) {
     formObj.submit();
 }
 
-function addRadioOrCheck(tableName, id, label, type){
+function addRadioOrCheck(tableName, id, label, type, checked){
 	beginHtml = "<tr><td colspan=2>";
 	endHtml = "</td></tr>";
 	// name = tableName + id;
@@ -654,7 +654,7 @@ function addRadioOrCheck(tableName, id, label, type){
 		// name = tableName;
 		typeName = 'radio';
 	}
-	extraHtml = beginHtml + "<label><input lang='send' type='" + typeName + "' name=" + name + " id=" + tableName + "-" + id + " value='" + checkedValue + "'>&nbsp;" + label + "</label>" + endHtml;
+	extraHtml = beginHtml + "<label><input lang='send' type='" + typeName + "' name=" + name + " id=" + tableName + "-" + id + " value='" + checkedValue + "' " + checked + ">&nbsp;" + label + "</label>" + endHtml;
 	document.getElementById(tableName).innerHTML = document.getElementById(tableName).innerHTML + extraHtml;
 }
 

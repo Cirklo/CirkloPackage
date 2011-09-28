@@ -385,7 +385,6 @@ function update(){
     while($arr=dbHelp::fetchRowByIndex($res)) {
 		$val = '';
 		$val=clean_input($_GET[$arr[0]."-".$arr[1]]);
-		
         $extra[$arr[0]]=$val;
         // eval("\$$var='$val';");
         $sql="update xfieldsval set xfieldsval_value='".$val."' where xfieldsval_entry=".$entry." and xfieldsval_field=".$arr[1];
