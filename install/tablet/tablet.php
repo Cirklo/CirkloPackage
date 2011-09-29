@@ -121,9 +121,12 @@ function tablet_logout(){
 			throw new Exception("Wrong login");
 		}
 		
-		// repetition ha auto increment on the repetition_id and repetition_value is not unique, and as such, repetition_id is unique and the value is useless (lol)
+		// repetition has auto increment on the repetition_id and repetition_value is not unique, and as such, repetition_id is unique and the value is useless (lol)
 		// $sql = "update entry set entry_action = ".$currentTime.", entry_slots = ".$slots.", entry_status = 1 where entry_id = ".$entry." and entry_repeat = ".$repeat;
-		$sql = "update entry set entry_action = ".$currentTime.", entry_slots = ".$slots.", entry_status = 1 where entry_repeat = ".$repeat;
+		$sql = "update entry set entry_action = ".$currentTime.", entry_status = 1 where entry_repeat = ".$repeat;
+		$res = dbHelp::query($sql) or die ($sql);
+		
+		$sql = "update entry set entry_action = ".$currentTime.", entry_slots = ".$slots.", entry_status = 1 where entry_id = ".$entry;
 		$res = dbHelp::query($sql) or die ($sql);
 		
 		$json->success = true;
