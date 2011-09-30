@@ -392,15 +392,15 @@ function nonconf(){
                 }
 
 				//************************************* del me **********************************************************
-                $this->Subject="No confirmation on ". $arr['date'] ;
-				$this->ClearReplyTos();	//clear replys before receiving any email
-				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
-                $this->Body=$msg . " <br> ".$sql;
-                $address = "ppires@igc.gulbenkian.pt";
-                $this->AddAddress($address, "");
-                if(!$this->Send()) {
-                    echo "Mailer Error: " . $this->ErrorInfo;
-                }
+                // $this->Subject="No confirmation on ". $arr['date'] ;
+				// $this->ClearReplyTos();	//clear replys before receiving any email
+				// $this->AddReplyTo($this->UserEmail,$this->UserFullName);
+                // $this->Body=$msg . " <br> ".$sql;
+                // $address = "ppires@igc.gulbenkian.pt";
+                // $this->AddAddress($address, "");
+                // if(!$this->Send()) {
+                    // echo "Mailer Error: " . $this->ErrorInfo;
+                // }
 				//************************************* del me **********************************************************
 
 		break;
