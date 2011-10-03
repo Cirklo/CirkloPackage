@@ -27,8 +27,10 @@ function go (objIMG) {
         document.getElementById('userdiv').style.display='none';
         document.getElementById('resourcesdiv').style.display='none';
         document.getElementById('videodiv').style.display='none';
-        objDIV.style.display = "block";   
-		objDIV.style.left = objIMG.x - objDIV.offsetWidth/2 + objIMG.offsetWidth/2;
+        objDIV.style.display = "block";
+		var offset = $(objIMG).offset();
+		objDIV.style.left = String(offset.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
+		// objDIV.style.left = String(objDIV.style.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
     } else {
         objIMG.src=s.substring(0,s.length-5) + ".png";
         objDIV.style.display = "none";   
