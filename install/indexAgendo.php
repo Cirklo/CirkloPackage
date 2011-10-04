@@ -64,8 +64,8 @@ if (isset($_GET['class'])) {
 // Shows most used resources filtered by a month of use
 } else {
     $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
-    // $datefilter=' and entry_datetime between date_sub(now(),interval 1 month) and now()';
-    $datefilter=" and entry_datetime between ".dbHelp::date_sub('now()', '1', 'month')." and now()";
+    // $datefilter=" and entry_datetime between ".dbHelp::date_sub('now()', '1', 'month')." and now()";
+    $datefilter=" and entry_datetime between ".dbHelp::date_sub(dbHelp::now(), '1', 'month')." and ".dbHelp::now();
 }
 
 // echo "<div id='logo' class='logo' style='background:url(".$_SESSION['path']."/pics/header.png) no-repeat left top;'>";

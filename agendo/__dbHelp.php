@@ -45,6 +45,10 @@
 			}
 		}
 
+		public static function now(){
+			return "'".date("Y-m-d H:i:s")."'";
+		}
+		
 		public static function changeToDatabase($db){
 			$connect = self::getConnect();
 			$connect->dbSelect($db);

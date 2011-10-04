@@ -222,7 +222,8 @@ function del(){
     if ($entry!=$arr[1]) $deleteall=0; //delete from monitor does not allow delete all 
     
 
-    $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > now()";
+    $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > ".dbHelp::now();
+    // $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > now()";
     if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
     
     $sql="select entry_repeat,".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i').",entry_status from entry where entry_id=". $entry;
@@ -307,8 +308,8 @@ function update(){
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();return;}
     if (!$perm->addBack($datetime)) {echo $perm->getWarning();return;}
 
-    // $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
-    $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > now()";
+    $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > ".dbHelp::now();
+    // $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > now()";
     if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
     //if (!$perm->addBack($datetime)) $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
     

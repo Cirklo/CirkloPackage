@@ -359,7 +359,8 @@ function nonconf(){
 				entry_user=user_id and 
 				resource_id=entry_resource and 
 				resource_status<>4 and 
-				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
+				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between ".dbHelp::now()." and ".dbHelp::date_add(dbHelp::now(),'60', 'minute');
+				// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
     $res=dbHelp::query($sql) or die($sql);
     // for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
         // mysql_data_seek($res,$i);
