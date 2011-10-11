@@ -68,7 +68,7 @@ $imResstatus5 = ($arr[0] == 5); // quick scheduling
 $imResstatus3 = ($arr[0] == 3); // user confirmation
 if($imResstatus3){ // user confirmation
 	echo "<object type='application/x-java-applet' WIDTH='1' HEIGHT='1' id='zeeApplet'>";
-		echo "<param name='codebase' value = '.' />";
+		echo "<param name='codebase' value = '../agendo' />";
 		echo "<param name='archive' value='macApp.jar'/>";
 		echo "<param name='code' value='MacAddressApplet'/>";
 		echo "<param name='scriptable' value='true'/>";
