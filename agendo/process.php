@@ -498,6 +498,7 @@ function confirm(){
 
     $resource=clean_input($_GET['resource']);
     $entry=clean_input($_GET['entry']);
+	$macChecksOut = $_GET['mac'];
 
     $perm = new permClass;
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {
@@ -508,7 +509,7 @@ function confirm(){
         $notify=new alert($resource);
         $notify->setEntry($entry);
         $notify->fromAdmin('confirm');
-    } elseif (!$perm->confirmEntry($entry)) {
+    } elseif (!$perm->confirmEntry($entry, $macChecksOut)) {
         echo $perm->getWarning();
         exit;
     }

@@ -37,3 +37,8 @@ INSERT INTO `xfieldsinputtype` (`xfieldsinputtype_id`, `xfieldsinputtype_type`) 
 (4, 'NumericOnlyInput');
 
 UPDATE configParams SET configParams_value='1.5.4' WHERE configParams_name='AgendoVersion';
+
+
+-- 2011-10-11
+-- to confirm a resource now you need to put the macaddres instead of the ip on the database, use the makeConfirmRes.php in admin for it
+ALTER TABLE `resource` CHANGE `resource_confIP` `resource_mac` VARCHAR( 17 ) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '0-0-0-0-0-0' COMMENT 'Macaddress of computer to be used to confirm reservation.'

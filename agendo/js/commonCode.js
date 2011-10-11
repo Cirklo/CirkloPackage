@@ -69,7 +69,6 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 	formObj=document.getElementById('edituser');
 	passCrypted = false;
 	document.body.style.cursor = 'wait';
-
 	if(user==null){
 		if (checkfield(formObj.user_idm)) return;
 		if (checkfield(formObj.user_passwd)) return;

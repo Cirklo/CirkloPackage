@@ -16,23 +16,34 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 //bgcolor2='document..backgroundColor; // just to set bgcolor2 at the beggining
 
 	var impersonateUser = '';
-	$(document).ready(function(){
-		if(document.getElementById('usersList') != null){
-			$("#usersList").focus(function(){
-				$("#usersList").autocomplete({
-					source: "../agendo/commonCode.php?usersList",
-					minLength: 2,
-					select: function(event, ui) {
-								impersonateUser = ui.item.id;
-							},
-					dataType: "json"
+	$(document).ready(
+		function(){
+			if(document.getElementById('usersList') != null){
+				$("#usersList").focus(function(){
+					$("#usersList").autocomplete({
+						source: "../agendo/commonCode.php?usersList",
+						minLength: 2,
+						select: function(event, ui) {
+									impersonateUser = ui.item.id;
+								},
+						dataType: "json"
+					});
 				});
-			});
+			}
+			else{
+				impersonateUser = '';
+			}
+			
+			if((confirmImage = document.getElementById('confirmIsPossible')) != null){
+				if(macIsConfirmed){
+					confirmImage.src = "pics/green_light.png"
+				}
+				else{
+					confirmImage.src = "pics/red_light.png"
+				}
+			}
 		}
-		else{
-			impersonateUser = '';
-		}
-	});
+	);
 	
 	function impersonateCheckChange(check){
 		element = document.getElementById('impersonateCheck');
@@ -90,8 +101,6 @@ function button_visibility(add,del,monitor,update,confirm) {
         //alert(confirm); 
         document.getElementById('confirmButton').disabled=true; 
     }
-    
-    
 }
 
 function swapColor(obj,tag,action){
@@ -351,7 +360,7 @@ function ManageEntries(action,ttime,tresolution) {
 
 function addcomments(entry) {
 	myForm=document.getElementById('entrycomments');
-    if (entry==0){
+    if (entry==0){ // has comments
         if (window.XMLHttpRequest){
             xmlhttp=new XMLHttpRequest();
         } else {
@@ -531,6 +540,7 @@ function ajaxEntries(method,url,nosync){
     break;
 	
     case 'confirm':
+		par += 'mac=' + macIsConfirmed + '&';
     break;
     }
 	
@@ -554,7 +564,17 @@ function ajaxEntries(method,url,nosync){
             window.location.href='weekview.php?resource=' + resource + '&date=' + date+ '&code=' + code + '&msg=' + xmlhttp.responseText;
         }
     }
-}   
+}
+
+macIsConfirmed = false;
+function macConfimation(){
+	if((applet = document.getElementById('zeeApplet')) != null){
+		macIsConfirmed = applet.rightMac();
+	}
+	else{
+		showMessage('Applets are not recognized.', true);
+	}
+}
 
 function filljscombo(tagname,start,end,resolution,selection,entry) {
     var i=0,sel='',dis=true;

@@ -188,10 +188,11 @@ function addBack($date){
 }
     
 //Sets the confirmation IP or manager based depending on the resource configuration
-function confirmEntry($entry){
+function confirmEntry($entry, $macConfirms = 'false'){
     $this->warning='';
     $cookie='';
-    $sql="select user_id,resource_status,resource_confIP,resource_confirmtol,resource_resolution from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp and resource_id=" . $this->Resource;
+    // $sql="select user_id,resource_status,resource_confIP,resource_confirmtol,resource_resolution from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp and resource_id=" . $this->Resource;
+    $sql="select user_id,resource_status,resource_confirmtol,resource_resolution from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp and resource_id=" . $this->Resource;
     $res=dbHelp::query($sql);
     $arrStatus=dbHelp::fetchRowByName($res);
     $sql="select ".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i')." date, entry_datetime,entry_slots,entry_user  from entry where entry_id=". $entry;
@@ -215,14 +216,18 @@ function confirmEntry($entry){
         }
     break;
     case 3: // equipment that user has to confirm in situ
-        //if ($arrStatus['user_id']==$this->User ) break;
-        if (isset($_COOKIE["resource_ip"])) $cookie=$_COOKIE["resource_ip"];
-        // if response is not the same or
-        if (($arrStatus['resource_confIP']!=$_SERVER['REMOTE_ADDR']) && (!strstr($cookie,$arrStatus['resource_confIP'])) && !$this->WasAdmin) {
-            $this->warning='Confirmation only possible on equipment computer.' ;
-            //$this->warning=trim($arrStatus['resource_confIP']) . '-' . $cookie;
-            return false;    
-        }
+	
+		// ***** change this to mac *****
+        // if (isset($_COOKIE["resource_ip"])) $cookie=$_COOKIE["resource_ip"];
+        // if (($arrStatus['resource_confIP']!=$_SERVER['REMOTE_ADDR']) && (!strstr($cookie,$arrStatus['resource_confIP'])) && !$this->WasAdmin) {
+            // $this->warning='Confirmation only possible on equipment computer.' ;
+            // return false;    
+        // }
+		if($macConfirms == 'false'){
+			$this->warning='Confirmation only possible on equipment computer.' ;
+			return false;
+		}
+		// ******************************
         
         // if ($arrEntry[3]!=$this->User and $arrStatus['user_id']!=$this->User) {
         if ($arrEntry[3]!=$this->User && !$this->WasAdmin) {

@@ -47,10 +47,10 @@ $resource=clean_input($_GET['resource']);
 // $resource=$_GET['resource'];
 
 // Used to hide buttons, and show or not, a custom interface
-$ressql = "select resource_status from resource where resource_id = ".$resource;
+$ressql = "select resource_status, resource_mac from resource where resource_id = ".$resource;
 $res = dbHelp::query($ressql) or die($ressql);
 $arr = dbHelp::fetchRowByIndex($res);
-$imResstatus5 = ($arr[0] == 5);
+$imResstatus5 = ($arr[0] == 5); // quick scheduling
 // $imResstatus5 = false;
 // if($arr[0] == 5){
 	// $imResstatus5 = true;
@@ -63,6 +63,28 @@ $imResstatus5 = ($arr[0] == 5);
 	// }
 // }
 // ***********************************************************
+
+// *************************** applet for mac address *********************
+$imResstatus3 = ($arr[0] == 3); // user confirmation
+if($imResstatus3){ // user confirmation
+	echo "<object type='application/x-java-applet' WIDTH='1' HEIGHT='1' id='zeeApplet'>";
+		echo "<param name='codebase' value = '../agendo' />";
+		echo "<param name='archive' value='macApp.jar'/>";
+		echo "<param name='code' value='MacAddressApplet'/>";
+		echo "<param name='scriptable' value='true'/>";
+		
+		echo "<param name='color' value='#1e4F54'/>";
+		echo "<param name='action' value='checkMac'/>";
+		echo "<param name='mac' value='".$arr[1]."'/>";
+	echo "</object>";
+	
+	// Checks if the macaddress associated to this resource is 
+	echo "<script type='text/javascript'>";
+	echo "macConfimation();";
+	echo "</script>";
+}
+//*************************************************************************
+
 
 if (isset($_GET['update'])) {$update=clean_input($_GET['update']);$entry=clean_input($_GET['update']);} else {$update=0;} ;
 //instatiation for calendar
@@ -319,7 +341,15 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					echo "<tr>";
 						echo "<td colspan=2>";
-						echo "<h2 align=center>". $calendar->getResourceName() ."</h2>";
+						// ************************************** mac green/red light ************************************
+						// if($imResstatus3){
+								// echo "<h2 align=center style='vertical-align:top;'>". $calendar->getResourceName();
+								// echo "&nbsp<img id='confirmIsPossible' style='vertical-align:bottom;' src=''/></h2>";
+						// }
+						// else{
+							echo "<h2 align=center>". $calendar->getResourceName() ."</h2>";
+						// }
+						// ***********************************************************************************************
 						echo "</td>";
 					echo "</tr>";
 						
