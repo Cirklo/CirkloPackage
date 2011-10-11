@@ -1,7 +1,8 @@
 <?php
 	session_start();
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
-	$_SESSION['path'] = "../../".$pathOfIndex[sizeof($pathOfIndex)-2];
+	$path = $pathOfIndex[sizeof($pathOfIndex)-2];
+	$_SESSION['path'] = "../../".$path;
 	require_once("../../agendo/commonCode.php");
 	
 	if(isset($_GET['res']) && isset($_GET['resName']) && isset($_GET['mac'])){
@@ -30,7 +31,7 @@
 			echo "<param name='scriptable' value='true'/>";
 
 			echo "<param name='color' value='#1e4F54'/>";
-			echo "<param name='url' value='https://localhost/Cirklo/admin/makeConfirmRes.php'/>";
+			echo "<param name='url' value='https://agendo.cirklo.org/".$path."/admin/makeConfirmRes.php'/>";
 			echo "<param name='action' value='associateRes'/>";
 			echo "<param name='numberOfResources' value='".$resourcesQuantity."'/>";
 			$i = 0;
