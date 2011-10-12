@@ -80,7 +80,7 @@ if($imResstatus3){ // user confirmation
 	
 	// Checks if the macaddress associated to this resource is 
 	echo "<script type='text/javascript'>";
-	echo "macConfimation();";
+	echo "macConfimation('".$arr[1]."');";
 	echo "</script>";
 }
 //*************************************************************************

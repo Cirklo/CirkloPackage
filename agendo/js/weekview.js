@@ -34,14 +34,14 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 				impersonateUser = '';
 			}
 			
-			if((confirmImage = document.getElementById('confirmIsPossible')) != null){
-				if(macIsConfirmed){
-					confirmImage.src = "pics/green_light.png"
-				}
-				else{
-					confirmImage.src = "pics/red_light.png"
-				}
-			}
+			// if((confirmImage = document.getElementById('confirmIsPossible')) != null){
+				// if(macIsConfirmed){
+					// confirmImage.src = "pics/green_light.png"
+				// }
+				// else{
+					// confirmImage.src = "pics/red_light.png"
+				// }
+			// }
 		}
 	);
 	
@@ -567,12 +567,24 @@ function ajaxEntries(method,url,nosync){
 }
 
 macIsConfirmed = false;
-function macConfimation(){
+function macConfimation(givenMac){
 	if((applet = document.getElementById('zeeApplet')) != null){
 		macIsConfirmed = applet.rightMac();
 	}
 	else{
-		showMessage('Applets are not recognized.', true);
+		try{
+			html = "<applet code='MacAddressApplet' archive='../agendo/macApp.jar'	width='0' height='0' id='zeeApplet' ><param name='color' value='#1e4F54' /><param name='action' value='checkMac' />	<param name='mac' value='" + givenMac + "' /></applet>";
+			document.writeln(html);
+		}
+		catch(err){
+			// showMessage(err.message);
+		}
+		if((applet = document.getElementById('zeeApplet')) == null){
+			// showMessage('Applets are not recognized.');
+		}
+		else{
+			macIsConfirmed = applet.rightMac();
+		}
 	}
 }
 

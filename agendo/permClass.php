@@ -223,14 +223,14 @@ function confirmEntry($entry, $macConfirms = 'false'){
             // $this->warning='Confirmation only possible on equipment computer.' ;
             // return false;    
         // }
-		if($macConfirms == 'false'){
+		if($macConfirms == 'false' && !$this->WasAdmin){
 			$this->warning='Confirmation only possible on equipment computer.' ;
 			return false;
 		}
 		// ******************************
         
         // if ($arrEntry[3]!=$this->User and $arrStatus['user_id']!=$this->User) {
-        if ($arrEntry[3]!=$this->User && !$this->WasAdmin) {
+        if ($arrEntry[3] != $this->User && !$this->WasAdmin) {
             $this->warning='Wrong User' ;
             return false;
         }
