@@ -328,7 +328,7 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `resource_price` smallint(6) NOT NULL,
   `resource_resolution` smallint(6) NOT NULL COMMENT 'In minutes, sets the time duration in minutes of  each slot.',
   `resource_maxslots` tinyint(4) NOT NULL COMMENT 'In slots, Maximum time of usage per user per day.',
-  `resource_confIP` varchar(15) COLLATE utf8_bin NOT NULL DEFAULT '0.0.0.0' COMMENT 'IP address of computer to be used to confirm reservation.',
+  `resource_mac` varchar(17) COLLATE utf8_bin NOT NULL DEFAULT '0-0-0-0-0-0' COMMENT 'IP address of computer to be used to confirm reservation.',
   `resource_confirmtol` smallint(6) NOT NULL COMMENT 'In slots, Number of time slots of tolerance allowed before and after reservation time to confirm presence or equipment usage.',
   `resource_delhour` int(11) NOT NULL COMMENT 'In hours, minimum time before an entry starts.to delete it.',
   `resource_color` int(11) NOT NULL,
