@@ -143,15 +143,15 @@
 		echo json_encode($json);
 	}
 
-	function importJs(){
-		echo "<script type='text/javascript' src='../agendo/js/jquery-1.5.2.min.js'></script>";
-		echo "<script type='text/javascript' src='../agendo/js/commonCode.js'></script>";
-		echo "<link type='text/css' href='../agendo/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
-		echo "<script type='text/javascript' src='../agendo/js/jquery.jnotify.js'></script>";
-		echo "<link href='../agendo/css/tipTip.css' rel='stylesheet' type='text/css'>";
-		echo "<script type='text/javascript' src='../agendo/js/jquery.tipTip.js'></script>";
-		echo "<link rel='stylesheet' type='text/css' href='../agendo/css/autocomplete.css'>";
-		echo "<script type='text/javascript' src='../agendo/js/jquery-ui-1.8.14.custom.min.js'></script>";
+	function importJs($path = "../agendo"){
+		echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
+		echo "<script type='text/javascript' src='".$path."/js/commonCode.js'></script>";
+		echo "<link type='text/css' href='".$path."/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
+		echo "<script type='text/javascript' src='".$path."/js/jquery.jnotify.js'></script>";
+		echo "<link href='".$path."/css/tipTip.css' rel='stylesheet' type='text/css'>";
+		echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
+		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
+		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
 	}
 
 	function showMsg($message, $isError = false, $import = false){
@@ -313,6 +313,11 @@
 								echo "<input type=button style='font-size:11px' onclick=\"window.location='../datumo/index.php'\" value='AdminArea' />";
 							echo "</td>";
 						echo "</tr>";
+						echo "<tr>";
+							echo "<td style='text-align:center'>";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/makeConfirmRes.php'\" value='Resource Settings' />";
+							echo "</td>";
+						echo "</tr>";
 					echo "</table>";
 				}
 				
@@ -336,14 +341,20 @@
 					
 					echo "<tr>";
 						echo "<td colspan=2 style='text-align:center'>";
-						echo "<input type=button style='font-size:11px' onclick=submitUser('".$phpFile.".php',".$resource.",null,null,0) value='Login' />";
-						echo "<input type=button style='font-size:11px' onclick=submitUser('../datumo/session.php',".$resource.",null,null,1) value='AdminArea' />";
+						echo "<input type=button style='font-size:11px' onclick=submitUser('".$phpFile.".php',".$resource.",null,null) value='Login' />";
+						echo "<input type=button style='font-size:11px' onclick=submitUser('../datumo/',null,null,null) value='AdminArea' />";
 						echo "</td>";
 					echo "</tr>";
 
 					echo "<tr>";
 						echo "<td align=center colspan=2>";
 						echo "<input type=button style='font-size:11px' onclick=ajaxRecoverPWD() value='Recover Password' />";
+						echo "</td>";
+					echo "</tr>";
+
+					echo "<tr>";
+						echo "<td align=center colspan=2>";
+						echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
 						echo "</td>";
 					echo "</tr>";
 				echo "</table>";
@@ -357,7 +368,8 @@
 				
 					echo "<tr>";
 							echo "<td colspan=2 style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='admin/cookie.php'\" value='Resource Settings' />";
+								// echo "<input type=button style='font-size:11px' onclick=\"window.location='admin/cookie.php'\" value='Resource Settings' />";
+								// echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
 							echo "</td>";
 					echo "<tr>";
 

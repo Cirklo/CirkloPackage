@@ -171,20 +171,28 @@ function addAhead($date, $slots)     {
 }
 
 //if there is the possibility to add an entry back in time
-function addBack($date){
+function addBack($date, $useDelModifier = false){
     if (substr($this->Permission,1,1)) {
         return true;
     }
 	
-	$datePlusOneSlot = date("YmdHi", strtotime($date) + $this->Resolution*60);
+	if($useDelModifier){
+		$date = date("YmdHi", strtotime($date) + (-1)*$this->getResourceDelHour()*60*60);
+	}
+	else{
+		$date = date("YmdHi", strtotime($date) + $this->Resolution*60);
+	}
+	
+	// $datePlusOneSlot = date("YmdHi", strtotime($date) + $this->Resolution*60);
     // if (date("YmdHi")>$date) {
 	// allows to book an entry in a slot that is "occuring"
-    if (date("YmdHi") > $datePlusOneSlot) {
-        $this->warning='You cannot add entries in the past';
+    if (date("YmdHi") > $date) {
+        // $this->warning='You cannot add entries in the past';
+        $this->warning='No permission to remove selected entry(ies)';
         return false;
-    }  else {
-        return true;
-    }
+	}
+	
+    return true;
 }
     
 //Sets the confirmation IP or manager based depending on the resource configuration

@@ -91,7 +91,8 @@ function add(){
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();exit;};
     if (!$perm->addRegular()) {echo $perm->getWarning();exit;};
     if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();exit;}
-    if (!$perm->addBack($datetime)) {echo $perm->getWarning();exit;}
+    // if (!$perm->addBack($datetime)) {echo $perm->getWarning();exit;}
+    if (!$perm->addBack($datetime)) {echo "Not allowed to add an entry for this hour";exit;}
     $EntryStatus=$perm->getEntryStatus();
     if (!$perm->getEntryStatus()) {echo $perm->getWarning();exit;}
     
@@ -172,9 +173,10 @@ function del(){
 	
     $resource=clean_input($_GET['resource']);
     $entry=clean_input($_GET['entry']);
+
     $seekentry='';
     // Gets the all the users, entry_ids and status of the given entry_id date, of a given resource
-    $sql = "SELECT entry_user,entry_id,entry_status FROM entry where entry_datetime in (select entry_datetime from entry where entry_id=".$entry.") and entry_resource=".$resource." AND entry_status IN ( 1, 2, 4 ) order by entry_id";
+    $sql = "SELECT entry_user,entry_id,entry_status, entry_datetime FROM entry where entry_datetime in (select entry_datetime from entry where entry_id=".$entry.") and entry_resource=".$resource." AND entry_status IN ( 1, 2, 4 ) order by entry_id";
     $res = dbHelp::query($sql) or die($sql);
     $found = false;
     $perm = new permClass;
@@ -220,11 +222,20 @@ function del(){
     
     $deleteall=$_GET['deleteall'];
     if ($entry!=$arr[1]) $deleteall=0; //delete from monitor does not allow delete all 
-    
 
-    $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > ".dbHelp::now();
-    // $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > now()";
-    if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
+    // $extra =" and ".dbHelp::date_sub('entry_datetime',$perm->getResourceDelHour(),'hour')." > ".dbHelp::now();
+    // if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
+	// ******* delete this??
+	// $delHourLimit = strtotime($arr[3]) + $perm->getResourceDelHour()*60*60;
+	// $dateBackLimit = date("YmdHi", $delHourLimit);
+    // if (!$perm->addBack($dateBackLimit, true)){
+    if (!$perm->addBack($arr[3], true)){
+        echo "No permission to delete selected entry(ies)";
+		return;
+	}
+	$extra = "";
+	// ***********************
+	
     
     $sql="select entry_repeat,".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i').",entry_status from entry where entry_id=". $entry;
     $res=dbHelp::query($sql);
@@ -306,11 +317,18 @@ function update(){
 	
     $perm= new permClass;
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();return;}
-    if (!$perm->addBack($datetime)) {echo $perm->getWarning();return;}
+	
+	// entry time with addded resource delete hour(s)
+	// $delHourLimit = strtotime($datetime) + $perm->getResourceDelHour()*60*60;
+	// $dateBackLimit = date("YmdHi", $delHourLimit);
+	// if (!$perm->addBack($dateBackLimit)) {echo $perm->getWarning();return;}
+	if (!$perm->addBack($datetime, true)) {echo $perm->getWarning();return;}
+	//***********************************************
+	
+    // $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > ".dbHelp::now();
+    // if (!$perm->addBack($datetime)) {echo $perm->getWarning();return;}
 
-    $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > ".dbHelp::now();
-    // $extra =" and ".dbHelp::date_sub('entry_datetime', $perm->getResourceDelHour(), 'hour')." > now()";
-    if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
+    // if ($perm->addBack($arr[1])) $extra =""; //if you can delete back there is no time restriction
     //if (!$perm->addBack($datetime)) $extra =" and addtime(entry_datetime,'-" .  $perm->getResourceDelHour() . ":0:0') > now()";
     
     if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();return;}
@@ -320,6 +338,15 @@ function update(){
     $resdt=dbHelp::query($sql) or die($sql);
     $arrdt=dbHelp::fetchRowByIndex($resdt);
 
+	// Doesnt let the entry be removed if its before the currenttime - delhour
+	// $entryDate = date("YmdHi", strtotime($arrdt[0]) + $perm->getResourceDelHour()*60*60);
+    // if (!$perm->addBack($entryDate)) {
+    if (!$perm->addBack($arrdt[0], true)) {
+		echo "You cannot remove entries from the past";
+		return;
+	}
+	// **********************************
+	
 	// check impersonate user here by get *************************************************************************************************************
 	// $tempUser = $user_id;
 	// if(isset($_GET['impersonate'])){
@@ -335,20 +362,17 @@ function update(){
 	
 		// current date in time format
 		$todaysDate = time(date("YmdHi"));
-		
-		// entry time with addded resource delete hour(s)
-		$otherDate = strtotime($datetime) - $perm->getResourceDelHour()*60*60;
 
 		$sql="select entry_status from entry where entry_id = ". $entry;
 		$res = dbHelp::query($sql) or die("Entry info not updated!");
 		$arr = dbHelp::fetchRowByIndex($res);
 		
 		// if the user is too late to change an entry and the entry is confirmed
-		// if ($otherDate < $todaysDate && $arr[0] == 1) {
+		// if ($delHourLimit < $todaysDate && $arr[0] == 1) {
 			// echo "You can't modify this entry. Talk to the person responsible for the equipment.";
 			// exit;
 		// }
-		if ($otherDate > $todaysDate) {
+		if ($delHourLimit > $todaysDate) {
 			$sql="update entry set entry_status = 2 where entry_id=". $entry;
 			$res = dbHelp::query($sql) or die("Entry info not updated!");
 		}

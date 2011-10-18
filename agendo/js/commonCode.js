@@ -93,11 +93,12 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 					}
 					//**************
 					else{
-						phpFilePath = phpFilePath + "?resource="+resource;
-						if(loginToDatumo){
-							// phpFilePath = "../datumo/index.php";
-							phpFilePath = "../datumo/";
+						if(resource != null){
+							phpFilePath = phpFilePath + "?resource="+resource;
 						}
+						// if(loginToDatumo){
+							// phpFilePath = "../datumo/";
+						// }
 						window.location = phpFilePath;
 					}
 				}
