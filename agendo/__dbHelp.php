@@ -20,29 +20,31 @@
 		}
 		
 		public static function getConnect(){
-			if(!isset(dbHelp::$connect)){
-				dbHelp::$connect = new dbConnection();
-				dbHelp::$schema = dbHelp::$connect->getSchemaName();
+			if(!isset(self::$connect)){
+				self::$connect = new dbConnection();
+				self::$schema = self::$connect->getSchemaName();
 				// Beware that w in MySQL is (0..6) and D in PostGre is (1..7)
-				dbHelp::$dateHash = array("i" => "MI", "H" => "HH24", "h" => "HH12", "d" => "DD", "w" => "ID", "m" => "MM", "M" => "Month", "Y" => "YYYY");
+				self::$dateHash = array("i" => "MI", "H" => "HH24", "h" => "HH12", "d" => "DD", "w" => "ID", "m" => "MM", "M" => "Month", "Y" => "YYYY");
 				self::setTimezone();
 	// $date = new DateTime();
 	// $tz = $date->getTimezone();
 	// echo($tz->getName());
 			}
-			return dbHelp::$connect;
+			return self::$connect;
 		}
 		
 		private static function setTimezone(){
 			try{
 				$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
-				$res = dbHelp::query($sql);
-				$arr = dbHelp::fetchRowByIndex($res);
+				$res = self::query($sql);
+				$arr = self::fetchRowByIndex($res);
 				date_default_timezone_set($arr[0]);
 			}
 			catch(Exception $e){
 				// not handled
+				return false;
 			}
+			return true;
 		}
 
 		public static function now(){
@@ -61,9 +63,31 @@
 			$prepSql->execute();
 		}
 		
-		public static function query($sql){
-			$connect = dbHelp::getConnect();
+		// public static function query($sql){
+			// $connect = self::getConnect();
+			// $prepSql = $connect->prepare($sql);
+			// $prepSql->execute();
+			// return $prepSql;
+		// }
+		
+		// $sql = 'INSERT INTO REGISTRY (name, value) VALUES (:name, :value)'
+		// $connect->prepare($sql);
+		// $prepSql->bindParam(':name', $name);
+		// $prepSql->bindParam(':value', $value);
+		// $prepSql->execute();
+		// OR
+		// $prepSql = $connect->prepare('UPDATE people SET name = :new_name WHERE id = :id');
+		// $prepSql->execute( array('new_name' => $name, 'id' => $id) );
+		public static function query($sql, $argsArray = null){
+			$connect = self::getConnect();
 			$prepSql = $connect->prepare($sql);
+			// wtf($sql."--".$argsArray[0]);
+			if(isset($argsArray)){
+				foreach($argsArray as $key => &$value){
+					$prepSql->bindParam(':'.(string)$key, $value);
+					// $prepSql->bindValue(':'.(string)$key, $value);
+				}
+			}
 			$prepSql->execute();
 			return $prepSql;
 		}
@@ -81,15 +105,15 @@
 		}
 
 		public static function selectDb($db){
-			dbHelp::getConnect()->dbSelect($db);
+			self::getConnect()->dbSelect($db);
 		}
 		
 		public static function getDatabase(){
-			return dbHelp::getConnect()->getDatabase();
+			return self::getConnect()->getDatabase();
 		}
 		
 		public static function getSchemaName(){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 			return $connect->getSchemaName();
 		}
 
@@ -98,7 +122,7 @@
 		}
 		
 		public static function date_add($datefield, $interval, $timeType){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 
 			switch($connect->getEngine()){
 				case "mysql": //query to change database in mysql
@@ -111,7 +135,7 @@
 		}
 		
 		public static function date_sub($datefield, $interval, $timeType){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 
 			switch($connect->getEngine()){
 				case "mysql": //query to change database in mysql
@@ -126,14 +150,14 @@
 		// Gets the same formatation parameters as MySql date_format (most of them at least) and converts them to PostGre
 		// Always returns the date as a string and not as a timestamp (unless $asTimestamp is true)
 		public static function getFromDate($datefield, $timeFormat, $asTimestamp=false){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 			
 			switch($connect->getEngine()){
 				case "mysql": //query to change database in mysql
 					$date = "date_format(".$datefield.", '".$timeFormat."')";
 				break;
 				case "pgsql"; //query to change database in postgresql
-					$dateCommand = dbHelp::convertDateCommands($timeFormat);
+					$dateCommand = self::convertDateCommands($timeFormat);
 					$date = "to_char(".$datefield.", '".$dateCommand."')";
 					
 					if($asTimestamp){
@@ -147,13 +171,13 @@
 		
 		// Converts the MySql time formats to PostGre format
 		public static function convertDateCommands($timeFormat){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 			$dateCommand = "";
 			$timeFormat = str_replace("%", "", $timeFormat);
 
 			for($i = 0; $i<strlen($timeFormat); $i++){
 				$char = $timeFormat[$i];
-				$tempChar = dbHelp::$dateHash[$char];
+				$tempChar = self::$dateHash[$char];
 				if(isset($tempChar))
 					$dateCommand = $dateCommand.$tempChar;
 				else
@@ -163,14 +187,14 @@
 		}
 		
 		public static function convertDateStringToTimeStamp($date, $dateCommand){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 			
 			switch($connect->getEngine()){
 				case "mysql": //query to change database in mysql
 					$sql = "str_to_date('".$date."','".$dateCommand."')";
 				break;
 				case "pgsql"; //query to change database in postgresql
-					$sql = "to_timestamp('".$date."','".dbHelp::convertDateCommands($dateCommand)."')";
+					$sql = "to_timestamp('".$date."','".self::convertDateCommands($dateCommand)."')";
 				break;
 			}
 			return $sql;
@@ -178,7 +202,7 @@
 		
 		// Returns the sql string for the corresponding engine of between dates
 		public static function dateBetween($dateFieldName, $date1, $date2){
-			// $connect = dbHelp::getConnect();
+			// $connect = self::getConnect();
 		
 			// switch($connect->getEngine()){
 				// case "mysql": //query to change database in mysql
@@ -193,7 +217,7 @@
 		
 		// Reads a script, expects a big line of sql statements seperated by ';'
 		public static function scriptRead($sql){
-			$connect = dbHelp::getConnect();
+			$connect = self::getConnect();
 			$connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$statements = explode(';',$sql);
 			$i = 0;
@@ -208,7 +232,7 @@
 		public static function startTransaction($sql){
 			// $resultMsg = 'success';
 			// try{
-				$connect = dbHelp::getConnect();
+				$connect = self::getConnect();
 				// $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 				$connect->beginTransaction();
 				$connect->exec($sql);

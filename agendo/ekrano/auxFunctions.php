@@ -3,13 +3,13 @@
 require_once "../Datumo2.0/.htconnect.php";
 
 if(isset($_GET['type'])){
-	$type=$_GET['type'];
+	$type=(int)$_GET['type'];
 	switch($type){
 		case 0:
 			resourceDisplay();
 			break;
 		case 1:
-			$ld=loadInfo($_GET['equip'], $_GET['resource'], $_GET['time']);
+			$ld=loadInfo((int)$_GET['equip'], (int)$_GET['resource'], (int)$_GET['time']);
 			echo $ld;
 			break;
 		case 2: 
@@ -22,7 +22,7 @@ function resourceDisplay(){
 	$conn=new dbConnection();
 	
 	//url variables
-	if(isset($_GET['resource']))	$resource_id=$_GET['resource'];
+	if(isset($_GET['resource']))	$resource_id=(int)$_GET['resource'];
 	$query="SELECT board_address, user_login, user_email, resource_status
 	FROM board, resource, user, equip 
 	WHERE user_id=equip_user 
@@ -144,8 +144,8 @@ function limits(){
 	//call database class
 	$conn=new dbConnection();
 	//url variables
-	if(isset($_GET['resource']))	$resource=$_GET['resource'];
-	if(isset($_GET['param']))	$parameter_id=$_GET['param'];
+	if(isset($_GET['resource']))	$resource=(int)$_GET['resource'];
+	if(isset($_GET['param']))	$parameter_id=(int)$_GET['param'];
 	
 	$query="SELECT equip_min, equip_max, equip_calibration, resource_type 
 	FROM equip, resource

@@ -7,12 +7,14 @@
 	
 	if(isset($_GET['res']) && isset($_GET['resName']) && isset($_GET['mac'])){
 		try{
-			$sql = "update resource set resource_mac = '".$_GET['mac']."' where resource_id = '".$_GET['res']."'";
-			$res = dbHelp::query($sql);
+			// $sql = "update resource set resource_mac = '".$_GET['mac']."' where resource_id = '".$_GET['res']."'";
+			// $res = dbHelp::query($sql);
+			$sql = "update resource set resource_mac = :0 where resource_id = :1";
+			$res = dbHelp::query($sql, array($_GET['mac'], $_GET['res']));
 			echo "The macaddress(".$_GET['mac'].") was associated to ".$_GET['resName'].".";
 		}
 		catch(Exception $e){
-			echo $sql."---".$e->getMessage();
+			echo $e->getMessage();
 		}
 		exit;
 	}

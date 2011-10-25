@@ -14,7 +14,7 @@
 	// logIn();
 	
 	if(isset($_POST['functionName'])){
-		call_user_func($_POST['functionName']);
+		call_user_func(cleanValue($_POST['functionName']));
 		exit;
 	}
 	importJs();

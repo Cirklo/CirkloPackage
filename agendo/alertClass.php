@@ -294,9 +294,12 @@ END:VCALENDAR";
 
 function recover($user_id){
     // $sql="select user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
-    $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
-    $res=dbHelp::query($sql);
+    // $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
+    $sql="select user_email,user_mobile,user_alert, user_id from ".dbHelp::getSchemaName().".user where user_login=:0";
+    // $res=dbHelp::query($sql);
+    $res=dbHelp::query($sql, array($user_id));
     $arr=dbHelp::fetchRowByName($res);
+	$user_id = $arr['user_id'];
     $vowels="aeiyou";
     $consonants="bcdfghjklmnpqrstvwxz";
     $pwd='';

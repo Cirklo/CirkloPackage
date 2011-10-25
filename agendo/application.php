@@ -10,9 +10,12 @@ function makeUser(){
 	try{
 		$dataArray = $_POST['dataArray'];
 		//INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
+		// $sql = "insert into ".dbHelp::getSchemaName().".user (user_login, user_passwd, user_firstname, user_lastname, user_dep, user_phone, user_phonext, user_mobile, user_email, user_alert, user_level)
+				// values('".$dataArray[0]."', '".cryptPassword($dataArray[1])."', '".$dataArray[2]."', '".$dataArray[3]."', '".$dataArray[4]."', '".$dataArray[5]."', '".$dataArray[6]."', '".$dataArray[7]."', '".$dataArray[8]."', '1', '2')";
+		// dbHelp::query($sql);
 		$sql = "insert into ".dbHelp::getSchemaName().".user (user_login, user_passwd, user_firstname, user_lastname, user_dep, user_phone, user_phonext, user_mobile, user_email, user_alert, user_level)
-				values('".$dataArray[0]."', '".cryptPassword($dataArray[1])."', '".$dataArray[2]."', '".$dataArray[3]."', '".$dataArray[4]."', '".$dataArray[5]."', '".$dataArray[6]."', '".$dataArray[7]."', '".$dataArray[8]."', '1', '2')";
-		dbHelp::query($sql);
+				values(:0, :1, :2, :3, :4, :5, :6, :7, :8, '1', '2')";
+		dbHelp::query($sql, $dataArray);
 		$json->success = true;
 		$json->message = "User inserted";
 	}

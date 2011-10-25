@@ -22,9 +22,11 @@
 	}
 
 	function autocompleteAgendo(){
-		$value = $_GET['term'];
-		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
-		$res = dbHelp::query($sql);
+		$value = strtolower($_GET['term']);
+		// $sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
+		// $res = dbHelp::query($sql);
+		$sql = "select resource_id, resource_name from resource where lower(resource_name) like :0 and resource_status not in (0,2)";
+		$res = dbHelp::query($sql, array("%".$value."%"));
 		while($arr = dbHelp::fetchRowByIndex($res)){
 			$row_array['id'] = $arr[0];
 			$row_array['value'] = $arr[1];
@@ -35,13 +37,37 @@
 
 	function getUsersList(){
 		$value = explode(' ', $_GET['term']);
+		$operand = "or";
+		
+		$values = array();
+		$values[0] = "%".strtolower($value[0])."%";
+		$values[1] = "%".strtolower($value[0])."%";
+		$values[2] = "%".strtolower($value[0])."%";
 		if(sizeOf($value) > 1){
-			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+			$operand = "or";
+			$values[2] = "%".strtolower($value[1])."%";
+			// $sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
 		}
-		else{
-			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
-		}
-		$res = dbHelp::query($sql);
+		
+		// else{
+			// $sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+		// }
+		// $res = dbHelp::query($sql);
+		
+		$sql = "select 
+					user_id, 
+					user_firstname, 
+					user_lastname, 
+					user_login 
+				from 
+					user 
+				where 
+					lower(user_login) like :0 ".$operand."
+					lower(user_firstname) like :1 ".$operand." 
+					lower(user_lastname) like :2 
+		";
+
+		$res = dbHelp::query($sql, $values);
 		while($arr = dbHelp::fetchRowByIndex($res)){
 			$row_array['id'] = $arr[0];
 			$row_array['value'] = $arr[1]." ".$arr[2]." (".$arr[3].")";
@@ -51,8 +77,8 @@
 	}
 
 	function logIn(){
-		$userLogin=$_POST['login'];
-		$pass=$_POST['pass'];
+		$userLogin=cleanValue($_POST['login']);
+		$pass=cleanValue($_POST['pass']);
 		// $resource=$_GET['resource'];
 		$passCrypted=$_POST['passCrypted'];
 		if($passCrypted == 'false'){
@@ -81,7 +107,7 @@
 				$email = $userLogin."@".$configArray['imapMailServer'];
 				// {imap.gmail.com:993/imap/ssl}INBOX
 				// $inbox = @imap_open("{".$configArray['imapHost']."}", $email, $_POST['pass']);
-				$inbox = @imap_open("{".$configArray['imapHost']."}", $userLogin, $_POST['pass']);
+				$inbox = @imap_open("{".$configArray['imapHost']."}", $userLogin, $pass);
 				// if login to imap is successfull then $externalLogin = true;
 				if(!$inbox){
 					// $message = imap_last_error();
@@ -520,5 +546,13 @@
 		}
 
 		return $arr;
+	}
+	
+	function cleanValue($value, $extraForbiddenOnes = ""){
+		$forbiddenOnes = ";\/".$extraForbiddenOnes;
+		$value = stripslashes($value);
+		$value = strip_tags($value);
+		$value = preg_replace("/[".$forbiddenOnes."]/",'',$value);
+		return $value;
 	}
 ?>

@@ -8,7 +8,7 @@ if(isset($_GET['type'])){
 	if(isset($_GET['resource_ip']))	$ip=$_GET['resource_ip'];	
 	
 	if(setcookie('resource_ip',$ip,time()+157680000,'/')){
-		$query="UPDATE resource SET resource_confIP='$ip' WHERE resource_id='$resource_id'";
+		$query="UPDATE resource SET resource_mac='$ip' WHERE resource_id='$resource_id'";
 		$conn->query($query);
 		echo "Cookie is baked!";
 	} else {

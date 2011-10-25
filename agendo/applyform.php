@@ -25,6 +25,8 @@ echo "<br>";
 echo "<table border=0>";
 //get personal information from previous page form
 foreach ($_POST as $key=>$value){
+	$key = cleanValue($key);
+	$value = cleanValue($value);
     if($key == 'GEDepartment' && $value == ''){} //do nothing
     else{
         $key = str_replace('_', ' ',$key);

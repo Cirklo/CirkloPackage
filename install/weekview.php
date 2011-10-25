@@ -9,7 +9,7 @@
 	require_once("../agendo/genMsg.php");
 
 	if(isset($_POST['functionName'])){
-		call_user_func($_POST['functionName']);
+		call_user_func(cleanValue($_POST['functionName']));
 		exit;
 	}
 
@@ -33,39 +33,32 @@
 
 
 <?php
-//********************************************
-$smallScript = "<script type='text/javascript'>alert('Please sign in to be able to access resources');</script>"."<meta HTTP-EQUIV='REFRESH' content='0; url=./'>";
+//*************Check for view without logging in********************
 if(!secureIpSessionLogin()){
-	echo $smallScript;
+	echo "<a href='index.php' style='color:#F7C439;'>Back to index</a>";
+	showMsg('Please sign in to be able to view resources', true);
 	exit;
 }
-//********************************************
+//******************************************************************
 
 //disable warning displays
 error_reporting(0);
-$resource=clean_input($_GET['resource']);
-// $resource=$_GET['resource'];
 
-// Used to hide buttons, and show or not, a custom interface
-$ressql = "select resource_status, resource_mac from resource where resource_id = ".$resource;
-$res = dbHelp::query($ressql) or die($ressql);
-$arr = dbHelp::fetchRowByIndex($res);
-$imResstatus5 = ($arr[0] == 5); // quick scheduling
-// $imResstatus5 = false;
-// if($arr[0] == 5){
-	// $imResstatus5 = true;
-	// if (isset($_COOKIE["resourceStatus"]) && $_COOKIE["resourceStatus"] == 5){
-		// $ressql = "select resinterface_phpfile from resinterface where resinterface_resource = ".$resource;
-		// $res = dbHelp::query($ressql) or die($ressql);
-		// $arr = dbHelp::fetchRowByIndex($res);
-		// echo "<meta HTTP-EQUIV='REFRESH' content='0; url=".$arr[0]."?resource=".$resource."'>";
-		// exit;
-	// }
-// }
-// ***********************************************************
+// $resource=clean_input($_GET['resource']);
+$arrInput = array();
+$arrInput[] = cleanValue($_GET['resource']);
+// $ressql = "select resource_status, resource_mac from resource where resource_id = ".$resource;
+$ressql = "select resource_status, resource_mac, resource_id from resource where resource_id = :0";
+// $res = dbHelp::query($ressql) or die($ressql);
+$res = dbHelp::query($ressql,$arrInput) or die($ressql);
+$arr = dbHelp::fetchRowByName($res);
+$resource = $arr['resource_id'];
+
+// Flags for the resource type/status
+$imResstatus5 = ($arr['resource_status'] == 5); // quick scheduling
+$imResstatus3 = ($arr['resource_status'] == 3); // user confirmation
 
 // *************************** applet for mac address *********************
-$imResstatus3 = ($arr[0] == 3); // user confirmation
 if($imResstatus3){ // user confirmation
 	echo "<object type='application/x-java-applet' WIDTH='1' HEIGHT='1' id='zeeApplet'>";
 		echo "<param name='codebase' value = '../agendo' />";
@@ -80,20 +73,20 @@ if($imResstatus3){ // user confirmation
 	
 	// Checks if the macaddress associated to this resource is 
 	echo "<script type='text/javascript'>";
-	echo "macConfimation('".$arr[1]."');";
+	echo "macConfimation('".$arr['resource_mac']."');";
 	echo "</script>";
 }
 //*************************************************************************
 
 
-if (isset($_GET['update'])) {$update=clean_input($_GET['update']);$entry=clean_input($_GET['update']);} else {$update=0;} ;
+if (isset($_GET['update'])) {$update=cleanValue($_GET['update']);$entry=cleanValue($_GET['update']);} else {$update=0;} ;
 //instatiation for calendar
 $calendar=new cal($resource,$update);
 $message=new genMsg;
 
 //getting the variables 
-if (isset($_GET['action'])) {$action =$_GET['action'];} else {$action =0;} ;
-if (isset($_GET['msg'])) {$msg =$_GET['msg'];} else {$msg ='';} ;
+if (isset($_GET['action'])) {$action = cleanValue($_GET['action']);} else {$action =0;} ;
+if (isset($_GET['msg'])) {$msg =cleanValue($_GET['msg']);} else {$msg ='';} ;
  
 //html body starts Here
 //##############################################
@@ -134,9 +127,8 @@ echo "</div>";
 $sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='institute' or configParams_name='shortname' or configParams_name='url'";
 $res = dbHelp::query($sql);
 $instituteArray = array();
-for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
-	// $institute[$i] = $arr[1];
-	$instituteArray[$arr[0]] = $arr[1];
+while($arr = dbHelp::fetchRowByName($res)){
+	$instituteArray[$arr['configParams_name']] = $arr['configParams_value'];
 }
 
 //This is where msgs are displayed (changed)
@@ -205,7 +197,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 			
 // *******************************************        calendar stuff made here     ***********************************************************
 			if (isset($_GET['date'])){
-				$calendar->setStartDate($_GET['date']);
+				$calendar->setStartDate(cleanValue($_GET['date']));
 			} else {        
 				$calendar->setStartDate(date("Ymd",mktime(0,0,0, date("m"), date("d")-date("N"),date("Y"))));
 			}
@@ -224,9 +216,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 				exit;
 			}
 
-			if (isset($_POST['action'])) call_user_func($_POST['action']);
+			if (isset($_POST['action'])) call_user_func(cleanValue($_POST['action']));
 			if (isset($_GET['entry'])){
-				$entry=clean_input($_GET['entry']);
+				$entry=(int)cleanValue($_GET['entry']);
 				$calendar->setEntry($entry);
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
 				
@@ -403,7 +395,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "<tr><td colspan=2><hr></td></tr>";
 					}
 					
-
 					// similar stuff
 					$sqlSimilar = "select similarresources_similar, resource_name from resource, (select similarresources_similar from similarresources where similarresources_resource = ".$resource.") as similars where resource_id = similarresources_similar";
 					$resSimilar = dbHelp::query($sqlSimilar);

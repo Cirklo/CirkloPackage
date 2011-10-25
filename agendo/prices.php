@@ -1,7 +1,7 @@
 <?php
 	session_start();
-	// $pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
-	// $_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
+	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
+	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("commonCode.php");
 	try{
 		echo "<link href='../agendo/css/intro.css' rel='stylesheet' type='text/css' />";

@@ -22,8 +22,10 @@ $mail = new PHPMailer;
 if(isset($_GET['val'])){ //new user form -> ajax response
     $id = $_GET['val'];    
     if($id != 0){
-        $sql = "SELECT institute_name FROM institute, department WHERE institute_id = department_inst AND department_id = $id";
-        $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+        // $sql = "SELECT institute_name FROM institute, department WHERE institute_id = department_inst AND department_id = ".$id;
+        // $res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+        $sql = "SELECT institute_name FROM institute, department WHERE institute_id = department_inst AND department_id = :0";
+        $res = dbHelp::query($sql, array($id)) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
         $row = dbHelp::fetchRowByIndex($res);
         echo $row[0];
     } else {
@@ -32,8 +34,8 @@ if(isset($_GET['val'])){ //new user form -> ajax response
 } else { //new permissions form
     $user_login = $_POST['user_login'];
     $pwd = $_POST['pwd'];
-    $resource = $_POST['Resource'];
-    $train = $_POST['assistance'];
+    $resource = (int)$_POST['Resource'];
+    $train = cleanValue($_POST['assistance']);
     if($train == 'on') $train = "yes";
     else $train = "no";
     
@@ -43,9 +45,12 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     // $pwd = $row[0];
     // $sql = "SELECT user_passwd, CONCAT(user_firstname,' ',user_lastname),user_email from ".dbHelp::getSchemaName().".user WHERE user_login = '".$user_login."'";
     $pwd = cryptPassword($pwd);
-    $sql = "SELECT user_passwd,user_firstname,user_lastname,user_email from ".dbHelp::getSchemaName().".user WHERE user_login = '".$user_login."'";
-    $res = dbHelp::query($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    // $sql = "SELECT user_passwd,user_firstname,user_lastname,user_email from ".dbHelp::getSchemaName().".user WHERE user_login = '".$user_login."'";
+    // $res = dbHelp::query($sql) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+    $sql = "SELECT user_passwd,user_firstname,user_lastname,user_email, user_login from ".dbHelp::getSchemaName().".user WHERE user_login = :0";
+    $res = dbHelp::query($sql, array($user_login)) or die($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
     $row = dbHelp::fetchRowByIndex($res);
+	$user_login = $row[4];
     $nrows = dbHelp::numberOfRows($res);
     // $user_name = $row[1];
     // $user_email = $row[2];

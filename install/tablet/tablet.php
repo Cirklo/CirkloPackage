@@ -5,7 +5,7 @@ $_SESSION['path'] = "../../".$pathOfIndex[sizeof($pathOfIndex)-2];
 require_once("../../agendo/commonCode.php");
 
 if(isset($_POST['functionName'])){
-	call_user_func($_POST['functionName']);
+	call_user_func(cleanValue($_POST['functionName']));
 	exit;
 }
 
@@ -23,7 +23,7 @@ function tablet_login(){
 		if(!isset($_POST['pin'])){
 			throw new Exception('No pin detected');
 		}
-		$pin = $_POST['pin'];
+		$pin = (int)$_POST['pin'];
 
 		if(!isset($_GET['resource'])){
 			throw new Exception('No resource detected');
@@ -91,7 +91,7 @@ function tablet_logout(){
 		if(!isset($_POST['pin'])){
 			throw new Exception('No pin detected');
 		}
-		$pin = $_POST['pin'];
+		$pin = (int)$_POST['pin'];
 
 		if(!isset($_GET['resource'])){
 			throw new Exception('No resource detected');

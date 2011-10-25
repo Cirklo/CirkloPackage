@@ -29,11 +29,12 @@ function getUserId(){
 	if(isset($_SESSION['user_id']) && $_SESSION['user_id']!='')
 		return $_SESSION['user_id'];
 	else {
-		$sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = '".$_GET['user_id']."'";
-		$res=dbHelp::query($sql) or die ($sql);
+		// $sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = '".$_GET['user_id']."'";
+		// $res=dbHelp::query($sql) or die ($sql);
+		$sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0";
+		$res=dbHelp::query($sql, array($_GET['user_id'])) or die ($sql);
 		$arr=dbHelp::fetchRowByIndex($res);
-		// return $_GET['user_id'];
-		return clean_input($arr[0]);
+		return $arr[0];
 	}
 }
 
@@ -42,30 +43,31 @@ function getPass(){
 		return $_SESSION['user_pass'];
 	else
 		// return cryptPassword($_GET['user_passwd']);
-		return cryptPassword(clean_input($_GET['user_passwd']));
+		return cryptPassword(cleanValue($_GET['user_passwd']));
 }
 
 //adding function. set the state to 1 or 2 depending on equipment state
 function add(){
     $w=0;
-    $update=clean_input($_GET['update']);
+    $update = (int)cleanValue($_GET['update']);
     if ($update>0) {update();exit;}
+	
     $assistance=$_GET['assistance'];
-    $code=clean_input($_GET['code']);
-    $repeat=clean_input($_GET['repeat']);
-    $enddate=clean_input($_GET['enddate']);
+    $code=cleanValue($_GET['code']);
+    $repeat=cleanValue($_GET['repeat']);
+    $enddate=cleanValue($_GET['enddate']);
     $enddate=substr($enddate,0,4) . substr($enddate,5,2) . substr($enddate,8,2);
-    $datetime=clean_input($_GET['datetime']);
+    $datetime=cleanValue($_GET['datetime']);
     $min=substr($datetime,10,2);
     $hour=substr($datetime,8,2);
-    $slots=clean_input($_GET['slots']);
+    $slots=(int)cleanValue($_GET['slots']);
     //$assistance=($assistance)?"1":"0";
     if($assistance=="true")	$assistance=1;
     else $assistance=0;
 
     $user_id=getUserId();
     $user_passwd=getPass();
-    $resource=clean_input($_GET['resource']);
+    $resource = (int)cleanValue($_GET['resource']);
 	
 	//201102251200
     $year=substr($datetime,0,4);
@@ -97,11 +99,15 @@ function add(){
     if (!$perm->getEntryStatus()) {echo $perm->getWarning();exit;}
     
     //if there is no associated entries it creates a new set
-    $sql="select repetition_id from repetition where repetition_code='".$code."'";
-    $res=dbHelp::query($sql) or die($sql) ;
+    // $sql="select repetition_id from repetition where repetition_code='".$code."'";
+    // $res=dbHelp::query($sql) or die($sql) ;
+    $sql="select repetition_id, repetition_code from repetition where repetition_code= :0";
+    $res=dbHelp::query($sql, array($code)) or die($sql);
+	$tempArr = dbHelp::fetchRowByIndex($res);
+	$code = (string)$tempArr[1];
     //if there is no related entry already it creates one
     if (dbHelp::numberOfRows($res)==0) {    
-        $sql="insert into repetition(repetition_code) values(" . $code . ")";
+        $sql="insert into repetition(repetition_code) values('".$code."')";
         dbHelp::query($sql) or die($sql);
     }
 
@@ -116,12 +122,14 @@ function add(){
 	
 	$tempUser = $user_id;
 	if(isset($_GET['impersonate'])){
-		$tempUser = $_GET['impersonate'];
+		$tempUser = (int)$_GET['impersonate'];
 	}
     //building the repetition pattern
     while ((substr($weekahead,0,8)<=$enddate) && ($w<53)) {
         if (!$perm->addAhead($weekahead, $slots)) {echo $perm->getWarning();exit;}
+		
         if (!$perm->checkOverlap($weekahead,$slots)) {echo $perm->getWarning();exit;}
+		
         // $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(".$user_id.",".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."," . $slots .",". $assistance ."," . $arrrep[0] .",". $EntryStatus . "," . $resource . ", '".date('Y-m-d H:i:s',time())."',NULL)";
         $sql="insert into entry(entry_user,entry_datetime,entry_slots,entry_assistance,entry_repeat,entry_status,entry_resource,entry_action,entry_comments) values(".$tempUser.",".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."," . $slots .",". $assistance ."," . $arrrep[0] .",". $EntryStatus . "," . $resource . ", '".date('Y-m-d H:i:s',time())."',NULL)";
         dbHelp::query($sql) or die($sql);
@@ -139,7 +147,7 @@ function add(){
         $extra= array();
 		while($arr=dbHelp::fetchRowByIndex($res)){
 			$val = '';
-			$val=clean_input($_GET[$arr[0]."-".$arr[1]]);
+			$val=cleanValue($_GET[$arr[0]."-".$arr[1]]);
 
             // eval("\$$var='$val';");
 			if(($arr[3] == 2 || $arr[3] == 3) && $val=='true')
@@ -147,8 +155,10 @@ function add(){
 			else if($arr[3] == 1)
 				$extra[$arr[2]]=$val;
 				
-            $sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arr[1].",'".$val."')";
-            dbHelp::query($sql) or die($sql);
+            // $sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arr[1].",'".$val."')";
+            // dbHelp::query($sql) or die($sql);
+            $sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arr[1].", :0)";
+            dbHelp::query($sql, array($val)) or die($sql);
         }
 		
         $notify->setSlots($slots);
@@ -171,8 +181,8 @@ function del(){
     $user_id=getUserId();
     $user_passwd=getPass();
 	
-    $resource=clean_input($_GET['resource']);
-    $entry=clean_input($_GET['entry']);
+    $resource=(int)cleanValue($_GET['resource']);
+    $entry=(int)cleanValue($_GET['entry']);
 
     $seekentry='';
     // Gets the all the users, entry_ids and status of the given entry_id date, of a given resource
@@ -277,17 +287,17 @@ function del(){
 
 function update(){
     // $extra='';
-    $datetime=clean_input($_GET['datetime']);
-    $slots=clean_input($_GET['slots']);
+    $datetime=cleanValue($_GET['datetime']);
+    $slots=(int)cleanValue($_GET['slots']);
     
-    // $user_id=clean_input($_GET['user_id']);
-    // $user_passwd=clean_input($_GET['user_passwd']);
+    // $user_id=cleanValue($_GET['user_id']);
+    // $user_passwd=cleanValue($_GET['user_passwd']);
 	// $user_passwd=cryptPassword($user_passwd);
     $user_id=getUserId();
     $user_passwd=getPass();
 
-    $resource=clean_input($_GET['resource']);
-    $entry=clean_input($_GET['entry']);
+    $resource=cleanValue($_GET['resource']);
+    $entry=cleanValue($_GET['entry']);
     
 	//**********************************************
     $day=substr($datetime,6,2);
@@ -300,8 +310,10 @@ function update(){
 	$maxHours = $arr[2];
 
 	if($arr[3] != $user_id && $maxHours != 0){
-		$sql="select entry_slots from entry where entry_id=". $entry;
-		$res=dbHelp::query($sql) or die($sql);
+		// $sql="select entry_slots from entry where entry_id=". $entry;
+		// $res=dbHelp::query($sql) or die($sql);
+		$sql="select entry_slots from entry where entry_id= :0";
+		$res=dbHelp::query($sql, array($entry)) or die($sql);
 		$arr=dbHelp::fetchRowByIndex($res);
 		$formerEntrySlots = $arr[0];
 		
@@ -334,9 +346,12 @@ function update(){
     if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();return;}
     //checking datetime before update
     // $sql="select @edt:=entry_datetime,@res:=entry_resource,entry_user from entry where entry_id=". $entry;
-    $sql="select entry_datetime,entry_resource,entry_user from entry where entry_id=". $entry;
-    $resdt=dbHelp::query($sql) or die($sql);
+    // $sql="select entry_datetime,entry_resource,entry_user, entry_id from entry where entry_id=". $entry;
+    // $resdt=dbHelp::query($sql) or die($sql);
+    $sql="select entry_datetime, entry_resource, entry_user, entry_id from entry where entry_id= :0";
+    $resdt=dbHelp::query($sql, array($entry)) or die($sql);
     $arrdt=dbHelp::fetchRowByIndex($resdt);
+	$entry = $arrdt[3];
 
 	// Doesnt let the entry be removed if its before the currenttime - delhour
 	// $entryDate = date("YmdHi", strtotime($arrdt[0]) + $perm->getResourceDelHour()*60*60);
@@ -363,8 +378,10 @@ function update(){
 		// current date in time format
 		$todaysDate = time(date("YmdHi"));
 
-		$sql="select entry_status from entry where entry_id = ". $entry;
-		$res = dbHelp::query($sql) or die("Entry info not updated!");
+		// $sql="select entry_status from entry where entry_id = ". $entry;
+		// $res = dbHelp::query($sql) or die("Entry info not updated!");
+		$sql="select entry_status from entry where entry_id = :0";
+		$res = dbHelp::query($sql, array($entry)) or die("Entry info not updated!");
 		$arr = dbHelp::fetchRowByIndex($res);
 		
 		// if the user is too late to change an entry and the entry is confirmed
@@ -405,15 +422,19 @@ function update(){
     }
     
 	// xfieldsinputtype: 1 = input, 2 = singlepickcheckbox, 3 = multipickcheckbox
-	$sql="select xfields_name,xfields_id, xfields_label from xfields where xfields_resource=".$resource." group by xfields_id, xfields_type";
-    $res=dbHelp::query($sql) or die($sql);
+	// $sql="select xfields_name,xfields_id, xfields_label from xfields where xfields_resource=".$resource." group by xfields_id, xfields_type";
+    // $res=dbHelp::query($sql) or die($sql);
+	$sql="select xfields_name,xfields_id, xfields_label from xfields where xfields_resource= :0 group by xfields_id, xfields_type";
+    $res=dbHelp::query($sql, array($resource)) or die($sql);
     while($arr=dbHelp::fetchRowByIndex($res)) {
 		$val = '';
-		$val=clean_input($_GET[$arr[0]."-".$arr[1]]);
+		$val=cleanValue($_GET[$arr[0]."-".$arr[1]]);
         $extra[$arr[0]]=$val;
         // eval("\$$var='$val';");
-        $sql="update xfieldsval set xfieldsval_value='".$val."' where xfieldsval_entry=".$entry." and xfieldsval_field=".$arr[1];
-        dbHelp::query($sql) or die("Entry info not updated!");
+        // $sql="update xfieldsval set xfieldsval_value='".$val."' where xfieldsval_entry=".$entry." and xfieldsval_field=".$arr[1];
+        // dbHelp::query($sql) or die("Entry info not updated!");
+        $sql="update xfieldsval set xfieldsval_value= :0 where xfieldsval_entry=".$entry." and xfieldsval_field=".$arr[1];
+        dbHelp::query($sql, array($val)) or die("Entry info not updated!");
     }
 	
     $notify=new alert($resource);
@@ -436,28 +457,34 @@ function update(){
 //set up one entry on top of another one and sets it up=4
 function monitor(){
 
-    // $user_id=clean_input($_GET['user_id']);
-    // $user_passwd=clean_input($_GET['user_passwd']);
+    // $user_id=cleanValue($_GET['user_id']);
+    // $user_passwd=cleanValue($_GET['user_passwd']);
 	// $user_passwd=cryptPassword($user_passwd);
     $user_id=getUserId();
     $user_passwd=getPass();
 
-    $resource=clean_input($_GET['resource']);
-    $entry=clean_input($_GET['entry']);
-    $code=clean_input($_GET['code']);
+    $resource=cleanValue($_GET['resource']);
+    $entry=cleanValue($_GET['entry']);
+    $code=cleanValue($_GET['code']);
     
     $perm= new permClass;
     if (!$perm->setPermission($user_id,$resource,$user_passwd)) {echo $perm->getWarning();return;}
     
-    $sql="insert into repetition(repetition_code) values(" . $code . ")";
-    dbHelp::query($sql) or die($sql);
+    // $sql="insert into repetition(repetition_code) values(" . $code . ")";
+    // dbHelp::query($sql) or die($sql);
+    $sql="insert into repetition(repetition_code) values(:0)";
+    dbHelp::query($sql, array($code)) or die($sql);
     
-    $sql="select repetition_id from repetition where repetition_code='". $code . "'";
-    $res=dbHelp::query($sql) or die($sql);
+    // $sql="select repetition_id from repetition where repetition_code='". $code . "'";
+    // $res=dbHelp::query($sql) or die($sql);
+    $sql="select repetition_id from repetition where repetition_code= :0";
+    $res=dbHelp::query($sql, array($code)) or die($sql);
     $arrrep=dbHelp::fetchRowByIndex($res);
 
-    $sql="select entry.entry_datetime, resource.resource_resp from entry, resource where entry.entry_resource=resource.resource_id and entry_id=".$entry;
-    $res=dbHelp::query($sql) or die($sql);
+    // $sql="select entry.entry_datetime, resource.resource_resp from entry, resource where entry.entry_resource=resource.resource_id and entry_id=".$entry;
+    // $res=dbHelp::query($sql) or die($sql);
+    $sql="select entry.entry_datetime, resource.resource_resp from entry, resource where entry.entry_resource=resource.resource_id and entry_id= :0";
+    $res=dbHelp::query($sql, array($entry)) or die($sql);
 	$currentDate = date('Y-m-d H:i:s',time());
     $arr=dbHelp::fetchRowByIndex($res);
 	// Only the "manager"/responsavel of a certain resource can monitor entries in the past
@@ -473,8 +500,10 @@ function monitor(){
 	}
 
 	// Block of code changed to stop users from getting in the waiting list more then once
-    $sql="select * from entry where entry_user = ".$tempUser." and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id=".$entry.")";
-    $res=dbHelp::query($sql) or die($sql);
+    // $sql="select * from entry where entry_user = ".$tempUser." and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id=".$entry.")";
+    // $res=dbHelp::query($sql) or die($sql);
+    $sql="select * from entry where entry_user = :0 and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id= :1)";
+    $res=dbHelp::query($sql, array($tempUser, $entry)) or die($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     // if ($arr[1]==$user_id) {echo "User already on the waiting list!";exit;};
 
@@ -482,8 +511,10 @@ function monitor(){
 		echo "User already on the waiting list!";
 		exit;
 	};
-    $sql="select * from entry where entry_id=" . $entry;
-    $res=dbHelp::query($sql) or die($sql);
+    // $sql="select * from entry where entry_id=" . $entry;
+    // $res=dbHelp::query($sql) or die($sql);
+    $sql="select * from entry where entry_id= :0";
+    $res=dbHelp::query($sql, array($entry)) or die($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     // end of block change
 	
@@ -493,20 +524,26 @@ function monitor(){
     
     // $sql="SELECT LAST_INSERT_ID()";
 	// $sql="SELECT entry_id from entry where entry_user = ".$user_id." and entry_datetime = (".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i').") and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
-	$sql="SELECT entry_id from entry where entry_user = ".$tempUser." and entry_datetime = '".$arr[2]."' and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
-    $res=dbHelp::query($sql) or die($sql);
+	// $sql="SELECT entry_id from entry where entry_user = ".$tempUser." and entry_datetime = '".$arr[2]."' and entry_repeat = " . $arrrep[0] ." and entry_resource = " . $resource;
+    // $res=dbHelp::query($sql) or die($sql);
+	$sql="SELECT entry_id from entry where entry_user = ".$tempUser." and entry_datetime = '".$arr[2]."' and entry_repeat = " . $arrrep[0] ." and entry_resource = :0";
+    $res=dbHelp::query($sql, array($resource)) or die($sql);
     $last=dbHelp::fetchRowByIndex($res);
         
 	// xfieldsinputtype: 1 = input, 2 = singlepickcheckbox, 3 = multipickcheckbox
 	// $sql="select xfields_name,xfields_id, xfields_label from xfields,resxfields where resxfields_field=xfields_id and resxfields_resource=".$resource." group by xfields_id, xfields_type";
-    $sql="select xfields_name,xfields_id from xfields where xfields_resource=".$resource." group by xfields_id, xfields_type";
-	$res=dbHelp::query($sql) or die($sql);
+    // $sql="select xfields_name,xfields_id from xfields where xfields_resource=".$resource." group by xfields_id, xfields_type";
+	// $res=dbHelp::query($sql) or die($sql);
+    $sql="select xfields_name,xfields_id from xfields where xfields_resource= :0 group by xfields_id, xfields_type";
+	$res=dbHelp::query($sql, array($resource)) or die($sql);
 	while($arrx=dbHelp::fetchRowByIndex($res)){
 		// $var=$arrx[0];
-		$val=clean_input($_GET[$arrx[0]."-".$arrx[1]]);
+		$val=cleanValue($_GET[$arrx[0]."-".$arrx[1]]);
 		// eval("\$$var='$val';");
-		$sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arrx[1].",'".$val."')";
-		dbHelp::query($sql) or die($sql);
+		// $sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arrx[1].",'".$val."')";
+		// dbHelp::query($sql) or die($sql);
+		$sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$last[0].",".$arrx[1].", :0)";
+		dbHelp::query($sql, array($val)) or die($sql);
 	}
     echo "Entry monitored!";
 }
@@ -514,14 +551,14 @@ function monitor(){
 //change the entry status from  2 to 1
 function confirm(){
 
-    // $user_id=clean_input($_GET['user_id']);
-    // $user_passwd=clean_input($_GET['user_passwd']);
+    // $user_id=cleanValue($_GET['user_id']);
+    // $user_passwd=cleanValue($_GET['user_passwd']);
 	// $user_passwd=cryptPassword($user_passwd);
     $user_id=getUserId();
     $user_passwd=getPass();
 
-    $resource=clean_input($_GET['resource']);
-    $entry=clean_input($_GET['entry']);
+    $resource=cleanValue($_GET['resource']);
+    $entry=cleanValue($_GET['entry']);
 	$macChecksOut = $_GET['mac'];
 
     $perm = new permClass;
@@ -539,8 +576,10 @@ function confirm(){
     }
     // echo $perm->getResourceStatus(),$perm->getWasAdmin();
 
-    $sql="update entry set entry_status=1 where entry_id=" . $entry;
-    $resPDO = dbHelp::query($sql) or die($sql);
+    // $sql="update entry set entry_status=1 where entry_id=" . $entry;
+    // $resPDO = dbHelp::query($sql) or die($sql);
+    $sql="update entry set entry_status=1 where entry_id= :0";
+    $resPDO = dbHelp::query($sql, array($entry)) or die($sql);
     // if (mysql_affected_rows()!=0)  echo $perm->getWarning();
     if (dbHelp::numberOfRows($resPDO)!=0) echo $perm->getWarning();
     
@@ -548,18 +587,22 @@ function confirm(){
     // dbHelp::query($sql) or die($sql);
     // $sql="delete from entry where entry_datetime=@dt and entry_status in (1,2,4) and entry_id<>". $entry . " and entry_resource=" . $resource;
 
-    $sql="select entry_datetime from entry where entry_id=" . $entry;
-    $res = dbHelp::query($sql) or die($sql);
+    // $sql="select entry_datetime from entry where entry_id=" . $entry;
+    // $res = dbHelp::query($sql) or die($sql);
+    $sql="select entry_datetime from entry where entry_id=:0";
+    $res = dbHelp::query($sql, array($entry)) or die($sql);
 	$arr = dbHelp::fetchRowByIndex($res);
-    $sql="delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id<>".$entry." and entry_resource=" . $resource;
-    dbHelp::query($sql) or die($sql);
+    // $sql="delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id<>".$entry." and entry_resource=" . $resource;
+    // dbHelp::query($sql) or die($sql);
+    $sql="delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id<> :0 and entry_resource= :1";
+    dbHelp::query($sql, array($entry, $resource)) or die($sql);
 }
 
 function addcomments(){
-    $resource=clean_input($_GET['resource']);
-    $entry=clean_input($_GET['entry']);
-    $comments=clean_input($_GET['comments']);
-	// $user=clean_input($_GET['user_id']);
+    $resource=cleanValue($_GET['resource']);
+    $entry=cleanValue($_GET['entry']);
+    $comments=cleanValue($_GET['comments']);
+	// $user=cleanValue($_GET['user_id']);
     $user_id=getUserId();
 
     $notify=new alert($resource);
@@ -567,8 +610,10 @@ function addcomments(){
     $notify->setUser($user_id);
     
     if ($comments!=''){
-		$sql="update entry set entry_comments='" . $comments . " 'where entry_id=" . $entry;
-		dbHelp::query($sql) or die($sql);
+		// $sql="update entry set entry_comments='" . $comments . " 'where entry_id=" . $entry;
+		// dbHelp::query($sql) or die($sql);
+		$sql="update entry set entry_comments= :0 where entry_id= :1";
+		dbHelp::query($sql, array($comments, $entry)) or die($sql);
 		if($notify->getResourceResp() != $user_id) $notify->toAdmin(date("YmdHi"),'','comment',$comments); 
 		echo "Comment added";
 	}
@@ -576,12 +621,15 @@ function addcomments(){
 
 function addCommentsXfields(){
 	$entry = $_POST['entry'];
-	$resource = $_POST['resource'];
+	// not being used?
+	// $resource = $_POST['resource']; 
 	$idArray = $_POST['idArray'];
 	foreach($idArray as $id => $value){
 		if($value != 'undefined'){
-			$sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$entry.",".$id.",'".$value."')";
-			dbHelp::query($sql);
+			// $sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(".$entry.",".$id.",'".$value."')";
+			// dbHelp::query($sql);
+			$sql="insert into xfieldsval(xfieldsval_entry,xfieldsval_field,xfieldsval_value) values(:0, :1, :2)";
+			dbHelp::query($sql, array($entry, $id, $value));
 		}
 	}
 }

@@ -441,6 +441,7 @@
 			}
 			
 			$adminId = 		$dataArray[0];
+			$dataArray[1] = cryptPassword($dataArray[1]);
 			$adminPass = 	$dataArray[1];
 			$adminFirst = 	$dataArray[2];
 			$adminLast = 	$dataArray[3];
@@ -487,32 +488,67 @@
 				throw new Exception("Failed to open ".$currentFile.".");
 			}
 			
+			// $sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
+					// (1, '".$adminId."', '".$adminPass."', '".$adminFirst."', '".$adminLast."', 1, '".$adminPhone."', '".$adminExt."', '".$adminMobile."', '".$adminMail."', 1, 0)";
+			// dbHelp::query($sql);	
 			$sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
-					(1, '".$adminId."', '".cryptPassword($adminPass)."', '".$adminFirst."', '".$adminLast."', 1, '".$adminPhone."', '".$adminExt."', '".$adminMobile."', '".$adminMail."', 1, 0)";
-			dbHelp::query($sql);	
+					(1, :0, :1, :2, :3, 1, :4, :5, :6, :7, 1, 0)";
+			dbHelp::query($sql, array_slice($dataArray,0,7));	
 			
+			// $sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
+					// (1, '".$institute."', '".$instituteAddress."', '".$institutePhone."', ".$instituteCountry.", 0)";
+			// dbHelp::query($sql);	
 			$sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
-					(1, '".$institute."', '".$instituteAddress."', '".$institutePhone."', ".$instituteCountry.", 0)";
-			dbHelp::query($sql);	
+					(1, :0, :1, :2, :3, 0)";
+			dbHelp::query($sql, array($institute, $instituteAddress, $institutePhone, $instituteCountry));	
 			
+			// $sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
+					// (1, '".$department."', 1, 1)";
+			// dbHelp::query($sql);	
 			$sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
-					(1, '".$department."', 1, 1)";
-			dbHelp::query($sql);	
+					(1, :0, 1, 1)";
+			dbHelp::query($sql, array($department));	
 			
+			$institute = 		$dataArray[8];
+			$instituteShort = 	$dataArray[9];
+			$instituteUrl = 	$dataArray[10];
+			$instituteMail = 	$dataArray[11];
+			$institutePass = 	$dataArray[12];
+			$instituteHost = 	$dataArray[13];
+			$institutePort = 	$dataArray[14];
+			$instituteSecure = 	$dataArray[15];
+			$instituteAuth = 	$dataArray[16];
+			$instituteAddress = $dataArray[17];
+			$institutePhone = 	$dataArray[18];
+			$instituteCountry = $dataArray[19];
+			// $sql = "INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
+					// (0, 'institute', '".$institute."'),
+					// (1, 'shortname', '".$instituteShort."'),
+					// (2, 'url', '".$instituteUrl."'),
+					// (3, 'secureresources', '0'),
+					// (4, 'host', '".$instituteHost."'),
+					// (5, 'port', '".$institutePort."'),
+					// (6, 'password', '".$institutePass."'),
+					// (7, 'email', '".$instituteMail."'),
+					// (8, 'smtpsecure', '".$instituteSecure."'),
+					// (9, 'smtpauth', '".$instituteAuth."'),
+					// (10,'publicity', '0'),
+					// (14,'timezone', '".$timezone."')";
+			// dbHelp::query($sql);	
 			$sql = "INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
-					(0, 'institute', '".$institute."'),
-					(1, 'shortname', '".$instituteShort."'),
-					(2, 'url', '".$instituteUrl."'),
+					(0, 'institute', :0),
+					(1, 'shortname', :1),
+					(2, 'url', :2),
 					(3, 'secureresources', '0'),
-					(4, 'host', '".$instituteHost."'),
-					(5, 'port', '".$institutePort."'),
-					(6, 'password', '".$institutePass."'),
-					(7, 'email', '".$instituteMail."'),
-					(8, 'smtpsecure', '".$instituteSecure."'),
-					(9, 'smtpauth', '".$instituteAuth."'),
+					(4, 'host', :3),
+					(5, 'port', :4),
+					(6, 'password', :5),
+					(7, 'email', :6),
+					(8, 'smtpsecure', :7),
+					(9, 'smtpauth', :8),
 					(10,'publicity', '0'),
-					(14,'timezone', '".$timezone."')";
-			dbHelp::query($sql);	
+					(14,'timezone', :9)";
+			dbHelp::query($sql, array($institute, $instituteShort, $instituteUrl, $instituteHost, $institutePort, $institutePass, $instituteMail, $instituteSecure, $instituteAuth, $timezone));	
 					
 			dbHelp::scriptRead($sqlDatumoConstraints);
 			copyFolderTo('pics', $_SESSION['path']."/pics");
@@ -580,7 +616,7 @@
 	
 	function back(){
 		$message = "No path was created yet";
-		$path = $_POST['path'];
+		$path = strip_tags($_POST['path']);
 		
 		if(isset($path)){
 			$_SESSION['path'] = "../".$path;
