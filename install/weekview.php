@@ -400,6 +400,17 @@ echo "<table id='master' style='margin:auto' width=750>";
 					$resSimilar = dbHelp::query($sqlSimilar);
 					if(dbHelp::numberOfRows($resSimilar)>0){
 						echo "<tr>";
+							$extraGet = "";
+							if(isset($_GET['date'])){
+								$extraGet = "&date=".$_GET['date'];
+							}
+							// echo "<td colspan=2><a href='../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip' style='color:#f6961a'>Similar Resources</></td>";
+							// echo "<td colspan=2><a style='color:#f6961a;cursor:pointer;' onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=900,height=300')\">Similar Resources</></td>";
+							// echo "<div style='border:10px solid white;'>";
+								// echo "<a href='../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip' target='_self'>bla</a>";
+								// print file_get_contents("../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip");
+							// echo "</div>";
+							// echo "<td colspan=2><a style='color:#f6961a;cursor:pointer;' onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=900,height=300')\">Similar Resources</></td>";
 							echo "<td colspan=2>Similar Resources</td>";
 						echo "</tr>";
 					
@@ -407,7 +418,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "<td colspan=2>";
 							echo "<select id='similarResources' class='similar'>";
 							while($arrSimilar = dbHelp::fetchRowByIndex($resSimilar)){
-								echo "<option value='".$arrSimilar[0]."' onclick='similarResources(this.value)'>".$arrSimilar[1]."</option>";
+								echo "<option value='".$arrSimilar[0]."' onClick='similarResources(this.value);'>".$arrSimilar[1]."</option>";
 							}
 							echo "</select>";
 							echo "</td>";

@@ -60,7 +60,7 @@ function user() {
 function newpwd(){
     require_once("alertClass.php");
     $alert= new alert;
-    $alert->recover((int)cleanValue($_GET['value']));
+    $alert->recover($_GET['value']);
 }
 
 /**

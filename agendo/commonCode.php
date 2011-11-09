@@ -256,10 +256,19 @@
 	
 	// Buttons for help, videos, resources and user/management
 	function echoUserVideosResourceHelpLinks(){
+		$resource = "";
+		if(isset($_GET['resource'])){
+			$resource = $_GET['resource'];
+		}
+		if(isset($_GET['date'])){
+			$extraGet = "&date=".$_GET['date'];
+		}
 		echo "<div id='linksImages'>";
 			echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.open('http://www.cirklo.org/agendo_help.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1000,height=600')\" align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right' />";
+			// echo "<img style='cursor:pointer' width=30px id=group title='group view' src=pics/group.png onclick=go(this) align='right' />";
+			echo "<img style='cursor:pointer' width=30px id=group title='group view' src=pics/group.png onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$resource.$date."','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=900,height=300')\" align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right' />";
 		echo "</div>";
 	}

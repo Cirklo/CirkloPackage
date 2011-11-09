@@ -63,32 +63,22 @@
 			$prepSql->execute();
 		}
 		
-		// public static function query($sql){
-			// $connect = self::getConnect();
-			// $prepSql = $connect->prepare($sql);
-			// $prepSql->execute();
-			// return $prepSql;
-		// }
-		
-		// $sql = 'INSERT INTO REGISTRY (name, value) VALUES (:name, :value)'
-		// $connect->prepare($sql);
-		// $prepSql->bindParam(':name', $name);
-		// $prepSql->bindParam(':value', $value);
-		// $prepSql->execute();
-		// OR
-		// $prepSql = $connect->prepare('UPDATE people SET name = :new_name WHERE id = :id');
-		// $prepSql->execute( array('new_name' => $name, 'id' => $id) );
 		public static function query($sql, $argsArray = null){
 			$connect = self::getConnect();
-			$prepSql = $connect->prepare($sql);
-			// wtf($sql."--".$argsArray[0]);
-			if(isset($argsArray)){
-				foreach($argsArray as $key => &$value){
-					$prepSql->bindParam(':'.(string)$key, $value);
-					// $prepSql->bindValue(':'.(string)$key, $value);
+			try{
+				$prepSql = $connect->prepare($sql);
+				// wtf($sql."--".$argsArray[0]);
+				if(isset($argsArray)){
+					foreach($argsArray as $key => &$value){
+						$prepSql->bindParam(':'.(string)$key, $value);
+						// $prepSql->bindValue(':'.(string)$key, $value);
+					}
 				}
+				$prepSql->execute();
 			}
-			$prepSql->execute();
+			catch(Exception $e){
+				throw new Exception("Full sql query is <".$sql.">: ".$e->getMessage());
+			}
 			return $prepSql;
 		}
 		

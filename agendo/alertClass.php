@@ -295,11 +295,11 @@ END:VCALENDAR";
 function recover($user_id){
     // $sql="select user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
     // $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
-    $sql="select user_email,user_mobile,user_alert, user_id from ".dbHelp::getSchemaName().".user where user_login=:0";
+    $sql="select user_email,user_mobile,user_alert, user_login from ".dbHelp::getSchemaName().".user where user_login=:0";
     // $res=dbHelp::query($sql);
     $res=dbHelp::query($sql, array($user_id));
     $arr=dbHelp::fetchRowByName($res);
-	$user_id = $arr['user_id'];
+	$user_id = $arr['user_login'];
     $vowels="aeiyou";
     $consonants="bcdfghjklmnpqrstvwxz";
     $pwd='';
@@ -311,8 +311,8 @@ function recover($user_id){
         }
     }
     // $sql="update user set user_passwd = password('$pwd') where user_id=". $user_id;
-    $sql="update user set user_passwd = '".cryptPassword($pwd)."' where user_login='". $user_id."'";
-    $res=dbHelp::query($sql) or die('Password not updated');
+    $sql="update ".dbHelp::getSchemaName().".user set user_passwd = '".cryptPassword($pwd)."' where user_login='".$user_id."'";
+   $res=dbHelp::query($sql) or die('Password not updated');
     switch ($arr['user_alert']) {
     case 2:
         try {
@@ -360,7 +360,7 @@ function nonconf(){
 			where 
 				entry_status=2 and 
 				entry_user=user_id and 
-				resource_id=entry_resource and 
+				entry_resource = resource_id and 
 				resource_status<>4 and 
 				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between ".dbHelp::now()." and ".dbHelp::date_add(dbHelp::now(),'60', 'minute');
 				// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');

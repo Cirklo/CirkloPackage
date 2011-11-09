@@ -22,6 +22,7 @@ function go (objIMG) {
         document.getElementById('help').src='pics/ask.png';
         document.getElementById('resources').src='pics/resource.png';
         document.getElementById('user').src='pics/user.png';
+        document.getElementById('group').src='pics/group.png';
         objIMG.src=s.substring(0,s.length-4) + "_.png";
         
         document.getElementById('userdiv').style.display='none';
@@ -96,6 +97,9 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 						if(resource != null){
 							phpFilePath = phpFilePath + "?resource="+resource;
 						}
+						else{
+							phpFilePath = phpFilePath;
+						}
 						// if(loginToDatumo){
 							// phpFilePath = "../datumo/";
 						// }
@@ -125,7 +129,15 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 function logOff(phpFilePath, resource){
 	$.post(phpFilePath, {functionName:'logOff'},"json")
 		.error(function(error){showMessage(error);})
-		.complete(function(){window.location = phpFilePath + "?resource="+resource;})
+		.complete(function(){
+				if(resource != null){
+					window.location = phpFilePath + "?resource="+resource;
+				}
+				else{
+					window.location = phpFilePath;
+				}
+			}
+		)
 	;
 }
 

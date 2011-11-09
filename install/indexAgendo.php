@@ -84,7 +84,7 @@ echo "<table id='master' style='width:800' align=center>";
 				echo "<table style='height:100%;width:100%'>";
 					echo "<tr valign='top'>";
 						echo "<td align='right'>";
-						loggedInAs('index', 0);
+						loggedInAs('index', 'null');
 						echo "</td>";
 					echo "</tr>";
 					
@@ -122,7 +122,7 @@ echo "<table id='master' style='width:800' align=center>";
 	echoResourcesDiv();
 
 	// User/management div
-	echoUserDiv('index', 0);
+	echoUserDiv('index', 'null');
 
 	// echo "<div class=logo>";
 	echo "<table class=equilist>";
