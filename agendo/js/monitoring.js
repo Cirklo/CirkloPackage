@@ -32,8 +32,14 @@ function changeToDate(date){
 	window.location.href = url + dateData;
 }
 
+// zee patch
 function changeParentWindow(resId, date, path){
 	window.opener.location =  path + "/weekview.php?resource=" + resId + "&date=" + date;
+}
+
+function changeDivColor(divId, color){
+	div = document.getElementById(divId);
+	div.style.backgroundColor = color;
 }
 
 $(document).ready(

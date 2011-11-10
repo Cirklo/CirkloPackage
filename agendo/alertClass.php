@@ -273,7 +273,7 @@ END:VCALENDAR";
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr  ;
             $address = $this->RespEmail;
-            $this->AddAddress($address, "");
+			$this->AddAddress($address, "");
             if(!$this->Send()) {
                 //echo "Mailer Error: " . $this->ErrorInfo;
             } else {
@@ -353,6 +353,7 @@ function nonconf(){
 				resource_name,
 				entry_id,
 				entry_datetime,
+				entry_user,
 				".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date,
 				(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,
 				(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert
@@ -387,7 +388,8 @@ function nonconf(){
 				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
                 $this->Body=$msg;
                 $address = $arr['user_email'];
-                $this->AddAddress($address, "");
+				$this->ClearAddresses();
+				$this->AddAddress($address, "");
                 echo $msg;
                 if(!$this->Send()) {
                     echo "Mailer Error: ".$this->ErrorInfo;

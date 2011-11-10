@@ -47,19 +47,18 @@ function checkfield(field) {
 <body>
 <?php
 
-$extra = '';
 $class = '';
 // Shows a specific resource
 if (isset($_GET['class'])) {
-    $class=clean_input($_GET['class']);
+    $class = (int)($_GET['class']);
     // $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and entry_status in (1,2) group by resource_name,resource_id order by e desc";
-	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resource_type=".$class." order by resource_name";
+	$extra = "and resource_type=".$class." order by resource_name";
     if ($class==0){
         // $sql="select 1,resource_name,resource_id from resource order by resource_name";
-        $sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id order by resource_name";
+        $extra = "order by resource_name";
 	}
-    $extra='resource_type='. $class . ' and';
-    $limit='';
+	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus in (1, 3, 4, 5) ".$extra;
+    // $limit='';
     $datefilter='';
 // Shows most used resources filtered by a month of use
 } else {

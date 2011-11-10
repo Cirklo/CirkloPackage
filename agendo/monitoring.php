@@ -10,24 +10,14 @@
 	define('equipType', isset($_GET['equipType']));
 	define('userLogged', (isset($_GET['userLogged']) && isset($_SESSION['user_id'])));
 	
-	// if(isset($_GET['res'])){
-		// $resource = (int)($_GET['res']);
-		// if(isset($_GET['date'])){
-			// $date = $_GET['date'];
-		// }
-		// else{
-			// $date = date('Ymd');
-		// }
-	// }
-	// else{
-		// showMsg('Resource needs to be specified.', true);
+	// ugly fix for the waiting list/unconfirmed entry bad sql structure....
+	$status2Entries = array();
+	
+	// if($_GET['res'] == '' && !isset($_SESSION['user_id'])){
+		// showMsg('Resource needs to be specified or user has to be logged on.', true);
 		// exit;
 	// }
-	if($_GET['res'] == '' && !isset($_SESSION['user_id'])){
-		showMsg('Resource needs to be specified or user has to be logged on.', true);
-		exit;
-	}
-	else{
+	// else{
 		if($_GET['res'] == ''){
 			$resource = false;
 		}
@@ -40,12 +30,12 @@
 		}
 		
 		if(isset($_GET['date'])){
-			$date = $_GET['date'];
+			$date = date('Ymd', strtotime($_GET['date']));
 		}
 		else{
 			$date = date('Ymd');
 		}
-	}
+	// }
 	
 	// start time for each resource
 	define('startTime', 0);
@@ -63,11 +53,13 @@
 	
 	$entryStatusColor = array(
 		1 => '#7bb382', // confirmed entry
-		2 => '#f9f4a6', // to be confirmed
+		2 => '#fbc314', // to be confirmed
 		// 'red', 		// deleted
 		4 => '#afdde5',	// monitored
-		5 => '#fbc314', // in use
+		5 => '#4300b3', // in use
 	);
+	$notConfirmedName = 'Not Confirmed';
+	$notConfirmedColor = '#ff7777';
 	
 	// ************************************* htmlStuff ***************************************************
 	echo "<div id='everything' style='display:table;margin:auto;'>";
@@ -75,7 +67,9 @@
 			echo "<div class='checkLabel'>";
 				labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
 				labelCheckText('equipTypepCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
-				labelCheckText('userCheck', 'userLogged', 'User', userLogged, 'Shows resources used by the currently logged user', !isset($_SESSION['user_id']), "User needs to be logged.");
+				if(isset($_SESSION['user_id'])){
+					labelCheckText('userCheck', 'userLogged', 'User', userLogged, 'Shows resources used by the currently logged user');
+				}
 			echo "</div>";
 		}
 		
@@ -86,7 +80,6 @@
 					echo "<div style='margin:auto;text-align:center;'>";
 						echo "<span style='margin:auto;text-align:center;'>";
 							echo "<a>".date('M Y', $mondayTime)."</a>";
-							// echo "<a class='fakeLink' onClick='changeToDate();' title='Shows current week'>Current week</a>";
 							echo "<br>";
 							
 							echo "<img class='fakeLink' onClick='changeToDate(\"".date('Ymd', strtotime(" -7 days", $mondayTime))."\");' title='Shows previous week' width='12px' height='12px' src='".$_SESSION['path']."/pics/left.gif'/>";
@@ -122,6 +115,8 @@
 				echo "<div class='colorBlockText'><a style='color:white;'>".$row[0]."</a></div>";
 				echo "<div class='colorBlock' style='background-color: ".$value."'></div>";
 			}
+			echo "<div class='colorBlockText'><a style='color:white;'>".$notConfirmedName."</a></div>";
+			echo "<div class='colorBlock' style='background-color: ".$notConfirmedColor."'></div>";
 		echo "</div>";
 	echo "</div>";
 	
@@ -214,7 +209,10 @@
 	
 	function makeUsageDivs($startTime, $endTime, $resource, $timeOfWeek){
 		global $entryStatusColor;
+		global $notConfirmedColor;
 		global $user;
+		// and the fix shows its ugly head here
+		global $status2Entries;
 		
 		$userSql = '';
 		if(userLogged){
@@ -234,13 +232,12 @@
 			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
 			".$userSql."
-			order by entry_datetime
+			order by entry_datetime, entry_status asc
 		";
 		$lastWidth = ($startTime - starTime) * slotsPerHour;
 		$prep = dbHelp::query($sql);
 		$availableStarting = date("H:i", strtotime($startTime.":00"));
 		if(dbHelp::numberOfRows($prep) == 0){
-			// echo "<div class='noUsage' style='width:".($endTime - $startTime)*slotsPerHour."px;background-color: ".notUsedColor.";'></div>";
 			echo "<div class='usageDataShow' style='width:".($endTime - $startTime)*slotsPerHour."px;background-color: ".notUsedColor.";' title='Available from ".$startTime.":00 to ".$endTime.":00'></div>";
 		}
 		else{
@@ -249,17 +246,34 @@
 				$usedWidth = ceil($row['entry_slots'] * $row['resource_resolution'] / 60.0 * slotsPerHour);
 				$lastWidth += $unusedWidth + $usedWidth;
 				// creates the "noUsage" bar that indicates when the resource isn't being used
-				// echo "<div class='noUsage' style='width:".$unusedWidth."px;background-color: ".notUsedColor.";'></div>";
 				echo "<div class='usageDataShow' style='width:".$unusedWidth."px;background-color: ".notUsedColor.";' title='Available from ".$availableStarting." to ".date('H:i', strtotime($row['entry_datetime']))."'></div>";
-				$availableStarting = date('H:i', strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60);
-				// creates the "usageBar" that indicates when the resource is being used
-				// echo "<div class='usageBar' style='width:".$usedWidth."px;background-color: ".$entryStatusColor[$row['entry_status']].";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')."'></div>";
-				echo "<div class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$entryStatusColor[$row['entry_status']].";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')."'></div>";
+				$entryLength = strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60;
+				$availableStarting = date('H:i', $entryLength);
+				// method to "convert" pre-reserved entries to unconfirmed ones
+				$colorToUse = $entryStatusColor[$row['entry_status']];
+				$entryStatus2Id = date('N', $timeOfWeek)."-".convertDate($row['entry_datetime'], 'H:i');
+				if($row['entry_status'] == 2){
+					if($entryLength < time()){
+						$colorToUse = $notConfirmedColor;
+					}
+					$status2Entries[$entryStatus2Id] = $colorToUse;
+				}
+				
+				// behold the ugly patch!!
+				if($row['entry_status'] == 4){
+					if($status2Entries[$entryStatus2Id] != $notConfirmedColor){
+						echo "<script type='text/javascript'>changeDivColor('".$entryStatus2Id."', '".$colorToUse."');</script>";
+					}
+				}
+				else{
+					// creates the "usageBar" that indicates when the resource is being used
+					echo "<div id='".$entryStatus2Id."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')."'></div>";
+				}
 			}
+			
 			$endAtWidth = $endTime * slotsPerHour;
 			if($lastWidth < $endAtWidth){
 				// creates the "noUsage" bar that indicates when the resource isn't being used
-				// echo "<div class='noUsage' style='width:".($endAtWidth - $lastWidth)."px;background-color: ".notUsedColor.";'></div>";
 				echo "<div class='usageDataShow' style='width:".($endAtWidth - $lastWidth)."px;background-color: ".notUsedColor.";' title='Available from ".$availableStarting." to ".$endTime.":00'></div>";
 			}
 		}
