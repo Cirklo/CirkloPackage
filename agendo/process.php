@@ -53,7 +53,7 @@ function add(){
     if ($update>0) {update();exit;}
 	
     $assistance=$_GET['assistance'];
-    $code=cleanValue($_GET['code']);
+    $code=$_GET['code'];
     $repeat=cleanValue($_GET['repeat']);
     $enddate=cleanValue($_GET['enddate']);
     $enddate=substr($enddate,0,4) . substr($enddate,5,2) . substr($enddate,8,2);
@@ -103,18 +103,17 @@ function add(){
     // $res=dbHelp::query($sql) or die($sql) ;
     $sql="select repetition_id, repetition_code from repetition where repetition_code= :0";
     $res=dbHelp::query($sql, array($code)) or die($sql);
-	$tempArr = dbHelp::fetchRowByIndex($res);
-	$code = (string)$tempArr[1];
     //if there is no related entry already it creates one
     if (dbHelp::numberOfRows($res)==0) {    
-        $sql="insert into repetition(repetition_code) values('".$code."')";
-        dbHelp::query($sql) or die($sql);
+        $sql = "insert into repetition(repetition_code) values(:0)";
+        dbHelp::query($sql, array($code)) or die($sql);
     }
 
     //getting the entry code
-    $sql="select repetition_id from repetition where repetition_code='". $code . "'";
-
-    $res=dbHelp::query($sql) or die($sql);
+    // $sql="select repetition_id from repetition where repetition_code='". $code . "'";
+    $sql="select repetition_id from repetition where repetition_code=:0";
+    // $res=dbHelp::query($sql) or die($sql);
+    $res=dbHelp::query($sql, array($code)) or die($sql);
     $arrrep=dbHelp::fetchRowByIndex($res);
     $weekahead=$datetime;
     $notify=new alert($resource);   

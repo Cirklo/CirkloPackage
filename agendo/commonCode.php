@@ -262,12 +262,16 @@
 			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right' />";
 			$extraGet = '';
 			$action = "onclick=\"showMessage('Resource needs to be specified or user has to be logged on.');\"";
-			if(isset($_GET['resource']) || isset($_SESSION['user_id'])){
+			if(isset($_GET['resource'])){
+				$extraGet = '&simEquip';
 				if(isset($_GET['date'])){
 					$date = date('Ymd', strtotime('+1 day', strtotime($_GET['date'])));
-					$extraGet = "&date=".$date;
+					$extraGet .= "&date=".$date;
 				}
-				$action = "onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$_GET['resource'].$extraGet."','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=900,height=300')\"";
+				$action = "onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$_GET['resource'].$extraGet."','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
+			}
+			else if(isset($_SESSION['user_id'])){
+				$action = "onclick=\"javascript:window.open('../agendo/monitoring.php','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
 			}
 			echo "<img style='cursor:pointer' width=30px id=group title='group view' src=pics/group.png ".$action." align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right' />";

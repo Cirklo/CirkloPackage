@@ -67,7 +67,7 @@ td{
 	height:20px;
 }
 
-.fakeLink:hover{
+.fakeLink:hover, .usage:hover{
 	cursor: pointer;
 }
 

@@ -18,10 +18,8 @@
 		// exit;
 	// }
 	// else{
-		if($_GET['res'] == ''){
-			$resource = false;
-		}
-		else{
+		$resource = false;
+		if(isset($_GET['res'])){
 			$resource = (int)($_GET['res']);
 		}
 		
@@ -52,14 +50,20 @@
 	// define('usedColor', '#7bb382');
 	
 	$entryStatusColor = array(
-		1 => '#7bb382', // confirmed entry
-		2 => '#fbc314', // to be confirmed
+		// 1 => '#7bb382', // confirmed entry
+		1 => '#e3f8a1', // confirmed entry
+		// 2 => '#fbc314', // to be confirmed
+		// 2 => '#f9f4a6', // to be confirmed
+		2 => '#f8f3a5', // to be confirmed
 		// 'red', 		// deleted
+		// 4 => '#afdde5',	// monitored
 		4 => '#afdde5',	// monitored
-		5 => '#4300b3', // in use
+		// 5 => '#4300b3', // in use
+		5 => '#fbc314', // in use
 	);
 	$notConfirmedName = 'Not Confirmed';
-	$notConfirmedColor = '#ff7777';
+	// $notConfirmedColor = '#ff7777';
+	$notConfirmedColor = '#f39ea8';
 	
 	// ************************************* htmlStuff ***************************************************
 	echo "<div id='everything' style='display:table;margin:auto;'>";
@@ -116,7 +120,7 @@
 				echo "<div class='colorBlock' style='background-color: ".$value."'></div>";
 			}
 			echo "<div class='colorBlockText'><a style='color:white;'>".$notConfirmedName."</a></div>";
-			echo "<div class='colorBlock' style='background-color: ".$notConfirmedColor."'></div>";
+			echo "<div id='bla' class='colorBlock' style='background-color: ".$notConfirmedColor."'></div>";
 		echo "</div>";
 	echo "</div>";
 	
