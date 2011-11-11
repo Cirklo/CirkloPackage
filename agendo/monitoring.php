@@ -50,19 +50,13 @@
 	// define('usedColor', '#7bb382');
 	
 	$entryStatusColor = array(
-		// 1 => '#7bb382', // confirmed entry
 		1 => '#e3f8a1', // confirmed entry
-		// 2 => '#fbc314', // to be confirmed
-		// 2 => '#f9f4a6', // to be confirmed
 		2 => '#f8f3a5', // to be confirmed
 		// 'red', 		// deleted
-		// 4 => '#afdde5',	// monitored
 		4 => '#afdde5',	// monitored
-		// 5 => '#4300b3', // in use
 		5 => '#fbc314', // in use
 	);
 	$notConfirmedName = 'Not Confirmed';
-	// $notConfirmedColor = '#ff7777';
 	$notConfirmedColor = '#f39ea8';
 	
 	// ************************************* htmlStuff ***************************************************
@@ -71,7 +65,7 @@
 			echo "<div class='checkLabel'>";
 				labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
 				labelCheckText('equipTypepCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
-				if(isset($_SESSION['user_id'])){
+				if(isset($user)){
 					labelCheckText('userCheck', 'userLogged', 'User', userLogged, 'Shows resources used by the currently logged user');
 				}
 			echo "</div>";
@@ -150,7 +144,7 @@
 	
 		$fromSql = 'resource';
 		$whereSql = "resource_id = ".$resource;
-		if(!$resource){
+		if(!$resource || (!simEquip && !equipType && userLogged)){
 			$fromSql = 'resource, entry';
 			$whereSql = "entry_user = ".$user." and entry_resource = resource_id";
 		}
@@ -193,13 +187,11 @@
 						// id = weekDay.resource
 						echo "<td id='".$i.".".$row['resource_id']."' class='usage'>";
 							// creates the "startOrEndBar" that indicates the resource's starttime
-							// echo "<div class='startOrEndBar' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
 							echo "<div class='usageDataShow' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
 							
 							makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], ($mondayTime + $timeToAdd), !$resource);
 							
 							// creates the "startOrEndBar" that indicates the resource's stoptime
-							// echo "<div class='startOrEndBar' style='width:".$endWidth."px;background-color:".startOrEndColor."' title='Resource scheduling ends at: ".$row['resource_stoptime'].":00'></div>";
 							echo "<div class='usageDataShow' style='width:".$endWidth."px;background-color:".startOrEndColor."' title='Resource scheduling ends at: ".$row['resource_stoptime'].":00'></div>";
 						echo "</td>";
 					}
