@@ -257,7 +257,15 @@
 				
 				// behold the ugly patch!!
 				if($row['entry_status'] == 4){
-					if($status2Entries[$entryStatus2Id] != $notConfirmedColor){
+					if(!isset($status2Entries[$entryStatus2Id])){
+						// need to clean this cr... stuff somehow
+						if($entryLength < time()){
+							$colorToUse = $notConfirmedColor;
+						}
+						$status2Entries[$entryStatus2Id] = $colorToUse;
+						echo "<div id='".$entryStatus2Id."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')."'></div>";
+					}
+					elseif($status2Entries[$entryStatus2Id] != $notConfirmedColor){
 						echo "<script type='text/javascript'>changeDivColor('".$entryStatus2Id."', '".$colorToUse."');</script>";
 					}
 				}
