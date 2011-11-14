@@ -57,12 +57,12 @@ if (isset($_GET['class'])) {
         // $sql="select 1,resource_name,resource_id from resource order by resource_name";
         $extra = "order by resource_name";
 	}
-	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus in (1, 3, 4, 5) ".$extra;
+	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus_id in (1, 3, 4, 5) ".$extra;
     // $limit='';
     $datefilter='';
 // Shows most used resources filtered by a month of use
 } else {
-    $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
+    $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and resstatus_id in (1, 3, 4, 5) and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
     // $datefilter=" and entry_datetime between ".dbHelp::date_sub('now()', '1', 'month')." and now()";
     $datefilter=" and entry_datetime between ".dbHelp::date_sub(dbHelp::now(), '1', 'month')." and ".dbHelp::now();
 }
