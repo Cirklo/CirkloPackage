@@ -271,7 +271,7 @@
 				$action = "onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$_GET['resource'].$extraGet."','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
 			}
 			else if(isset($_SESSION['user_id'])){
-				$action = "onclick=\"javascript:window.open('../agendo/monitoring.php','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
+				$action = "onclick=\"javascript:window.open('../agendo/monitoring.php?userLogged','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
 			}
 			echo "<img style='cursor:pointer' width=30px id=group title='group view' src=pics/group.png ".$action." align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right' />";

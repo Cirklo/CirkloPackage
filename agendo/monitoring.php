@@ -123,44 +123,48 @@
 		global $resource;
 		global $user;
 		$fromSimSql = "";
-		$whereSimSql = "";
-		$fromTypeSql = "";
 		$whereTypeSql = "";
-		$whereSql = "";
+		$whereSql = "resource_id = ".$resource;
 		
-		if(simEquip){
-			$fromSimSql = ",similarresources";
-			$whereSimSql = "or similarresources_resource = ".$resource." and resource_id = similarresources_similar";
-		}
-
 		if(equipType){
-			$fromTypeSql = ",(select resource_type as restype from resource where resource_id = ".$resource.") as resTypes";
-			$modifier = " and";
-			if(!simEquip){
-				$modifier = " or";
+			$modifier = "and ";
+			if(!userLogged && !simEquip){
+				$modifier = "";
+				$whereSql = "";
 			}
-			$whereTypeSql = $modifier." resource_type = restype";
+			$sql = "select resource_type as restype from resource where resource_id = ".$resource;
+			$prep = dbHelp::query($sql);
+			$typeArray = dbHelp::fetchRowByIndex($prep);
+			$whereTypeSql = $modifier."resource_type = ".$typeArray[0]; 
 		}
 	
-		$fromSql = 'resource';
-		$whereSql = "resource_id = ".$resource;
-		if(!$resource || (!simEquip && !equipType && userLogged)){
-			$fromSql = 'resource, entry';
-			$whereSql = "entry_user = ".$user." and entry_resource = resource_id";
+		$fromUser = '';
+		if(userLogged){
+			$fromUser = ",(select resource_id as residuser from resource, permissions where (permissions_user = ".$user." or resource_resp = ".$user.") and resource_id = permissions_resource) as allowedRes";
+			$whereSql = "resource_id = residuser";
 		}
-		
+
+		if(simEquip){
+			$fromSimSql = ",similarresources";
+			$whereSql = "similarresources_resource = ".$resource." and (resource_id = similarresources_similar or resource_id = ".$resource.")";
+			if(userLogged){
+				$whereSql = "similarresources_resource = residuser and resource_id = similarresources_similar";
+				// $whereSql = "similarresources_resource = residuser and (resource_id = similarresources_similar or resource_id = residuser)";
+			}
+		}
+
 		$sql = "select distinct
 			resource_id
 			,resource_name
 			,resource_starttime
 			,resource_stoptime
 		from
-			".$fromSql."
+			resource
+			".$fromType." 
+			".$fromUser." 
 			".$fromSimSql." 
-			".$fromTypeSql." 
 		where
 			".$whereSql." 
-			".$whereSimSql." 
 			".$whereTypeSql." 
 		order by
 			resource_name
@@ -210,10 +214,12 @@
 		// and the fix shows its ugly head here
 		global $status2Entries;
 		
-		$userSql = '';
-		if(userLogged){
-				$userSql = " and entry_user = ".$user." ";
-		}
+		$fromUser = '';
+		$whereUser = '';
+		// if(userLogged){
+			// $fromUser = ',permissions';
+			// $whereUser = " and permissions_user = ".$user." or resource_resp = ".$user;
+		// }
 		$sql = "select 
 			entry_datetime
 			,entry_slots
@@ -222,12 +228,13 @@
 		from
 			resource
 			,entry
+			".$fromUser."
 		where
 			entry_resource = ".$resource."
 			and resource_id = entry_resource
 			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
-			".$userSql."
+			".$whereUser."
 			order by entry_datetime, entry_status asc
 		";
 		$lastWidth = ($startTime - starTime) * slotsPerHour;
