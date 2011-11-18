@@ -120,7 +120,7 @@
 		// Not entry divs
 		echo "<tr>";
 			echo "<td class='groupViewTd'>";
-				echo "<div style='margin:auto;text-align:center;'>";
+				echo "<div class='resourcesNames' style='margin:auto;text-align:center;'>";
 					echo "<span style='margin:auto;text-align:center;'>";
 						echo "<a>".date('M Y', $mondayTime)."</a>";
 						echo "<br>";
