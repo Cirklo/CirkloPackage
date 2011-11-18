@@ -80,8 +80,8 @@ body{
 	cursor: pointer;
 }
 
-.usage{
-	min-width: 96px;
+.usage, .weekday{
+	width: 96px;
 }
 
 .usageDataShow{
