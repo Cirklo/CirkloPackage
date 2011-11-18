@@ -1,18 +1,27 @@
+/*
 body{
 	background: #1E4F54;
 	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 	color: #ffffff;
 }
+*/
 
-a{
+.groupViewA{
 	text-decoration: none;
 	color: black;
 	font-size: 11px;
 }
 
-td{
+.groupViewTd, .weekday, .usage{
 	border: 1px solid black;
 	background: white;
+}
+
+.resourcesNames{
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipses;
+	width:120px;
 }
 
 #weekdaysResources{
@@ -22,8 +31,8 @@ td{
 }
 
 .colorBlock{
-	width: 15px;
-	height: 15px;
+	width: 12px;
+	height: 12px;
 	float: right;
 	margin-left: 5px;
 	margin-right: 5px;
@@ -78,8 +87,4 @@ td{
 .usageDataShow{
 	height: 20px;
 	float: left;
-}
-
-.subtitle{
-	width: 25px;
 }

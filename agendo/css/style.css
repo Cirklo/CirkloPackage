@@ -80,7 +80,8 @@ td.date {
 
 a {
 	text-decoration: none;
-	color: #789095;
+	/*color: #789095;*/
+	color: #567e73;
 }
 
 a:hover {

@@ -1,39 +1,38 @@
 <?php
 	require_once("commonCode.php");
-	
-	importJs();
-	echo "<link href='css/monitoring.css' rel='stylesheet' type='text/css' />";
-	echo "<script type='text/javascript' src='js/monitoring.js'></script>";
 
 	// variables
+	$resource = false;
+	$userChecked = true;
+	if(isset($_GET['resource'])){
+		$resource = (int)($_GET['resource']);
+		$userChecked = isset($_GET['userLogged']);
+	}
+	
+	if(isset($_SESSION['user_id'])){
+		$user = (int)$_SESSION['user_id'];
+	}
+	
+	if(isset($_GET['date'])){
+		$date = date('Ymd', strtotime($_GET['date']));
+		if(!isset($_GET['gimmeGroupViewData'])){
+			$date = date('Ymd', strtotime(" +1 days", strtotime($_GET['date'])));
+		}
+	}
+	else{
+		$date = date('Ymd');
+	}
+	
 	define('simEquip', isset($_GET['simEquip']));
 	define('equipType', isset($_GET['equipType']));
-	define('userLogged', (isset($_GET['userLogged']) && isset($_SESSION['user_id'])));
+	define('userLogged', ($userChecked && isset($_SESSION['user_id'])));
+	
+	if(!isset($_SESSION['user_id']) && !isset($_GET['resource'])){
+		return;
+	}
 	
 	// ugly fix for the waiting list/unconfirmed entry bad sql structure....
 	$status2Entries = array();
-	
-	// if($_GET['res'] == '' && !isset($_SESSION['user_id'])){
-		// showMsg('Resource needs to be specified or user has to be logged on.', true);
-		// exit;
-	// }
-	// else{
-		$resource = false;
-		if(isset($_GET['res'])){
-			$resource = (int)($_GET['res']);
-		}
-		
-		if(isset($_SESSION['user_id'])){
-			$user = (int)$_SESSION['user_id'];
-		}
-		
-		if(isset($_GET['date'])){
-			$date = date('Ymd', strtotime($_GET['date']));
-		}
-		else{
-			$date = date('Ymd');
-		}
-	// }
 	
 	// start time for each resource
 	define('startTime', 0);
@@ -59,62 +58,53 @@
 	$notConfirmedName = 'Not Confirmed';
 	$notConfirmedColor = '#f39ea8';
 	
+	$mondayTime = getMondayTimeFromDate($date);
+	if(isset($_GET['gimmeGroupViewData'])){ 
+		doWeekDataArray($mondayTime);
+		exit;
+	}
+	
 	// ************************************* htmlStuff ***************************************************
-	echo "<div id='everything' style='display:table;margin:auto;'>";
+	importJs();
+	// echo "<link href='css/monitoring.css' rel='stylesheet' type='text/css' />";
+	// echo "<script type='text/javascript' src='js/monitoring.js'></script>";
+	echo "<script type='text/javascript' src='../agendo/js/monitoring.js'></script>";
+	echo "<link href='../agendo/css/monitoring.css' rel='stylesheet' type='text/css' />";
+	echo  "<script type='text/javascript'>setResourceAndDate('".$date."', '".$resource."');</script>";
+	
+	// echo "<div id='groupdiv' style='display:table;margin:auto;'>";
+	echo "<div id='groupdiv' style='padding:5px;display:none;position:absolute;margin:auto;color:#444444;background-color:#FFFFFF;opacity:0.9;'>";
+		// echo "<h1 style='text-align:center;color:#F7C439'>Resource Multiview</h1>";
 		if($resource != false){
-			echo "<div class='checkLabel'>";
-				labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
-				labelCheckText('equipTypepCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
+			echo "<div id='labelsDiv' class='checkLabel'>";
+				// echo "<a style='color:white;'>Filter by: </a>";
+				echo "<a class='groupViewA' style='font-size:15px;'>Filter by: </a>";
+				// labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
+				labelCheckText('similarCheck', 'simEquip', 'Similar', true, 'Shows similar resources');
+				labelCheckText('equipTypeCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
 				if(isset($user)){
 					labelCheckText('userCheck', 'userLogged', 'User', userLogged, 'Shows resources used by the currently logged user');
 				}
 			echo "</div>";
 		}
 		
-		$mondayTime = getMondayTimeFromDate($date);
-		echo "<table id='weekdaysResources'>";
-			echo "<tr>";
-				echo "<td>";
-					echo "<div style='margin:auto;text-align:center;'>";
-						echo "<span style='margin:auto;text-align:center;'>";
-							echo "<a>".date('M Y', $mondayTime)."</a>";
-							echo "<br>";
-							
-							echo "<img class='fakeLink' onClick='changeToDate(\"".date('Ymd', strtotime(" -7 days", $mondayTime))."\");' title='Shows previous week' width='12px' height='12px' src='".$_SESSION['path']."/pics/left.gif'/>";
-							echo "<img class='fakeLink' onClick='changeToDate();' title='Shows current week' width='12px' height='12px' src='".$_SESSION['path']."/pics/today.gif'/>";
-							echo "<img class='fakeLink' onClick='changeToDate(\"".date('Ymd', strtotime(" +7 days", $mondayTime))."\");' title='Shows next week' width='12px' height='12px' src='".$_SESSION['path']."/pics/right.gif'/>";
-						echo "</span>";
-					echo "</div>";
-				echo "</td>";
-
-				// each day of the week
-				for($i=0; $i<7; $i++){
-					$timeToAdd = $i*24*60*60;
-					echo "<td class ='weekday'>";
-						$dayTime = $mondayTime + $timeToAdd;
-						$weekdayColorText = "black";
-						if(date('Ymd', $dayTime) == date('Ymd')){
-							$weekdayColorText = "#bb3322";
-						}
-						echo "<a style='color:".$weekdayColorText.";'>".date('d-', $dayTime).date('D', $dayTime)."</a>";
-					echo "</td>";
-				}
-			echo "</tr>";
+		// This div will contain a table that contains the weekdays and its resources
+		echo "<div id='tableHolder'>";
+			// doWeekDataArray($mondayTime);
+		echo "</div>";
 			
-			doWeekDataArray($mondayTime);
-		echo "</table>";
-		
 		echo "<div style='text-align:right;margin-top:3px;'>";
 			global $entryStatusColor;
 			foreach($entryStatusColor as $key => $value){
 				$sql = "select status_name from status where status_id = ".$key;
 				$prepSql = dbHelp::query($sql);
 				$row = dbHelp::fetchRowByIndex($prepSql);
-				echo "<div class='colorBlockText'><a style='color:white;'>".$row[0]."</a></div>";
+				echo "<div class='colorBlockText'><a>".$row[0]."</a></div>";
 				echo "<div class='colorBlock' style='background-color: ".$value."'></div>";
 			}
-			echo "<div class='colorBlockText'><a style='color:white;'>".$notConfirmedName."</a></div>";
+			echo "<div class='colorBlockText'><a>".$notConfirmedName."</a></div>";
 			echo "<div id='bla' class='colorBlock' style='background-color: ".$notConfirmedColor."'></div>";
+			echo "<div style='float:left;'><a>For time info click on calendar slots</a></div>";
 		echo "</div>";
 	echo "</div>";
 	
@@ -126,6 +116,37 @@
 		$whereTypeSql = "";
 		$whereSql = "resource_id = ".$resource;
 		
+		echo "<table id='weekdaysResources'>";
+		// Not entry divs
+		echo "<tr>";
+			echo "<td class='groupViewTd'>";
+				echo "<div style='margin:auto;text-align:center;'>";
+					echo "<span style='margin:auto;text-align:center;'>";
+						echo "<a>".date('M Y', $mondayTime)."</a>";
+						echo "<br>";
+						
+						echo "<img class='fakeLink' onClick='changeToDate(\"".date('Ymd', strtotime(" -7 days", $mondayTime))."\");' title='Shows previous week' width='12px' height='12px' src='".$_SESSION['path']."/pics/left.gif'/>";
+						echo "<img class='fakeLink' onClick='changeToDate(\"".date('Ymd')."\");' title='Shows current week' width='12px' height='12px' src='".$_SESSION['path']."/pics/today.gif'/>";
+						echo "<img class='fakeLink' onClick='changeToDate(\"".date('Ymd', strtotime(" +7 days", $mondayTime))."\");' title='Shows next week' width='12px' height='12px' src='".$_SESSION['path']."/pics/right.gif'/>";
+					echo "</span>";
+				echo "</div>";
+			echo "</td>";
+
+			// each day of the week
+			for($i=0; $i<7; $i++){
+				$timeToAdd = $i*24*60*60;
+				echo "<td class ='weekday'>";
+					$dayTime = $mondayTime + $timeToAdd;
+					$weekdayColorText = "black";
+					if(date('Ymd', $dayTime) == date('Ymd')){
+						$weekdayColorText = "#bb3322";
+					}
+					echo "<a style='color:".$weekdayColorText.";'>".date('d-', $dayTime).date('D', $dayTime)."</a>";
+				echo "</td>";
+			}
+		echo "</tr>";
+			
+		// Entry divs code starting here
 		if(equipType){
 			$modifier = "and ";
 			if(!userLogged && !simEquip){
@@ -146,10 +167,11 @@
 
 		if(simEquip){
 			$fromSimSql = ",similarresources";
-			$whereSql = "similarresources_resource = ".$resource." and (resource_id = similarresources_similar or resource_id = ".$resource.")";
+			$whereSql = "similarresources_resource = ".$resource." and resource_id = similarresources_similar or resource_id = ".$resource;
 			if(userLogged){
-				$whereSql = "similarresources_resource = residuser and resource_id = similarresources_similar";
+				// $whereSql = "similarresources_resource = residuser and resource_id = similarresources_similar or resource_id = residuser and resource_id = ".$resource;
 				// $whereSql = "similarresources_resource = residuser and (resource_id = similarresources_similar or resource_id = residuser)";
+				$whereSql = "(similarresources_resource = ".$resource." and resource_id = similarresources_similar and resource_id = residuser or resource_id = ".$resource." and residuser = resource_id)";
 			}
 		}
 
@@ -177,11 +199,13 @@
 				$prepPic = dbHelp::query($sqlPic);
 				$rowPic = dbHelp::fetchRowByName($prepPic);
 				echo "<tr>";
-					echo "<td>";
+					echo "<td class='groupViewTd'>";
+						echo "<div class='resourcesNames'>";
 						echo "<img class='picLinks' src='".$_SESSION['path']."/pics/".$rowPic['pics_path']."'/>";
-						echo "<a class='fakeLink' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', $mondayTime - 24*60*60)."\", \"".$_SESSION['path']."\")' >";
+						echo "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 days", $mondayTime))."\")' >";
 							echo $row['resource_name'];
 						echo "</a>";
+						echo "</div>";
 					echo "</td>";
 					$startWidth = (startTime + $row['resource_starttime']) * slotsPerHour;
 					$endWidth = (endTime - $row['resource_stoptime']) * slotsPerHour;
@@ -205,6 +229,7 @@
 		else{
 			showMsg('No results found.');
 		}
+		echo "</table>";
 	}
 	
 	function makeUsageDivs($startTime, $endTime, $resource, $timeOfWeek){
@@ -278,7 +303,7 @@
 				}
 				else{
 					// creates the "usageBar" that indicates when the resource is being used
-					echo "<div id='".$entryStatus2Id."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')."'></div>";
+					echo "<div id='".$entryStatus2Id."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')." to ".date("H:i", convertWidthToTime($usedWidth, $row['entry_datetime']))."'></div>";
 				}
 			}
 			
@@ -290,18 +315,19 @@
 		}
 	}
 	
-	function labelCheckText($id, $value, $text, $checked, $title, $showMessage = false , $message = ""){
-		$action = "onChange='checkRedirect(this, ".(int)($showMessage).", \"".$message."\");'";
+	function labelCheckText($id, $value, $text, $checked, $title){
+		// $action = "onChange='checkRedirect(this);'";
+		$action = "onChange='getTableData();'";
 
  		$extraHtml = "";
 		if($checked){
 			$extraHtml = "checked";
 		}
 		
-		echo "<label id='".$id."' title='".$title."'>";
-			echo "<input type='checkbox' value='".$value."' ".$action." ".$extraHtml."/>";
+		echo "<label title='".$title."'>";
+			echo "<input id='".$id."' style='margin-left:5px;' type='checkbox' value='".$value."' ".$action." ".$extraHtml."/>";
 			echo "&nbsp";
-			echo "<a style='color: white;'>".$text."</a>";
+			echo "<a>".$text."</a>";
 			echo "&nbsp";
 		echo "</label>";
 	}
@@ -325,5 +351,13 @@
 	
 	function convertDate($date, $toFormat){
 		return date($toFormat, strtotime($date));
+	}
+	
+	function convertWidthToTime($width, $startingFromDate = null){
+		$widthTime = ($width*60/slotsPerHour)*60;
+		if(isset($startingFromDate)){
+			return strtotime($startingFromDate) + $widthTime;
+		}
+		return $widthTime;
 	}
 ?>

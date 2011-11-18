@@ -1,40 +1,5 @@
-function checkRedirect(element, showMsg, msg){
-	if(showMsg){
-		showMessage(msg);
-		element.checked = false;
-	}
-	else{
-		var url = window.location.href;
-		value = element.value;
-		if(url.indexOf(value) != -1){
-			window.location.href = url.replace("&" + value, "");
-		}
-		else{
-			window.location.href += "&" + value;
-		}
-	}
-}
-
-function changeToDate(date){
-	var url = window.location.href;
-	// haha, kinda funny if you are portuguese
-	var dateData = "&date=" + date;
-	if(date == null){
-		dateData = "";
-	}
-	
-	// This is pretty horrible...
-	if((index = url.indexOf('date')) != -1){
-		index --;
-		url = url.replace(url.substring(index, index + 14), "");
-	}
-	
-	window.location.href = url + dateData;
-}
-
-// zee patch
-function changeParentWindow(resId, date, path){
-	window.opener.location =  path + "/weekview.php?resource=" + resId + "&date=" + date;
+function changeParentWindow(resId, date){
+	window.location =  "weekview.php?resource=" + resId + "&date=" + date;
 }
 
 function changeDivColor(divId, color){
@@ -42,9 +7,47 @@ function changeDivColor(divId, color){
 	div.style.backgroundColor = color;
 }
 
+var resource = false;
+var date;
+function setResourceAndDate(zeeDate, res){
+	date = zeeDate;
+	if(res != false){
+		resource = res;
+	}
+}
+
+function changeToDate(zeeDate){
+	date = zeeDate;
+	getTableData();
+}
+
+function getTableData(){
+	url = "../agendo/monitoring.php?gimmeGroupViewData";
+	if($('#labelsDiv').length > 0){
+		if($('#userCheck').attr('checked')){
+			url += "&userLogged";
+		}
+		url += "&resource=" + resource;
+		if($('#similarCheck').attr('checked')){
+			url += "&simEquip";
+		}
+		if($('#equipTypeCheck').attr('checked')){
+			url += "&equipType";
+		}
+	}
+	url += "&date=" + date;
+	
+	$.get(url, 
+		function(serverData){
+			element = document.getElementById('tableHolder');
+			element.innerHTML = serverData;
+		}
+	);
+}
+
 $(document).ready(
 	function(){
-		$('#weekdaysResources').width($('#weekdaysResources').width() + 5);
-		$(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
+		getTableData();
+		// $(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
 	}
 );
