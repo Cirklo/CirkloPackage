@@ -309,7 +309,7 @@
 				}
 				
 				$entryStatus2Id = $row['resource_id']."-".date('N', $timeOfWeek)."-".convertDate($row['entry_datetime'], 'H:i');
-				if(isset($status2Entries[$entryStatus2Id]) && $status2Entries[$entryStatus2Id] != $notConfirmedColor){
+				if(isset($status2Entries[$entryStatus2Id])){
 					// $htmlToSend .= "<script type='text/javascript'>changeDivColor('".$entryStatus2Id."','".$colorToUse."');</script>";
 					$status2Entries[$entryStatus2Id] = $colorToUse;
 					// wtf($row['entry_status']."--".$entryStatus2Id."--".$colorToUse);
