@@ -169,7 +169,8 @@
 	
 		$fromUser = '';
 		if(userLogged){
-			$fromUser = ",(select resource_id as residuser from resource, permissions where (permissions_user = ".$user." or resource_resp = ".$user.") and resource_id = permissions_resource) as allowedRes";
+			// $fromUser = ",(select resource_id as residuser from resource, permissions where (permissions_user = ".$user." or resource_resp = ".$user.") and resource_id = permissions_resource) as allowedRes";
+			$fromUser = ",(select resource_id as residuser from resource, permissions where (permissions_user = ".$user." and resource_id = permissions_resource) or resource_resp = ".$user.") as allowedRes";
 			$whereSql = "resource_id = residuser";
 		}
 
