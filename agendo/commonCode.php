@@ -281,7 +281,8 @@
 	
 	// Videos div
 	function echoVideosDiv(){
-		echo "<div id=videodiv align='center' style='cursor:pointer;padding:5px;display:none;position:absolute;width:150px;color:#444444;background-color:#FFFFFF;opacity:0.9;'>";
+		// echo "<div id=videodiv align='center' style='cursor:pointer;padding:5px;display:none;position:absolute;width:150px;color:#444444;background-color:#FFFFFF;opacity:0.9;'>";
+		echo "<div id=videodiv align='center' class='dropMenu'>";
 			$sql= "select media_name, media_link, media_description from media order by media_name";
 			$res=dbHelp::query($sql) or die ($sql);
 			$vidWidth = 640;
@@ -295,7 +296,8 @@
 	
 	// Resources div
 	function echoResourcesDiv(){
-		echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
+		// echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
+		echo "<div id=resourcesdiv align='center'  class='dropMenu'>\n";
 			echo "<table>";
 				echo "<tr>";
 					echo "<td>";
@@ -337,7 +339,8 @@
 		// end
 		
 		$display = "table";
-		echo "<div id=userdiv align='center' style='display:none;width:auto;position:absolute;color:#444444;background-color:#FFFFFF;opacity:0.9;padding:5px'>";
+		// echo "<div id=userdiv align='center' style='display:none;width:auto;position:absolute;color:#444444;background-color:#FFFFFF;opacity:0.9;padding:5px'>";
+		echo "<div id=userdiv align='center' class='dropMenu'>";
 			echo "<form name=edituser id=edituser method=post>";
 				if(isset($_SESSION['user_id'])){
 					$display = "none";

@@ -23,6 +23,7 @@
 <meta name="keywords" content="" />
 <meta name="description" content="" /> 
 <link href="../agendo/css/style.css" rel="stylesheet" type="text/css" />
+<link href="../agendo/css/common.css" rel="stylesheet" type="text/css" />
 <link href="../agendo/css/CalendarControl.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="../agendo/js/cal.js"></script>
 <script type="text/javascript" src="../agendo/js/ajax.js"></script>
@@ -190,6 +191,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 			// Resources div
 			echoResourcesDiv();
 
+			// Group View
+			require_once('../agendo/monitoring.php');
+			
 			// User/management div
 			echoUserDiv("weekview", $calendar->getResource());
 		echo "</td>";

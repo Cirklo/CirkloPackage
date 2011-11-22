@@ -24,6 +24,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <link href="../agendo/css/intro.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="../agendo/css/common.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../agendo/js/ajax.js"></script>
 <script type="text/javascript">
 function noenter() {
@@ -57,7 +58,7 @@ if (isset($_GET['class'])) {
         // $sql="select 1,resource_name,resource_id from resource order by resource_name";
         $extra = "order by resource_name";
 	}
-	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus_id in (1, 3, 4, 5) ".$extra;
+	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus in (1, 3, 4, 5) ".$extra;
     // $limit='';
     $datefilter='';
 // Shows most used resources filtered by a month of use
@@ -120,6 +121,9 @@ echo "<table id='master' style='width:800' align=center>";
 	// Resources div
 	echoResourcesDiv();
 
+	// Group View
+	require_once('../agendo/monitoring.php');
+	
 	// User/management div
 	echoUserDiv('index', 'null');
 

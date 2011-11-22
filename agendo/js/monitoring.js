@@ -3,6 +3,7 @@ function changeParentWindow(resId, date){
 }
 
 function changeDivColor(divId, color){
+	// alert(color);
 	div = document.getElementById(divId);
 	div.style.backgroundColor = color;
 }
@@ -40,14 +41,27 @@ function getTableData(){
 	$.get(url, 
 		function(serverData){
 			element = document.getElementById('tableHolder');
-			element.innerHTML = serverData;
+			element.innerHTML = serverData.htmlCode;
+			divsToChangeArray = serverData.divsToChange;
+			for(key in divsToChangeArray){
+				// alert(key + "-----" + divsToChangeArray[key])
+				changeDivColor(key, divsToChangeArray[key]);
+			}
+			// alert(serverData);
 		}
-	);
+		,'json')
+		.success(
+			function(){
+				$(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
+			}
+		)
+	;
+	// $(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
 }
 
 $(document).ready(
 	function(){
 		getTableData();
-		// $(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
+		$(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
 	}
 );
