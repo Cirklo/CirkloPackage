@@ -494,10 +494,6 @@
 		return true;
 	}
 	
-	function echoThisToJS(){
-		return array(0 => "IRSYSTEMSEPARATOR", 1 => "IRSEPARATOR");
-	}
-	
 	function sendMail($subject, $address, $message, $replyToPerson, $userDbSettings, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
 		require_once("../agendo/alert/class.phpmailer.php");
 		$mail = new PHPMailer();
