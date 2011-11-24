@@ -53,9 +53,9 @@ function getTableData(){
 			element = document.getElementById('tableHolder');
 			element.innerHTML = serverData.htmlCode;
 
-			status2And4Divs = serverData.divsToChange;
-			for(key in status2And4Divs){
-				changeDivColor(key, status2And4Divs[key]);
+			entriesStarting = serverData.entriesStarting;
+			for(key in entriesStarting){
+				changeDivColor(key, entriesStarting[key]);
 			}
 			
 			qsEntries = serverData.quickScheduleEntries;

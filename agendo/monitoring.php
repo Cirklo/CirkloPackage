@@ -245,7 +245,7 @@
 		}
 		$htmlToSend .= "</table>";
 		$json->htmlCode = $htmlToSend;
-		$json->status2And4Divs = $entriesStarting;
+		$json->entriesStarting = $entriesStarting;
 		$json->quickScheduleEntries = $quickScheduleEntries;
 		echo json_encode($json);
 	}
