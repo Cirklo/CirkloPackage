@@ -32,7 +32,9 @@
 	}
 	
 	// ugly fix for the waiting list/unconfirmed entry bad sql structure....
-	$status2Entries = array();
+	$entriesStarting = array();
+	// yet another fix, this time for the eventual overlap of quickschedule entries
+	$quickScheduleEntries = array();
 	
 	// start time for each resource
 	define('startTime', 0);
@@ -117,7 +119,8 @@
 		global $resource;
 		global $user;
 		global $htmlToSend;
-		global $status2Entries;
+		global $entriesStarting;
+		global $quickScheduleEntries;
 		
 		$json;
 		$fromSimSql = "";
@@ -141,9 +144,11 @@
 			$htmlToSend .= "</td>";
 
 			// each day of the week
+			$weekDayWidth = (endTime-startTime)*slotsPerHour;
+			// $weekDayWidth = 300;
 			for($i=0; $i<7; $i++){
 				$timeToAdd = $i*24*60*60;
-				$htmlToSend .= "<td class ='weekday'>";
+				$htmlToSend .= "<td class ='weekday' style='min-width: ".$weekDayWidth.";'>";
 					$dayTime = $mondayTime + $timeToAdd;
 					$weekdayColorText = "black";
 					if(date('Ymd', $dayTime) == date('Ymd')){
@@ -210,10 +215,10 @@
 				$htmlToSend .= "<tr>";
 					$htmlToSend .= "<td class='groupViewTd'>";
 						$htmlToSend .= "<div class='resourcesNames'>";
-						$htmlToSend .= "<img class='picLinks' src='".$_SESSION['path']."/pics/".$rowPic['pics_path']."'/>";
-						$htmlToSend .= "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 days", $mondayTime))."\")' >";
-							$htmlToSend .= $row['resource_name'];
-						$htmlToSend .= "</a>";
+							$htmlToSend .= "<img class='picLinks' src='".$_SESSION['path']."/pics/".$rowPic['pics_path']."'/>";
+							$htmlToSend .= "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 days", $mondayTime))."\")' >";
+								$htmlToSend .= $row['resource_name'];
+							$htmlToSend .= "</a>";
 						$htmlToSend .= "</div>";
 					$htmlToSend .= "</td>";
 					$startWidth = (startTime + $row['resource_starttime']) * slotsPerHour;
@@ -240,8 +245,8 @@
 		}
 		$htmlToSend .= "</table>";
 		$json->htmlCode = $htmlToSend;
-		$json->divsToChange = $status2Entries;
-		
+		$json->status2And4Divs = $entriesStarting;
+		$json->quickScheduleEntries = $quickScheduleEntries;
 		echo json_encode($json);
 	}
 	
@@ -249,9 +254,9 @@
 		global $entryStatusColor;
 		global $notConfirmedColor;
 		global $user;
-		// and the fix shows its ugly head here
 		global $htmlToSend;
-		global $status2Entries;
+		global $entriesStarting;
+		global $quickScheduleEntries;
 		
 		$fromUser = '';
 		$whereUser = '';
@@ -265,6 +270,7 @@
 			,entry_status
 			,resource_resolution
 			,resource_id
+			,resource_status
 		from
 			resource
 			,entry
@@ -275,7 +281,7 @@
 			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
 			".$whereUser."
-			order by entry_datetime, entry_status asc
+			order by entry_datetime, entry_status asc, entry_action asc
 		";
 		$lastWidth = ($startTime - starTime) * slotsPerHour;
 		$prep = dbHelp::query($sql);
@@ -285,12 +291,9 @@
 		}
 		else{
 			$endAtWidth = $endTime * slotsPerHour;
-			// $totalWidthAvailable = (endTime - starTime) * slotsPerHour - $endAtWidth; 
+			$entryEndTimes = array();
 			while($row = dbHelp::fetchRowByName($prep)){
 				$unusedWidth = ceil(getWidth($row['entry_datetime']) - $lastWidth);
-				// if($unusedWidth < 0){
-					// $unusedWidth = 0;
-				// }
 				$usedWidth = floor($row['entry_slots'] * $row['resource_resolution'] / 60.0 * slotsPerHour);
 				$lastWidth += $unusedWidth;
 				if($lastWidth + $usedWidth > $endAtWidth){
@@ -299,25 +302,46 @@
 				$lastWidth += $usedWidth;
 				
 				// creates the "noUsage" bar that indicates when the resource isn't being used
-				$htmlToSend .= "<div class='usageDataShow' style='width:".$unusedWidth."px;background-color: ".notUsedColor.";' title='Available from ".$availableStarting." to ".date('H:i', strtotime($row['entry_datetime']))."'></div>";
+				if($unusedWidth > 0){
+					$htmlToSend .= "<div class='usageDataShow' style='width:".$unusedWidth."px;background-color: ".notUsedColor.";' title='Available from ".$availableStarting." to ".date('H:i', strtotime($row['entry_datetime']))."'></div>";
+				}
 				$entryLength = strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60;
 				$availableStarting = date('H:i', $entryLength);
 				$colorToUse = $entryStatusColor[$row['entry_status']];
+				$weekDay = date('N', $timeOfWeek);
+				$entryId = $row['resource_id']."-".$weekDay."-".convertDate($row['entry_datetime'], 'H:i');
 
-				if(($row['entry_status'] == 2 || $row['entry_status'] == 4) && time() > $entryLength){
-					$colorToUse = $notConfirmedColor;
+				// $createEntryDiv = true;
+				$createEntryDiv = !isset($entriesStarting[$entryId]);
+				if($row['entry_status'] == 2 || $row['entry_status'] == 4){
+					if(time() > $entryLength){
+						$colorToUse = $notConfirmedColor;
+					}
 				}
 				
-				$entryStatus2Id = $row['resource_id']."-".date('N', $timeOfWeek)."-".convertDate($row['entry_datetime'], 'H:i');
-				if(isset($status2Entries[$entryStatus2Id])){
-					// $htmlToSend .= "<script type='text/javascript'>changeDivColor('".$entryStatus2Id."','".$colorToUse."');</script>";
-					$status2Entries[$entryStatus2Id] = $colorToUse;
-					// wtf($row['entry_status']."--".$entryStatus2Id."--".$colorToUse);
+				if($row['resource_status'] == 5){
+					$entryEndTimesId = $row['resource_id']."-".$weekDay."-".date('H:i', ($entryLength - ($row['resource_resolution'] * 60)));
+					// $tempEntry = $entryId;
+					// if(isset($entryEndTimes[$entryId])){
+					if(isset($entryEndTimes[$entryId])){
+						if(!isset($entriesStarting[$entryId])){
+							$quickScheduleEntries[$entryEndTimes[$entryId]] = floor(1 * $row['resource_resolution'] / 60.0 * slotsPerHour);
+						}
+						else{
+							$quickScheduleEntries[$entryEndTimes[$entryId]] = $usedWidth;
+						}
+						// $quickScheduleEntries[$entryId] = $entryEndTimes[$entryId];
+						// wtf($quickScheduleEntries[$entryId]);
+					}
+					else{
+						$entryEndTimes[$entryEndTimesId] = $entryId;
+					}
 				}
-				else{
-					$status2Entries[$entryStatus2Id] = $colorToUse;
+				
+				$entriesStarting[$entryId] = $colorToUse;
+				if($createEntryDiv){
 					// creates the "usageBar" that indicates when the resource is being used
-					$htmlToSend .= "<div id='".$entryStatus2Id."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')." to ".date("H:i", convertWidthToTime($usedWidth, $row['entry_datetime']))."'></div>";
+					$htmlToSend .= "<div id='".$entryId."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')." to ".date("H:i", convertWidthToTime($usedWidth, $row['entry_datetime']))."'></div>";
 				}
 			}
 			

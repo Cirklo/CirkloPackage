@@ -3,9 +3,19 @@ function changeParentWindow(resId, date){
 }
 
 function changeDivColor(divId, color){
-	// alert(color);
 	div = document.getElementById(divId);
 	div.style.backgroundColor = color;
+}
+
+function setWidth(divId, width){
+	div = document.getElementById(divId);
+	currentWidth = $(div).width();
+	if(currentWidth > 1){
+		$(div).width(currentWidth - width);
+	}
+	// else{
+		// $(div).width(width);
+	// }
 }
 
 var resource = false;
@@ -42,12 +52,17 @@ function getTableData(){
 		function(serverData){
 			element = document.getElementById('tableHolder');
 			element.innerHTML = serverData.htmlCode;
-			divsToChangeArray = serverData.divsToChange;
-			for(key in divsToChangeArray){
-				// alert(key + "-----" + divsToChangeArray[key])
-				changeDivColor(key, divsToChangeArray[key]);
+
+			status2And4Divs = serverData.divsToChange;
+			for(key in status2And4Divs){
+				changeDivColor(key, status2And4Divs[key]);
 			}
-			// alert(serverData);
+			
+			qsEntries = serverData.quickScheduleEntries;
+			for(key in qsEntries){
+				// alert(key);
+				setWidth(key, qsEntries[key]);
+			}
 		}
 		,'json')
 		.success(
