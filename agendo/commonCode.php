@@ -289,7 +289,9 @@
 			$vidHeight = 480;
 			for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
 				$arr=dbHelp::fetchRowByIndex($res);
-				echo "<a title='".$arr[2]."' onclick=\"javascript:window.open('".$arr[1]."','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=no,width=".$vidWidth.",height=".$vidHeight."')\">".$arr[0]."</a><br>";
+				echo "<div style='padding:2px;'>";
+					echo "<a title='".$arr[2]."' onclick=\"javascript:window.open('".$arr[1]."','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=no,width=".$vidWidth.",height=".$vidHeight."')\">".$arr[0]."</a><br>";
+				echo "</div>";
 			}
 		echo "</div>";		
 	}
@@ -325,7 +327,9 @@
 				echo "<hr>";
 				for ($i=0;$i<$numRows;$i++) {
 					$arr=dbHelp::fetchRowByIndex($res);
-					echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
+					echo "<div style='padding:2px;'>";
+						echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
+					echo "</div>";
 				}
 			}
 		echo "</div>";

@@ -271,6 +271,7 @@
 			,resource_resolution
 			,resource_id
 			,resource_status
+			,resource_confirmtol
 		from
 			resource
 			,entry
@@ -314,7 +315,7 @@
 				// $createEntryDiv = true;
 				$createEntryDiv = !isset($entriesStarting[$entryId]);
 				if($row['entry_status'] == 2 || $row['entry_status'] == 4){
-					if(time() > $entryLength){
+					if(time() > ($entryLength + $row['resource_confirmtol'] * $row['resource_resolution'] * 60)){
 						$colorToUse = $notConfirmedColor;
 					}
 				}
