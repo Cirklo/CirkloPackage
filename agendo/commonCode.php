@@ -320,7 +320,7 @@
 				echo "<tr>";
 			echo "</table>";
 			
-			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
+			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource where resource_status in (1, 3, 4, 5)) order by resourcetype_name";
 			$res=dbHelp::query($sql) or die ($sql);
 			$numRows = dbHelp::numberOfRows($res);
 			if($numRows > 0){
