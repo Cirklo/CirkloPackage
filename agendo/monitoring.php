@@ -202,6 +202,7 @@
 		where
 			".$whereSql." 
 			".$whereTypeSql." 
+			and resource_status in (1, 3, 4, 5)
 		order by
 			resource_name
 		";
@@ -281,6 +282,7 @@
 			and resource_id = entry_resource
 			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
+			and resource_status in (1, 3, 4, 5)
 			".$whereUser."
 			order by entry_datetime, entry_status asc, entry_action asc
 		";
