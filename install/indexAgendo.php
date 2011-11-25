@@ -134,7 +134,7 @@ if (isset($_GET['class'])) {
 				echo "<td class=title_>Most Used Resources</td>";
 				echo "<td class=title_ >Share</td>";
 			echo "</tr>";
-			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
+			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and resource_status in (1, 3, 4, 5) and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
 			$res=dbHelp::query($sql) or die ($sql);
 			for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
 				if ($i==0) $max = $arr[0];
