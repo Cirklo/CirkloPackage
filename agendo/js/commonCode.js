@@ -41,9 +41,12 @@ function go (objIMG) {
 
 		var offset = $(objIMG).offset();
 		if(name == 'group'){
-			objDIV.style.display = 'table';
+			// objDIV.style.display = 'table';
+			getTableData();
+			// alert(bla);
+
 			// $('#weekdaysResources').width($('#weekdaysResources').width() + 5);
-			$(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
+			// $(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
 			// objDIV.style.left = String(offset.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
 			// objDIV.style.right = "50px";
 			// objDIV.style.margin = "auto";

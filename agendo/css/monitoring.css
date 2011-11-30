@@ -12,9 +12,9 @@ body{
 	font-size: 11px;
 }
 
-.groupViewTd, .weekday, .usage{
-	border: 1px solid black;
+.groupViewTd, .weekdayTd, .usage{
 	background: white;
+	border: 1px solid black;
 }
 
 .resourcesNames{
@@ -27,7 +27,7 @@ body{
 #weekdaysResources{
 	padding: 2px;
 	border-collapse: collapse;
-	overflow:scroll;
+	border: 1px solid black;
 }
 
 .colorBlock{
@@ -53,11 +53,6 @@ body{
 	color: #F7C439;
 }
 
-.weekday{
-	text-align: center;
-	background-color: white;
-}
-
 .links, .fakeLink{
 	padding-left: 5px;
 	padding-right: 5px;
@@ -74,11 +69,28 @@ body{
 	height:20px;
 }
 
-.fakeLink:hover, .usage:hover{
+.weekday, .weekday:hover{
+	color: black;
+}
+
+.weekdayRed, .weekdayRed:hover{
+	color: red;
+}
+
+.fakeLink:hover, .usage:hover, .weekday, .weekdayRed{
 	cursor: pointer;
 }
 
-.usage, .weekday{
+.weekdayTd{
+	text-align: center;
+	background-color: white;
+}
+
+.weekdayTd:hover{
+	background-color: #cccccc;
+}
+
+.usage, .weekdayTd{
 	padding: 0px;
 	margin: 0px;
 }

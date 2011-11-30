@@ -273,6 +273,7 @@ END:VCALENDAR";
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr  ;
             $address = $this->RespEmail;
+			$this->ClearAddresses();
 			$this->AddAddress($address, "");
             if(!$this->Send()) {
                 //echo "Mailer Error: " . $this->ErrorInfo;

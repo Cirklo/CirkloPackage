@@ -109,7 +109,7 @@
 				echo "<div class='colorBlock' style='background-color: ".$value."'></div>";
 			}
 			echo "<div class='colorBlockText'><a>".$notConfirmedName."</a></div>";
-			echo "<div id='bla' class='colorBlock' style='background-color: ".$notConfirmedColor."'></div>";
+			echo "<div class='colorBlock' style='background-color: ".$notConfirmedColor."'></div>";
 			echo "<div style='float:left;'><a>For time info click on calendar slots</a></div>";
 		echo "</div>";
 	echo "</div>";
@@ -123,6 +123,7 @@
 		global $quickScheduleEntries;
 		
 		$json;
+		$json->errorMsg = "";
 		$fromSimSql = "";
 		$whereTypeSql = "";
 		$whereSql = "resource_id = ".$resource;
@@ -148,13 +149,13 @@
 			// $weekDayWidth = 300;
 			for($i=0; $i<7; $i++){
 				$timeToAdd = $i*24*60*60;
-				$htmlToSend .= "<td class ='weekday' style='min-width: ".$weekDayWidth.";'>";
+				$htmlToSend .= "<td class ='weekdayTd' style='min-width: ".$weekDayWidth.";' onclick='scaleMe(".($i+1).")'>";
 					$dayTime = $mondayTime + $timeToAdd;
-					$weekdayColorText = "black";
+					$weekdayClass = "weekday";
 					if(date('Ymd', $dayTime) == date('Ymd')){
-						$weekdayColorText = "#bb3322";
+						$weekdayClass = "weekdayRed";
 					}
-					$htmlToSend .= "<a style='color:".$weekdayColorText.";'>".date('d-', $dayTime).date('D', $dayTime)."</a>";
+					$htmlToSend .= "<a class='".$weekdayClass."'>".date('d-', $dayTime).date('D', $dayTime)."</a>";
 				$htmlToSend .= "</td>";
 			}
 		$htmlToSend .= "</tr>";
@@ -229,6 +230,7 @@
 						$timeToAdd = $i*24*60*60;
 						// id = weekDay.resource
 						$htmlToSend .= "<td id='".$i.".".$row['resource_id']."' class='usage'>";
+							// $htmlToSend .= "<div style='white-space:nowrap;'>";
 							// creates the "startOrEndBar" that indicates the resource's starttime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
 							
@@ -236,13 +238,14 @@
 							
 							// creates the "startOrEndBar" that indicates the resource's stoptime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$endWidth."px;background-color:".startOrEndColor."' title='Resource scheduling ends at: ".$row['resource_stoptime'].":00'></div>";
+							// $htmlToSend .= "</div>";
 						$htmlToSend .= "</td>";
 					}
 				$htmlToSend .= "</tr>";
 			}
 		}
 		else{
-			showMsg('No results found.');
+			$json->errorMsg = "No results found.";
 		}
 		$htmlToSend .= "</table>";
 		$json->htmlCode = $htmlToSend;
