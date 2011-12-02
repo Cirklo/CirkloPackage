@@ -48,7 +48,6 @@
 	// colors
 	define('startOrEndColor', '#dddddd');
 	define('notUsedColor', '#ffffff');
-	// define('usedColor', '#7bb382');
 	
 	$entryStatusColor = array(
 		1 => '#e3f8a1', // confirmed entry
@@ -59,7 +58,6 @@
 	);
 	$notConfirmedName = 'Not Confirmed';
 	$notConfirmedColor = '#f39ea8';
-	// $notConfirmedColor = 'red';
 	
 	$htmlToSend = "";
 	$mondayTime = getMondayTimeFromDate($date);
@@ -70,22 +68,15 @@
 	
 	// ************************************* htmlStuff ***************************************************
 	importJs();
-	// echo "<link href='css/monitoring.css' rel='stylesheet' type='text/css' />";
-	// echo "<script type='text/javascript' src='js/monitoring.js'></script>";
 	echo "<script type='text/javascript' src='../agendo/js/monitoring.js'></script>";
 	echo "<link href='../agendo/css/monitoring.css' rel='stylesheet' type='text/css' />";
 	echo  "<script type='text/javascript'>setResourceAndDate('".$date."', '".$resource."');</script>";
 	
-	// echo "<div id='groupdiv' style='display:table;margin:auto;'>";
-	// echo "<div id='groupdiv' style='padding:5px;display:none;position:absolute;margin:auto;color:#444444;background-color:#FFFFFF;border:3px solid #1E4F54'>";
 	echo "<div id='groupdiv' class='dropMenu' style='text-align:center;'>";
-		// echo "<h1 style='text-align:center;color:#F7C439'>Resource Multiview</h1>";
 		echo "<a style='text-align:center;color:#1E4F54;font-size:15px;'>Resource Multiview</a>";
 		if($resource != false){
 			echo "<div id='labelsDiv' class='checkLabel'>";
-				// echo "<a style='color:white;'>Filter by: </a>";
 				echo "<a class='groupViewA' style='font-size:15px;'>Filter by: </a>";
-				// labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
 				labelCheckText('similarCheck', 'simEquip', 'Similar', true, 'Shows similar resources');
 				labelCheckText('equipTypeCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
 				if(isset($user)){
@@ -96,7 +87,6 @@
 		
 		// This div will contain a table that contains the weekdays and its resources
 		echo "<div id='tableHolder'>";
-			// doWeekDataArray($mondayTime);
 		echo "</div>";
 			
 		echo "<div style='text-align:right;margin-top:3px;'>";
@@ -146,7 +136,6 @@
 
 			// each day of the week
 			$weekDayWidth = (endTime-startTime)*slotsPerHour;
-			// $weekDayWidth = 300;
 			for($i=0; $i<7; $i++){
 				$timeToAdd = $i*24*60*60;
 				$htmlToSend .= "<td class ='weekdayTd' style='min-width: ".$weekDayWidth.";' onclick='scaleMe(".($i+1).")'>";
@@ -175,7 +164,6 @@
 	
 		$fromUser = '';
 		if(userLogged){
-			// $fromUser = ",(select resource_id as residuser from resource, permissions where (permissions_user = ".$user." or resource_resp = ".$user.") and resource_id = permissions_resource) as allowedRes";
 			$fromUser = ",(select resource_id as residuser from resource, permissions where (permissions_user = ".$user." and resource_id = permissions_resource) or resource_resp = ".$user.") as allowedRes";
 			$whereSql = "resource_id = residuser";
 		}
@@ -184,8 +172,6 @@
 			$fromSimSql = ",similarresources";
 			$whereSql = "similarresources_resource = ".$resource." and resource_id = similarresources_similar or resource_id = ".$resource;
 			if(userLogged){
-				// $whereSql = "similarresources_resource = residuser and resource_id = similarresources_similar or resource_id = residuser and resource_id = ".$resource;
-				// $whereSql = "similarresources_resource = residuser and (resource_id = similarresources_similar or resource_id = residuser)";
 				$whereSql = "(similarresources_resource = ".$resource." and resource_id = similarresources_similar and resource_id = residuser or resource_id = ".$resource." and residuser = resource_id)";
 			}
 		}
@@ -228,9 +214,7 @@
 					// each day of the week
 					for($i=0; $i<7; $i++){
 						$timeToAdd = $i*24*60*60;
-						// id = weekDay.resource
 						$htmlToSend .= "<td id='".$i.".".$row['resource_id']."' class='usage'>";
-							// $htmlToSend .= "<div style='white-space:nowrap;'>";
 							// creates the "startOrEndBar" that indicates the resource's starttime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
 							
@@ -238,7 +222,6 @@
 							
 							// creates the "startOrEndBar" that indicates the resource's stoptime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$endWidth."px;background-color:".startOrEndColor."' title='Resource scheduling ends at: ".$row['resource_stoptime'].":00'></div>";
-							// $htmlToSend .= "</div>";
 						$htmlToSend .= "</td>";
 					}
 				$htmlToSend .= "</tr>";
@@ -262,16 +245,12 @@
 		global $entriesStarting;
 		global $quickScheduleEntries;
 		
-		$fromUser = '';
-		$whereUser = '';
-		// if(userLogged){
-			// $fromUser = ',permissions';
-			// $whereUser = " and permissions_user = ".$user." or resource_resp = ".$user;
-		// }
 		$sql = "select 
 			entry_datetime
 			,entry_slots
 			,entry_status
+			,user_firstname
+			,user_lastname
 			,resource_resolution
 			,resource_id
 			,resource_status
@@ -279,14 +258,14 @@
 		from
 			resource
 			,entry
-			".$fromUser."
+			,user
 		where
 			entry_resource = ".$resource."
 			and resource_id = entry_resource
 			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
 			and resource_status in (1, 3, 4, 5)
-			".$whereUser."
+			and entry_user = user_id
 			order by entry_datetime, entry_status asc, entry_action asc
 		";
 		$lastWidth = ($startTime - starTime) * slotsPerHour;
@@ -317,7 +296,6 @@
 				$weekDay = date('N', $timeOfWeek);
 				$entryId = $row['resource_id']."-".$weekDay."-".convertDate($row['entry_datetime'], 'H:i');
 
-				// $createEntryDiv = true;
 				$createEntryDiv = !isset($entriesStarting[$entryId]);
 				if($row['entry_status'] == 2 || $row['entry_status'] == 4){
 					if(time() > ($entryLength + $row['resource_confirmtol'] * $row['resource_resolution'] * 60)){
@@ -327,8 +305,6 @@
 				
 				if($row['resource_status'] == 5){
 					$entryEndTimesId = $row['resource_id']."-".$weekDay."-".date('H:i', ($entryLength - ($row['resource_resolution'] * 60)));
-					// $tempEntry = $entryId;
-					// if(isset($entryEndTimes[$entryId])){
 					if(isset($entryEndTimes[$entryId])){
 						if(!isset($entriesStarting[$entryId])){
 							$quickScheduleEntries[$entryEndTimes[$entryId]] = floor(1 * $row['resource_resolution'] / 60.0 * slotsPerHour);
@@ -336,8 +312,6 @@
 						else{
 							$quickScheduleEntries[$entryEndTimes[$entryId]] = $usedWidth;
 						}
-						// $quickScheduleEntries[$entryId] = $entryEndTimes[$entryId];
-						// wtf($quickScheduleEntries[$entryId]);
 					}
 					else{
 						$entryEndTimes[$entryEndTimesId] = $entryId;
@@ -347,7 +321,7 @@
 				$entriesStarting[$entryId] = $colorToUse;
 				if($createEntryDiv){
 					// creates the "usageBar" that indicates when the resource is being used
-					$htmlToSend .= "<div id='".$entryId."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled for ".convertDate($row['entry_datetime'], 'H:i')." to ".date("H:i", convertWidthToTime($usedWidth, $row['entry_datetime']))."'></div>";
+					$htmlToSend .= "<div id='".$entryId."' class='usageDataShow' style='width:".$usedWidth."px;background-color: ".$colorToUse.";' title='Scheduled from ".convertDate($row['entry_datetime'], 'H:i')." to ".date("H:i", convertWidthToTime($usedWidth, $row['entry_datetime']))." by ".$row['user_firstname']." ".$row['user_lastname']."'></div>";
 				}
 			}
 			
@@ -359,7 +333,6 @@
 	}
 	
 	function labelCheckText($id, $value, $text, $checked, $title){
-		// $action = "onChange='checkRedirect(this);'";
 		$action = "onChange='getTableData();'";
 
  		$extraHtml = "";
