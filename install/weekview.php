@@ -357,8 +357,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					//***********************************************
 					//************* Weekly hours left ***************
-					
-					if(isset($_SESSION['user_id'])){
+					if(isset($_SESSION['user_id']) && $calendar->getRespId() != $_SESSION['user_id']){
 						$day=substr($calendar->getStartDate(),6,2);
 						$month=substr($calendar->getStartDate(),4,2);
 						$year=substr($calendar->getStartDate(),0,4);
@@ -376,10 +375,20 @@ echo "<table id='master' style='margin:auto' width=750>";
 							
 							$timeUsed = $totalSlots * $resolution/60;
 							$maxSlots = $maxHours * 60 / $resolution;
+							$slotsLeft = $maxSlots - $totalSlots;
+							
+							if($slotsLeft < 0){
+								$slotsLeft = 0;
+							}
+							
+							$timeLeft = $maxHours - $timeUsed;
+							if($timeLeft < 0){
+								$timeLeft = 0;
+							}
 							
 							echo "<tr>";
 								echo "<td colspan=2 align='center'>";
-								echo "You have ".($maxHours - $timeUsed)." hours (".($maxSlots - $totalSlots)." entries) left to book";
+								echo "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
 								echo "</td>";
 							echo "</tr>";
 							
@@ -390,7 +399,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "</tr>";
 						}
 					}
-					
 					//************* Weekly hours left ***************
 					//***********************************************
 	

@@ -136,6 +136,7 @@ class cal extends phpCollection{
     private $Status;
     private $StatusName;
     private $Link;
+    private $RespId;
     private $RespName;
     private $RespEmail;
     private $DelTolerance;
@@ -172,6 +173,7 @@ class cal extends phpCollection{
         $this->Status=$arrresource['resource_status'];
         $this->StatusName=$arrresource['resstatus_name'];
         $this->Link=$arrresource['resource_wikilink'];
+        $this->RespId=$arrresource['user_id'];
         $this->RespEmail=$arrresource['user_email'];
         $this->RespName=$arrresource['user_firstname']. " " . $arrresource['user_lastname'];
         $this->DelTolerance=$arrresource['resource_delhour'];
@@ -204,6 +206,7 @@ class cal extends phpCollection{
     function getLink() {return $this->Link;}
     function getRespEmail() {return $this->RespEmail;}
     function getRespName() {return $this->RespName;}
+    function getRespId() {return $this->RespId;}
     function getDelTolerance() {return $this->DelTolerance;}
     function getPrice() {return $this->Price;}
     function getResourceImage() {return $this->ResourceImage;}
