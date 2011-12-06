@@ -573,4 +573,8 @@
 		$value = preg_replace("/[".$forbiddenOnes."]/",'',$value);
 		return $value;
 	}
+	
+	function convertDate($date, $toFormat){
+		return date($toFormat, strtotime($date));
+	}
 ?>

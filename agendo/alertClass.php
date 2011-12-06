@@ -477,6 +477,87 @@ function fromAdmin($type,$extra=''){
     
 }//end function
 
+function entriesReminder(){
+	$sql = "select configParams_value from configParams where configParams_name = 'entryReminderHour'";
+	$prep = dbHelp::query($sql);
+	$row = dbHelp::fetchRowByIndex($prep);
+				// AND date(entry_datetime)=".date('Y-m-d')." 
+	// if(isset($row) && $row[0] == date('H')){
+	if(isset($row) && $row[0] == 5){
+		$sql = "
+			SELECT 
+				user_email
+				,resource_name
+				,resource_resolution
+				,entry_datetime
+				,entry_slots
+			FROM 
+				entry
+				,user
+				,resource
+			WHERE
+				entry_user=user_id 
+				AND resource_id=entry_resource 
+				AND date(entry_datetime)='2011-11-27' 
+				AND entry_status IN (1,2) 
+			ORDER BY 
+				user_email
+				,resource_name
+				,entry_datetime
+		";
+		
+		$this->Subject="Entry Reminder";
+		$this->ClearReplyTos();
+		$this->AddReplyTo("support@cirklo.org");
+		
+		$tempEmail = "";
+		$tempResource = "";
+		$prep = dbHelp::query($sql);
+		while($row = dbHelp::fetchRowByName($prep)){
+			if($row['user_email'] != $tempEmail){
+				// send email
+				if($tempEmail != ""){
+					$this->Body = $tempMsg;
+					$this->ClearAddresses();
+					$this->AddAddress($tempEmail, "");
+					if(!$this->Send()){
+						echo "Email error: ".$this->ErrorInfo;
+					}
+					// echo $this->Subject;
+					// echo "<br>";
+					// echo $tempEmail;
+					// echo "<br>";
+					// echo $tempMsg;
+					// echo "<br>";
+				}
+				$tempEmail = $row['user_email'];
+				$tempMsg = "You have the following bookings for today (".convertDate($row['entry_datetime'], "d/m/Y")."):\n";
+				$tempResource = "";
+			}
+			if($row['resource_name'] != $tempResource){
+				$tempResource = $row['resource_name'];
+				$tempMsg .= "Resource '".$tempResource."'\n";
+			}
+			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
+		}
+		
+		// send email for the last person on the list
+		if($tempEmail != ""){
+			$this->Body=$tempMsg;
+			$this->ClearAddresses();
+			$this->AddAddress($tempEmail, "");
+			if(!$this->Send()){
+				echo "Email error: ".$this->ErrorInfo;
+			}
+			// echo $this->Subject;
+			// echo "<br>";
+			// echo $tempEmail;
+			// echo "<br>";
+			// echo $tempMsg;
+			// echo "<br>";
+		}
+	}
+}
 
 
 } // end class

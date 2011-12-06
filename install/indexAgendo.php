@@ -117,12 +117,12 @@ if (isset($_GET['class'])) {
         // $sql="select 1,resource_name,resource_id from resource order by resource_name";
         $extra = "order by resource_name";
 	}
-	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus_id in (1, 3, 4, 5) ".$extra;
+	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus_id not in (0, 2) ".$extra;
     // $limit='';
     // $datefilter='';
 // Shows most used resources filtered by a month of use
 } else {
-    $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and resstatus_id in (1, 3, 4, 5) and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
+    $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and resstatus_id not in (0, 2) and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
     // $datefilter=" and entry_datetime between ".dbHelp::date_sub('now()', '1', 'month')." and now()";
     $datefilter=" and entry_datetime between ".dbHelp::date_sub(dbHelp::now(), '1', 'month')." and ".dbHelp::now();
 }
@@ -134,7 +134,7 @@ if (isset($_GET['class'])) {
 				echo "<td class=title_>Most Used Resources</td>";
 				echo "<td class=title_ >Share</td>";
 			echo "</tr>";
-			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and resource_status in (1, 3, 4, 5) and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
+			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and resource_status not in (0, 2) and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
 			$res=dbHelp::query($sql) or die ($sql);
 			for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
 				if ($i==0) $max = $arr[0];

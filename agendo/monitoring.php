@@ -189,7 +189,7 @@
 		where
 			".$whereSql." 
 			".$whereTypeSql." 
-			and resource_status in (1, 3, 4, 5)
+			and resource_status not in (0, 2)
 		order by
 			resource_name
 		";
@@ -362,10 +362,6 @@
 		$minsSlots = (int)date('i' ,strtotime($time)) /60.0 * slotsPerHour;
 		$hoursSlots = (int)date('H' ,strtotime($time)) * slotsPerHour;
 		return  $minsSlots + $hoursSlots;
-	}
-	
-	function convertDate($date, $toFormat){
-		return date($toFormat, strtotime($date));
 	}
 	
 	function convertWidthToTime($width, $startingFromDate = null){
