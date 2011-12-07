@@ -482,8 +482,9 @@ function entriesReminder(){
 	$prep = dbHelp::query($sql);
 	$row = dbHelp::fetchRowByIndex($prep);
 				// AND date(entry_datetime)=".date('Y-m-d')." 
-	// if(isset($row) && $row[0] == date('H')){
-	if(isset($row) && $row[0] == 5){
+				// AND date(entry_datetime)='2011-11-27' 
+	if(isset($row) && $row[0] == date('H')){
+	// if(isset($row) && $row[0] == 5){
 		$sql = "
 			SELECT 
 				user_email
@@ -498,7 +499,7 @@ function entriesReminder(){
 			WHERE
 				entry_user=user_id 
 				AND resource_id=entry_resource 
-				AND date(entry_datetime)='2011-11-27' 
+				AND date(entry_datetime)=".date('Y-m-d')." 
 				AND entry_status IN (1,2) 
 			ORDER BY 
 				user_email
@@ -536,7 +537,7 @@ function entriesReminder(){
 			}
 			if($row['resource_name'] != $tempResource){
 				$tempResource = $row['resource_name'];
-				$tempMsg .= "Resource '".$tempResource."'\n";
+				$tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
 			}
 			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
 		}
