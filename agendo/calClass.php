@@ -81,7 +81,6 @@ class calCell {
         $cellgrey="#aaaaaa";
         
 		$baseStyle = "
-			white-space: nowrap;
 			width: 60px;
 			overflow: hidden;
 		";
@@ -108,7 +107,8 @@ class calCell {
 			$addId = " id='".$nlineXweekday."'";
 			// echo "<td align=center lang=". $cellbgLight . " title=" . $this->Entry ." class='entryTd' " . $extra ." rowspan=". $this->NSlots .">". $this->Tag ."</td>\n";        
 		}
-		echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='".$baseStyle."'>".$this->Tag."</div></td>\n";        
+		// echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='".$baseStyle."'>".$this->Tag."</div></td>\n";        
+		echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='overflow: hidden;width: 60px;text-overflow:ellipses;'>".$this->Tag."</div></td>\n";        
     }    
 }
 
