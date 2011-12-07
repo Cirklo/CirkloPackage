@@ -80,29 +80,29 @@ class calCell {
         if ($this->EntryStatus==5) $cellbgLight=cal::InUseCellColorOff;
         $cellgrey="#aaaaaa";
         
-        switch ($slotType){
-        case 0: // without entry
-            $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
-            break;
-        case 1: // with entry
-            $extra="OnMouseDown='swapColor(this,1,1);'";
-            if ($this->getRepeat()!='') {
-                $extra = $extra . " style='background:$cellbgStrong'";
-            } else {
-                $extra = $extra . " style='background:$cellbgLight'";
-            }
-            break;
-        case 2: // update
-            $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
-            $extra = $extra . " style='background:$cellgrey'";
-            break;
-        }
 		$baseStyle = "
 			white-space: nowrap;
 			width: 60px;
 			overflow: hidden;
 		";
 
+        switch ($slotType){
+        case 0: // without entry
+            $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);' style='".$baseStyle."'";
+            break;
+        case 1: // with entry
+            $extra="OnMouseDown='swapColor(this,1,1);'";
+            if ($this->getRepeat()!='') {
+                $extra = $extra . " style='background:".$cellbgStrong.";".$baseStyle."'";
+            } else {
+                $extra = $extra . " style='background:".$cellbgLight.";".$baseStyle."'";
+            }
+            break;
+        case 2: // update
+            $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
+            $extra = $extra . " style='background:".$cellgrey.";".$baseStyle."'";
+            break;
+        }
 		$addId = "";
 		if($nlineXweekday != ''){
 			$addId = " id='".$nlineXweekday."'";
@@ -288,8 +288,8 @@ class cal extends phpCollection{
             $from=date("H.i",$this->SlotStart);
             $to=date("H.i",mktime($this->StartTime,self::$Resolution*($nline+1)));
             $txt=$from."-".$to;
-            echo "<td align=center width=10% class=date >". $txt ."</td>\n";
-            // echo "<td align=center class='date'>". $txt ."</td>\n";
+            // echo "<td align=center width=10% class=date >". $txt ."</td>\n";
+            echo "<td align=center class=date style='width:90px'>". $txt ."</td>\n";
 
 			// $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status,entry_slots from entry,".dbHelp::getSchemaName().".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".dbHelp::getFromDate('entry_datetime','%Y%m%d')."='". $this->Day . "' and ".dbHelp::getFromDate('entry_datetime','%H%i')."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
            for($weekday=1;$weekday<8;$weekday++){
