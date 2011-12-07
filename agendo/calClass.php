@@ -283,7 +283,8 @@ class cal extends phpCollection{
             $from=date("H.i",$this->SlotStart);
             $to=date("H.i",mktime($this->StartTime,self::$Resolution*($nline+1)));
             $txt=$from."-".$to;
-            echo "<td align=center width=10% class=date >". $txt ."</td>\n";
+            // echo "<td align=center width=10% class=date >". $txt ."</td>\n";
+            echo "<td align=center class=date >". $txt ."</td>\n";
 
 			// $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status,entry_slots from entry,".dbHelp::getSchemaName().".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".dbHelp::getFromDate('entry_datetime','%Y%m%d')."='". $this->Day . "' and ".dbHelp::getFromDate('entry_datetime','%H%i')."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
            for($weekday=1;$weekday<8;$weekday++){

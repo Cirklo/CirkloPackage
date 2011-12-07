@@ -488,6 +488,7 @@ function entriesReminder(){
 		$sql = "
 			SELECT 
 				user_email
+				,resource_id
 				,resource_name
 				,resource_resolution
 				,entry_datetime
@@ -537,7 +538,16 @@ function entriesReminder(){
 			}
 			if($row['resource_name'] != $tempResource){
 				$tempResource = $row['resource_name'];
-				$tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
+				// $tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
+				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
+				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME']."weekview.php?resource=".$row['resource_id']."&date=".getMondayTimeFromDate(date('Ymd')).")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
+				$monday = date("Ymd",$this->getMondayTimeFromDate('20111127'));
+				$protocol = "http";
+				if(!empty($_SERVER['HTTPS'])){
+					$protocol = "https";
+				}
+				$urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".substr($_SESSION['path'], 3)."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
+				$tempMsg .= "Resource '".$tempResource."'".$urlPath."\n";
 			}
 			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
 		}
@@ -559,6 +569,16 @@ function entriesReminder(){
 		}
 	}
 }
+
+function getMondayTimeFromDate($date){
+	$dateTime = strtotime($date);
+	// int number corresponding to $date's  day of the week
+	$weekDay = date('N', $dateTime);
+	// gets $date's monday time
+	$date = $dateTime - ($weekDay - 1)*24*60*60;
+	return $date;
+}
+	
 
 
 } // end class
