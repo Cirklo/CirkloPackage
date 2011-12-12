@@ -37,7 +37,8 @@ function dispInput($val,$name,$len,$flag,$type,$j){
   * @param $extraecho -> a non database option(s)
  */ 
 
-function autoComplete ($table,$selection,$name, $flag, $user_id, $j)
+ /*
+function autoComplete($table,$selection,$name, $flag, $user_id, $j)
 {
     $sql = "show fields from ".$table;
     $res = dbHelp::query($sql);
@@ -65,6 +66,7 @@ function autoComplete ($table,$selection,$name, $flag, $user_id, $j)
 		fillCombos($table,$selection,$name,$extra='',$extraecho='', $user_id, $j);
     }    
 }
+*/
  
 function fillCombos ($table,$selection,$name,$extra='',$extraecho='', $user_id,$j)
 {

@@ -30,9 +30,6 @@ function back(){
 	}
 }
 
-// needs to be the same as the one on the index.php
-separator = 'IRSEPARATOR';
-systemSeparator = 'IRSYSTEMSEPARATOR';
 detectedErrorOnJS = false;
 messageToShow = '';
 aContinents = [];

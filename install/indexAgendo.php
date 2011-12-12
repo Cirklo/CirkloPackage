@@ -14,7 +14,7 @@
 	// logIn();
 	
 	if(isset($_POST['functionName'])){
-		call_user_func($_POST['functionName']);
+		call_user_func(cleanValue($_POST['functionName']));
 		exit;
 	}
 	importJs();
@@ -24,6 +24,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <link href="../agendo/css/intro.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="../agendo/css/common.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../agendo/js/ajax.js"></script>
 <script type="text/javascript">
 function noenter() {
@@ -47,27 +48,6 @@ function checkfield(field) {
 <body>
 <?php
 
-$extra = '';
-$class = '';
-// Shows a specific resource
-if (isset($_GET['class'])) {
-    $class=clean_input($_GET['class']);
-    // $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and entry_status in (1,2) group by resource_name,resource_id order by e desc";
-	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resource_type=".$class." order by resource_name";
-    if ($class==0){
-        // $sql="select 1,resource_name,resource_id from resource order by resource_name";
-        $sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id order by resource_name";
-	}
-    $extra='resource_type='. $class . ' and';
-    $limit='';
-    $datefilter='';
-// Shows most used resources filtered by a month of use
-} else {
-    $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
-    // $datefilter=" and entry_datetime between ".dbHelp::date_sub('now()', '1', 'month')." and now()";
-    $datefilter=" and entry_datetime between ".dbHelp::date_sub(dbHelp::now(), '1', 'month')." and ".dbHelp::now();
-}
-
 // echo "<div id='logo' class='logo' style='background:url(".$_SESSION['path']."/pics/header.png) no-repeat left top;'>";
 // agendo Resource Schedule
 // echo "<div id='logo' class='logo'>";
@@ -84,7 +64,7 @@ echo "<table id='master' style='width:800' align=center>";
 				echo "<table style='height:100%;width:100%'>";
 					echo "<tr valign='top'>";
 						echo "<td align='right'>";
-						loggedInAs('index', 0);
+						loggedInAs('index', 'null');
 						echo "</td>";
 					echo "</tr>";
 					
@@ -121,17 +101,40 @@ echo "<table id='master' style='width:800' align=center>";
 	// Resources div
 	echoResourcesDiv();
 
+	// Group View
+	require_once('../agendo/monitoring.php');
+	
 	// User/management div
-	echoUserDiv('index', 0);
+	echoUserDiv('index', 'null');
+
+$class = null;
+// Shows a specific resource
+if (isset($_GET['class'])) {
+    $class = (int)($_GET['class']);
+    // $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and entry_status in (1,2) group by resource_name,resource_id order by e desc";
+	$extra = "and resource_type='".$class."' order by resource_name";
+    if ($class==0){
+        // $sql="select 1,resource_name,resource_id from resource order by resource_name";
+        $extra = "order by resource_name";
+	}
+	$sql="select resource_name,resourcetype_name, resstatus_name, resource_id from resource, resstatus, resourcetype where resource_type = resourcetype_id and resource_status = resstatus_id and resstatus_id not in (0, 2) ".$extra;
+    // $limit='';
+    // $datefilter='';
+// Shows most used resources filtered by a month of use
+} else {
+    $sql="SELECT sum(entry_slots*resource_resolution) e,resource_name, resource_id from entry, resource where resource_id=entry_resource and resstatus_id not in (0, 2) and entry_status in (1,2) group by resource_name,resource_id order by e desc limit 10";
+    // $datefilter=" and entry_datetime between ".dbHelp::date_sub('now()', '1', 'month')." and now()";
+    $datefilter=" and entry_datetime between ".dbHelp::date_sub(dbHelp::now(), '1', 'month')." and ".dbHelp::now();
+}
 
 	// echo "<div class=logo>";
 	echo "<table class=equilist>";
-		if($class == ''){
+		if(!isset($class)){
 			echo "<tr>";
 				echo "<td class=title_>Most Used Resources</td>";
 				echo "<td class=title_ >Share</td>";
 			echo "</tr>";
-			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
+			$sql="SELECT sum(entry_slots*resource_resolution) e, resource_name, resource_id from entry, resource where resource_id = entry_resource and resource_status not in (0, 2) and entry_status in (1,2) ".$datefilter." group by resource_name order by e desc limit 15";
 			$res=dbHelp::query($sql) or die ($sql);
 			for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
 				if ($i==0) $max = $arr[0];
@@ -152,7 +155,8 @@ echo "<table id='master' style='width:800' align=center>";
 		else {
 			echo "<tr>";
 				echo "<td class=title_>All Resources</td>";
-				echo "<td class=title_>Resource Type</td><td class=title_ >Permission Type</td>";
+				echo "<td class=title_>Resource Type</td>";
+				echo "<td class=title_ >Permission Type</td>";
 			echo "</tr>";
 			$resResource=dbHelp::query($sql);
 			while($arrResource=dbHelp::fetchRowByIndex($resResource)){

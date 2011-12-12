@@ -14,22 +14,48 @@ $("#resourceSearch").focus(function(){
 });
 
 function go (objIMG) {
+	groupViewOk = typeof(groupViewOk) != 'undefined' ? groupViewOk : false;
     s=objIMG.src;
+	if((name = objIMG.id) == 'group' && document.getElementById('groupdiv') == null){
+		showMessage('User needs to be logged or be in the calendar view to have a resource associated.');
+		return;
+	}
+		
     objDIV=document.getElementById(objIMG.id + 'div');
-    
     if (s.substring(s.length-5,s.length)!="_.png"){
+		// document.getElementById(name).src = 'pics/' + name + '.png'
         document.getElementById('video').src='pics/video.png';
         document.getElementById('help').src='pics/ask.png';
         document.getElementById('resources').src='pics/resource.png';
         document.getElementById('user').src='pics/user.png';
+        document.getElementById('group').src='pics/group.png';
         objIMG.src=s.substring(0,s.length-4) + "_.png";
         
+        // document.getElementById(name + 'div').style.display='none';
+		if((groupElement = document.getElementById('groupdiv')) != null){
+			groupElement.style.display='none';
+		}
         document.getElementById('userdiv').style.display='none';
         document.getElementById('resourcesdiv').style.display='none';
         document.getElementById('videodiv').style.display='none';
-        objDIV.style.display = "block";
+
 		var offset = $(objIMG).offset();
-		objDIV.style.left = String(offset.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
+		if(name == 'group'){
+			// objDIV.style.display = 'table';
+			getTableData();
+			// alert(bla);
+
+			// $('#weekdaysResources').width($('#weekdaysResources').width() + 5);
+			// $(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
+			// objDIV.style.left = String(offset.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
+			// objDIV.style.right = "50px";
+			// objDIV.style.margin = "auto";
+		}
+		else{
+			objDIV.style.display = "block";
+			objDIV.style.left = String(offset.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
+		}
+		
 		// objDIV.style.left = String(objDIV.style.left - objDIV.offsetWidth/2 + objIMG.offsetWidth/2) + "px";
     } else {
         objIMG.src=s.substring(0,s.length-5) + ".png";
@@ -96,6 +122,9 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 						if(resource != null){
 							phpFilePath = phpFilePath + "?resource="+resource;
 						}
+						else{
+							phpFilePath = phpFilePath;
+						}
 						// if(loginToDatumo){
 							// phpFilePath = "../datumo/";
 						// }
@@ -125,7 +154,15 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 function logOff(phpFilePath, resource){
 	$.post(phpFilePath, {functionName:'logOff'},"json")
 		.error(function(error){showMessage(error);})
-		.complete(function(){window.location = phpFilePath + "?resource="+resource;})
+		.complete(function(){
+				if(resource != null){
+					window.location = phpFilePath + "?resource="+resource;
+				}
+				else{
+					window.location = phpFilePath;
+				}
+			}
+		)
 	;
 }
 

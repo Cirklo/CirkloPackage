@@ -22,6 +22,8 @@ $msg = "Reservation system new user request:\n\n";
 //PERSONAL INFORMATION LOOP
 foreach($_POST as $key=>$value){
     $key = str_replace('_',' ',$key);
+	$key = cleanValue($key);
+	$value = cleanValue($value);
     $msg .= $key.": ".$value."\n";
     if($key == 'Resource') $resource = $value;
 }

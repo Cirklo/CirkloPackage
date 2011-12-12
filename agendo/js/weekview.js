@@ -134,7 +134,8 @@ function swapColor(obj,tag,action){
 				//alert(xmlhttp.responseText);         
 				}
 			}
-        } else {
+        // } else {
+        } else if(document.getElementById('addButton') != null){
             document.getElementById('addButton').value='Add';
 			for (i=1;i<tablesize;i++)
 				for (j=1;j<table.rows[i].cells.length;j++)

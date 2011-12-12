@@ -273,7 +273,8 @@ END:VCALENDAR";
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr  ;
             $address = $this->RespEmail;
-            $this->AddAddress($address, "");
+			$this->ClearAddresses();
+			$this->AddAddress($address, "");
             if(!$this->Send()) {
                 //echo "Mailer Error: " . $this->ErrorInfo;
             } else {
@@ -294,9 +295,12 @@ END:VCALENDAR";
 
 function recover($user_id){
     // $sql="select user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
-    $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
-    $res=dbHelp::query($sql);
+    // $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
+    $sql="select user_email,user_mobile,user_alert, user_login from ".dbHelp::getSchemaName().".user where user_login=:0";
+    // $res=dbHelp::query($sql);
+    $res=dbHelp::query($sql, array($user_id));
     $arr=dbHelp::fetchRowByName($res);
+	$user_id = $arr['user_login'];
     $vowels="aeiyou";
     $consonants="bcdfghjklmnpqrstvwxz";
     $pwd='';
@@ -308,8 +312,8 @@ function recover($user_id){
         }
     }
     // $sql="update user set user_passwd = password('$pwd') where user_id=". $user_id;
-    $sql="update user set user_passwd = '".cryptPassword($pwd)."' where user_login='". $user_id."'";
-    $res=dbHelp::query($sql) or die('Password not updated');
+    $sql="update ".dbHelp::getSchemaName().".user set user_passwd = '".cryptPassword($pwd)."' where user_login='".$user_id."'";
+   $res=dbHelp::query($sql) or die('Password not updated');
     switch ($arr['user_alert']) {
     case 2:
         try {
@@ -350,6 +354,7 @@ function nonconf(){
 				resource_name,
 				entry_id,
 				entry_datetime,
+				entry_user,
 				".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date,
 				(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,
 				(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert
@@ -357,7 +362,7 @@ function nonconf(){
 			where 
 				entry_status=2 and 
 				entry_user=user_id and 
-				resource_id=entry_resource and 
+				entry_resource = resource_id and 
 				resource_status<>4 and 
 				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between ".dbHelp::now()." and ".dbHelp::date_add(dbHelp::now(),'60', 'minute');
 				// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
@@ -384,7 +389,8 @@ function nonconf(){
 				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
                 $this->Body=$msg;
                 $address = $arr['user_email'];
-                $this->AddAddress($address, "");
+				$this->ClearAddresses();
+				$this->AddAddress($address, "");
                 echo $msg;
                 if(!$this->Send()) {
                     echo "Mailer Error: ".$this->ErrorInfo;
@@ -471,6 +477,108 @@ function fromAdmin($type,$extra=''){
     
 }//end function
 
+function entriesReminder(){
+	$sql = "select configParams_value from configParams where configParams_name = 'entryReminderHour'";
+	$prep = dbHelp::query($sql);
+	$row = dbHelp::fetchRowByIndex($prep);
+				// AND date(entry_datetime)=".date('Y-m-d')." 
+				// AND date(entry_datetime)='2011-11-27' 
+	if(isset($row) && $row[0] == date('H')){
+	// if(isset($row) && $row[0] == 5){
+		$sql = "
+			SELECT 
+				user_email
+				,resource_id
+				,resource_name
+				,resource_resolution
+				,entry_datetime
+				,entry_slots
+			FROM 
+				entry
+				,user
+				,resource
+			WHERE
+				entry_user=user_id 
+				AND resource_id=entry_resource 
+				AND date(entry_datetime)=".date('Y-m-d')." 
+				AND entry_status IN (1,2) 
+			ORDER BY 
+				user_email
+				,resource_name
+				,entry_datetime
+		";
+		
+		$this->Subject="Entry Reminder";
+		$this->ClearReplyTos();
+		$this->AddReplyTo("support@cirklo.org");
+		
+		$tempEmail = "";
+		$tempResource = "";
+		$prep = dbHelp::query($sql);
+		while($row = dbHelp::fetchRowByName($prep)){
+			if($row['user_email'] != $tempEmail){
+				// send email
+				if($tempEmail != ""){
+					$this->Body = $tempMsg;
+					$this->ClearAddresses();
+					$this->AddAddress($tempEmail, "");
+					if(!$this->Send()){
+						echo "Email error: ".$this->ErrorInfo;
+					}
+					// echo $this->Subject;
+					// echo "<br>";
+					// echo $tempEmail;
+					// echo "<br>";
+					// echo $tempMsg;
+					// echo "<br>";
+				}
+				$tempEmail = $row['user_email'];
+				$tempMsg = "You have the following bookings for today (".convertDate($row['entry_datetime'], "d/m/Y")."):\n";
+				$tempResource = "";
+			}
+			if($row['resource_name'] != $tempResource){
+				$tempResource = $row['resource_name'];
+				// $tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
+				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
+				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME']."weekview.php?resource=".$row['resource_id']."&date=".getMondayTimeFromDate(date('Ymd')).")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
+				$monday = date("Ymd",$this->getMondayTimeFromDate('20111127'));
+				$protocol = "http";
+				if(!empty($_SERVER['HTTPS'])){
+					$protocol = "https";
+				}
+				$urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".substr($_SESSION['path'], 3)."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
+				$tempMsg .= "Resource '".$tempResource."'".$urlPath."\n";
+			}
+			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
+		}
+		
+		// send email for the last person on the list
+		if($tempEmail != ""){
+			$this->Body=$tempMsg;
+			$this->ClearAddresses();
+			$this->AddAddress($tempEmail, "");
+			if(!$this->Send()){
+				echo "Email error: ".$this->ErrorInfo;
+			}
+			// echo $this->Subject;
+			// echo "<br>";
+			// echo $tempEmail;
+			// echo "<br>";
+			// echo $tempMsg;
+			// echo "<br>";
+		}
+	}
+}
+
+function getMondayTimeFromDate($date){
+	$dateTime = strtotime($date);
+	// int number corresponding to $date's  day of the week
+	$weekDay = date('N', $dateTime);
+	// gets $date's monday time
+	$date = $dateTime - ($weekDay - 1)*24*60*60;
+	return $date;
+}
+	
 
 
 } // end class

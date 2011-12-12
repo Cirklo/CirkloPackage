@@ -55,7 +55,8 @@ class errorHandler extends PHPMailer{
         // $this->AddReplyTo($row[3],"Calendar Admin");
    }
     
-    function sqlError($type, $num, $query, $table, $user_id){
+ /*
+	function sqlError($type, $num, $query, $table, $user_id){
         // echo $query."-".$type;
         //Which user has generated the error?
         $login = $this->getUser($user_id);
@@ -101,7 +102,8 @@ class errorHandler extends PHPMailer{
         echo "location='$url';";
         echo "</script>";
     }
-    
+*/    
+
     function error($num){
         switch($num){
             case '1451':

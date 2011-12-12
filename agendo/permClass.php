@@ -289,20 +289,23 @@ function getEntryStatus(){
         $this->warning="Resource Inactive";
         return false;
     break;
-    case 1:
-        return 1; // return entry status as regular
-    break;
+    // case 1:
+    // case 6:
+        // return 1; // return entry status as regular
+    // break;
     case 2:
         $this->warning="Resource Invisible";
         return 2; // return entry status as a pre-reserve
     break;
     case 3:
-        return 2; // return entry status as a pre-reserve
-    break;
     case 4:
         return 2; // return entry status as a pre-reserve
     break;
+	default:
+		return 1; // return entry status as regular
+	break;
     }
+	
 }
 
 /**

@@ -75,12 +75,13 @@ td.date {
 	font-size: 10px;
 	color: #888888;
 	font-weight:100;
+	padding: 0px;
 }
-
 
 a {
 	text-decoration: none;
-	color: #789095;
+	/*color: #789095;*/
+	color: #567e73;
 }
 
 a:hover {
@@ -114,11 +115,12 @@ table.calendar {
  margin-top: 5px;
 }
 div.calendar td {
- border: 1px solid #EAE8D5;
+ border: 1px solid #d9d7c4;
+ /*border: 1px solid #567e73;*/
+ /*border: 1px solid #EAE8D5;*/
  width: 90px;
  text-align:center;
  padding:5px;
- 
  }
  
 div.buttonsDiv td {

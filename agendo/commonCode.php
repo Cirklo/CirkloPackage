@@ -6,7 +6,7 @@
   @version 1.0
   @Code used in lots of places and all joined in an artistic way to avoid copy pasting same methods in different places
 */
-	error_reporting (E_ERROR | E_WARNING | E_PARSE);
+	// error_reporting (E_ERROR | E_WARNING | E_PARSE);
 	session_start();
 	// session_destroy();
 	require_once("__dbHelp.php");
@@ -22,9 +22,11 @@
 	}
 
 	function autocompleteAgendo(){
-		$value = $_GET['term'];
-		$sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
-		$res = dbHelp::query($sql);
+		$value = strtolower($_GET['term']);
+		// $sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
+		// $res = dbHelp::query($sql);
+		$sql = "select resource_id, resource_name from resource where lower(resource_name) like :0 and resource_status not in (0,2)";
+		$res = dbHelp::query($sql, array("%".$value."%"));
 		while($arr = dbHelp::fetchRowByIndex($res)){
 			$row_array['id'] = $arr[0];
 			$row_array['value'] = $arr[1];
@@ -35,13 +37,37 @@
 
 	function getUsersList(){
 		$value = explode(' ', $_GET['term']);
+		$operand = "or";
+		
+		$values = array();
+		$values[0] = "%".strtolower($value[0])."%";
+		$values[1] = "%".strtolower($value[0])."%";
+		$values[2] = "%".strtolower($value[0])."%";
 		if(sizeOf($value) > 1){
-			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+			$operand = "or";
+			$values[2] = "%".strtolower($value[1])."%";
+			// $sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' and lower(user_lastname) like '%".strtolower($value[1])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
 		}
-		else{
-			$sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
-		}
-		$res = dbHelp::query($sql);
+		
+		// else{
+			// $sql = "select user_id, user_firstname, user_lastname, user_login from user where lower(user_firstname) like '%".strtolower($value[0])."%' or lower(user_lastname) like '%".strtolower($value[0])."%' or lower(user_login) like '%".strtolower($value[0])."%'";
+		// }
+		// $res = dbHelp::query($sql);
+		
+		$sql = "select 
+					user_id, 
+					user_firstname, 
+					user_lastname, 
+					user_login 
+				from 
+					user 
+				where 
+					lower(user_login) like :0 ".$operand."
+					lower(user_firstname) like :1 ".$operand." 
+					lower(user_lastname) like :2 
+		";
+
+		$res = dbHelp::query($sql, $values);
 		while($arr = dbHelp::fetchRowByIndex($res)){
 			$row_array['id'] = $arr[0];
 			$row_array['value'] = $arr[1]." ".$arr[2]." (".$arr[3].")";
@@ -51,8 +77,8 @@
 	}
 
 	function logIn(){
-		$userLogin=$_POST['login'];
-		$pass=$_POST['pass'];
+		$userLogin=cleanValue($_POST['login']);
+		$pass=cleanValue($_POST['pass']);
 		// $resource=$_GET['resource'];
 		$passCrypted=$_POST['passCrypted'];
 		if($passCrypted == 'false'){
@@ -81,7 +107,7 @@
 				$email = $userLogin."@".$configArray['imapMailServer'];
 				// {imap.gmail.com:993/imap/ssl}INBOX
 				// $inbox = @imap_open("{".$configArray['imapHost']."}", $email, $_POST['pass']);
-				$inbox = @imap_open("{".$configArray['imapHost']."}", $userLogin, $_POST['pass']);
+				$inbox = @imap_open("{".$configArray['imapHost']."}", $userLogin, $pass);
 				// if login to imap is successfull then $externalLogin = true;
 				if(!$inbox){
 					// $message = imap_last_error();
@@ -234,27 +260,46 @@
 			echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.open('http://www.cirklo.org/agendo_help.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1000,height=600')\" align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right' />";
+			$extraGet = '';
+			// $action = "onclick=\"showMessage('Resource needs to be specified or user has to be logged on.');\"";
+			// if(isset($_GET['resource'])){
+				// $extraGet = '&simEquip';
+				// if(isset($_GET['date'])){
+					// $date = date('Ymd', strtotime('+1 day', strtotime($_GET['date'])));
+					// $extraGet .= "&date=".$date;
+				// }
+				// $action = "onclick=\"javascript:window.open('../agendo/monitoring.php?resource=".$_GET['resource'].$extraGet."','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
+			// }
+			// else if(isset($_SESSION['user_id'])){
+				// $action = "onclick=\"javascript:window.open('../agendo/monitoring.php?userLogged','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=1024,height=300')\"";
+			// }
+			// echo "<img style='cursor:pointer' width=30px id=group title='group view' src=pics/group.png ".$action." align='right' />";
+			echo "<img style='cursor:pointer' width=30px id=group title='group view' src=pics/group.png onclick=go(this) align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=user title='user area' src=pics/user.png onclick=go(this) align='right' />";
 		echo "</div>";
 	}
 	
 	// Videos div
 	function echoVideosDiv(){
-		echo "<div id=videodiv align='center' style='cursor:pointer;padding:5px;display:none;position:absolute;width:150px;color:#444444;background-color:#FFFFFF;opacity:0.9;'>";
+		// echo "<div id=videodiv align='center' style='cursor:pointer;padding:5px;display:none;position:absolute;width:150px;color:#444444;background-color:#FFFFFF;opacity:0.9;'>";
+		echo "<div id=videodiv align='center' class='dropMenu'>";
 			$sql= "select media_name, media_link, media_description from media order by media_name";
 			$res=dbHelp::query($sql) or die ($sql);
 			$vidWidth = 640;
 			$vidHeight = 480;
 			for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
 				$arr=dbHelp::fetchRowByIndex($res);
-				echo "<a title='".$arr[2]."' onclick=\"javascript:window.open('".$arr[1]."','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=no,width=".$vidWidth.",height=".$vidHeight."')\">".$arr[0]."</a><br>";
+				echo "<div style='padding:2px;'>";
+					echo "<a title='".$arr[2]."' onclick=\"javascript:window.open('".$arr[1]."','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=no,width=".$vidWidth.",height=".$vidHeight."')\">".$arr[0]."</a><br>";
+				echo "</div>";
 			}
 		echo "</div>";		
 	}
 	
 	// Resources div
 	function echoResourcesDiv(){
-		echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
+		// echo "<div id=resourcesdiv align='center' style='padding:10px;display:none;position:absolute;left:540px;color:#444444;background-color:#FFFFFF;opacity:0.9'>\n";
+		echo "<div id=resourcesdiv align='center'  class='dropMenu'>\n";
 			echo "<table>";
 				echo "<tr>";
 					echo "<td>";
@@ -275,14 +320,16 @@
 				echo "<tr>";
 			echo "</table>";
 			
-			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource) order by resourcetype_name";
+			$sql= "select * from resourcetype where resourcetype_id in (select distinct resource_type from resource where resource_status in (1, 3, 4, 5)) order by resourcetype_name";
 			$res=dbHelp::query($sql) or die ($sql);
 			$numRows = dbHelp::numberOfRows($res);
 			if($numRows > 0){
 				echo "<hr>";
 				for ($i=0;$i<$numRows;$i++) {
 					$arr=dbHelp::fetchRowByIndex($res);
-					echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
+					echo "<div style='padding:2px;'>";
+						echo "<a href=index.php?class=" .$arr[0] . ">" . $arr[1] . "</a><br>";
+					echo "</div>";
 				}
 			}
 		echo "</div>";
@@ -296,7 +343,8 @@
 		// end
 		
 		$display = "table";
-		echo "<div id=userdiv align='center' style='display:none;width:auto;position:absolute;color:#444444;background-color:#FFFFFF;opacity:0.9;padding:5px'>";
+		// echo "<div id=userdiv align='center' style='display:none;width:auto;position:absolute;color:#444444;background-color:#FFFFFF;opacity:0.9;padding:5px'>";
+		echo "<div id=userdiv align='center' class='dropMenu'>";
 			echo "<form name=edituser id=edituser method=post>";
 				if(isset($_SESSION['user_id'])){
 					$display = "none";
@@ -450,10 +498,6 @@
 		return true;
 	}
 	
-	function echoThisToJS(){
-		return array(0 => "IRSYSTEMSEPARATOR", 1 => "IRSEPARATOR");
-	}
-	
 	function sendMail($subject, $address, $message, $replyToPerson, $userDbSettings, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
 		require_once("../agendo/alert/class.phpmailer.php");
 		$mail = new PHPMailer();
@@ -520,5 +564,17 @@
 		}
 
 		return $arr;
+	}
+	
+	function cleanValue($value, $extraForbiddenOnes = ""){
+		$forbiddenOnes = ";\/".$extraForbiddenOnes;
+		$value = stripslashes($value);
+		$value = strip_tags($value);
+		$value = preg_replace("/[".$forbiddenOnes."]/",'',$value);
+		return $value;
+	}
+	
+	function convertDate($date, $toFormat){
+		return date($toFormat, strtotime($date));
 	}
 ?>

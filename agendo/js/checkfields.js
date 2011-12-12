@@ -1,3 +1,4 @@
+/*
 function clickit(id,action,table,nrows,user_id, order, page, limit, ninserts) {
     var iChars = "!#$%^&=[]\';{}|\"<>?";
     var iCharsINT = "0123456789";
@@ -92,7 +93,9 @@ function clickit(id,action,table,nrows,user_id, order, page, limit, ninserts) {
         CurForm.submit();
     } 
 }
+*/
 
+/*
 function checkFill(id, action, table, nrows, order, user_id, page, limit, ninserts){
     var changedRows = new Array();
     for(var i = 0; i < document.forms.length; i++){
@@ -142,6 +145,7 @@ function checkFill(id, action, table, nrows, order, user_id, page, limit, ninser
     }
     
 }
+*/
 
 function validate_form(){
     var CurForm = eval("document.application");

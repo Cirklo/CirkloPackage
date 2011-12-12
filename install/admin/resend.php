@@ -47,9 +47,10 @@ $mail->AddReplyTo($configArray['email'], "Calendar administration");
 // $mail->SetFrom($row[3], 'Calendar Admin');
 // $mail->AddReplyTo($row[3],"Calendar Admin");
 
+$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 $body = "Alarm\n\n";
 $body.= date('Y-m-d H:i:s',time())." ".$msg;
-$body.= "\n\nPlease visit the monitoring page http://calendar.igc.gulbenkian.pt/ekrano for further details!";
+$body.= "\n\nPlease visit the monitoring page https://agendo.cirklo.org/".$pathOfIndex[sizeof($pathOfIndex)-2]."/ekrano/ for further details!";
 
 $mail->Subject = "Calendar monitoring system";
 $mail->Body=$body;

@@ -27,11 +27,10 @@ call_user_func($type);
    * returns resource name and id. This is sent between tags that are later (on javascript) separated for creating the dropdown list. It could be done in a much more elegant way
 */
 function resource() {
-    $value=clean_input($_GET['value']);
-    $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type=" . $value);
-    for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
-        // mysql_data_seek($res,$i);
-        $arr=dbHelp::fetchRowByName($res);
+    $value = (int)cleanValue($_GET['value']);
+    // $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type=" . $value);
+    $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type = :0", array($value));
+    while($arr=dbHelp::fetchRowByName($res)){
         echo "<name>" . $arr['resource_name'];
         echo "<value>" . $arr['resource_id'];
     }
@@ -44,9 +43,11 @@ function resource() {
 */
 
 function user() {
-    $value=clean_input($_GET['value']);
-    $sql="select user_login,user_id from ".dbHelp::getSchemaName().".user where user_login like '" . $value . "%'";
-    $res=dbHelp::query($sql) or die ($sql);
+    $value = cleanValue($_GET['value']);
+    // $sql="select user_login, user_id from ".dbHelp::getSchemaName().".user where user_login like '".$value."%'";
+    $sql="select user_login, user_id from ".dbHelp::getSchemaName().".user where user_login like :0";
+    // $res=dbHelp::query($sql) or die ($sql);
+    $res=dbHelp::query($sql, array($value.'%')) or die ($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     echo $arr[0];
     // echo "|" . $arr[1];
@@ -60,41 +61,47 @@ function newpwd(){
     require_once("alertClass.php");
     $alert= new alert;
     $alert->recover($_GET['value']);
-
 }
 
 /**
    * text input autofill for administrating table. 
 */
 
+/*
 function admin() {
-    $value=clean_input($_GET['value']);
-    $tag=clean_input($_GET['tag']);
-    $table=clean_input($_GET['table']);
-    $sql="show fields from $table";
-    $res=dbHelp::query($sql) or die ($sql);
-    // mysql_data_seek($res,0);
+    $value=cleanValue($_GET['value']);
+    $tag=cleanValue($_GET['tag']);
+    $table=cleanValue($_GET['table']);
+	
+    // $sql="show fields from $table";
+    $sql="show fields from ".$table;
+    // $res=dbHelp::query($sql) or die ($sql);
+    $res=dbHelp::query($sql, array($table)) or die ($sql);
     $field1=dbHelp::fetchRowByIndex($res);
-    // mysql_data_seek($res,1);
     $field2=dbHelp::fetchRowByIndex($res);
     
-    $sql="select " . $field2[0] . ",". $field1[0] . " from $table where lower(" . $field2[0] . ") like lower('" . $value . "%')";
+    $sql="select ".$field2[0].", ".$field1[0]." from ".$table." where lower(".$field2[0].") like lower('".$value."%')";
     $res=dbHelp::query($sql) or die ($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     echo $arr[0];
     echo "|" . $arr[1];
 }
+*/
 
 function DisplayUserInfo() {
-    $value=clean_input($_GET['value']);
+    $value=cleanValue($_GET['value']);
     // $sql="select concat(user_firstname, ' ', user_lastname) name,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,date_format(entry_datetime,'%H:%i') s,date_format(date_add(entry_datetime,interval resource_resolution*entry_slots minute),'%H:%i') e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,date_format(entry_datetime,'%H:%i') s,date_format(date_add(entry_datetime,interval resource_resolution*entry_slots minute),'%H:%i') e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
-	$sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
-    $res=dbHelp::query($sqlAux) or die ($sqlAux);
+	// $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
+	// $res=dbHelp::query($sqlAux) or die ($sqlAux);
+    $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id= :0";
+    $res=dbHelp::query($sqlAux, array($value)) or die ($sqlAux);
     $arr=dbHelp::fetchRowByIndex($res);
 	
-    $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
-    $res=dbHelp::query($sql) or die ($sql);
+    // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
+    // $res=dbHelp::query($sql) or die ($sql);
+    $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=:0";
+    $res=dbHelp::query($sql, array($value)) or die ($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     echo "<table>";
     echo "<tr><td>Time: </td><td>" . $arr[8] ."-" .$arr[9] ."</td></tr>";
@@ -112,9 +119,11 @@ function DisplayUserInfo() {
 }
 
 function DisplayEntryInfo() {
-    $entry=clean_input($_GET['entry']);
-    $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=".$entry." and xfields_placement = 1 group by xfields_id, xfields_type";
-    $res=dbHelp::query($sql) or die ($sql);
+    $entry=cleanValue($_GET['entry']);
+    // $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=".$entry." and xfields_placement = 1 group by xfields_id, xfields_type";
+    // $res=dbHelp::query($sql) or die ($sql);
+    $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=:0 and xfields_placement = 1 group by xfields_id, xfields_type";
+    $res=dbHelp::query($sql, array($entry)) or die ($sql);
     
 	while($arr=dbHelp::fetchRowByIndex($res)){
 		if($arr[2] == 2 || $arr[2] == 3)
