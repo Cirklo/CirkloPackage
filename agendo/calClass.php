@@ -80,9 +80,13 @@ class calCell {
         if ($this->EntryStatus==5) $cellbgLight=cal::InUseCellColorOff;
         $cellgrey="#aaaaaa";
         
+			// white-space: nowrap;
+			// text-overflow:ellipses;
 		$baseStyle = "
 			width: 60px;
 			overflow: hidden;
+			padding:0px;
+			margin:0px;
 		";
 
         switch ($slotType){
@@ -107,8 +111,8 @@ class calCell {
 			$addId = " id='".$nlineXweekday."'";
 			// echo "<td align=center lang=". $cellbgLight . " title=" . $this->Entry ." class='entryTd' " . $extra ." rowspan=". $this->NSlots .">". $this->Tag ."</td>\n";        
 		}
-		// echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='".$baseStyle."'>".$this->Tag."</div></td>\n";        
-		echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='overflow: hidden;width: 60px;text-overflow:ellipses;'>".$this->Tag."</div></td>\n";        
+		// echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='overflow: hidden;width: 60px;text-overflow:ellipses;'>".$this->Tag."</div></td>\n";        
+		echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots.">".$this->Tag."</td>\n";        
     }    
 }
 
@@ -215,6 +219,7 @@ class cal extends phpCollection{
     function getDelTolerance() {return $this->DelTolerance;}
     function getPrice() {return $this->Price;}
     function getResourceImage() {return $this->ResourceImage;}
+    function isResp() {return isset($_SESSION['user_id']) && $this->RespId == $_SESSION['user_id'];}
     
     public final static function getConfTolerance() {return self::$ConfTolerance;}
     public final static function getResolution() {return self::$Resolution;}
@@ -368,11 +373,11 @@ class cal extends phpCollection{
 						}
 						// *******************************************
                         $cell->setEntryStatus($arr['entry_status']);
-						
+			
 						// If the action is not a update?
                         if ($this->Update != $cell->getEntry()){
                             //$cell->setTag("<a onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\ onmouseout=\"HideContent('DisplayUserInfo')\" href=weekview.php?resource=" . $this->Resource . "&entry=" . $cell->getEntry(). ">" . $cell->getUser() ."</a><br><a onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\" href=#>" . $cell->getNextUser() ."</a>" );
-                            $cell->setTag("<li style='list-style:none;padding:1px;cursor:pointer;' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getUser() ."<br><li style='list-style:none;cursor:pointer' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getNextUser() ."</li>" );
+                            $cell->setTag("<li style='list-style:none;padding:4px;cursor:pointer;width:60px;overflow:hidden;text-overflow:ellipses;white-space:nowrap;' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getUser() ."<br><li style='list-style:none;cursor:pointer' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getNextUser() ."</li>" );
 							for ($j=0;$j<$cell->getNSlots();$j++){
 								$this->Slot[$nline+$j][$weekday] = 1;
 							}
