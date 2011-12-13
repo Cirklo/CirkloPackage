@@ -70,7 +70,7 @@ if($imResstatus3){ // user confirmation
 		
 		echo "<param name='color' value='#1e4F54'/>";
 		echo "<param name='action' value='checkMac'/>";
-		echo "<param name='mac' value='".$arr[1]."'/>";
+		echo "<param name='mac' value='".$arr['resource_mac']."'/>";
 	echo "</object>";
 	
 	// Checks if the macaddress associated to this resource is 

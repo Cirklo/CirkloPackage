@@ -388,9 +388,11 @@ function update(){
 			// echo "You can't modify this entry. Talk to the person responsible for the equipment.";
 			// exit;
 		// }
+		$delHourLimit = strtotime($datetime) + $perm->getResourceDelHour()*60*60;
+		$dateBackLimit = date("YmdHi", $delHourLimit);
 		if ($delHourLimit > $todaysDate) {
-			$sql="update entry set entry_status = 2 where entry_id=". $entry;
-			$res = dbHelp::query($sql) or die("Entry info not updated!");
+			$sql="update entry set entry_status = 2 where entry_id = :0";
+			$res = dbHelp::query($sql, array($entry)) or die("Entry info not updated!");
 		}
     }
 	//************************************
