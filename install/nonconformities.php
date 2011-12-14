@@ -8,7 +8,7 @@ require_once("../agendo/commonCode.php");
 require_once("../agendo/alertClass.php");
 $alert= new alert;
 $alert->nonconf();
-
+$alert->entriesReminder();
 
 ?>
 
