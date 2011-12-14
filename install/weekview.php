@@ -107,11 +107,11 @@ echo "<hr />";
 
 echo "<table id='legend'>";
 	echo "<tr>";
-		echo "<td bgcolor=". cal::RegCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Confirmed</td>";
-		echo "<td bgcolor=". cal::PreCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>To be confirmed</td>";
-		echo "<td bgcolor=". cal::ErrCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Unconfirmed</td>";
-		echo "<td bgcolor=". cal::MonCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Monitored</td>";
-		echo "<td bgcolor=". cal::InUseCellColorOff . ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>In use</td>";
+		echo "<td bgcolor=".cal::RegCellColorOff.">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Confirmed</td>";
+		echo "<td bgcolor=".cal::PreCellColorOff.">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>To be confirmed</td>";
+		echo "<td bgcolor=".cal::ErrCellColorOff.">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Unconfirmed</td>";
+		echo "<td bgcolor=".cal::MonCellColorOff.">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Monitored</td>";
+		echo "<td bgcolor=".cal::InUseCellColorOff.">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>In use</td>";
 	echo "</tr>";
 echo "</table>";
 
@@ -123,9 +123,6 @@ echo "<p style='text-align:right'><a href=# onclick=\"javascript:d=document.getE
 echo "</div>";
 
 //for displaying calendar
-// $sql = "SELECT mainconfig_institute, mainconfig_shortname, mainconfig_url FROM mainconfig WHERE mainconfig_id = 1";
-// $res = dbHelp::query($sql);
-// $institute = dbHelp::fetchRowByIndex($res);
 $sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='institute' or configParams_name='shortname' or configParams_name='url'";
 $res = dbHelp::query($sql);
 $instituteArray = array();
@@ -430,8 +427,11 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "<tr>";
 							echo "<td colspan=2>";
 							echo "<select id='similarResources' class='similar'>";
+							echo "<option >Bla</option>";
+
 							while($arrSimilar = dbHelp::fetchRowByIndex($resSimilar)){
 								echo "<option value='".$arrSimilar[0]."' onClick='similarResources(this.value);'>".$arrSimilar[1]."</option>";
+								// echo "<option value='".$arrSimilar[0]."' onChange='similarResources(this.value);'>".$arrSimilar[1]."</option>";
 							}
 							echo "</select>";
 							echo "</td>";
@@ -645,7 +645,7 @@ echo "</div>";
 
 
 // for displaying user info
-echo "<div id=DisplayUserInfo style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'></div>";
+echo "<div id=DisplayUserInfo style='display:none;position:absolute;z-index:99;padding:3px;'></div>";
 $sql = "select xfields_type, xfields_label, xfields_name, xfields_id from xfields where xfields_placement = 2 and xfields_resource = ".$resource;
 $res = dbHelp::query($sql);
 //for displaying user confirmation comments

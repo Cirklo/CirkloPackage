@@ -100,12 +100,23 @@ function DisplayUserInfo() {
 	
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
     // $res=dbHelp::query($sql) or die ($sql);
+	$style = "
+		padding:5px;
+		background-color: white;
+		-moz-border-radius: 3px;  /* Firefox */
+		-webkit-border-radius: 3px;  /* Safari, Chrome */
+		border-radius: 3px;  /* CSS3 */
+		-moz-box-shadow: 3px 3px 4px #000;
+		-webkit-box-shadow: 3px 3px 4px #000;
+		box-shadow: 3px 3px 4px #000;
+	";
     $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=:0";
     $res=dbHelp::query($sql, array($value)) or die ($sql);
     $arr=dbHelp::fetchRowByIndex($res);
-    echo "<table>";
+    echo "<table style='".$style."'>";
     echo "<tr><td>Time: </td><td>" . $arr[8] ."-" .$arr[9] ."</td></tr>";
     echo "<tr><td>Name: </td><td>" . $arr[0] . " " . $arr[1] . "</td></tr>";
+	
 	// Only show this if a user is logged
 	if(isset($_SESSION['user_id']) || $_SESSION['user_id']!= ''){
 		echo "<tr><td>Email: </td><td>" . $arr[2] . "</td></tr>";
@@ -115,6 +126,31 @@ function DisplayUserInfo() {
 		echo "<tr><td>Department: </td><td>" . $arr[6] . "</td></tr>";
 		echo "<tr><td>Institute: </td><td>" . $arr[7] . "</td></tr>";
 	}
+	
+	$sql = "
+		select 
+			user_firstname
+			,user_lastname 
+		from 
+			databasename.user
+			,entry
+			,(select entry_datetime as entryDate, resource_id as res from entry, resource where entry_id = :0) as entryDates
+		where 
+			entry_user=user_id 
+			and entry_resource=res 
+			and entry_datetime = entryDate 
+			and entry_status = 4 
+		order by entry_id
+	";
+    $res=dbHelp::query($sql, array($value)) or die ($sql);
+	$arr=dbHelp::fetchRowByIndex($res);
+	if($arr[0] != null){
+		// $textColor = "#afdde5";
+		echo "<tr><td colspan=2><hr></hr></td></tr>";
+		$textColor = "#63a3ae";
+		echo "<tr><td style='color:".$textColor.";'>Next user: </td><td style='color:".$textColor.";'>" . $arr[0] . " " . $arr[1] . "</td></tr>";
+	}
+
     echo "</table>";
 }
 

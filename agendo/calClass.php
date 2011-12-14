@@ -83,7 +83,7 @@ class calCell {
 			// white-space: nowrap;
 			// text-overflow:ellipses;
 		$baseStyle = "
-			width: 60px;
+			width: 70px;
 			overflow: hidden;
 			padding:0px;
 			margin:0px;
@@ -376,8 +376,23 @@ class cal extends phpCollection{
 			
 						// If the action is not a update?
                         if ($this->Update != $cell->getEntry()){
+							$listStyle = "	
+								list-style-type:none;
+								cursor:pointer;
+								width:60px;
+								overflow:hidden;
+								text-overflow:ellipses;
+								white-space:nowrap;
+								display:block;
+								padding:5px;
+							";
+							$extraList  = "";
+							// if($cell->getNSlots() > 1 && $cell->getNextEntry() != null){
+								// $extraList = "<br><li style='".$listStyle."' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getNextUser() ."</li>";
+							// }
+							
                             //$cell->setTag("<a onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\ onmouseout=\"HideContent('DisplayUserInfo')\" href=weekview.php?resource=" . $this->Resource . "&entry=" . $cell->getEntry(). ">" . $cell->getUser() ."</a><br><a onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\" href=#>" . $cell->getNextUser() ."</a>" );
-                            $cell->setTag("<li style='list-style:none;padding:4px;cursor:pointer;width:60px;overflow:hidden;text-overflow:ellipses;white-space:nowrap;' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getUser() ."<br><li style='list-style:none;cursor:pointer' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getNextEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getNextUser() ."</li>" );
+                            $cell->setTag("<li style='".$listStyle."' onmouseover=\"ShowContent('DisplayUserInfo'," . $cell->getEntry() . ")\" onmouseout=\"HideContent('DisplayUserInfo')\">" . $cell->getUser() .$extraList);
 							for ($j=0;$j<$cell->getNSlots();$j++){
 								$this->Slot[$nline+$j][$weekday] = 1;
 							}
