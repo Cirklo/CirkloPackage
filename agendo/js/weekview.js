@@ -714,9 +714,9 @@ function checkfield(field) {
     return false;
 }
 
-function similarResources(value){
-	window.location="./weekview.php?resource=" + value;
-}
+// function similarResources(value){
+	// window.location="./weekview.php?resource=" + value;
+// }
 
 function calendarReduceRowSpan(id){
 	if((element = document.getElementById(id)) != null){

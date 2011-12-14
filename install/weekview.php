@@ -406,43 +406,35 @@ echo "<table id='master' style='margin:auto' width=750>";
 					}
 					
 					// similar stuff
-					$sqlSimilar = "select similarresources_similar, resource_name from resource, (select similarresources_similar from similarresources where similarresources_resource = ".$resource.") as similars where resource_id = similarresources_similar";
-					$resSimilar = dbHelp::query($sqlSimilar);
-					if(dbHelp::numberOfRows($resSimilar)>0){
-						echo "<tr>";
-							$extraGet = "";
-							if(isset($_GET['date'])){
-								$extraGet = "&date=".$_GET['date'];
-							}
-							// echo "<td colspan=2><a href='../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip' style='color:#f6961a'>Similar Resources</></td>";
-							// echo "<td colspan=2><a style='color:#f6961a;cursor:pointer;' onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=900,height=300')\">Similar Resources</></td>";
-							// echo "<div style='border:10px solid white;'>";
-								// echo "<a href='../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip' target='_self'>bla</a>";
-								// print file_get_contents("../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip");
-							// echo "</div>";
-							// echo "<td colspan=2><a style='color:#f6961a;cursor:pointer;' onclick=\"javascript:window.open('../agendo/monitoring.php?res=".$resource.$extraGet."&simEquip','_blank','toolbars=no,directories=no,status=no,menubar=no,location=no,resizable=yes,scrollbars=no,width=900,height=300')\">Similar Resources</></td>";
-							echo "<td colspan=2>Similar Resources</td>";
-						echo "</tr>";
+					// $sqlSimilar = "select similarresources_similar, resource_name from resource, (select similarresources_similar from similarresources where similarresources_resource = ".$resource.") as similars where resource_id = similarresources_similar";
+					// $resSimilar = dbHelp::query($sqlSimilar);
+					// if(dbHelp::numberOfRows($resSimilar)>0){
+						// echo "<tr>";
+							// $extraGet = "";
+							// if(isset($_GET['date'])){
+								// $extraGet = "&date=".$_GET['date'];
+							// }
+							// echo "<td colspan=2>Similar Resources</td>";
+						// echo "</tr>";
 					
-						echo "<tr>";
-							echo "<td colspan=2>";
-							echo "<select id='similarResources' class='similar'>";
-							echo "<option >Bla</option>";
+						// echo "<tr>";
+							// echo "<td colspan=2>";
+							// echo "<select id='similarResources' class='similar' onChange=window.location='./weekview.php?resource='+this.value>";
+							// echo "<option value='".$resource."' >This Resource</option>";
 
-							while($arrSimilar = dbHelp::fetchRowByIndex($resSimilar)){
-								echo "<option value='".$arrSimilar[0]."' onClick='similarResources(this.value);'>".$arrSimilar[1]."</option>";
-								// echo "<option value='".$arrSimilar[0]."' onChange='similarResources(this.value);'>".$arrSimilar[1]."</option>";
-							}
-							echo "</select>";
-							echo "</td>";
-						echo "</tr>";
+							// while($arrSimilar = dbHelp::fetchRowByIndex($resSimilar)){
+								// echo "<option value='".$arrSimilar[0]."' >".$arrSimilar[1]."</option>";
+							// }
+							// echo "</select>";
+							// echo "</td>";
+						// echo "</tr>";
 
-						echo "<tr>";
-							echo "<td colspan=2>";
-							echo "<hr>";
-							echo "</td>";
-						echo "</tr>";
-					}
+						// echo "<tr>";
+							// echo "<td colspan=2>";
+							// echo "<hr>";
+							// echo "</td>";
+						// echo "</tr>";
+					// }
 					// /similar stuff
 					
 				
