@@ -581,7 +581,7 @@ function getMondayTimeFromDate($date){
 	// int number corresponding to $date's  day of the week
 	$weekDay = date('N', $dateTime);
 	// gets $date's monday time
-	$date = $dateTime - ($weekDay - 2)*24*60*60;
+	$date = $dateTime - ($weekDay)*24*60*60;
 	return $date;
 }
 	
