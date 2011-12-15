@@ -542,7 +542,7 @@ function entriesReminder(){
 				// $tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
 				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
 				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME']."weekview.php?resource=".$row['resource_id']."&date=".getMondayTimeFromDate(date('Ymd')).")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
-				$monday = date("Ymd",$this->getMondayTimeFromDate('20111127'));
+				$monday = date("Ymd",$this->getMondayTimeFromDate(date('ymd', $row['entry_datetime'])));
 				$protocol = "http";
 				if(!empty($_SERVER['HTTPS'])){
 					$protocol = "https";
