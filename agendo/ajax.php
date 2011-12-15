@@ -136,11 +136,11 @@ function DisplayUserInfo() {
 			,entry
 			,(select entry_datetime as entryDate, resource_id as res from entry, resource where entry_id = :0) as entryDates
 		where 
-			entry_user=user_id 
-			and entry_resource=res 
+			entry_user = user_id 
+			and entry_resource = res 
 			and entry_datetime = entryDate 
 			and entry_status = 4 
-		order by entry_id
+		order by entry_id asc
 	";
     $res=dbHelp::query($sql, array($value)) or die ($sql);
 	$arr=dbHelp::fetchRowByIndex($res);
