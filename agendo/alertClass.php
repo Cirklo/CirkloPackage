@@ -577,7 +577,7 @@ function entriesReminder(){
 }
 
 function getMondayTimeFromDate($date){
-	$dateTime = strtotime($date);
+	$dateTime = strtotime($date) - 24 * 60* 60;
 	// int number corresponding to $date's  day of the week
 	$weekDay = date('N', $dateTime);
 	// gets $date's monday time
