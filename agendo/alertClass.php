@@ -547,7 +547,12 @@ function entriesReminder(){
 				if(!empty($_SERVER['HTTPS'])){
 					$protocol = "https";
 				}
-				$urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".substr($_SESSION['path'], 3)."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
+				$partialPath = "";
+				$uriArray = explode('\\',str_replace('/', '\\', $_SERVER['REQUEST_URI']));
+				for($i=0;$i<sizeOf($uriArray)-1;$i++){
+					$partialPath .= $uriArray[$i];
+				}
+				$urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".$partialPath."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
 				$tempMsg .= "Resource '".$tempResource."'".$urlPath."\n";
 			}
 			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
