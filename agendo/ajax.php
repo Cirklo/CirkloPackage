@@ -132,7 +132,7 @@ function DisplayUserInfo() {
 			user_firstname
 			,user_lastname 
 		from 
-			databasename.user
+			".dbHelp::getSchemaName().".user
 			,entry
 			,(select entry_datetime as entryDate, resource_id as res from entry, resource where entry_id = :0) as entryDates
 		where 
