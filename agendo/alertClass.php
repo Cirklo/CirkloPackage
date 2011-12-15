@@ -483,6 +483,7 @@ function entriesReminder(){
 	$row = dbHelp::fetchRowByIndex($prep);
 				// AND date(entry_datetime)=".date('Y-m-d')." 
 				// AND date(entry_datetime)='2011-11-27' 
+	// midnight is 00
 	if(isset($row) && $row[0] == date('H')){
 	// if(isset($row) && $row[0] == 5){
 		$sql = "
@@ -500,7 +501,7 @@ function entriesReminder(){
 			WHERE
 				entry_user=user_id 
 				AND resource_id=entry_resource 
-				AND date(entry_datetime)=".date('Y-m-d')." 
+				AND date(entry_datetime)='".date('Y-m-d')."' 
 				AND entry_status IN (1,2) 
 			ORDER BY 
 				user_email
