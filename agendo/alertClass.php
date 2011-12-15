@@ -577,11 +577,11 @@ function entriesReminder(){
 }
 
 function getMondayTimeFromDate($date){
-	$dateTime = strtotime($date) - 24 * 60* 60;
+	$dateTime = strtotime($date);
 	// int number corresponding to $date's  day of the week
 	$weekDay = date('N', $dateTime);
 	// gets $date's monday time
-	$date = $dateTime - ($weekDay - 1)*24*60*60;
+	$date = $dateTime - ($weekDay - 2)*24*60*60;
 	return $date;
 }
 	
