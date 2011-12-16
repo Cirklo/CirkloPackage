@@ -6,7 +6,7 @@
   @version 1.0
   @Code used in lots of places and all joined in an artistic way to avoid copy pasting same methods in different places
 */
-	// error_reporting (E_ERROR | E_WARNING | E_PARSE);
+	error_reporting (E_ERROR | E_WARNING | E_PARSE);
 	session_start();
 	// session_destroy();
 	require_once("__dbHelp.php");
