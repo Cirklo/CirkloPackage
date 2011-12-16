@@ -543,16 +543,18 @@ function entriesReminder(){
 				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
 				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME']."weekview.php?resource=".$row['resource_id']."&date=".getMondayTimeFromDate(date('Ymd')).")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
 				$monday = date("Ymd",$this->getMondayTimeFromDate(date('ymd')));
-				$protocol = "http";
-				if(!empty($_SERVER['HTTPS'])){
-					$protocol = "https";
-				}
-				$partialPath = "";
-				$uriArray = explode('\\',str_replace('/', '\\', $_SERVER['REQUEST_URI']));
-				for($i=0;$i<sizeOf($uriArray)-1;$i++){
-					$partialPath .= $uriArray[$i];
-				}
-				$urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".$partialPath."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
+				// doesnt work when its executed by a cronjob (loses the server info, request would have to be done by the client for it to work)
+				// $protocol = "http";
+				// if(!empty($_SERVER['HTTPS'])){
+					// $protocol = "https";
+				// }
+				// $partialPath = "";
+				// $uriArray = explode('\\',str_replace('/', '\\', $_SERVER['REQUEST_URI']));
+				// for($i=0;$i<sizeOf($uriArray)-1;$i++){
+					// $partialPath .= $uriArray[$i];
+				// }
+				// $urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".$partialPath."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
+				$urlPath = " (https://agendo.cirklo.org/".substr($_SESSION['path'],3)."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
 				$tempMsg .= "Resource '".$tempResource."'".$urlPath."\n";
 			}
 			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
