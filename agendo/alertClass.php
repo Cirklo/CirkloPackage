@@ -542,7 +542,7 @@ function entriesReminder(){
 				// $tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
 				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
 				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME']."weekview.php?resource=".$row['resource_id']."&date=".getMondayTimeFromDate(date('Ymd')).")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
-				$monday = date("Ymd",$this->getMondayTimeFromDate(date('ymd')));
+				$monday = date("Ymd",$this->getMondayFromDate(date('ymd')));
 				// doesnt work when its executed by a cronjob (loses the server info, request would have to be done by the client for it to work)
 				// $protocol = "http";
 				// if(!empty($_SERVER['HTTPS'])){
@@ -578,7 +578,7 @@ function entriesReminder(){
 	}
 }
 
-function getMondayTimeFromDate($date){
+function getMondayFromDate($date){
 	$dateTime = strtotime($date);
 	// int number corresponding to $date's  day of the week
 	$weekDay = date('N', $dateTime);
