@@ -173,7 +173,7 @@ function addAhead($date, $slots)     {
 //if there is the possibility to add an entry back in time
 // function addBack($date, $useDelModifier = false){
 function addBack($entryDate, $useDelModifier = false){
-    if (substr($this->Permission,1,1)) {
+    if (substr($this->Permission,1,1) || $this->WasAdmin) {
         return true;
     }
 	
@@ -181,7 +181,6 @@ function addBack($entryDate, $useDelModifier = false){
 	if($useDelModifier){
 		// $date = date("YmdHi", strtotime($date) + $this->getResourceDelHour()*60*60);
 		$date = time() + $this->getResourceDelHour()*60*60;
-	}
 	// else{
 		// $date = date("YmdHi", strtotime($date) + $this->Resolution*60);
 	// }
@@ -192,10 +191,15 @@ function addBack($entryDate, $useDelModifier = false){
 	// }
 	
 	// wtf($this->getResourceDelHour() ."--". date("Y/m/d->H:i",$date) ."--". date("Y/m/d->H:i",$entryDate));
-    if (
-		$this->getResourceDelHour() >= 0 && ($entryDate > $date || time() > $entryDate + $this->Resolution*60)
-		|| ($this->getResourceDelHour() < 0 && $date > $entryDate)
-		) {
+		if (
+			$this->getResourceDelHour() >= 0 && ($entryDate > $date || time() > $entryDate + $this->Resolution*60)
+			|| ($this->getResourceDelHour() < 0 && $date > $entryDate)
+			) {
+			$this->warning='No permission to remove selected entry(ies)';
+			return false;
+		}
+	}
+	elseif(time() > $entryDate + $this->Resolution*60) {
         $this->warning='No permission to remove selected entry(ies)';
         return false;
 	}

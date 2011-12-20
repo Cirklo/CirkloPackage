@@ -94,7 +94,7 @@ function add(){
     if (!$perm->addRegular()) {echo $perm->getWarning();exit;};
     if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();exit;}
     // if (!$perm->addBack($datetime)) {echo $perm->getWarning();exit;}
-    if (!$perm->addBack($datetime, true)) {echo "Not allowed to add an entry for this hour";exit;}
+    if (!$perm->addBack($datetime)) {echo "Not allowed to add an entry for this hour";exit;}
     $EntryStatus=$perm->getEntryStatus();
     if (!$perm->getEntryStatus()) {echo $perm->getWarning();exit;}
     
