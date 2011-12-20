@@ -192,7 +192,7 @@ function addBack($entryDate, $useDelModifier = false){
 	
 	// wtf($this->getResourceDelHour() ."--". date("Y/m/d->H:i",$date) ."--". date("Y/m/d->H:i",$entryDate));
 		if (
-			$this->getResourceDelHour() >= 0 && ($entryDate > $date || time() > $entryDate + $this->Resolution*60)
+			$this->getResourceDelHour() >= 0 && ($date > $entryDate || time() > $entryDate + $this->Resolution*60)
 			|| ($this->getResourceDelHour() < 0 && $date > $entryDate)
 			) {
 			$this->warning='No permission to remove selected entry(ies)';
