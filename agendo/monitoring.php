@@ -14,10 +14,10 @@
 	}
 	
 	if(isset($_GET['date'])){
-		$date = date('Ymd', strtotime($_GET['date']));
-		if(!isset($_GET['gimmeGroupViewData'])){
+		// $date = date('Ymd', strtotime($_GET['date']));
+		// if(!isset($_GET['gimmeGroupViewData'])){
 			$date = date('Ymd', strtotime(" +1 days", strtotime($_GET['date'])));
-		}
+		// }
 	}
 	else{
 		$date = date('Ymd');
