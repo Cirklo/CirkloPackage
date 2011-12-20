@@ -94,7 +94,7 @@ function add(){
     if (!$perm->addRegular()) {echo $perm->getWarning();exit;};
     if (!$perm->addAhead($datetime, $slots)) {echo $perm->getWarning();exit;}
     // if (!$perm->addBack($datetime)) {echo $perm->getWarning();exit;}
-    if (!$perm->addBack($datetime)) {echo "Not allowed to add an entry for this hour";exit;}
+    if (!$perm->addBack($datetime, true)) {echo "Not allowed to add an entry for this hour";exit;}
     $EntryStatus=$perm->getEntryStatus();
     if (!$perm->getEntryStatus()) {echo $perm->getWarning();exit;}
     
@@ -239,7 +239,7 @@ function del(){
 	// $dateBackLimit = date("YmdHi", $delHourLimit);
     // if (!$perm->addBack($dateBackLimit, true)){
     if (!$perm->addBack($arr[3], true)){
-        echo "No permission to delete selected entry(ies)";
+        echo $perm->getWarning();
 		return;
 	}
 	$extra = "";
@@ -356,7 +356,7 @@ function update(){
 	// $entryDate = date("YmdHi", strtotime($arrdt[0]) + $perm->getResourceDelHour()*60*60);
     // if (!$perm->addBack($entryDate)) {
     if (!$perm->addBack($arrdt[0], true)) {
-		echo "You cannot remove entries from the past";
+		echo $perm->getWarning();
 		return;
 	}
 	// **********************************

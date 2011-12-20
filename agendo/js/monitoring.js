@@ -46,6 +46,7 @@ function getTableData(){
 			url += "&equipType";
 		}
 	}
+
 	url += "&date=" + date;
 	$.get(url, 
 		function(serverData){

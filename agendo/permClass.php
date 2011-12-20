@@ -171,23 +171,31 @@ function addAhead($date, $slots)     {
 }
 
 //if there is the possibility to add an entry back in time
-function addBack($date, $useDelModifier = false){
+// function addBack($date, $useDelModifier = false){
+function addBack($entryDate, $useDelModifier = false){
     if (substr($this->Permission,1,1)) {
         return true;
     }
 	
+	$entryDate = strtotime($entryDate);
 	if($useDelModifier){
-		$date = date("YmdHi", strtotime($date) + (-1)*$this->getResourceDelHour()*60*60);
+		// $date = date("YmdHi", strtotime($date) + $this->getResourceDelHour()*60*60);
+		$date = time() + $this->getResourceDelHour()*60*60;
 	}
-	else{
-		$date = date("YmdHi", strtotime($date) + $this->Resolution*60);
-	}
-	
+	// else{
+		// $date = date("YmdHi", strtotime($date) + $this->Resolution*60);
+	// }
 	// $datePlusOneSlot = date("YmdHi", strtotime($date) + $this->Resolution*60);
     // if (date("YmdHi")>$date) {
-	// allows to book an entry in a slot that is "occuring"
-    if (date("YmdHi") > $date) {
-        // $this->warning='You cannot add entries in the past';
+        // $this->warning='No permission to remove selected entry(ies)';
+        // return false;
+	// }
+	
+	// wtf($this->getResourceDelHour() ."--". date("Y/m/d->H:i",$date) ."--". date("Y/m/d->H:i",$entryDate));
+    if (
+		$this->getResourceDelHour() >= 0 && ($entryDate > $date || time() > $entryDate + $this->Resolution*60)
+		|| ($this->getResourceDelHour() < 0 && $date > $entryDate)
+		) {
         $this->warning='No permission to remove selected entry(ies)';
         return false;
 	}

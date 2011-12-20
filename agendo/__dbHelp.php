@@ -26,9 +26,6 @@
 				// Beware that w in MySQL is (0..6) and D in PostGre is (1..7)
 				self::$dateHash = array("i" => "MI", "H" => "HH24", "h" => "HH12", "d" => "DD", "w" => "ID", "m" => "MM", "M" => "Month", "Y" => "YYYY");
 				self::setTimezone();
-	// $date = new DateTime();
-	// $tz = $date->getTimezone();
-	// echo($tz->getName());
 			}
 			return self::$connect;
 		}
