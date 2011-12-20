@@ -204,7 +204,7 @@
 					$htmlToSend .= "<td class='groupViewTd'>";
 						$htmlToSend .= "<div class='resourcesNames'>";
 							$htmlToSend .= "<img class='picLinks' src='".$_SESSION['path']."/pics/".$rowPic['pics_path']."'/>";
-							$htmlToSend .= "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 days", $mondayTime))."\")' >";
+							$htmlToSend .= "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 day", $mondayTime))."\")' >";
 								$htmlToSend .= $row['resource_name'];
 							$htmlToSend .= "</a>";
 						$htmlToSend .= "</div>";
