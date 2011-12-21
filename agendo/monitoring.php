@@ -78,6 +78,7 @@
 			echo "<div id='labelsDiv' class='checkLabel'>";
 				echo "<a class='groupViewA' style='font-size:15px;'>Filter by: </a>";
 				labelCheckText('similarCheck', 'simEquip', 'Similar', true, 'Shows similar resources');
+				// labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
 				labelCheckText('equipTypeCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
 				if(isset($user)){
 					labelCheckText('userCheck', 'userLogged', 'User', userLogged, 'Shows resources used by the currently logged user');
@@ -204,7 +205,7 @@
 					$htmlToSend .= "<td class='groupViewTd'>";
 						$htmlToSend .= "<div class='resourcesNames'>";
 							$htmlToSend .= "<img class='picLinks' src='".$_SESSION['path']."/pics/".$rowPic['pics_path']."'/>";
-							$htmlToSend .= "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 day", $mondayTime))."\")' >";
+							$htmlToSend .= "<a class='fakeLink' title='".$row['resource_name']."' onclick='changeParentWindow(".$row['resource_id'].",\"".date('Ymd', strtotime(" -1 days", $mondayTime))."\")' >";
 								$htmlToSend .= $row['resource_name'];
 							$htmlToSend .= "</a>";
 						$htmlToSend .= "</div>";
@@ -213,12 +214,13 @@
 					$endWidth = (endTime - $row['resource_stoptime']) * slotsPerHour;
 					// each day of the week
 					for($i=0; $i<7; $i++){
-						$timeToAdd = $i*24*60*60;
+						// $timeToAdd = $i*24*60*60;
 						$htmlToSend .= "<td id='".$i.".".$row['resource_id']."' class='usage'>";
 							// creates the "startOrEndBar" that indicates the resource's starttime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
 							
-							makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], ($mondayTime + $timeToAdd), !$resource);
+							// makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], ($mondayTime + $timeToAdd), !$resource);
+							makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], strtotime(" +".$i." days", $mondayTime), !$resource);
 							
 							// creates the "startOrEndBar" that indicates the resource's stoptime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$endWidth."px;background-color:".startOrEndColor."' title='Resource scheduling ends at: ".$row['resource_stoptime'].":00'></div>";
