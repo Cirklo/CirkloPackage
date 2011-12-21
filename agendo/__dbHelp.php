@@ -14,9 +14,11 @@
 		private static $dateHash;
 		private static $instance;
 
+		// no static contructors on PHP (WHY YOU NO STATIC CONSTRUCTORS?!?)
 		private function __construct(){
-			$connect = new dbConnection();
-			$schema = $connect->getSchemaName();
+			// $connect = new dbConnection();
+			// $schema = $connect->getSchemaName();
+			self::getConnect();
 		}
 		
 		public static function getConnect(){
@@ -232,4 +234,6 @@
 			// return $resultMsg;
 		}
 	}
+	// Fix for the lack of statick contructors
+	dbHelp::getConnect();
 ?>

@@ -59,6 +59,9 @@
 	$notConfirmedName = 'Not Confirmed';
 	$notConfirmedColor = '#f39ea8';
 	
+	// $sql = "select now()";
+	// dbHelp::query($sql);
+	
 	$htmlToSend = "";
 	$mondayTime = getMondayTimeFromDate($date);
 	if(isset($_GET['gimmeGroupViewData'])){ 
@@ -78,7 +81,6 @@
 			echo "<div id='labelsDiv' class='checkLabel'>";
 				echo "<a class='groupViewA' style='font-size:15px;'>Filter by: </a>";
 				labelCheckText('similarCheck', 'simEquip', 'Similar', true, 'Shows similar resources');
-				// labelCheckText('similarCheck', 'simEquip', 'Similar', simEquip, 'Shows similar resources');
 				labelCheckText('equipTypeCheck', 'equipType', 'Type', equipType, 'Shows resources of the same type');
 				if(isset($user)){
 					labelCheckText('userCheck', 'userLogged', 'User', userLogged, 'Shows resources used by the currently logged user');
@@ -171,31 +173,41 @@
 		}
 
 		if(simEquip){
-			$fromSimSql = ",similarresources";
-			$whereSql = "similarresources_resource = ".$resource." and resource_id = similarresources_similar or resource_id = ".$resource;
-			if(userLogged){
-				$whereSql = "(similarresources_resource = ".$resource." and resource_id = similarresources_similar and resource_id = residuser or resource_id = ".$resource." and residuser = resource_id)";
+			$sql = 
+				"select distinct
+					similarresources_id
+				from
+					similarresources
+			";
+			$prep = dbHelp::query($sql);
+			if(dbHelp::numberOfRows($prep) > 0){
+				$fromSimSql = ",similarresources";
+				$whereSql = "similarresources_resource = ".$resource." and resource_id = similarresources_similar or resource_id = ".$resource;
+				if(userLogged){
+					$whereSql = "(similarresources_resource = ".$resource." and resource_id = similarresources_similar and resource_id = residuser or resource_id = ".$resource." and residuser = resource_id)";
+				}
 			}
 		}
 
-		$sql = "select distinct
-			resource_id
-			,resource_name
-			,resource_starttime
-			,resource_stoptime
-		from
-			resource
-			".$fromType." 
-			".$fromUser." 
-			".$fromSimSql." 
-		where
-			".$whereSql." 
-			".$whereTypeSql." 
-			and resource_status not in (0, 2)
-		order by
-			resource_name
+		$sql = "
+			select distinct
+				resource_id
+				,resource_name
+				,resource_starttime
+				,resource_stoptime
+			from
+				resource
+				".$fromType." 
+				".$fromUser." 
+				".$fromSimSql." 
+			where
+				".$whereSql." 
+				".$whereTypeSql." 
+				and resource_status not in (0, 2)
+			order by
+				resource_name
 		";
-
+		
 		$prep = dbHelp::query($sql);
 		if(dbHelp::numberOfRows($prep) > 0){
 			while($row = dbHelp::fetchRowByName($prep)){
@@ -219,7 +231,7 @@
 						$htmlToSend .= "<td id='".$i.".".$row['resource_id']."' class='usage'>";
 							// creates the "startOrEndBar" that indicates the resource's starttime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
-							
+
 							// makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], ($mondayTime + $timeToAdd), !$resource);
 							makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], strtotime(" +".$i." days", $mondayTime));
 							
@@ -265,7 +277,7 @@
 		where
 			entry_resource = ".$resource."
 			and resource_id = entry_resource
-			and entry_datetime like '".date('Y-m-d', $timeOfWeek)."%'
+			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
 			and resource_status in (1, 3, 4, 5)
 			and entry_user = user_id
@@ -356,7 +368,8 @@
 		// int number corresponding to $date's  day of the week
 		$weekDay = date('N', $dateTime);
 		// gets $date's monday time
-		$date = $dateTime - ($weekDay - 1)*24*60*60;
+		// $date = $dateTime - ($weekDay - 1)*24*60*60;
+		$date = strtotime("- ".($weekDay - 1)." days", $dateTime);
 		return $date;
 	}
 	
