@@ -138,9 +138,10 @@
 			// each day of the week
 			$weekDayWidth = (endTime-startTime)*slotsPerHour;
 			for($i=0; $i<7; $i++){
-				$timeToAdd = $i*24*60*60;
+				// $timeToAdd = $i*24*60*60;
 				$htmlToSend .= "<td class ='weekdayTd' style='min-width: ".$weekDayWidth.";' onclick='scaleMe(".($i+1).")'>";
-					$dayTime = $mondayTime + $timeToAdd;
+					// $dayTime = $mondayTime + $timeToAdd;
+					$dayTime = strtotime(" +".$i." days", $mondayTime);
 					$weekdayClass = "weekday";
 					if(date('Ymd', $dayTime) == date('Ymd')){
 						$weekdayClass = "weekdayRed";
@@ -220,7 +221,7 @@
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$startWidth."px;background-color:".startOrEndColor."' title='Resource scheduling starts at: ".$row['resource_starttime'].":00'></div>";
 							
 							// makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], ($mondayTime + $timeToAdd), !$resource);
-							makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], strtotime(" +".$i." days", $mondayTime), !$resource);
+							makeUsageDivs($row['resource_starttime'], $row['resource_stoptime'], $row['resource_id'], strtotime(" +".$i." days", $mondayTime));
 							
 							// creates the "startOrEndBar" that indicates the resource's stoptime
 							$htmlToSend .= "<div class='usageDataShow' style='width:".$endWidth."px;background-color:".startOrEndColor."' title='Resource scheduling ends at: ".$row['resource_stoptime'].":00'></div>";
@@ -264,7 +265,7 @@
 		where
 			entry_resource = ".$resource."
 			and resource_id = entry_resource
-			and entry_datetime like '".date("Y-m-d", $timeOfWeek)."%'
+			and entry_datetime like '".date('Y-m-d', $timeOfWeek)."%'
 			and entry_status in (1,2,4,5)
 			and resource_status in (1, 3, 4, 5)
 			and entry_user = user_id
