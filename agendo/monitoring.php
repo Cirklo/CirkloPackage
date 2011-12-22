@@ -24,7 +24,8 @@
 	}
 	
 	define('simEquip', isset($_GET['simEquip']));
-	define('equipType', isset($_GET['equipType']));
+	// define('equipType', isset($_GET['equipType']));
+	define('equipType', isset($_GET['equipType']) || isset($_GET['class']));
 	define('userLogged', ($userChecked && isset($_SESSION['user_id'])));
 	
 	if(!isset($_SESSION['user_id']) && !isset($_GET['resource'])){
@@ -74,6 +75,10 @@
 	echo "<script type='text/javascript' src='../agendo/js/monitoring.js'></script>";
 	echo "<link href='../agendo/css/monitoring.css' rel='stylesheet' type='text/css' />";
 	echo  "<script type='text/javascript'>setResourceAndDate('".$date."', '".$resource."');</script>";
+	
+	if(isset($_GET['class'])){
+		echo  "<script type='text/javascript'>setClass(".$_GET['class'].");</script>";
+	}
 	
 	echo "<div id='groupdiv' class='dropMenu' style='text-align:center;'>";
 		echo "<a style='text-align:center;color:#1E4F54;font-size:15px;'>Resource Multiview</a>";
@@ -160,10 +165,16 @@
 				$modifier = "";
 				$whereSql = "";
 			}
-			$sql = "select resource_type as restype from resource where resource_id = ".$resource;
-			$prep = dbHelp::query($sql);
-			$typeArray = dbHelp::fetchRowByIndex($prep);
-			$whereTypeSql = $modifier."resource_type = ".$typeArray[0]; 
+			
+			if(!isset($_GET['class'])){
+				$sql = "select resource_type as restype from resource where resource_id = ".$resource;
+				$prep = dbHelp::query($sql);
+				$typeArray = dbHelp::fetchRowByIndex($prep);
+				$whereTypeSql = $modifier."resource_type = ".$typeArray[0]; 
+			}
+			else{
+				$whereTypeSql = $modifier."resource_type = ".(int)$_GET['class'];
+			}
 		}
 	
 		$fromUser = '';
@@ -368,9 +379,10 @@
 		// int number corresponding to $date's  day of the week
 		$weekDay = date('N', $dateTime);
 		// gets $date's monday time
-		// $date = $dateTime - ($weekDay - 1)*24*60*60;
 		$date = strtotime("- ".($weekDay - 1)." days", $dateTime);
 		return $date;
+		// does not work when $date is a monday
+		// return strtotime('last monday', strtotime($date));
 	}
 	
 	// returns the number of slots from the starttime to the time given

@@ -32,8 +32,17 @@ function changeToDate(zeeDate){
 	getTableData();
 }
 
+var type = null;
+function setClass(newType){
+	type = newType;
+}
+
 function getTableData(){
 	url = "../agendo/monitoring.php?gimmeGroupViewData";
+	if(type != null){
+		url += "&class=" + type;
+	}
+		
 	if($('#labelsDiv').length > 0){
 		if($('#userCheck').attr('checked')){
 			url += "&userLogged";
