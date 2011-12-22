@@ -76,7 +76,7 @@
 	echo "<link href='../agendo/css/monitoring.css' rel='stylesheet' type='text/css' />";
 	echo  "<script type='text/javascript'>setResourceAndDate('".$date."', '".$resource."');</script>";
 	
-	if(isset($_GET['class'])){
+	if(isset($_GET['class']) && $_GET['class'] != 0){
 		echo  "<script type='text/javascript'>setClass(".$_GET['class'].");</script>";
 	}
 	
