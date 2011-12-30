@@ -379,11 +379,13 @@
 			if(!file_put_contents($path."/".$filename, $fileData) || !copy(($filename = 'indexDatumo.php'), $path."/index.php") || !copy(($filename = 'nonconformities.php'), $path."/nonconformities.php")){
 				throw new Exception("Couldn't create the ".$filename." file in '".$path."'.");
 			}
-			require_once("../agendo/commonCode.php");
 			
 			$arrVersion = noHtconnectFetchRows("select version()", $dbEngine, $informationSchemaName, $dbHost, $dbUser, $dbPass);
 			$arrDB = noHtconnectFetchRows("CREATE DATABASE ".$dbName, $dbEngine, $informationSchemaName, $dbHost, $dbUser, $dbPass);
 			$mysqlVersion = "5";
+
+			require_once("../agendo/commonCode.php");
+			
 			if(version_compare($arrVersion[0], $mysqlVersion, '<')){ // Checks if the current mysql version is a minimum of $mysqlVersion
 				throw new Exception("You need at least Mysql ".$mysqlVersion." to proceed.");
 			}
