@@ -61,32 +61,39 @@ var xmlhttp,url;
 }
 
 function ajaxRecoverPWD() {
-var xmlhttp,url;
-obj=document.getElementById('user_idm');
-    if (obj.value=='') return;
-    if (window.XMLHttpRequest){ 
-        xmlhttp=new XMLHttpRequest();
-    } else {
-        alert("Your browser does not support XMLHTTP!");
-        exit;
-    }
+// var xmlhttp,url;
+	obj=document.getElementById('user_idm');
+    // if (obj.value=='') return;
+    // if (window.XMLHttpRequest){ 
+        // xmlhttp=new XMLHttpRequest();
+    // } else {
+        // alert("Your browser does not support XMLHTTP!");
+        // exit;
+    // }
     
-	var str = "An error occurred while changing your password.";
-    xmlhttp.onreadystatechange=function() {
-        if(xmlhttp.readyState==4) {
-            str=xmlhttp.responseText;
-            // document.getElementById('msg').innerHTML=str;
-            // showfade('msg',2000);
-			str = str.replace(/(\r\n|\n|\r)/gm," ");
-			// alert(str);
-        }
-    }
+	// var str = "An error occurred while changing your password.";
+    // xmlhttp.onreadystatechange=function() {
+        // if(xmlhttp.readyState==4) {
+            // str=xmlhttp.responseText;
+			// str = str.replace(/(\r\n|\n|\r)/gm," ");
+        // }
+    // }
     
-    //alert(Page + objTagOri.value);
     url="../agendo/ajax.php?type=newpwd&value=" + obj.title; // title has user_id info
-    xmlhttp.open("GET",url,true);
-    xmlhttp.send(null);
-    str = 'Your new password was sent.';
-	// alert('Your new password was sent.');
-	showMessage(str);
+    // xmlhttp.open("GET",url,true);
+    // xmlhttp.send(null);
+    // str = 'Your new password was sent.';
+	// showMessage(str);
+	
+	$.post(url,
+			function(serverData){
+				showMessage(serverData);
+			}
+		)
+		.error(
+			function(error) {
+				showMessage(error.responseText, true);
+			}
+		)
+	;
 }

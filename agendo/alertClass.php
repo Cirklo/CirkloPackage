@@ -312,35 +312,40 @@ function recover($user_id){
         }
     }
     // $sql="update user set user_passwd = password('$pwd') where user_id=". $user_id;
-    $sql="update ".dbHelp::getSchemaName().".user set user_passwd = '".cryptPassword($pwd)."' where user_login='".$user_id."'";
-   $res=dbHelp::query($sql) or die('Password not updated');
-    switch ($arr['user_alert']) {
-    case 2:
-        try {
-            $msg="Your%20password%20is%20now%20$pwd";
-            $url="http://192.168.52.35:8888/send?phone=". $arr['user_mobile'] . "&msg=" . $msg;
-            $handle = fopen($url, "r");
-			echo "Sms sent!";
-        } catch (HttpException $ex) {
-            echo $ex;
-        }
-        break;
-        case 1:
-            $this->Subject="New password request";
-            $this->AddReplyTo($this->UserEmail,$this->UserFullName);
-            $this->Body="Your randomly generated password is now $pwd";
-            $address = $arr['user_email'];
-            $this->AddAddress($address, "");
-            if(!$this->Send()) {
-                echo "Mailer Error: " . $this->ErrorInfo;
-            } else {
-                echo "Email sent!";
-            }
-        break;
-        case 0:
-            break;
-    }
-echo "Password updated";
+	$sql="update ".dbHelp::getSchemaName().".user set user_passwd = '".cryptPassword($pwd)."' where user_login='".$user_id."'";
+	$res=dbHelp::query($sql) or die('Password not updated');
+	if(dbHelp::numberOfRows($res) < 1){
+		echo "User not found";
+	}
+	else{
+		switch ($arr['user_alert']) {
+			case 2:
+				try {
+					$msg="Your%20password%20is%20now%20$pwd";
+					$url="http://192.168.52.35:8888/send?phone=". $arr['user_mobile'] . "&msg=" . $msg;
+					$handle = fopen($url, "r");
+					echo "Password sent by Sms!";
+				} catch (HttpException $ex) {
+					echo $ex;
+				}
+			break;
+			case 1:
+				$this->Subject="New password request";
+				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
+				$this->Body="Your randomly generated password is now $pwd";
+				$address = $arr['user_email'];
+				$this->AddAddress($address, "");
+				if(!$this->Send()) {
+					echo "Mailer Error: " . $this->ErrorInfo;
+				} else {
+					echo "Password sent by Email!";
+				}
+			break;
+			case 0:
+			break;
+		}
+	}
+// echo "Password updated";
 }
 
 function nonconf(){
