@@ -146,9 +146,9 @@ function add(){
         $extra= array();
 		while($arr=dbHelp::fetchRowByIndex($res)){
 			$val = '';
-			$val=cleanValue($_GET[$arr[0]."-".$arr[1]]);
-
+			$val = cleanValue($_GET[str_replace(" ", "_", $arr[0])."-".$arr[1]]);
             // eval("\$$var='$val';");
+
 			if(($arr[3] == 2 || $arr[3] == 3) && $val=='true')
 				$extra[$arr[0]]=$arr[2];
 			else if($arr[3] == 1)

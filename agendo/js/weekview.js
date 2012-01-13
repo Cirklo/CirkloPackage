@@ -690,7 +690,7 @@ function addRadioOrCheck(tableName, id, label, type, checked){
 		// name = tableName;
 		typeName = 'radio';
 	}
-	extraHtml = beginHtml + "<label><input lang='send' type='" + typeName + "' name=" + name + " id=" + tableName + "-" + id + " value='" + checkedValue + "' " + checked + ">&nbsp;" + label + "</label>" + endHtml;
+	extraHtml = beginHtml + "<label><input lang='send' type='" + typeName + "' name='" + name + "' id='" + tableName + "-" + id + "' value='" + checkedValue + "' " + checked + ">&nbsp;" + label + "</label>" + endHtml;
 	document.getElementById(tableName).innerHTML = document.getElementById(tableName).innerHTML + extraHtml;
 }
 
