@@ -30,7 +30,7 @@ class calCell {
     function setTag($arg)       {$this->Tag=$arg;}
     function setStartDate($arg) {$this->StartDate=$arg;}
     function setRepeat($arg)    {$this->Repeat=$arg;}
-    function setEntryStatus($arg)    {
+    function setEntryStatus($arg, $isConfirmRes = false)    {
         if ($arg==2 or $arg==4) {
                 $datetime=$this->getStartDate(). date('Hi',$this->getStartTime());
                 $min=substr($datetime,10,2);
@@ -40,7 +40,7 @@ class calCell {
                 $day=substr($datetime,6,2);
                 $endtime=mktime($hour,$min + (cal::getConfTolerance()+$this->getNSlots()) * cal::getResolution(),0,$month,$day,$year);
                 $now=mktime(date("H"),date("i"),date("s"),date("m"),date("d"),date("Y"));
-                if ($endtime<$now) {
+                if ($endtime<$now && $isConfirmRes) {
                     $arg=9;
                 }
         }
@@ -372,8 +372,7 @@ class cal extends phpCollection{
 							$nlineXweekday = $weekdayNline[$weekday];
 						}
 						// *******************************************
-                        $cell->setEntryStatus($arr['entry_status']);
-			
+                        $cell->setEntryStatus($arr['entry_status'], $this->Status == 3 || $this->Status == 4);
 						// If the action is not a update?
                         if ($this->Update != $cell->getEntry()){
 							$listStyle = "	

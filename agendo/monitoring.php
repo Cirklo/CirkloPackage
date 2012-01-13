@@ -323,7 +323,7 @@
 				$entryId = $row['resource_id']."-".$weekDay."-".convertDate($row['entry_datetime'], 'H:i');
 
 				$createEntryDiv = !isset($entriesStarting[$entryId]);
-				if($row['entry_status'] == 2 || $row['entry_status'] == 4){
+				if(($row['entry_status'] == 2 || $row['entry_status'] == 4) && ($row['resource_status'] == 3 || $row['resource_status'] == 4)){
 					if(time() > ($entryLength + $row['resource_confirmtol'] * $row['resource_resolution'] * 60)){
 						$colorToUse = $notConfirmedColor;
 					}
