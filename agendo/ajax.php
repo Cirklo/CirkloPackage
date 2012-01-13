@@ -134,7 +134,7 @@ function DisplayUserInfo() {
 		from 
 			".dbHelp::getSchemaName().".user
 			,entry
-			,(select entry_datetime as entryDate, resource_id as res from entry, resource where entry_id = :0) as entryDates
+			,(select entry_datetime as entryDate, resource_id as res from entry, resource where entry_id = :0 and entry_resource = resource_id) as entryDates
 		where 
 			entry_user = user_id 
 			and entry_resource = res 
