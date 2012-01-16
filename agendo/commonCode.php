@@ -191,11 +191,6 @@
 		echo "</script>";
 	}
 
-	// if(isset($_GET['checkUserAndPass'])){
-		// validUserAndPass($_GET['user'], $_GET['pass']);
-		// exit;
-	// }
-		
 	// Initializes the session, checks if it timesOut and if needsToBeLogged it doesnt allow the page where 
 	// this function is to be entered without a user being logged in
 	function initSession($needsToBeLogged=false){
@@ -414,12 +409,12 @@
 						echo "</td>";
 					echo "</tr>";
 				
-					echo "<tr>";
-							echo "<td colspan=2 style='text-align:center'>";
+					// echo "<tr>";
+							// echo "<td colspan=2 style='text-align:center'>";
 								// echo "<input type=button style='font-size:11px' onclick=\"window.location='admin/cookie.php'\" value='Resource Settings' />";
 								// echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
-							echo "</td>";
-					echo "<tr>";
+							// echo "</td>";
+					// echo "<tr>";
 
 					echo "<tr>";
 						echo "<td align=center>";
@@ -430,6 +425,19 @@
 						echo "<input type=button style='font-size:11px' value='New Permission' onclick=\"javascript:window.open('../agendo/newperm.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=no,scrollbars=no,width=400,height=275')\" />";
 						echo "</td>";
 					echo "<tr>";
+					
+					$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_level = 0 and user_id = :0";
+					$prepAdmin = dbHelp::query($sql, array($_SESSION['user_id']));
+
+					$sql = "select resource_id from resource where resource_resp = :0";
+					$prepManager = dbHelp::query($sql, array($_SESSION['user_id']));
+					if(dbHelp::numberOfRows($prepAdmin) > 0 || dbHelp::numberOfRows($prepManager) > 0){ // Check if user is admin or resource responsible
+						echo "<tr>";
+								echo "<td colspan=2 style='text-align:center'>";
+									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
+								echo "</td>";
+						echo "<tr>";
+					}
 				echo "</table>";
 			echo "</form>";
 		echo "</div>";
