@@ -8,16 +8,14 @@ a {
 	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 	font-size: 11px;
 	text-decoration: none;
-	/*color: #789095;
-	color: #567e73;*/
-	color: white;
+	/*color: #789095;*/
+	color: #567e73;
 }
 
 a:hover {
 	font-size: 11px;
 	border: none;
-	/*color: #aaaaaa;*/
-	color: #F7C439;
+	color: #aaaaaa;
 }
 
 a.asd {
