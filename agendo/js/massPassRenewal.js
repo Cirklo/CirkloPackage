@@ -21,22 +21,24 @@ function swapSelected(from, to){
 
 function sendUserList(to, userId){
 	userLogins = new Array();
-	var confirmed = confirm("Are you sure you want to generate a random password for all these users?");
-	if(confirmed){
-		toList = document.getElementById(to).options;
-		for(var i=0; i<toList.length; i++){
-			userLogins[i] = toList[i].value;
-		}
-		
-		if(userLogins.length > 0){
-			$.post(
-				"massPassRenewal.php", 
-				{userId: userId, userLogins: userLogins},
-				function(serverData){
-					showMessage(serverData.msg, serverData.error);
-				},
-				"json")
-			;
+	toList = document.getElementById(to).options;
+	if(toList.length > 0){
+		var confirmed = confirm("Are you sure you want to generate a random password for all these users?");
+		if(confirmed){
+			for(var i=0; i<toList.length; i++){
+				userLogins[i] = toList[i].value;
+			}
+			
+			if(userLogins.length > 0){
+				$.post(
+					"massPassRenewal.php", 
+					{userId: userId, userLogins: userLogins},
+					function(serverData){
+						showMessage(serverData.msg, serverData.error);
+					},
+					"json")
+				;
+			}
 		}
 	}
 }
