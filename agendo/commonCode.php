@@ -437,6 +437,12 @@
 									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
 								echo "</td>";
 						echo "<tr>";
+
+						echo "<tr>";
+								echo "<td colspan=2 style='text-align:center'>";
+									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/givePermission.php'\" value='Resource Access' />";
+								echo "</td>";
+						echo "<tr>";
 					}
 				echo "</table>";
 			echo "</form>";

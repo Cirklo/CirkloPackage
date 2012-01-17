@@ -19,9 +19,9 @@ function swapSelected(from, to){
 	}
 }
 
-function sendUserList(to, userId){
+function sendUserList(userId){
 	userLogins = new Array();
-	toList = document.getElementById(to).options;
+	toList = document.getElementById("toSelect").options;
 	if(toList.length > 0){
 		var confirmed = confirm("Are you sure you want to generate a random password for all these users?");
 		if(confirmed){

@@ -76,7 +76,7 @@
 				$prepSql->execute();
 			}
 			catch(Exception $e){
-				throw new Exception("Full sql query is <".$sql.">: ".$e->getMessage());
+				throw new Exception("Full sql query is: '".$sql."'. Error is: '".$e->getMessage()."'");
 			}
 			return $prepSql;
 		}

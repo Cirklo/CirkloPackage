@@ -12,7 +12,7 @@ require_once("commonCode.php");
 		ob_start();
 		$error = false;
 		for($i = 0; $i < sizeOf($userLogins); $i++){
-			$error = !$alert->recover($userLogins[$i]);
+			$error = !$alert->recover($userLogins[$i], $passRequester);
 			if($error){
 				break;
 			}
@@ -96,7 +96,7 @@ require_once("commonCode.php");
 		echo "<tr>";
 			echo "<td colspan='3'>";
 				echo "<br>";
-				echo "<input type='button' value='Send password(s)' onclick='sendUserList(\"toSelect\", ".$_SESSION['user_id'].");'/>";
+				echo "<input type='button' value='Send password(s)' onclick='sendUserList(".$_SESSION['user_id'].");'/>";
 			echo "</td>";
 		echo "</tr>";
 		
@@ -107,10 +107,4 @@ require_once("commonCode.php");
 			echo "</td>";
 		echo "</tr>";
 	echo "</table>";
-	
-	echo "<br>";
-	
-	
-	echo "<br>";
-
 ?>
