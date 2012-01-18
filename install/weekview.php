@@ -675,8 +675,9 @@ echo "<div id=InputComments style='display:none;position:absolute;border-style:s
 		echo "<textarea name=txtcomments id=txtcomments rows=3 cols=25></textarea>";
     echo "</form>";
 	
-    echo "<center><a href=\"javascript:addcomments(0)\">add comment</a>&nbsp;&nbsp;&nbsp;";
-    echo "<a href=\"javascript:addcomments()\">everything ok!</a>";
+    echo "<center>";
+	echo "<a href='javascript:addcomments(0)' title='Confirm and leave the comment written above'>Comment and confirm</a>&nbsp;&nbsp;&nbsp;";
+    echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>";
 echo "</div>";
 
 
