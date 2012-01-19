@@ -43,7 +43,7 @@
 							echo "<param name='scriptable' value='true'/>";
 
 							echo "<param name='color' value='#1e4F54'/>";
-							echo "<param name='url' value='https://localhost/agendo/makeConfirmRes.php'/>";
+							echo "<param name='url' value='".getUrl()."'/>";
 							echo "<param name='action' value='associateRes'/>";
 							echo "<param name='numberOfResources' value='".$resourcesQuantity."'/>";
 							$i = 0;
@@ -68,9 +68,13 @@
 			showMsg($e->getMessage(), true);
 		}
 	echo "</body>";
-
-	// echo "<script type='text/javascript'>
-		// $(document).ready(function(){alert('treta');alert(zeeApplet.bla('https://agendo.cirklo.org/demo/teste.php','teste','utf8encodingMyAss'));});
-	// </script>";
 	
+	// returns the url for this file
+	function getUrl(){
+		$protocol = "http";
+		if(!empty($_SERVER['HTTPS'])){
+			$protocol = "https";
+		}
+		return $protocol."://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+	}
 ?>
