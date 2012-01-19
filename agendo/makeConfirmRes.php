@@ -43,7 +43,7 @@
 							echo "<param name='scriptable' value='true'/>";
 
 							echo "<param name='color' value='#1e4F54'/>";
-							echo "<param name='url' value='https://localhost/Cirklo/admin/makeConfirmRes.php'/>";
+							echo "<param name='url' value='https://localhost/agendo/makeConfirmRes.php'/>";
 							echo "<param name='action' value='associateRes'/>";
 							echo "<param name='numberOfResources' value='".$resourcesQuantity."'/>";
 							$i = 0;
