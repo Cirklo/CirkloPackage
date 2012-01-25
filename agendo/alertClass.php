@@ -350,7 +350,7 @@ function recover($user_id, $passRenewalResp = null){
 					echo "Mailer Error: " . $this->ErrorInfo;
 					return false;
 				} else {
-					echo "Password sent by Email!";
+					echo "The password will soon arrive to your email address";
 				}
 			break;
 			case 0:
