@@ -46,7 +46,7 @@ require_once("commonCode.php");
 	$prepManager = dbHelp::query($sql, array($_SESSION['user_id']));
 
 	if(dbHelp::numberOfRows($prepAdmin) > 0){ // Check if user is admin
-		$userQuery = "select user_login, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user where user_id != :0";
+		$userQuery = "select user_login, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user where user_id != :0 order by lower(user_firstname), lower(user_lastname)";
 	}
 	elseif(dbHelp::numberOfRows($prepManager) > 0){ // Else check if user is a resource manager
 		$row = dbHelp::fetchRowByIndex($prepManager);
@@ -54,7 +54,7 @@ require_once("commonCode.php");
 		while($row = dbHelp::fetchRowByIndex($prepManager)){
 			$resList .= ",".$row[0];
 		}
-		$userQuery = "select user_login, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user , permissions where permissions_resource in (".$resList.") and user_id = permissions_user and user_id != :0";
+		$userQuery = "select user_login, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user , permissions where permissions_resource in (".$resList.") and user_id = permissions_user and user_id != :0 order by lower(user_firstname), lower(user_lastname)";
 	}
 	else{ // Else its not a special user and shouldnt see the massPassRenewal screen
 		echo "<script type='text/javascript'>window.location='../".$_SESSION['path']."';</script>";
