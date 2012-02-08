@@ -226,9 +226,9 @@ function confirmEntry($entry, $macConfirms = 'false'){
     //echo $sql;
     if (dbHelp::numberOfRows($res)==0) $this->warning="You might be the last. Confirm with next user!";
     
+    $this->warning='Entry Confirmed!';
     switch ($arrStatus['resource_status']) {
     case 4:  // equipment that only manager can confirm entries
-        $this->warning='Entry Confirmed!';
         if ($arrStatus['user_id']!=$this->User ){
 			
             $this->warning='Only Equipment manager can confirm entry';

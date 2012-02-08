@@ -255,6 +255,7 @@ function del(){
     } else {
         $sql="update entry set entry_status=3 where entry_id=" . $seekentry . $extra;
     }
+	
     $resPDO = dbHelp::query($sql) or die ($sql);
     if (dbHelp::numberOfRows($resPDO)==0) {
         echo "No permission to delete selected entry(ies)";

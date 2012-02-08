@@ -545,7 +545,7 @@ function ajaxEntries(method,url,nosync){
     break;
     }
 	
-    objForm.user_id.value=objForm.user_id.title;
+    // objForm.user_id.value=objForm.user_id.title;
     // builds post string
     for (nelements=0;nelements<objForm.length;nelements++){
         if (objForm[nelements].lang=='send') {
@@ -556,6 +556,7 @@ function ajaxEntries(method,url,nosync){
 			}
 		}
     }
+
 	// par has username and pass
 	xmlhttp.open(method, url + '&' + par, nosync);
 	xmlhttp.send(null);
