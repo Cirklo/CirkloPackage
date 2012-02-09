@@ -66,28 +66,28 @@
 			$colspan = 0;
 			while($row = dbHelp::fetchRowByName($prep)){
 				$colspan = sizeOf($row);
-				$json->tableData .= "<tr>";
-				foreach($row as $field){
-					$json->tableData .= "<td>";
-						$json->tableData .= $field;
-					$json->tableData .= "</td>";
-				}
 				if($showSubTotal && $previousDepartmentName != $row['invoice_department']){
 					if($previousDepartmentName != ""){
-						$json->tableData .= "</tr>";
 						$json->tableData .= "<tr>";
 							$json->tableData .= "<td colspan='".$colspan."'>";
 								$json->tableData .= "<hr>";
 								$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
 								$json->tableData .= "<hr>";
 							$json->tableData .= "</td>";
+						$json->tableData .= "</tr>";
 						$subtotal = 0;
 					}
 				}
+				$json->tableData .= "<tr>";
+				foreach($row as $field){
+					$json->tableData .= "<td>";
+						$json->tableData .= $field;
+					$json->tableData .= "</td>";
+				}
+				$json->tableData .= "</tr>";
 				$previousDepartmentName = $row['invoice_department'];
 				$subtotal += $row['invoice_price'];
 				$total += $row['invoice_price'];
-				$json->tableData .= "</tr>";
 			}
 			if($showSubTotal){
 				$json->tableData .= "<tr>";
