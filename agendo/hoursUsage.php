@@ -18,7 +18,6 @@
 			
 			$resourceSelect = "";
 			$resourceGroupBy = "";
-				$resourceGroupBy = ",resource_name";
 			if($_POST['resourceCheck'] == 1){
 				$resourceSelect = ",resource_name AS invoice_resource";
 				$resourceGroupBy = ",resource_name";
@@ -33,14 +32,13 @@
 				$showSubTotal = true;
 			}
 
-			// academic prices only
 			$sql = "
 				select 
 					department_name AS invoice_department
+					,sum(entry_slots * resource_resolution) / 60 AS invoice_hours
+					,sum(entry_slots * resource_resolution / 60 * price_value) AS invoice_price 
 					".$resourceSelect."
 					".$userSelect."
-					,(sum(entry_slots * resource_resolution) / 60) AS invoice_hours
-					,(sum(entry_slots * resource_resolution) / 60 * price_value) AS invoice_price 
 				from 
 					entry
 					,user
@@ -52,7 +50,6 @@
 					and entry_user = user.user_id
 					and resource_id = entry_resource
 					and price_resource = entry_resource
-					and price_type = 2
 					and entry_datetime between :0 and :1
 				group by 
 					department_name
@@ -65,30 +62,54 @@
 			$prep = dbHelp::query($sql, array($beginDate, $endDate));
 			$json->tableData = "";
 			$colspan = 0;
-			while($row = dbHelp::fetchRowByName($prep)){
+			while($row = dbHelp::fetchRowByIndex($prep)){
 				$colspan = sizeOf($row);
-				if($showSubTotal && $previousDepartmentName != $row['invoice_department']){
-					if($previousDepartmentName != ""){
-						$json->tableData .= "<tr>";
-							$json->tableData .= "<td colspan='".$colspan."'>";
-								$json->tableData .= "<hr>";
-								$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
-								$json->tableData .= "<hr>";
-							$json->tableData .= "</td>";
-						$json->tableData .= "</tr>";
-						$subtotal = 0;
+				if($previousDepartmentName != $row[0]){
+					$json->tableData .= "<tr>";
+						$json->tableData .= "<td>";
+							$json->tableData .= $row[0];
+							$json->tableData .= "<hr>";
+						$json->tableData .= "</td>";
+					$json->tableData .= "</tr>";
+					
+					if($showSubTotal){
+						if($previousDepartmentName != ""){
+							$json->tableData .= "<tr>";
+								$json->tableData .= "<td colspan='".$colspan."'>";
+									$json->tableData .= "<hr>";
+									$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
+									$json->tableData .= "<hr>";
+								$json->tableData .= "</td>";
+							$json->tableData .= "</tr>";
+							$subtotal = 0;
+						}
 					}
 				}
+				$hours = round($row[1], 2);
+				$priceTimesHours = round($row[2], 2);
+				
 				$json->tableData .= "<tr>";
-				foreach($row as $field){
+					// Hours
 					$json->tableData .= "<td>";
-						$json->tableData .= $field;
+						$json->tableData .= $hours;
 					$json->tableData .= "</td>";
-				}
+					
+					// Price*Hours
+					$json->tableData .= "<td>";
+						$json->tableData .= $priceTimesHours;
+					$json->tableData .= "</td>";
+
+					// Names if User is checked
+					for($i=3; $i<sizeOf($row); $i++){
+						$json->tableData .= "<td>";
+							$json->tableData .= $row[$i];
+						$json->tableData .= "</td>";
+					}
 				$json->tableData .= "</tr>";
-				$previousDepartmentName = $row['invoice_department'];
-				$subtotal += $row['invoice_price'];
-				$total += $row['invoice_price'];
+				
+				$previousDepartmentName = $row[0];
+				$subtotal += $priceTimesHours;
+				$total += $priceTimesHours;
 			}
 			
 			if($showSubTotal){
@@ -101,7 +122,7 @@
 			}
 			
 			$json->tableData .= "<tr>";
-				$json->tableData .= "<td>";
+				$json->tableData .= "<td colspan='".$colspan."'>";
 					$json->tableData .= "<hr>";
 					$json->tableData .= "Total: ".$total;
 				$json->tableData .= "</td>";
