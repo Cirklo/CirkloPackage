@@ -52,9 +52,9 @@
 		
 		public static function convertToDate($date, $isTime = false){
 			if($isTime){
-				return "'".date("Y-m-d H:i:s", $time)."'";
+				return date("Y-m-d H:i:s", $time);
 			}
-			return "'".date("Y-m-d H:i:s", strtotime($date))."'";
+			return date("Y-m-d H:i:s", strtotime($date));
 		}
 		
 		public static function changeToDatabase($db){
