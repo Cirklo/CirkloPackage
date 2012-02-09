@@ -77,7 +77,6 @@
 						if($previousDepartmentName != ""){
 							$json->tableData .= "<tr>";
 								$json->tableData .= "<td colspan='".$colspan."'>";
-									$json->tableData .= "<hr>";
 									$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
 									$json->tableData .= "<hr>";
 								$json->tableData .= "</td>";
@@ -116,7 +115,6 @@
 			if($showSubTotal){
 				$json->tableData .= "<tr>";
 					$json->tableData .= "<td colspan='".$colspan."'>";
-						$json->tableData .= "<hr>";
 						$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
 					$json->tableData .= "</td>";
 				$json->tableData .= "</tr>";
