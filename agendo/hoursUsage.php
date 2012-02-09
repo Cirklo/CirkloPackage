@@ -18,6 +18,7 @@
 			
 			$resourceSelect = "";
 			$resourceGroupBy = "";
+				$resourceGroupBy = ",resource_name";
 			if($_POST['resourceCheck'] == 1){
 				$resourceSelect = ",resource_name AS invoice_resource";
 				$resourceGroupBy = ",resource_name";
@@ -89,6 +90,7 @@
 				$subtotal += $row['invoice_price'];
 				$total += $row['invoice_price'];
 			}
+			
 			if($showSubTotal){
 				$json->tableData .= "<tr>";
 					$json->tableData .= "<td colspan='".$colspan."'>";
