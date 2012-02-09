@@ -74,18 +74,17 @@
 				$total += $row['invoice_price'];
 				if($showSubTotal && $previousDepartmentName != $row['invoice_department']){
 					if($previousDepartmentName != ""){
-						$subtotal = 0;
 						$json->tableData .= "</tr>";
-						
 						$json->tableData .= "<tr>";
 							$json->tableData .= "<td colspan='".sizeOf($row)."'>";
 								$json->tableData .= "<hr>";
 								$json->tableData .= "Subtotal for department '".$row['invoice_department']."': ".$subtotal;
 								$json->tableData .= "<hr>";
 							$json->tableData .= "</td>";
+						$subtotal = 0;
 					}
-					$previousDepartmentName = $row['invoice_department'];
 				}
+				$previousDepartmentName = $row['invoice_department'];
 				$json->tableData .= "</tr>";
 			}
 			if($showSubTotal){
