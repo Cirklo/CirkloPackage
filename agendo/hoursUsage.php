@@ -78,9 +78,10 @@
 						$json->tableData .= "</tr>";
 						
 						$json->tableData .= "<tr>";
-							$json->tableData .= "<td>";
+							$json->tableData .= "<td colspan='".sizeOf($row)."'>";
 								$json->tableData .= "<hr>";
 								$json->tableData .= "Subtotal for department '".$row['invoice_department']."': ".$subtotal;
+								$json->tableData .= "<hr>";
 							$json->tableData .= "</td>";
 					}
 					$previousDepartmentName = $row['invoice_department'];
