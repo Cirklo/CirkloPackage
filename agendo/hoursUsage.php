@@ -75,7 +75,7 @@
 			$sql = "
 				select 
 					sum(entry_slots * resource_resolution) / 60 AS invoice_hours
-					,sum(entry_slots * resource_resolution / 60 * price_value) AS invoice_price 
+					,sum(entry_slots * resource_resolution * price_value / 60) AS invoice_price 
 					,department_name AS invoice_department
 					".$userSelect."
 					".$resourceSelect."
@@ -87,7 +87,10 @@
 					,price
 				where 
 					user.user_dep = department_id
+					and institute_id = department_inst
+					and price_type = institute_pricetype
 					and entry_user = user.user_id
+					and entry_status not in (2,3)
 					and resource_id = entry_resource
 					and price_resource = entry_resource
 					and entry_datetime between :0 and :1
