@@ -11,34 +11,74 @@
 		&& isset($_POST['endDate'])
 	){
 		try{
-			$beginDate = dbHelp::convertToDate($_POST['beginDate']);
-			$endDate = dbHelp::convertToDate($_POST['endDate']);
+			$beginDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['beginDate']));
+			$endDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['endDate']));
 			$showSubTotal = false;
 			$previousDepartmentName = "";
+			$subtotal = 0;
+			$total = 0;
+			$colspan = 3;
+			$json->tableData = "";
+
+			$json->tableData .= "<tr style='border-bottom: 1px solid black;'>";
+				$json->tableData .= "<td>";
+					$json->tableData .= "Department";
+				$json->tableData .= "</td>";
 			
-			$resourceSelect = "";
-			$resourceGroupBy = "";
-			if($_POST['resourceCheck'] == 1){
-				$resourceSelect = ",resource_name AS invoice_resource";
-				$resourceGroupBy = ",resource_name";
-				$showSubTotal = true;
-			}
+				$userSelect = "";
+				$userGroupBy = "";
+				if($_POST['userCheck'] == 1){
+					$userSelect = ",user_firstname, user_lastname";
+					$userGroupBy = ",user_firstname, user_lastname";
+					$showSubTotal = true;
+					
+					$json->tableData .= "<td colspan='2'>";
+						$json->tableData .= "User name";
+					$json->tableData .= "</td>";
+					
+					$colspan += 2;
+				}
+				
+				$resourceSelect = "";
+				$resourceGroupBy = "";
+				if($_POST['resourceCheck'] == 1){
+					$resourceSelect = ", resource_name, price_value";
+					$resourceGroupBy = ", resource_name";
+					$showSubTotal = true;
+					
+					$json->tableData .= "<td>";
+						$json->tableData .= "Resource";
+					$json->tableData .= "</td>";
+					
+					$json->tableData .= "<td>";
+						$json->tableData .= "Price per hour";
+					$json->tableData .= "</td>";
+					
+					$colspan += 2;
+				}
 			
-			$userSelect = "";
-			$userGroupBy = "";
-			if($_POST['userCheck'] == 1){
-				$userSelect = ",user_firstname, user_lastname";
-				$userGroupBy = ",user_firstname, user_lastname";
-				$showSubTotal = true;
-			}
+				$json->tableData .= "<td>";
+					$json->tableData .= "Usage time(hours)";
+				$json->tableData .= "</td>";
+				
+				$json->tableData .= "<td>";
+					$json->tableData .= "Cost";
+				$json->tableData .= "</td>";
+			$json->tableData .= "</tr>";
+			
+			$json->tableData .= "<tr>";
+				$json->tableData .= "<td colspan='".$colspan."'>";
+					$json->tableData .= "<hr>";
+				$json->tableData .= "</td>";
+			$json->tableData .= "</tr>";
 
 			$sql = "
 				select 
 					sum(entry_slots * resource_resolution) / 60 AS invoice_hours
 					,sum(entry_slots * resource_resolution / 60 * price_value) AS invoice_price 
 					,department_name AS invoice_department
-					".$resourceSelect."
 					".$userSelect."
+					".$resourceSelect."
 				from 
 					entry
 					,user
@@ -57,33 +97,21 @@
 					".$userGroupBy."
 			";
 			
-			$subtotal = 0;
-			$total = 0;
 			$prep = dbHelp::query($sql, array($beginDate, $endDate));
-			$json->tableData = "";
-			$colspan = 0;
 			while($row = dbHelp::fetchRowByIndex($prep)){
 				$department = $row[2];
-				$colspan = sizeOf($row);
-				if($previousDepartmentName != $department){
-					// $json->tableData .= "<tr>";
-						// $json->tableData .= "<td>";
-							// $json->tableData .= $department;
-							// $json->tableData .= "<hr>";
-						// $json->tableData .= "</td>";
-					// $json->tableData .= "</tr>";
-					
-					if($showSubTotal){
-						if($previousDepartmentName != ""){
-							$json->tableData .= "<tr>";
-								$json->tableData .= "<td colspan='".$colspan."'>";
-									$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
-									$json->tableData .= "<hr>";
-								$json->tableData .= "</td>";
-							$json->tableData .= "</tr>";
-							$subtotal = 0;
-						}
-					}
+				if(
+					$previousDepartmentName != $department
+					&& $showSubTotal
+					&& $previousDepartmentName != ""
+				){
+					$json->tableData .= "<tr>";
+						$json->tableData .= "<td colspan='".$colspan."'>";
+							$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
+							$json->tableData .= "<hr>";
+						$json->tableData .= "</td>";
+					$json->tableData .= "</tr>";
+					$subtotal = 0;
 				}
 				$hours = round($row[0], 2);
 				$priceTimesHours = round($row[1], 2);
@@ -135,12 +163,6 @@
 		echo json_encode($json);
 		exit;
 	}
-	// else{
-		// $json->success = false;
-		// $json->message = "Please check the input parameters";
-		// echo json_encode($json);
-		// exit;
-	// }
 	
 	echo "<script type='text/javascript' src='js/jquery-1.5.2.min.js'></script>";
 	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";

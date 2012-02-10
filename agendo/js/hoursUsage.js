@@ -1,6 +1,6 @@
 $(function() {
-	$('#beginDateText').datepick(); 
-	$('#endDateText').datepick(); 
+	$('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
+	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
 });
 
 // Sends the checkBoxes states to the server and gets the appropriate table data
