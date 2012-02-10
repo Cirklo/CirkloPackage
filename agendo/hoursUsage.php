@@ -85,10 +85,11 @@
 					,resource
 					,department
 					,price
+					,institute
 				where 
 					user.user_dep = department_id
 					and institute_id = department_inst
-					and price_type = institute_pricetype
+					and price_type = institute_price_type
 					and entry_user = user.user_id
 					and entry_status not in (2,3)
 					and resource_id = entry_resource
@@ -99,7 +100,7 @@
 					".$resourceGroupBy."
 					".$userGroupBy."
 			";
-			
+
 			$prep = dbHelp::query($sql, array($beginDate, $endDate));
 			while($row = dbHelp::fetchRowByIndex($prep)){
 				$department = $row[2];
