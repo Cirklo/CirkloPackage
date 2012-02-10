@@ -89,7 +89,7 @@
 				where 
 					user.user_dep = department_id
 					and institute_id = department_inst
-					and price_type = institute_price_type
+					and price_type = institute_pricetype
 					and entry_user = user.user_id
 					and entry_status not in (2,3)
 					and resource_id = entry_resource
