@@ -8,7 +8,13 @@ function sendChecksAndGetResult(){
 	if($('#beginDateText').val() != '' && $('#endDateText').val() != ''){
 		$.post(
 			"hoursUsage.php", 
-			{userCheck: Number($('#userCheck').attr('checked')), resourceCheck: Number($('#resourceCheck').attr('checked')), beginDate: $('#beginDateText').val(), endDate: $('#endDateText').val()},
+			{
+				userCheck: Number($('#userCheck').attr('checked'))
+				, resourceCheck: Number($('#resourceCheck').attr('checked'))
+				, entryCheck: Number($('#entryCheck').attr('checked'))
+				, beginDate: $('#beginDateText').val()
+				, endDate: $('#endDateText').val()
+			},
 			function(serverData){
 				if(serverData.success){
 					$('#resultsTable').html(serverData.tableData);

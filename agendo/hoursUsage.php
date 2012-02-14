@@ -25,6 +25,27 @@
 					$json->tableData .= "Department";
 				$json->tableData .= "</td>";
 			
+				$entrySelect = "
+					sum(entry_slots * resource_resolution / 60) AS invoice_hours
+					,sum(entry_slots * resource_resolution * price_value / 60) AS invoice_price
+					,department_name AS invoice_department
+				";
+				$entryGroupBy = "";
+				if($_POST['entryCheck'] == 1){
+					$entrySelect = "
+						entry_slots * resource_resolution / 60 AS invoice_hours
+						,entry_slots * resource_resolution * price_value / 60 AS invoice_price
+						,department_name AS invoice_department
+						,entry_datetime
+					";
+					$entryGroupBy = ", entry_id order by department_name, entry_datetime";
+					
+					$json->tableData .= "<td>";
+						$json->tableData .= "Entry date";
+					$json->tableData .= "</td>";
+					$colspan++;
+				}
+				
 				$userSelect = "";
 				$userGroupBy = "";
 				if($_POST['userCheck'] == 1){
@@ -74,9 +95,7 @@
 
 			$sql = "
 				select 
-					sum(entry_slots * resource_resolution) / 60 AS invoice_hours
-					,sum(entry_slots * resource_resolution * price_value / 60) AS invoice_price 
-					,department_name AS invoice_department
+					".$entrySelect." 
 					".$userSelect."
 					".$resourceSelect."
 				from 
@@ -87,20 +106,20 @@
 					,price
 					,institute
 				where 
-					user.user_dep = department_id
+					user.user_id = entry_user
+					and department_id = user.user_dep
 					and institute_id = department_inst
 					and price_type = institute_pricetype
-					and entry_user = user.user_id
-					and entry_status not in (2,3)
-					and resource_id = entry_resource
 					and price_resource = entry_resource
+					and entry_status in (1,5)
+					and resource_id = entry_resource
 					and entry_datetime between :0 and :1
 				group by 
 					department_name
 					".$resourceGroupBy."
 					".$userGroupBy."
+					".$entryGroupBy."
 			";
-
 			$prep = dbHelp::query($sql, array($beginDate, $endDate));
 			while($row = dbHelp::fetchRowByIndex($prep)){
 				$department = $row[2];
@@ -111,7 +130,7 @@
 				){
 					$json->tableData .= "<tr>";
 						$json->tableData .= "<td colspan='".$colspan."'>";
-							$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
+							$json->tableData .= "Total for department '".$previousDepartmentName."': ".$subtotal;
 							$json->tableData .= "<hr>";
 						$json->tableData .= "</td>";
 					$json->tableData .= "</tr>";
@@ -147,7 +166,7 @@
 			if($showSubTotal){
 				$json->tableData .= "<tr>";
 					$json->tableData .= "<td colspan='".$colspan."'>";
-						$json->tableData .= "Subtotal for department '".$previousDepartmentName."': ".$subtotal;
+						$json->tableData .= "Total for department '".$previousDepartmentName."': ".$subtotal;
 					$json->tableData .= "</td>";
 				$json->tableData .= "</tr>";
 			}
@@ -213,7 +232,11 @@
 				echo "<input type='button' id='searchButton' value='Search' onclick='sendChecksAndGetResult()'/>";
 			echo "</td>";
 			
-			echo "<td></td>";
+			echo "<td>";
+				echo "<label>Entry";
+					echo "<input type='checkBox' id='entryCheck'/>";
+				echo "</label>";
+			echo "</td>";
 		echo "</tr>";
 	echo "</table>";
 	
