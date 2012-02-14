@@ -426,12 +426,13 @@
 						echo "</td>";
 					echo "<tr>";
 					
-					$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_level = 0 and user_id = :0";
-					$prepAdmin = dbHelp::query($sql, array($_SESSION['user_id']));
+					if(isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) != false){ // Check if user is admin or resource responsible
+						echo "<tr>";
+								echo "<td colspan=2 style='text-align:center'>";
+									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/hoursUsage.php'\" value='Usage Report' />";
+								echo "</td>";
+						echo "<tr>";
 
-					$sql = "select resource_id from resource where resource_resp = :0";
-					$prepManager = dbHelp::query($sql, array($_SESSION['user_id']));
-					if(dbHelp::numberOfRows($prepAdmin) > 0 || dbHelp::numberOfRows($prepManager) > 0){ // Check if user is admin or resource responsible
 						echo "<tr>";
 								echo "<td colspan=2 style='text-align:center'>";
 									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
@@ -449,6 +450,31 @@
 		echo "</div>";
 	}	
 // End of buttons for help, videos, resources and user/management
+	
+	// Checks if a user is an administrator
+	function isAdmin($user_id){
+		if($user_id != ''){
+			$sql = "select user_level from ".dbHelp::getSchemaName().".user where user_id = :0";
+			$prepAdmin = dbHelp::query($sql, array($user_id));
+			$row = dbHelp::fetchRowByIndex($prepAdmin);
+			return $row[0] == 0;
+		}
+		
+		return false;
+	}
+	
+	// Checks if a user is a resource manager, returns the resource or false
+	function isResp($user_id){
+		if($user_id != ''){
+			$sql = "select resource_id from resource where resource_resp = :0";
+			$prepManager = dbHelp::query($sql, array($user_id));
+			if(dbHelp::numberOfRows($prepManager) > 0){
+				$row = dbHelp::fetchRowByIndex($prepManager);
+				return $row[0];
+			}
+		}
+		return false;
+	}
 	
 	// wtf = "write to file", not "what the fu..dge" 
 	function wtf($string, $mode = "w", $path = "c:/a.txt"){

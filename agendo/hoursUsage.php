@@ -3,7 +3,11 @@
 	// $pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 	// $_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("commonCode.php");
-
+	
+	if(!isAdmin($_SESSION['user_id']) || !isResp($_SESSION['user_id'])){ // Check if user is admin or resource responsible
+		echo "<script type='text/javascript'>window.location='".$_SESSION['path']."/'</script>";
+	}
+	
 	if(
 		isset($_POST['userCheck'])
 		&& isset($_POST['resourceCheck'])
@@ -193,6 +197,12 @@
 	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
 	
 	echo "<table style='margin:auto;width:320px;text-align:right;'>";
+		echo "<tr>";
+			echo "<td colspan='3 style='text-align:center;'>";
+				echo "<a style='color:black;text-align:center;' onmouseover=\"this.style.color='#F7C439'\" onmouseout=\"this.style.color='black'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+			echo "</td>";
+		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>";
 				echo "<a>From date:</a>";
