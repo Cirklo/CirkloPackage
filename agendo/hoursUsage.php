@@ -4,7 +4,9 @@
 	// $_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("commonCode.php");
 	
-	if(!isAdmin($_SESSION['user_id']) || !isResp($_SESSION['user_id'])){ // Check if user is admin or resource responsible
+	$isResp = isResp($_SESSION['user_id']);
+	$isAdmin = isAdmin($_SESSION['user_id']);
+	if(!$isAdmin && !$isResp){ // Check if user is admin or resource responsible
 		echo "<script type='text/javascript'>window.location='".$_SESSION['path']."/'</script>";
 	}
 	
@@ -23,6 +25,14 @@
 			$total = 0;
 			$colspan = 3;
 			$json->tableData = "";
+
+			$whereDepartment = "user_id = entry_user and department_id = user_dep";
+			if(!$isAdmin && $isResp != false){
+				$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
+				$prep = dbHelp::query($sql, array($_SESSION['user_id']));
+				$row = dbHelp::fetchRowByIndex($prep);
+				$whereDepartment = "user_id = entry_user and user_dep = ".$row[0]." and department_id = user_dep";
+			}
 
 			$json->tableData .= "<tr style='border-bottom: 1px solid black;'>";
 				$json->tableData .= "<td>";
@@ -104,14 +114,13 @@
 					".$resourceSelect."
 				from 
 					entry
-					,user
+					,".dbHelp::getSchemaName().".user
 					,resource
 					,department
 					,price
 					,institute
 				where 
-					user.user_id = entry_user
-					and department_id = user.user_dep
+					".$whereDepartment."
 					and institute_id = department_inst
 					and price_type = institute_pricetype
 					and price_resource = entry_resource
@@ -124,6 +133,7 @@
 					".$userGroupBy."
 					".$entryGroupBy."
 			";
+
 			$prep = dbHelp::query($sql, array($beginDate, $endDate));
 			while($row = dbHelp::fetchRowByIndex($prep)){
 				$department = $row[2];
