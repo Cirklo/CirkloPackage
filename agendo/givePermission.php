@@ -48,7 +48,7 @@ require_once("commonCode.php");
 		$prepResources = dbHelp::query($sql);
 	}
 	elseif(dbHelp::numberOfRows($prepManager) > 0){ // Else check if user is a resource manager
-		$sql = "select resource_id, resource_name from resource where resource_resp = :0";
+		$sql = "select resource_id, resource_name from resource where resource_resp = :0 order by lower(resource_name)";
 		$prepResources = dbHelp::query($sql, array($_SESSION['user_id']));
 	}
 	else{ // Else its not a special user and shouldnt see the massPassRenewal screen
@@ -68,7 +68,7 @@ require_once("commonCode.php");
 		echo "<tr>";
 			echo "<td>";
 				echo "<h3 style='color:white;'>Pick Users from:</h3>";
-				$userQuery = "select user_id, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user where user_id != :0";
+				$userQuery = "select user_id, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user where user_id != :0 order by lower(user_firstname), lower(user_lastname)";
 				$prep = dbHelp::query($userQuery, array($_SESSION['user_id']));
 				echo "<select multiple='multiple' size='".$commonSelectSize."' id='fromSelect' style='".$commonSelectStyle."'>";
 					while($row = dbHelp::fetchRowByIndex($prep)){

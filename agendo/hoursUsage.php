@@ -1,14 +1,9 @@
 <?php
-	// session_start();
-	// $pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
-	// $_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("commonCode.php");
 	
 	$isResp = isResp($_SESSION['user_id']);
 	$isAdmin = isAdmin($_SESSION['user_id']);
-	if(!$isAdmin && !$isResp){ // Check if user is admin or resource responsible
-		echo "<script type='text/javascript'>window.location='".$_SESSION['path']."/'</script>";
-	}
+	$isPI = isPI($_SESSION['user_id']);
 	
 	if(
 		isset($_POST['userCheck'])
@@ -17,21 +12,27 @@
 		&& isset($_POST['endDate'])
 	){
 		try{
-			$beginDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['beginDate']));
-			$endDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['endDate']));
 			$showSubTotal = false;
-			$previousDepartmentName = "";
-			$subtotal = 0;
-			$total = 0;
 			$colspan = 3;
 			$json->tableData = "";
 
 			$whereDepartment = "user_id = entry_user and department_id = user_dep";
-			if(!$isAdmin && $isResp != false){
-				$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
-				$prep = dbHelp::query($sql, array($_SESSION['user_id']));
-				$row = dbHelp::fetchRowByIndex($prep);
-				$whereDepartment = "user_id = entry_user and user_dep = ".$row[0]." and department_id = user_dep";
+			if(!$isAdmin){
+				if($isPI == false){
+					$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
+					$prep = dbHelp::query($sql, array($_SESSION['user_id']));
+					$row = dbHelp::fetchRowByIndex($prep);
+					$departments = $row[0];
+					$whereDepartment = "user_id = entry_user and user_dep = ".$departments." and department_id = user_dep";
+				}
+				else{
+					$departments = implode(",", $isPI);
+					$whereDepartment = "user_id = entry_user and user_dep in (".$departments.") and department_id = user_dep";
+				}
+				
+				if($isResp != false){
+					$whereIsResp = "user_id = entry_user and user_dep not in (".$departments.") and department_id = user_dep and entry_resource in (".implode(",", $isResp).")";
+				}
 			}
 
 			$json->tableData .= "<tr style='border-bottom: 1px solid black;'>";
@@ -107,84 +108,15 @@
 				$json->tableData .= "</td>";
 			$json->tableData .= "</tr>";
 
-			$sql = "
-				select 
-					".$entrySelect." 
-					".$userSelect."
-					".$resourceSelect."
-				from 
-					entry
-					,".dbHelp::getSchemaName().".user
-					,resource
-					,department
-					,price
-					,institute
-				where 
-					".$whereDepartment."
-					and institute_id = department_inst
-					and price_type = institute_pricetype
-					and price_resource = entry_resource
-					and entry_status in (1,5)
-					and resource_id = entry_resource
-					and entry_datetime between :0 and :1
-				group by 
-					department_name
-					".$resourceGroupBy."
-					".$userGroupBy."
-					".$entryGroupBy."
-			";
+			$beginDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['beginDate']));
+			$endDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['endDate']));
+			
+			$json->tableData .= generateResults();
+			if(!$isAdmin && $isResp != false){
+				$whereDepartment = $whereIsResp;
+				$json->tableData .= generateResults();
+			}
 
-			$prep = dbHelp::query($sql, array($beginDate, $endDate));
-			while($row = dbHelp::fetchRowByIndex($prep)){
-				$department = $row[2];
-				if(
-					$previousDepartmentName != $department
-					&& $showSubTotal
-					&& $previousDepartmentName != ""
-				){
-					$json->tableData .= "<tr>";
-						$json->tableData .= "<td colspan='".$colspan."'>";
-							$json->tableData .= "Total for department '".$previousDepartmentName."': ".$subtotal;
-							$json->tableData .= "<hr>";
-						$json->tableData .= "</td>";
-					$json->tableData .= "</tr>";
-					$subtotal = 0;
-				}
-				$hours = round($row[0], 2);
-				$priceTimesHours = round($row[1], 2);
-				
-				$json->tableData .= "<tr>";
-					// Department and Names if User is checked
-					for($i=2; $i<sizeOf($row); $i++){
-						$json->tableData .= "<td>";
-							$json->tableData .= $row[$i];
-						$json->tableData .= "</td>";
-					}
-					
-					// Hours
-					$json->tableData .= "<td>";
-						$json->tableData .= $hours;
-					$json->tableData .= "</td>";
-					
-					// Price*Hours
-					$json->tableData .= "<td>";
-						$json->tableData .= $priceTimesHours;
-					$json->tableData .= "</td>";
-				$json->tableData .= "</tr>";
-				
-				$previousDepartmentName = $department;
-				$subtotal += $priceTimesHours;
-				$total += $priceTimesHours;
-			}
-			
-			if($showSubTotal){
-				$json->tableData .= "<tr>";
-					$json->tableData .= "<td colspan='".$colspan."'>";
-						$json->tableData .= "Total for department '".$previousDepartmentName."': ".$subtotal;
-					$json->tableData .= "</td>";
-				$json->tableData .= "</tr>";
-			}
-			
 			$json->tableData .= "<tr>";
 				$json->tableData .= "<td colspan='".$colspan."'>";
 					$json->tableData .= "<hr>";
@@ -260,7 +192,113 @@
 		echo "</tr>";
 	echo "</table>";
 	
+	// Table where the results will appear
 	echo "<table id='resultsTable' style='margin:auto;border:1px solid black;width:800;text-align:center;'>";
-		
 	echo "</table>";
+	
+	// Returns a string with what the subtotal line should look for each department
+	function showSubTotal($departmentName, $subTotal, $colspan, $isAdmin){
+		$subColspan = 0;
+		$extraHtml = "";
+		if($isAdmin){
+			$subColspan = 2;
+			// Put the checkbox in a class for easy multi select and un-select
+			$extraHtml = 
+				"<td colspan='".$subColspan."' style='text-align:right;'>
+					<label>Mail the department manager
+						<input type='checkBox' id='department-".$departmentName."-Email'/>
+					</label>
+				</td>"
+			;
+		}
+	
+		$formatedString = "<tr>";
+			$formatedString .= "<td colspan='".($colspan-$subColspan)."'>";
+				$formatedString .= "Total for department '".$departmentName."': ".$subTotal;
+			$formatedString .= "</td>";
+			
+			$formatedString .= $extraHtml;
+		$formatedString .= "</tr>";
+		
+		return $formatedString;
+	}
+	
+	function generateResults(){
+		global $total, $colspan, $beginDate, $endDate, $showSubTotal, $isAdmin, $entrySelect, $userSelect, $resourceSelect, $whereDepartment, $resourceGroupBy, $userGroupBy, $entryGroupBy;
+		
+		$formatedString = "";
+		$previousDepartmentName = "";
+		$subTotal = 0;
+		$sql = "
+			select 
+				".$entrySelect." 
+				".$userSelect."
+				".$resourceSelect."
+			from 
+				entry
+				,".dbHelp::getSchemaName().".user
+				,resource
+				,department
+				,price
+				,institute
+			where 
+				".$whereDepartment."
+				and institute_id = department_inst
+				and price_type = institute_pricetype
+				and price_resource = entry_resource
+				and entry_status in (1,5)
+				and resource_id = entry_resource
+				and entry_datetime between :0 and :1
+			group by 
+				department_name
+				".$resourceGroupBy."
+				".$userGroupBy."
+				".$entryGroupBy."
+		";
+
+		$prep = dbHelp::query($sql, array($beginDate, $endDate));
+		while($row = dbHelp::fetchRowByIndex($prep)){
+			$department = $row[2];
+			if(
+				$previousDepartmentName != $department
+				&& $showSubTotal
+				&& $previousDepartmentName != ""
+			){
+				$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin);
+				$subTotal = 0;
+			}
+			$hours = round($row[0], 2);
+			$priceTimesHours = round($row[1], 2);
+			
+			$formatedString .= "<tr>";
+				// Department and Names if User is checked
+				for($i=2; $i<sizeOf($row); $i++){
+					$formatedString .= "<td>";
+						$formatedString .= $row[$i];
+					$formatedString .= "</td>";
+				}
+				
+				// Hours
+				$formatedString .= "<td>";
+					$formatedString .= $hours;
+				$formatedString .= "</td>";
+				
+				// Price*Hours
+				$formatedString .= "<td>";
+					$formatedString .= $priceTimesHours;
+				$formatedString .= "</td>";
+			$formatedString .= "</tr>";
+			
+			$previousDepartmentName = $department;
+			$subTotal += $priceTimesHours;
+			$total += $priceTimesHours;
+		}
+		
+		// Used to show the last subtotal
+		if($showSubTotal){
+			$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin);
+		}
+		
+		return $formatedString;
+	}
 ?>

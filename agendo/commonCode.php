@@ -466,11 +466,32 @@
 	// Checks if a user is a resource manager, returns the resource or false
 	function isResp($user_id){
 		if($user_id != ''){
+			$resources = array();
 			$sql = "select resource_id from resource where resource_resp = :0";
 			$prepManager = dbHelp::query($sql, array($user_id));
-			if(dbHelp::numberOfRows($prepManager) > 0){
-				$row = dbHelp::fetchRowByIndex($prepManager);
-				return $row[0];
+			while($row = dbHelp::fetchRowByIndex($prepManager)){
+				$resources[] = $row[0];
+			}
+			
+			if(sizeOf($resources) > 0){
+				return $resources;
+			}
+		}
+		return false;
+	}
+	
+	// Checks if a user is a department manager(PI), returns the resource or false
+	function isPI($user_id){
+		if($user_id != ''){
+			$departments = array();
+			$sql = "select department_id from department where department_manager = :0";
+			$prepManager = dbHelp::query($sql, array($user_id));
+			while($row = dbHelp::fetchRowByIndex($prepManager)){
+				$departments[] = $row[0];
+			}
+			
+			if(sizeOf($departments) > 0){
+				return $departments;
 			}
 		}
 		return false;
