@@ -15,7 +15,7 @@
 			$showSubTotal = false;
 			$colspan = 3;
 			$json->tableData = "";
-
+			$whereIsResp = "";
 			$whereDepartment = "user_id = entry_user and department_id = user_dep";
 			if(!$isAdmin){
 				if($isPI == false){
@@ -31,7 +31,7 @@
 				}
 				
 				if($isResp != false){
-					$whereIsResp = "user_id = entry_user and user_dep not in (".$departments.") and department_id = user_dep and entry_resource in (".implode(",", $isResp).")";
+					$whereIsResp = "or user_id = entry_user and user_dep not in (".$departments.") and department_id = user_dep and entry_resource in (".implode(",", $isResp).")";
 				}
 			}
 
@@ -112,10 +112,6 @@
 			$endDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['endDate']));
 			
 			$json->tableData .= generateResults();
-			if(!$isAdmin && $isResp != false){
-				$whereDepartment = $whereIsResp;
-				$json->tableData .= generateResults();
-			}
 
 			$json->tableData .= "<tr>";
 				$json->tableData .= "<td colspan='".$colspan."'>";
@@ -224,11 +220,26 @@
 	}
 	
 	function generateResults(){
-		global $total, $colspan, $beginDate, $endDate, $showSubTotal, $isAdmin, $entrySelect, $userSelect, $resourceSelect, $whereDepartment, $resourceGroupBy, $userGroupBy, $entryGroupBy;
+		global 	$total, $colspan, $beginDate, $endDate, $showSubTotal, $isAdmin, $entrySelect, $userSelect, 
+				$resourceSelect, $whereDepartment, $resourceGroupBy, $userGroupBy, $entryGroupBy, $whereIsResp;
 		
 		$formatedString = "";
 		$previousDepartmentName = "";
 		$subTotal = 0;
+		$staticWhere = "
+			and institute_id = department_inst
+			and price_type = institute_pricetype
+			and price_resource = entry_resource
+			and entry_status in (1,5)
+			and resource_id = entry_resource
+			and entry_datetime between :0 and :1
+		";
+
+		$resourcesManagerWhere = "";
+		if($whereIsResp != ""){
+			$resourcesManagerWhere = $whereIsResp." ".$staticWhere;
+		}
+
 		$sql = "
 			select 
 				".$entrySelect." 
@@ -243,12 +254,8 @@
 				,institute
 			where 
 				".$whereDepartment."
-				and institute_id = department_inst
-				and price_type = institute_pricetype
-				and price_resource = entry_resource
-				and entry_status in (1,5)
-				and resource_id = entry_resource
-				and entry_datetime between :0 and :1
+				".$staticWhere."
+				".$resourcesManagerWhere."
 			group by 
 				department_name
 				".$resourceGroupBy."
