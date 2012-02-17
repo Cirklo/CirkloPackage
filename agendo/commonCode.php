@@ -356,11 +356,18 @@
 								echo "<input type=button style='font-size:11px' onclick=\"window.location='../datumo/index.php'\" value='AdminArea' />";
 							echo "</td>";
 						echo "</tr>";
+						
 						echo "<tr>";
 							echo "<td style='text-align:center'>";
 								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/makeConfirmRes.php'\" value='Resource Settings' />";
 							echo "</td>";
 						echo "</tr>";
+						
+						echo "<tr>";
+							echo "<td colspan='2' style='text-align:center'>";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/hoursUsage.php'\" value='Usage Report' />";
+							echo "</td>";
+						echo "<tr>";
 					echo "</table>";
 				}
 				
@@ -384,20 +391,20 @@
 					
 					echo "<tr>";
 						echo "<td colspan=2 style='text-align:center'>";
-						echo "<input type=button style='font-size:11px' onclick=submitUser('".$phpFile.".php',".$resource.",null,null) value='Login' />";
-						echo "<input type=button style='font-size:11px' onclick=submitUser('../datumo/',null,null,null) value='AdminArea' />";
+							echo "<input type=button style='font-size:11px' onclick=submitUser('".$phpFile.".php',".$resource.",null,null) value='Login' />";
+							echo "<input type=button style='font-size:11px' onclick=submitUser('../datumo/',null,null,null) value='AdminArea' />";
 						echo "</td>";
 					echo "</tr>";
 
 					echo "<tr>";
 						echo "<td align=center colspan=2>";
-						echo "<input type=button style='font-size:11px' onclick=ajaxRecoverPWD() value='Recover Password' />";
+							echo "<input type=button style='font-size:11px' onclick=ajaxRecoverPWD() value='Recover Password' />";
 						echo "</td>";
 					echo "</tr>";
 
 					echo "<tr>";
 						echo "<td align=center colspan=2>";
-						echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
+							echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
 						echo "</td>";
 					echo "</tr>";
 				echo "</table>";
@@ -405,7 +412,7 @@
 				echo "<table>";
 					echo "<tr>";
 						echo "<td align=center colspan=2>";
-						echo "<hr />";
+							echo "<hr />";
 						echo "</td>";
 					echo "</tr>";
 				
@@ -418,31 +425,25 @@
 
 					echo "<tr>";
 						echo "<td align=center>";
-						echo "<input type=button style='display:".$display.";font-size:11px' value='New User' onclick=\"javascript:window.open('../agendo/application.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=no,scrollbars=no,width=600,height=475')\" />";
+							echo "<input type=button style='display:".$display.";font-size:11px' value='New User' onclick=\"javascript:window.open('../agendo/application.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=no,scrollbars=no,width=600,height=475')\" />";
 						echo "</td>";
 
 						echo "<td align=center>";
-						echo "<input type=button style='font-size:11px' value='New Permission' onclick=\"javascript:window.open('../agendo/newperm.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=no,scrollbars=no,width=400,height=275')\" />";
+							echo "<input type=button style='font-size:11px' value='New Permission' onclick=\"javascript:window.open('../agendo/newperm.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=no,scrollbars=no,width=400,height=275')\" />";
 						echo "</td>";
 					echo "<tr>";
 					
 					if(isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) != false){ // Check if user is admin or resource responsible
 						echo "<tr>";
-								echo "<td colspan=2 style='text-align:center'>";
-									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/hoursUsage.php'\" value='Usage Report' />";
-								echo "</td>";
+							echo "<td colspan=2 style='text-align:center'>";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
+							echo "</td>";
 						echo "<tr>";
 
 						echo "<tr>";
-								echo "<td colspan=2 style='text-align:center'>";
-									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
-								echo "</td>";
-						echo "<tr>";
-
-						echo "<tr>";
-								echo "<td colspan=2 style='text-align:center'>";
-									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/givePermission.php'\" value='Resource Access' />";
-								echo "</td>";
+							echo "<td colspan=2 style='text-align:center'>";
+								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/givePermission.php'\" value='Resource Access' />";
+							echo "</td>";
 						echo "<tr>";
 					}
 				echo "</table>";
@@ -453,7 +454,7 @@
 	
 	// Checks if a user is an administrator
 	function isAdmin($user_id){
-		if($user_id != ''){
+		if(isset($user_id) && $user_id != ''){
 			$sql = "select user_level from ".dbHelp::getSchemaName().".user where user_id = :0";
 			$prepAdmin = dbHelp::query($sql, array($user_id));
 			$row = dbHelp::fetchRowByIndex($prepAdmin);
@@ -465,7 +466,7 @@
 	
 	// Checks if a user is a resource manager, returns the resource or false
 	function isResp($user_id){
-		if($user_id != ''){
+		if(isset($user_id) && $user_id != ''){
 			$resources = array();
 			$sql = "select resource_id from resource where resource_resp = :0";
 			$prepManager = dbHelp::query($sql, array($user_id));
@@ -482,7 +483,7 @@
 	
 	// Checks if a user is a department manager(PI), returns the resource or false
 	function isPI($user_id){
-		if($user_id != ''){
+		if(isset($user_id) && $user_id != ''){
 			$departments = array();
 			$sql = "select department_id from department where department_manager = :0";
 			$prepManager = dbHelp::query($sql, array($user_id));

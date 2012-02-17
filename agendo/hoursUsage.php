@@ -136,12 +136,6 @@
 	
 	echo "<table style='margin:auto;width:320px;text-align:right;'>";
 		echo "<tr>";
-			echo "<td colspan='3 style='text-align:center;'>";
-				echo "<a style='color:black;text-align:center;' onmouseover=\"this.style.color='#F7C439'\" onmouseout=\"this.style.color='black'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
-			echo "</td>";
-		echo "</tr>";
-		
-		echo "<tr>";
 			echo "<td>";
 				echo "<a>From date:</a>";
 			echo "</td>";
@@ -191,6 +185,12 @@
 	// Table where the results will appear
 	echo "<table id='resultsTable' style='margin:auto;border:1px solid black;width:800;text-align:center;'>";
 	echo "</table>";
+	
+	echo "<br>";
+	
+	echo "<div style='margin:auto;width:200px;text-align:center;'>";
+		echo "<a style='color:black;text-align:center;' onmouseover=\"this.style.color='#F7C439'\" onmouseout=\"this.style.color='black'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+	echo "</div>";
 	
 	// Returns a string with what the subtotal line should look for each department
 	function showSubTotal($departmentName, $subTotal, $colspan, $isAdmin){
