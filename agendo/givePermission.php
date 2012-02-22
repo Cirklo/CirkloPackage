@@ -44,7 +44,7 @@ require_once("commonCode.php");
 	$prepManager = dbHelp::query($sql, array($_SESSION['user_id']));
 
 	if(dbHelp::numberOfRows($prepAdmin) > 0){ // Check if user is admin
-		$sql = "select resource_id, resource_name from resource";
+		$sql = "select resource_id, resource_name from resource order by lower(resource_name)";
 		$prepResources = dbHelp::query($sql);
 	}
 	elseif(dbHelp::numberOfRows($prepManager) > 0){ // Else check if user is a resource manager
