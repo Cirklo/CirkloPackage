@@ -1,0 +1,70 @@
+body {
+	margin:0;
+	background: #1e4F54;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	color: white;
+}
+
+h1{
+	color: #F7C439;
+	text-align: center;
+}
+
+.link, .link:visited{
+	color: #F7C439;
+}
+
+.link:hover{
+	color: white;
+}
+
+.rowNames{
+	/*color: #bb3322;*/
+	color: black;
+	font-size: 18px;
+	background-color: white;
+}
+
+.rowSubTotals{
+	color: black;
+	font-size: 16px;
+	background-color: white;
+}
+
+.rowTotal{
+	color: #bb3322;
+	font-size: 16px;
+	background-color: white;
+}
+
+.resultsData{
+	color: #444444;
+	font-size: 14px;
+	background-color: #cccccc;
+}
+
+/*
+#resultsTable {
+	border-collapse: collapse;
+	border-style: hidden;
+}
+
+#resultsTable td, #resultsTable th {
+	border: 1px solid black;
+}
+
+#resultsTable tr:first-child th {
+  border-top: 0;
+}
+#resultsTable tr:last-child td {
+  border-bottom: 0;
+}
+#resultsTable tr td:first-child,
+#resultsTable tr th:first-child {
+  border-left: 0;
+}
+#resultsTable tr td:last-child,
+#resultsTable tr th:last-child {
+  border-right: 0;
+}
+*/
