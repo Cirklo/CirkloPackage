@@ -19,18 +19,13 @@
     * 1-> regular, 2-> pre-reserve, 3->deleted, 4->Monitored
     */
     
-// require_once(".htconnect.php");
-// require_once("__dbHelp.php");
 $action=$_GET['action'];
-//echo $action;
 call_user_func($action);
 
 function getUserId(){
 	if(isset($_SESSION['user_id']) && $_SESSION['user_id']!='')
 		return $_SESSION['user_id'];
 	else {
-		// $sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = '".$_GET['user_id']."'";
-		// $res=dbHelp::query($sql) or die ($sql);
 		$sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0";
 		$res=dbHelp::query($sql, array($_GET['user_id'])) or die ($sql);
 		$arr=dbHelp::fetchRowByIndex($res);
@@ -42,7 +37,6 @@ function getPass(){
 	if(isset($_SESSION['user_pass']) && $_SESSION['user_pass']!='')
 		return $_SESSION['user_pass'];
 	else
-		// return cryptPassword($_GET['user_passwd']);
 		return cryptPassword(cleanValue($_GET['user_passwd']));
 }
 
@@ -398,9 +392,8 @@ function update(){
     }
 	//************************************
 	
-	// impersonate user here by get *********************************************************************************************************************
     // $sql="update entry set entry_user=".$tempUser.", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots." where entry_id=". $entry;
-    $sql="update entry set entry_user=".$arrdt[2].", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots." where entry_id=". $entry;
+    $sql="update entry set entry_user=".$arrdt[2].", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots.", entry_action = '".date('Y-m-d H:i:s',time())."' where entry_id=". $entry;
     $resPDO = dbHelp::query($sql.$extra) or die($sql.$extra);
     if (dbHelp::numberOfRows($resPDO) == 0) {
         echo "Entry info not updated.";
