@@ -6,7 +6,8 @@
 	$isPI = isPI($_SESSION['user_id']);
 	
 	if(
-		isset($_POST['userCheck'])
+		isset($_POST['search'])
+		&& isset($_POST['userCheck'])
 		&& isset($_POST['resourceCheck'])
 		&& isset($_POST['entryCheck'])
 		&& isset($_POST['beginDate'])
@@ -26,9 +27,20 @@
 	}
 	elseif(
 		isset($_POST['emailManagers'])
-		&& isset($_POST['departments'])
+		&& isset($_POST['managers'])
+		&& isset($_POST['totals'])
 	){
-		
+		try{
+			emailManagers($_POST['managers'], $_POST['totals']);
+			$json->success = true;
+			$json->message = "Report sent";
+		}
+		catch(Exception $e){
+			$json->success = false;
+			$json->message = "Error: ".$e->getMessage();
+		}
+		echo json_encode($json);
+		exit;
 	}
 	
 	// echo "<script type='text/javascript' src='js/jquery-1.5.2.min.js'></script>";
@@ -93,24 +105,30 @@
 	
 	// Returns a string with what the subtotal line should look for each department
 	function showSubTotal($departmentName, $subTotal, $colspan, $isAdmin, $isPI, $showSubTotal){
-		$formatedString .= "<tr class='rowSubTotals'>";
-			$subColspan = $colspan;
-			if($isAdmin || $isPI != false){
-				$formatedString .= "<td>";
-					$formatedString .=  "<label title='Select to email the department manager'>Email";
-						$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentName."-EmailCheck' value='".$departmentName."'/>";
-					$formatedString .=  "</label>";
-				$formatedString .= "</td>";
-				$subColspan--;
-			}
-			
-			if($showSubTotal){
-				$formatedString .= "<td colspan='".$subColspan."'>";
-					$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentName."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
-				$formatedString .= "</td>";
-				$subTotal = 0;
-			}
-		$formatedString .= "</tr>";
+			$style = "
+				color: black;
+				font-size: 16px;
+				background-color: white;
+			";
+			// $formatedString .= "<tr class='rowSubTotals'>";
+			$formatedString .= "<tr style='".$style."'>";
+				$subColspan = $colspan;
+				if($isAdmin || $isPI != false){
+					$formatedString .= "<td>";
+						$formatedString .=  "<label class='emailLabels' title='Select to email the department manager'>Email";
+							$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentName."-EmailCheck' value='".$departmentName."'/>";
+						$formatedString .=  "</label>";
+					$formatedString .= "</td>";
+					$subColspan--;
+				}
+				
+				if($showSubTotal){
+					$formatedString .= "<td colspan='".$subColspan."'>";
+						$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentName."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
+					$formatedString .= "</td>";
+					$subTotal = 0;
+				}
+			$formatedString .= "</tr>";
 		$formatedString .= "</table>";
 		$formatedString .= "<br>";
 		
@@ -119,13 +137,35 @@
 	
 	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
 	function startTable($department, $subHeader, $colspan){
-		$formatedString = "<table id='".$department."Table' style='width:100%;text-align: center;'>";
+		$sql = "select user_login from department, ".dbHelp::getSchemaName().".user where department_name = :0 and user_id = department_manager";
+		$prep = dbHelp::query($sql, array($department));
+		$row = dbHelp::fetchRowByIndex($prep);
+		$formatedString = "<table id='".$department."Table' summary='".$row[0]."' style='width:100%;text-align:center;'>";
+		$style = "
+			color: black;
+			font-size: 16px;
+			background-color: white;
+		";
 		$formatedString .= " 
-			<td class='rowNames' style='text-align:center;' colspan='".$colspan."'>
+			<td style='".$style."' colspan='".$colspan."'>
 				Department: ".$department."
 			</td>
 		";
 		return $formatedString.$subHeader;
+	}
+	
+	function showTotal($total){
+		$formatedString = "";
+		$style = "
+			color: #bb3322;
+			font-size: 16px;
+			background-color: white;
+			text-align: center;
+		";
+		$formatedString .= "<div style='".$style."'>";
+			$formatedString .= "Total: ".$total;
+		$formatedString .= "</div>";
+		return $formatedString;
 	}
 	
 	function generateResults($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI){
@@ -153,7 +193,12 @@
 			}
 		}
 
-		$subHeader .= "<tr class='rowNames'>";
+		$style = "
+			color: black;
+			font-size: 16px;
+			background-color: white;
+		";
+		$subHeader .= "<tr style='".$style."'>";
 				// sum(entry_slots * resource_resolution / 60) AS invoice_hours
 			$entrySelect = "
 				sum(entry_slots * resource_resolution) AS invoice_hours
@@ -218,8 +263,17 @@
 			$subHeader .= "</td>";
 		$subHeader .= "</tr>";
 		
-		$beginDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['beginDate']));
-		$endDate = dbHelp::convertToDate(str_replace("/", "-", $_POST['endDate']));
+		$beginDate = str_replace("/", "-", $_POST['beginDate']);
+		$endDate = str_replace("/", "-", $_POST['endDate']);
+		if(strtotime($beginDate) > strtotime($endDate)){
+			throw new Exception("'From date' is after 'To date'");
+		}
+		elseif(!strtotime($beginDate) || !strtotime($endDate)){
+			throw new Exception("Not a valid date");
+		}
+		
+		$beginDate = dbHelp::convertToDate($beginDate);
+		$endDate = dbHelp::convertToDate($endDate);
 			
 		$previousDepartmentName = "";
 		$subTotal = 0;
@@ -277,8 +331,13 @@
 			$hours = floor($row[0] / 60);
 			$minutes = $row[0] % 60;
 			$priceTimesHours = round($row[1], 2);
-			
-			$formatedString .= "<tr class='resultsData'>";
+			$style = "
+				color: #444444;
+				font-size: 14px;
+				background-color: #cccccc;
+			";
+			// $formatedString .= "<tr class='resultsData'>";
+			$formatedString .= "<tr style='".$style."'>";
 				// Names if User is checked
 				for($i=3; $i<sizeOf($row); $i++){
 					$formatedString .= "<td>";
@@ -306,9 +365,7 @@
 		// Used to show the last subtotal
 		$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, ($showSubTotal || dbHelp::numberOfRows($prep) > 1));
 		
-		$formatedString .= "<div class='rowTotal'>";
-			$formatedString .= "Total: ".$total;
-		$formatedString .= "</div>";
+		$formatedString .= showTotal($total);
 		
 		if($isAdmin || $isPI != false){
 			$formatedString .=  "<div style='text-align:center;' colspan='".$colspan."'>";
@@ -323,7 +380,25 @@
 		return $formatedString;
 	}
 	
-	function emailManagers(){
-		
+	function emailManagers($managers, $totals){
+		$defaultMailTitle = "Usage report";
+		$from = "Agendo";
+		$managers = json_decode($managers, true);
+		foreach($managers as $manager => $departments){
+			// Get manager email here
+			$sql = "select user_email from ".dbHelp::getSchemaName().".user where user_login = :0";
+			$prep = dbHelp::query($sql, array($manager));
+			$row = dbHelp::fetchRowByIndex($prep);
+			$message = "<html>";
+				$message .= "<body bgcolor='#1e4F54'>";
+				foreach($departments as $department){
+					$message .= $department;
+					$message .= "\n<br>";
+				}
+				$message .= showTotal($totals[$manager]);
+				$message .= "</body>";
+			$message .= "</html>";
+			sendMail($defaultMailTitle, $row[0], $message, $from, true, true);
+		}
 	}
 ?>

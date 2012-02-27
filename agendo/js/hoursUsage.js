@@ -9,7 +9,8 @@ function sendChecksAndGetResult(){
 		$.post(
 			"hoursUsage.php", 
 			{
-				userCheck: Number($('#userCheck').attr('checked'))
+				search: 'search'
+				, userCheck: Number($('#userCheck').attr('checked'))
 				, resourceCheck: Number($('#resourceCheck').attr('checked'))
 				, entryCheck: Number($('#entryCheck').attr('checked'))
 				, beginDate: $('#beginDateText').val()
@@ -19,19 +20,20 @@ function sendChecksAndGetResult(){
 				if(serverData.success){
 					$('#resultsTable').html(serverData.tableData);
 				}
-			},
-			"json")
+				else{
+					showMessage(serverData.message, true);
+				}
+			}
+			, "json")
 			.error(
 				function(error){
-					// Change alert to something else
-					alert(error.responseText);
+					showMessage(error.responseText, true);
 				}
 			)
 		;
 	}
 	else{
-		// Change alert to something else
-		alert('Please pick both dates');
+		showMessage('Please pick both dates');
 	}
 }
 
@@ -41,30 +43,53 @@ function selectUnselectAll(){
 	var elemArray = document.getElementById('resultsTable').getElementsByClassName('emailChecks');
 	
 	for(i in elemArray){
-		if(elemArray[i].id != null && elemArray[i].value){ // fix for chrome
+		if(elemArray[i].id != null && elemArray[i].value){ // fixed for chrome
 			elemArray[i].checked = selectAllChecked;
 		}
 	}
 }
 
 function email(){
-	var departmentsArray = new Array();
+	var clone;
+	var total = 0;
+	var managers = {}; // object, not an array, arrays => integer indexes, objects can be associative arrays
+	var totals = {}; // object, not an array, arrays => integer indexes, objects can be associative arrays
 	var elemArray = document.getElementById('resultsTable').getElementsByClassName('emailChecks');
-	
-	// Gets the selected departments to email
-	for(i in elemArray){
-		if(elemArray[i].id != null && elemArray[i].value && elemArray[i].checked){ // fix for chrome
-			departmentsArray.push(elemArray[i].value);
+	// Gets the checked departments to email
+	for(var i in elemArray){
+		if(elemArray[i].id != null && elemArray[i].value && elemArray[i].checked){ // fixed for chrome
+			element = $("#" + elemArray[i].value + 'Table');
+			clone = element.clone().wrap('<table>').parent();
+			clone.find("#" + elemArray[i].value + '-EmailCheck').attr("disabled", true);
+			currentManager = element.attr("summary");
+			if(managers[currentManager] == null){
+				managers[currentManager] = {};
+				totals[currentManager] = 0;
+			}
+			managers[currentManager][managers[currentManager].length] = clone.html();
+			totals[currentManager] += Number(clone.find("#" + elemArray[i].value + 'SubTotal').attr("name"));
 		}
 	}
-
-	var subTotal;
-	// Iterates through the several departments (the ones checked)
-	for(i in departmentsArray){
-		subTotal = document.getElementById(departmentsArray[i] + 'SubTotal').name;
-		alert(subTotal);
-		// alert(departmentsArray[i]);
-	}
+	
+	// Convert multidimensional array to a string
+	managers = JSON.stringify(managers);
+	$.post(
+		"hoursUsage.php", 
+		{
+			emailManagers: 'emailManagers'
+			, 'managers': managers
+			, totals: totals
+		},
+		function(serverData){
+			showMessage(serverData.message, !serverData.success);
+		}
+		, "json")
+		.error(
+			function(error){
+				showMessage(error.responseText, true);
+			}
+		)
+	;
 }
 
 // Return an array with all the information regarding a department

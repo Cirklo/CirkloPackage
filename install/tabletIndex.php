@@ -169,8 +169,8 @@ function notifyUserAndResp($resource_name, $usersName, $usersPhoneNumber, $users
 	// $replyToPerson = "uicweb@igc.gulbenkian.pt";
 	echo "Resource ".$resource_name." time usage was exceeded by user ".$usersName.".\n";
 	$replyToPerson = "";
-	sendMail($subject,$usersEmail, $userMessage, $replyToPerson, true);
-	sendMail($subject, $respEmail, $responsibleMessage, $replyToPerson, true); // $arr[6] = responsible's email
+	sendMail($subject,$usersEmail, $userMessage, $replyToPerson);
+	sendMail($subject, $respEmail, $responsibleMessage, $replyToPerson);
 }
 
 function makeCookie(){
