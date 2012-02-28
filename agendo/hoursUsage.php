@@ -111,10 +111,10 @@
 				background-color: white;
 			";
 			// $formatedString .= "<tr class='rowSubTotals'>";
-			$formatedString .= "<tr style='".$style."'>";
+			$formatedString .= "\n<tr style='".$style."'>";
 				$subColspan = $colspan;
 				if($isAdmin || $isPI != false){
-					$formatedString .= "<td>";
+					$formatedString .= "\n<td>";
 						$formatedString .=  "<label class='emailLabels' title='Select to email the department manager'>Email";
 							$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentName."-EmailCheck' value='".$departmentName."'/>";
 						$formatedString .=  "</label>";
@@ -123,7 +123,7 @@
 				}
 				
 				if($showSubTotal){
-					$formatedString .= "<td colspan='".$subColspan."'>";
+					$formatedString .= "\n<td colspan='".$subColspan."'>";
 						$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentName."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
 					$formatedString .= "</td>";
 					$subTotal = 0;
@@ -140,14 +140,14 @@
 		$sql = "select user_login from department, ".dbHelp::getSchemaName().".user where department_name = :0 and user_id = department_manager";
 		$prep = dbHelp::query($sql, array($department));
 		$row = dbHelp::fetchRowByIndex($prep);
-		$formatedString = "<table id='".$department."Table' summary='".$row[0]."' style='width:100%;text-align:center;'>";
+		$formatedString = "\n<table id='".$department."Table' summary='".$row[0]."' style='width:100%;text-align:center;'>";
 		$style = "
 			color: black;
 			font-size: 16px;
 			background-color: white;
 		";
 		$formatedString .= " 
-			<td style='".$style."' colspan='".$colspan."'>
+			<\ntd style='".$style."' colspan='".$colspan."'>
 				Department: ".$department."
 			</td>
 		";
@@ -162,7 +162,7 @@
 			background-color: white;
 			text-align: center;
 		";
-		$formatedString .= "<div style='".$style."'>";
+		$formatedString .= "\n<div style='".$style."'>";
 			$formatedString .= "Total: ".$total;
 		$formatedString .= "</div>";
 		return $formatedString;
