@@ -110,24 +110,29 @@
 				font-size: 16px;
 				background-color: white;
 			";
-			// $formatedString .= "<tr class='rowSubTotals'>";
-			$formatedString .= "\n<tr style='".$style."'>";
-				$subColspan = $colspan;
-				if($isAdmin || $isPI != false){
-					$formatedString .= "\n<td>";
-						$formatedString .=  "<label class='emailLabels' title='Select to email the department manager'>Email";
-							$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentName."-EmailCheck' value='".$departmentName."'/>";
-						$formatedString .=  "</label>";
-					$formatedString .= "</td>";
-					$subColspan--;
-				}
+
+			$displaySubTotal = "none";
+			if($showSubTotal){
+				$displaySubTotal = "table";
+			}
+
+			$displayEmail = "none";
+			if($isAdmin || $isPI != false){
+				$displayEmail = "table";
+			}
+			
+			$formatedString = "\n<tr style='".$style."'>";
+				$formatedString .= "\n<td colspan='".$colspan."'>";
+					$formatedString .=  "<label class='emailLabels' style='display:".$displayEmail.";margin-left:10px;float:left' title='Select to email the department manager'>Email";
+						$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentName."-EmailCheck' value='".$departmentName."'/>";
+					$formatedString .=  "</label>";
 				
-				if($showSubTotal){
-					$formatedString .= "\n<td colspan='".$subColspan."'>";
+					$formatedString .=  "&nbsp";
+				
+					$formatedString .= "<label style='display:".$displaySubTotal.";float:right;margin-right:10px;'>";
 						$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentName."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
-					$formatedString .= "</td>";
-					$subTotal = 0;
-				}
+					$formatedString .= "</label>";
+				$formatedString .= "</td>";
 			$formatedString .= "</tr>";
 		$formatedString .= "</table>";
 		$formatedString .= "<br>";
@@ -314,15 +319,19 @@
 				".$entryGroupBy."
 		";
 		$prep = dbHelp::query($sql, array($beginDate, $endDate));
+		$departmentElements = 0;
 		while($row = dbHelp::fetchRowByIndex($prep)){
+			$departmentElements++;
 			$department = $row[2];
 			if(
 				$previousDepartmentName != $department
 			){
 				if($previousDepartmentName != ""
 				){
-					$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, ($showSubTotal || dbHelp::numberOfRows($prep) > 1));
+					$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, dbHelp::numberOfRows($prep) > 1);
+					// $formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, $departmentElements > 1);
 					$subTotal = 0;
+					$departmentElements = 0;
 				}
 				$formatedString .= startTable($department, $subHeader, $colspan);
 			}
@@ -363,7 +372,8 @@
 		}
 		
 		// Used to show the last subtotal
-		$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, ($showSubTotal || dbHelp::numberOfRows($prep) > 1));
+		$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, dbHelp::numberOfRows($prep) > 1);
+		// $formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $isAdmin, $isPI, $departmentElements > 1);
 		
 		$formatedString .= showTotal($total);
 		
