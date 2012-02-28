@@ -54,7 +54,6 @@ function email(){
 	var total = 0;
 	var managers = {}; // object, not an array, arrays => integer indexes, objects can be associative arrays
 	var totals = {}; // object, not an array, arrays => integer indexes, objects can be associative arrays
-	var sizes
 	var elemArray = document.getElementById('resultsTable').getElementsByClassName('emailChecks');
 	// Gets the checked departments to email
 	for(var i in elemArray){
@@ -63,7 +62,8 @@ function email(){
 			clone = element.clone().wrap('<table>').parent();
 			clone.find("#" + elemArray[i].value + '-EmailCheck').attr("disabled", true);
 			currentManager = element.attr("summary");
-			if(managers[currentManager] == null){
+			// if(managers[currentManager] == null){
+			if(typeof managers[currentManager] != 'undefined'){
 				// Needs to be an array, otherwise it wouldnt be possible to get the length property (yep javascript is THAT bad!!)
 				managers[currentManager] = new Array();
 				totals[currentManager] = 0;
