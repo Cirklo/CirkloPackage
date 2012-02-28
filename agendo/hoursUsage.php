@@ -147,7 +147,7 @@
 			background-color: white;
 		";
 		$formatedString .= " 
-			<\ntd style='".$style."' colspan='".$colspan."'>
+			\n<td style='".$style."' colspan='".$colspan."'>
 				Department: ".$department."
 			</td>
 		";
