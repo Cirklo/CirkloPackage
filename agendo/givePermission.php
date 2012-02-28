@@ -137,7 +137,7 @@ require_once("commonCode.php");
 		echo "<tr>";
 			echo "<td colspan='3'>";
 				echo "<br>";
-				echo "<a style='color:white;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+				echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
 			echo "</td>";
 		echo "</tr>";
 	echo "</table>";
