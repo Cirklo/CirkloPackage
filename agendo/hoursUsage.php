@@ -398,7 +398,8 @@
 				$message .= showTotal($totals[$manager]);
 				$message .= "</body>";
 			$message .= "</html>";
-			sendMail($defaultMailTitle, $row[0], $message, $from, true, true);
+			wtf($row[0], "w", "a.txt");
+			// sendMail($defaultMailTitle, $row[0], $message, $from, true, true);
 		}
 	}
 ?>
