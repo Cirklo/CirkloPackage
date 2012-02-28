@@ -54,6 +54,7 @@ function email(){
 	var total = 0;
 	var managers = {}; // object, not an array, arrays => integer indexes, objects can be associative arrays
 	var totals = {}; // object, not an array, arrays => integer indexes, objects can be associative arrays
+	var sizes
 	var elemArray = document.getElementById('resultsTable').getElementsByClassName('emailChecks');
 	// Gets the checked departments to email
 	for(var i in elemArray){
@@ -63,16 +64,18 @@ function email(){
 			clone.find("#" + elemArray[i].value + '-EmailCheck').attr("disabled", true);
 			currentManager = element.attr("summary");
 			if(managers[currentManager] == null){
-				managers[currentManager] = {};
+				// Needs to be an array, otherwise it wouldnt be possible to get the length property (yep javascript is THAT bad!!)
+				managers[currentManager] = new Array();
 				totals[currentManager] = 0;
 			}
 			managers[currentManager][managers[currentManager].length] = clone.html();
 			totals[currentManager] += Number(clone.find("#" + elemArray[i].value + 'SubTotal').attr("name"));
 		}
 	}
-	
+
 	// Convert multidimensional array to a string
 	managers = JSON.stringify(managers);
+	
 	$.post(
 		"hoursUsage.php", 
 		{

@@ -408,6 +408,7 @@
 				$message .= showTotal($totals[$manager]);
 				$message .= "</body>";
 			$message .= "</html>";
+			
 			sendMail($defaultMailTitle, $row[0], $message, $from, true, true);
 		}
 	}
