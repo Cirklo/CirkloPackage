@@ -63,7 +63,7 @@ function email(){
 			clone.find("#" + elemArray[i].value + '-EmailCheck').attr("disabled", true);
 			currentManager = element.attr("summary");
 			// if(managers[currentManager] == null){
-			if(typeof managers[currentManager] != 'undefined'){
+			if(typeof managers[currentManager] == 'undefined'){
 				// Needs to be an array, otherwise it wouldnt be possible to get the length property (yep javascript is THAT bad!!)
 				managers[currentManager] = new Array();
 				totals[currentManager] = 0;
