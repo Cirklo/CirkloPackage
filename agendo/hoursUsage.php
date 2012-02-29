@@ -147,11 +147,11 @@
 	}
 	
 	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
-	function startTable($department, $subHeader, $colspan){
+	function startTable($departmentId, $subHeader, $colspan){
 		$sql = "select user_login, department_name from department, ".dbHelp::getSchemaName().".user where department_id = :0 and user_id = department_manager";
-		$prep = dbHelp::query($sql, array($department));
+		$prep = dbHelp::query($sql, array($departmentId));
 		$row = dbHelp::fetchRowByIndex($prep);
-		$formatedString = "\n<table id='".$department."Table' summary='".$row[0]."' style='width:100%;text-align:center;'>";
+		$formatedString = "\n<table id='".$departmentId."Table' summary='".$row[0]."' style='width:100%;text-align:center;'>";
 		$style = "
 			color: black;
 			font-size: 16px;
@@ -160,7 +160,7 @@
 		$formatedString .= " 
 			\n<td style='".$style."' colspan='".$colspan."'>
 				Department: ".$row[1]."
-			</td>
+			</td>\n
 		";
 		return $formatedString.$subHeader;
 	}
@@ -219,13 +219,10 @@
 			$entryGroupBy = "";
 			if($_POST['entryCheck'] == 1){
 					// entry_slots * resource_resolution / 60 AS invoice_hours
-				// $entrySelect = "
-					// entry_slots * resource_resolution AS invoice_hours
-					// ,entry_slots * resource_resolution * price_value / 60 AS invoice_price
-					// ,department_id AS invoice_department
-					// ,entry_datetime
-				// ";
-				$entrySelect .= "
+				$entrySelect = "
+					entry_slots * resource_resolution AS invoice_hours
+					,entry_slots * resource_resolution * price_value / 60 AS invoice_price
+					,department_id AS invoice_department
 					,entry_datetime
 				";
 				$entryGroupBy = ", entry_id order by department_name, entry_datetime";
@@ -355,22 +352,22 @@
 				background-color: #cccccc;
 			";
 			// $formatedString .= "<tr class='resultsData'>";
-			$formatedString .= "<tr style='".$style."'>";
+			$formatedString .= "\n<tr style='".$style."'>";
 				// Names if User is checked
 				for($i=3; $i<sizeOf($row); $i++){
-					$formatedString .= "<td>";
+					$formatedString .= "\n<td>";
 						$formatedString .= $row[$i];
 					$formatedString .= "</td>";
 				}
 				
 				// Hours
-				$formatedString .= "<td>";
+				$formatedString .= "\n<td>";
 					// $formatedString .= $hours;
 					$formatedString .= $hours."h : ".$minutes."m";
 				$formatedString .= "</td>";
 				
 				// Price*Hours
-				$formatedString .= "<td>";
+				$formatedString .= "\n<td>";
 					$formatedString .= $priceTimesHours;
 				$formatedString .= "</td>";
 			$formatedString .= "</tr>";
