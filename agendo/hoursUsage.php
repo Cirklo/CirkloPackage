@@ -104,33 +104,39 @@
 	echo "<br>";
 	
 	// Returns a string with what the subtotal line should look for each department
-	function showSubTotal($departmentName, $subTotal, $colspan, $isAdmin, $isPI, $showSubTotal){
-			$style = "
-				color: black;
-				font-size: 16px;
-				background-color: white;
-			";
+	function showSubTotal($departmentId, $subTotal, $colspan, $isAdmin, $isPI, $showSubTotal){
+		$style = "
+			color: black;
+			font-size: 16px;
+			background-color: white;
+		";
 
-			$displaySubTotal = "none";
-			if($showSubTotal){
-				$displaySubTotal = "table";
-			}
+			
+		$sql = "select department_name from department where department_id = :0";
+		$prep = dbHelp::query($sql, array($departmentId));
+		$row = dbHelp::fetchRowByIndex($prep);
+		$departmentName = $row[0];
+		
+		$displaySubTotal = "none";
+		if($showSubTotal){
+			$displaySubTotal = "table";
+		}
 
-			$displayEmail = "none";
-			if($isAdmin || $isPI != false){
-				$displayEmail = "table";
-			}
+		$displayEmail = "none";
+		if($isAdmin || $isPI != false){
+			$displayEmail = "table";
+		}
 			
 			$formatedString = "\n<tr style='".$style."'>";
 				$formatedString .= "\n<td colspan='".$colspan."'>";
 					$formatedString .=  "<label class='emailLabels' style='display:".$displayEmail.";margin-left:10px;float:left' title='Select to email the department manager'>Email";
-						$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentName."-EmailCheck' value='".$departmentName."'/>";
+						$formatedString .=  "<input type='checkBox' class='emailChecks' id='".$departmentId."-EmailCheck' value='".$departmentId."'/>";
 					$formatedString .=  "</label>";
 				
 					$formatedString .=  "&nbsp";
 				
 					$formatedString .= "<label style='display:".$displaySubTotal.";float:right;margin-right:10px;'>";
-						$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentName."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
+						$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentId."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
 					$formatedString .= "</label>";
 				$formatedString .= "</td>";
 			$formatedString .= "</tr>";
@@ -142,7 +148,7 @@
 	
 	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
 	function startTable($department, $subHeader, $colspan){
-		$sql = "select user_login from department, ".dbHelp::getSchemaName().".user where department_name = :0 and user_id = department_manager";
+		$sql = "select user_login, department_name from department, ".dbHelp::getSchemaName().".user where department_id = :0 and user_id = department_manager";
 		$prep = dbHelp::query($sql, array($department));
 		$row = dbHelp::fetchRowByIndex($prep);
 		$formatedString = "\n<table id='".$department."Table' summary='".$row[0]."' style='width:100%;text-align:center;'>";
@@ -153,7 +159,7 @@
 		";
 		$formatedString .= " 
 			\n<td style='".$style."' colspan='".$colspan."'>
-				Department: ".$department."
+				Department: ".$row[1]."
 			</td>
 		";
 		return $formatedString.$subHeader;
@@ -208,15 +214,18 @@
 			$entrySelect = "
 				sum(entry_slots * resource_resolution) AS invoice_hours
 				,sum(entry_slots * resource_resolution * price_value / 60) AS invoice_price
-				,department_name AS invoice_department
+				,department_id AS invoice_department
 			";
 			$entryGroupBy = "";
 			if($_POST['entryCheck'] == 1){
 					// entry_slots * resource_resolution / 60 AS invoice_hours
-				$entrySelect = "
-					entry_slots * resource_resolution AS invoice_hours
-					,entry_slots * resource_resolution * price_value / 60 AS invoice_price
-					,department_name AS invoice_department
+				// $entrySelect = "
+					// entry_slots * resource_resolution AS invoice_hours
+					// ,entry_slots * resource_resolution * price_value / 60 AS invoice_price
+					// ,department_id AS invoice_department
+					// ,entry_datetime
+				// ";
+				$entrySelect .= "
 					,entry_datetime
 				";
 				$entryGroupBy = ", entry_id order by department_name, entry_datetime";
@@ -401,8 +410,8 @@
 			$row = dbHelp::fetchRowByIndex($prep);
 			$message = "<html>";
 				$message .= "<body bgcolor='#1e4F54'>";
-				foreach($departments as $department){
-					$message .= $department;
+				foreach($departments as $tableDepartment){
+					$message .= $tableDepartment;
 					$message .= "\n<br>";
 				}
 				$message .= showTotal($totals[$manager]);
