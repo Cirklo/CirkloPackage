@@ -84,7 +84,6 @@ if($imResstatus3){ // user confirmation
 if (isset($_GET['update'])) {$update=cleanValue($_GET['update']);$entry=cleanValue($_GET['update']);} else {$update=0;} ;
 //instatiation for calendar
 $calendar=new cal($resource,$update);
-$message=new genMsg;
 
 //getting the variables 
 if (isset($_GET['action'])) {$action = cleanValue($_GET['action']);} else {$action =0;} ;
@@ -604,6 +603,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "<td colspan=2><b>Announcements</b></td>";
 						echo "</tr>";
 						
+						$message=new genMsg;
 						echo "<tr>";
 							echo "<td colspan=2>";
 							$message->announcement($resource);

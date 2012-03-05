@@ -199,13 +199,14 @@ function toAdmin($datetime,$extra,$type,$comment=''){
     $day=substr($datetime,6,2);
     $hour=substr($datetime,8,2);
     $min=substr($datetime,10,2);
-
-    if ($extra!='') // fields for new or update entry
+	
+    if ($extra!=''){ // fields for new or update entry
         foreach ($extra as $key => $value) {
-        $extrainfo.= $key. ":".$value ."\\n";
+			$extrainfo.= $key. ":".$value ."\\n";
         }
         $extrainfo=substr($extrainfo,0,strlen($extrainfo)-2);
-        
+	}
+	
 $att = "BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Cirklo Agendo
@@ -221,7 +222,6 @@ END:VCALENDAR";
 
     switch ($type) {
         case 'newentry':
-
 			$this->AddStringAttachment($att,'agendo.ics');
             $msg="New entry on ". $this->ResourceName . " at ". $hour . ":". $min ." on the " .$year."-".$month."-".$day." from user ".$this->UserFullName.".";
             break;
@@ -236,7 +236,6 @@ END:VCALENDAR";
             break;
 			
         case 'update':
-		
 			// $sql="select xfields_label, xfieldsval_value from xfields, xfieldsval where xfieldsval_entry = ".$this->LastEntry." and xfieldsval_field = xfields_id";
 			// $res=dbHelp::query($sql);
 			// $fields = '';
@@ -269,16 +268,17 @@ END:VCALENDAR";
 			
         case 1:
             $this->Subject=strtoupper($type)." on " . $this->ResourceName ;
+			$this->ClearReplyTos();
             $this->AddReplyTo($this->UserEmail,$this->UserFullName);
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
-            $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr  ;
+            $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr;
             $address = $this->RespEmail;
 			$this->ClearAddresses();
 			$this->AddAddress($address, "");
             if(!$this->Send()) {
-                //echo "Mailer Error: " . $this->ErrorInfo;
+                // echo "Mailer Error: " . $this->ErrorInfo;
             } else {
-                //echo "Message sent!";
+                // echo "Message sent!";
             }
             break;
 			
@@ -292,7 +292,6 @@ END:VCALENDAR";
    * @param integer user_id (user unique id)
 
 */
-
 function recover($user_id, $passRenewalResp = null){
     // $sql="select user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
     // $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
@@ -415,19 +414,6 @@ function nonconf(){
                 } else {
                     //echo "Message sent!";
                 }
-
-				//************************************* del me **********************************************************
-                // $this->Subject="No confirmation on ". $arr['date'] ;
-				// $this->ClearReplyTos();	//clear replys before receiving any email
-				// $this->AddReplyTo($this->UserEmail,$this->UserFullName);
-                // $this->Body=$msg . " <br> ".$sql;
-                // $address = "ppires@igc.gulbenkian.pt";
-                // $this->AddAddress($address, "");
-                // if(!$this->Send()) {
-                    // echo "Mailer Error: " . $this->ErrorInfo;
-                // }
-				//************************************* del me **********************************************************
-
 		break;
         case 0:
             break;
