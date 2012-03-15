@@ -82,7 +82,9 @@ class pubHandler{
 						position:absolute;
 						top:0px;
 						width:134px;
-						border:0px solid;'>";
+						border:0px solid;
+						margin:2px;
+						'>";
 					
 					//loop through all results
 					for($i=0;$row=$sql->fetch();$i++){
@@ -95,7 +97,8 @@ class pubHandler{
 							width:130px;
 							height:$row[2];
 							text-align:center;
-							vertical-align:bottom'>";			
+							vertical-align:bottom;
+							'>";			
 						echo "<a href=javascript:clickPub('$row[5]','$row[4]');><img src='$row[3]' width=128px></a>";
 						echo "</div>";
 					}		

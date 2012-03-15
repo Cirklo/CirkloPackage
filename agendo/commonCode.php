@@ -560,14 +560,14 @@
 		return true;
 	}
 	
-	function sendMail($subject, $address, $message, $replyToPerson, $userDbSettings = true, $isHtml = false, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
+	function getMailObject($subject, $address, $message, $replyToPerson, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
 		require_once("../agendo/alert/class.phpmailer.php");
 		$mail = new PHPMailer();
 		
 		$mail->IsSMTP();
-		$mail->isHtml($isHtml);
+		// $mail->isHtml($isHtml);
 		$mail->SMTPDebug  = 1;
-		if($userDbSettings){
+		if($auth == null){
 			$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
 			$res = dbHelp::query($sql);
 			$configArray = array();
@@ -597,8 +597,20 @@
 		$mail->Body = $message;
 		$mail->AddAddress($address, "");
 
-		if($mail->Send() === false){
-			throw new Exception("Unable to send the email, please check the mail settings.");
+		// if($mail->Send() === false){
+			// throw new Exception("Unable to send the email, please check the mail settings.");
+		// }
+		return $mail;
+	}
+	
+	// Sends the mail object, its objective is patch the crappy send method of the mailer class (seriously, send = false means error? ever heard of exceptions??)
+	function sendMailObject($mailObject, $exceptionMessage = false){
+		if(!$exceptionMessage){
+			$exceptionMessage = "Unable to send the email, please check the mail settings.";
+		}
+		
+		if($mailObject->Send() === false){
+			throw new Exception($exceptionMessage);
 		}
 	}
 	
