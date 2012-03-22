@@ -480,6 +480,7 @@ INSERT INTO `xfieldsinputtype` (`xfieldsinputtype_id`, `xfieldsinputtype_type`) 
 (2, 'CheckBoxSinglePick'),
 (3, 'CheckBoxMultiPick'),
 (4, 'NumericOnlyInput');
+(5, 'EmptyAllowedText');
 
 
 --

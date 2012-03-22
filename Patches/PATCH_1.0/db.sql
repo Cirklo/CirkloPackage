@@ -50,3 +50,14 @@ INSERT INTO `resstatus` (`resstatus_id`, `resstatus_name`) VALUES
 (6, 'Sequencing');
 
 UPDATE configParams SET configParams_value='1.5.5' WHERE configParams_name='AgendoVersion';
+
+
+-- 2012-03-22
+-- few changes to allow a financial report and a new type of xfield (an empty input text box)
+ALTER TABLE `institute` ADD COLUMN `institute_pricetype` INT NOT NULL DEFAULT 1  AFTER `institute_vat` ;
+ALTER TABLE `institute` ADD INDEX ( `institute_pricetype` ) ;
+ALTER TABLE `institute` ADD FOREIGN KEY ( `institute_pricetype` ) REFERENCES `pricetype` (`pricetype_id`);
+INSERT INTO `level` (`level_id`, `level_name`) VALUES ('3', 'Inactive');
+INSERT INTO `databasename`.`xfieldsinputtype` (`xfieldsinputtype_id`, `xfieldsinputtype_type`) VALUES ('5', 'EmptyAllowedText');
+
+UPDATE configParams SET configParams_value='1.5.6' WHERE configParams_name='AgendoVersion';

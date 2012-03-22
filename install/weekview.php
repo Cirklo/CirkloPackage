@@ -19,7 +19,7 @@
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" /> 
-<META HTTP-EQUIV="REFRESH" CONTENT="180">
+<META HTTP-EQUIV="REFRESH" CONTENT="180" />
 <meta name="keywords" content="" />
 <meta name="description" content="" /> 
 <link href="../agendo/css/style.css" rel="stylesheet" type="text/css" />
@@ -437,6 +437,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 					// /similar stuff
 					
 				
+					$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'inline-table';
+					$tdButtonsDisplay = 'table-row';
 					// Used to hide buttons
 					if(!$imResstatus5){
 					//**********************
@@ -488,6 +490,14 @@ echo "<table id='master' style='margin:auto' width=750>";
 										echo "<br><input lang=send onkeypress='return noenter()' class=numericXfield  id='".$arrxfields['xfields_name']."-".$arrxfields['xfields_id']."' name='".$arrxfields['xfields_label']."' ".$extraHtml.">";
 										echo "</td>";
 									}
+									elseif($arrxfields['xfields_type'] == 5){// input that wont give an error if its empty
+										if ($calendar->getEntry()!=0)
+											$extraHtml = "value='" . $arrxfields['xfieldsval_value']. "'";
+										echo "<td colspan=2>";
+										echo $arrxfields['xfields_label'];
+										echo "<br><input lang=send onkeypress='return noenter()' class='emptyAllowedText'  id='".$arrxfields['xfields_name']."-".$arrxfields['xfields_id']."' name='".$arrxfields['xfields_label']."' ".$extraHtml.">";
+										echo "</td>";
+									}
 									else if($arrxfields['xfields_type'] == 2 || $arrxfields['xfields_type'] == 3){
 										if($formerName != $arrxfields['xfields_name']){
 											echo "<tr><td colspan=2>".$arrxfields['xfields_name']."</td></tr>";
@@ -536,21 +546,42 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "</tr>";
 
 						echo "<tr><td colspan=2><hr></td></tr>";
-
-						echo "<tr><td colspan=2 align='center'>";
-							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\">";
-							echo "<input type=button style='width:60px' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\">";
-							echo "<input type=button style='width:40px' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\"><br>";
-							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\">";
-							echo "<input type=button style='width:70px' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\">";
-						echo "</td></tr>";
 						
-						echo "<tr><td colspan=2><hr></td></tr>";
-
+						if($imResstatus6){
+							if($calendar->isResp()){
+								$buttonDisplay2 = $buttonDisplay5 = 'none';
+							}
+							// elseif(hasPermission($_SESSION['user_id'], $resource)){
+							else{
+								$tdButtonsDisplay = 'none';
+								$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
+								echo "<tr><td colspan=2 align='center'>";
+									echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='addSample();' />";
+								echo "</td></tr>";
+								
+								echo "<tr><td colspan=2><hr></td></tr>";
+							}
+							// else{
+								// $tdButtonsDisplay = 'none';
+							// }
+						}
 					// Used to hide buttons
 					}
+					else{
+						$tdButtonsDisplay = 'none';
+						$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
+					}
 					//*********************
-					echo "</table>";
+					echo "<tr style='display:".$tdButtonsDisplay.";' ><td colspan=2 align='center'>";
+						echo "<input type=button style='width:40px;display:".$buttonDisplay1.";' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\" />";
+						echo "<input type=button style='width:60px;display:".$buttonDisplay2.";' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\" />";
+						echo "<input type=button style='width:40px;display:".$buttonDisplay3.";' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" /><br>";
+						echo "<input type=button style='width:70px;display:".$buttonDisplay4.";' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" />";
+						echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\" />";
+					echo "</td></tr>";
+				
+					echo "<tr style='display:".$tdButtonsDisplay.";'><td colspan=2;><hr></td></tr>";
+				echo "</table>";
 				
 				echo "<input name=action lang=send style='visibility:hidden;font-size:0px' value='' id=action>";
 				//echo "<input name=maxslots  style='visibility:hidden;font-size:0px' value='' id=maxslots>";
@@ -565,36 +596,24 @@ echo "<table id='master' style='margin:auto' width=750>";
 					echo "<table align=left style='width:100%;padding:2px;'>";
 						// *************************************************************************
 						// Checks if the user logged is the one responsible for the current resource
-						if(isset($_SESSION['user_id']) && $imResstatus5 != 5){
-							$sqlResp = "select 1 from resource where resource_id = ".$calendar->getResource()." and resource_resp = ".$_SESSION['user_id'];
-							$resResp = dbHelp::query($sqlResp);
-							if(dbHelp::numberOfRows($resResp) > 0){
-								echo "<tr>";
-									echo "<td colspan=2>";
-									echo "<label>Perform action as:</label>";
-									echo "</td>";
-								echo "</tr>";
-							
-								$sqlResp = "select user_id, user_firstname, user_lastname from user";
-								$resResp = dbHelp::query($sqlResp);
-								echo "<tr>";
-									echo "<td>";
-									echo "<input type='checkbox' id='impersonateCheck' onchange='impersonateCheckChange()' />";
-									echo "</td>";
-									
-									echo "<td>";
-									// echo "<input type='text' id='usersList' onclick='impersonateCheckActive(true)' disabled/>";
-									echo "<input type='text' id='usersList' onclick='impersonateCheckChange(true)'/>";
-									echo "</td>";
-								echo "</tr>";
+						if($calendar->isResp() && !$imResstatus5 && !$imResstatus6){
+							echo "<tr>";
+								echo "<td colspan=2>";
+								echo "<label>Perform action as:</label>";
+								echo "</td>";
+							echo "</tr>";
+						
+							echo "<tr>";
+								echo "<td>";
+								echo "<input type='checkbox' id='impersonateCheck' onchange='impersonateCheckChange()' />";
+								echo "</td>";
 								
-								// echo "<tr>";
-									// echo "<td colspan=2>";
-									// echo "<hr>";
-									// echo "</td>";
-								// echo "</tr>";
-								echo "<tr><td colspan=2><hr></td></tr>";
-							}
+								echo "<td>";
+								echo "<input type='text' id='usersList' onclick='impersonateCheckChange(true)'/>";
+								echo "</td>";
+							echo "</tr>";
+							
+							echo "<tr><td colspan=2><hr></td></tr>";
 						}
 						// *************************************************************************
 
@@ -675,11 +694,10 @@ echo "<div id=InputComments style='display:none;position:absolute;border-style:s
 		echo "<textarea name=txtcomments id=txtcomments rows=3 cols=25></textarea>";
     echo "</form>";
 	
-    echo "<center>";
+	echo "<center>";
 	echo "<a href='javascript:addcomments(0)' title='Confirm and leave the comment written above'>Comment and confirm</a>&nbsp;&nbsp;&nbsp;";
-    echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>";
+	echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>";
 echo "</div>";
-
 
 echo "</body>";
 echo "</html>";

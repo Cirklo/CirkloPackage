@@ -702,8 +702,8 @@ function checkfield(field) {
     if(usingSession && (field.name == 'user_id' || field.name == 'user_passwd')){
 		return false;
 	}
-	
-    if (field.value=='') {
+
+    if (field.value=='' && field.className != 'emptyAllowedText') {
 		field.focus();
         if (document.getElementById('msg').innerHTML != "Field " + field.name + " required!")
 			document.getElementById('msg').innerHTML = "Field " + field.name + " required!";

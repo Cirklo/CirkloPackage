@@ -345,7 +345,9 @@ function recover($user_id, $passRenewalResp = null){
 				$address = $arr['user_email'];
 				$this->ClearAddresses();
 				$this->AddAddress($address, "");
+				// echo success or error message.... sniff :'(
 				if(!$this->Send()) {
+					// password is updated anyway
 					echo "Mailer Error: " . $this->ErrorInfo;
 					return false;
 				} else {

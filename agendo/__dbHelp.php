@@ -83,7 +83,12 @@
 				$prepSql->execute();
 			}
 			catch(Exception $e){
-				throw new Exception("Full sql query is: '".$sql."'. Error is: '".$e->getMessage()."'");
+				$argsText = "";
+				if($argsArray != null){
+					$argsText = "\nUsing the data array [".implode("; ", $argsArray)."]";
+				}
+				self::errorLog("Full sql query is: '".$sql."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
+				throw new Exception("Database error, error logged.");
 			}
 			return $prepSql;
 		}
@@ -240,6 +245,19 @@
 			// }
 			// return $resultMsg;
 		}
+		
+		// Creates a log for the db errors, deletes the file if its bigger then the $maxSize then appends the new error
+		private static function errorLog($error){
+			$maxSize = 5000; // bytes
+			$path = $_SESSION['path']."/dbErrorLog.txt";
+			if(file_exists($path) && filesize($path)+strlen($error) > $maxSize){
+				unlink ($path);
+			}
+			$fh = fopen($path, "a") or die("Can't open/create db log file on path '".$path."'");
+			fwrite($fh, $error."\n");
+			fclose($fh);
+		}
+	
 	}
 	// Fix for the lack of static contructors
 	dbHelp::getConnect();

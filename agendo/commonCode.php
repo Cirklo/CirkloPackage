@@ -481,6 +481,20 @@
 		return false;
 	}
 	
+	// Checks if user $userId is allowed to use the resource $resourceId
+	function hasPermission($userId, $resourceId){
+		$sql = "select permissions_level from permissions where permissions_user = :0 and permissions_resource = :1";
+		$prep = dbHelp::query($sql, array($userId, $resourceId));
+		$permissionsLevel = dbHelp::fetchRowByIndex($prep);
+		// if(dbHelp::numberOfRows($prep) > 0 && ){
+		// if($permissionsLevel != null && $permissionsLevel[0] != 0){
+			// wtf('YaY');
+			// return 
+		// }
+		return $permissionsLevel != null && $permissionsLevel[0] != 0;
+		// return false;
+	}
+	
 	// Checks if a user is a department manager(PI), returns the resource or false
 	function isPI($user_id){
 		if(isset($user_id) && $user_id != ''){
@@ -609,8 +623,13 @@
 			$exceptionMessage = "Unable to send the email, please check the mail settings.";
 		}
 		
-		if($mailObject->Send() === false){
-			throw new Exception($exceptionMessage);
+		ob_start();
+			$result = $mailObject->Send();
+			$echoStr = ob_get_contents();
+		ob_end_clean();
+
+		if($result === false){
+			throw new Exception($exceptionMessage." ".$echoStr);
 		}
 	}
 	
