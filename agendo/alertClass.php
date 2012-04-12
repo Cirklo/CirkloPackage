@@ -487,14 +487,28 @@ function entriesReminder(){
 	$sql = "select configParams_value from configParams where configParams_name like 'entryReminderHour'";
 	$prep = dbHelp::query($sql);
 	$row = dbHelp::fetchRowByIndex($prep);
-				// AND date(entry_datetime)=".date('Y-m-d')." 
-				// AND date(entry_datetime)='2011-11-27' 
-	// midnight is 00
+	// Checks if its time to send the reminders (this should run every hour), midnight is 00
 	if(isset($row) && $row[0] == date('H')){
-	// if(isset($row) && $row[0] == 5){
+	// if(isset($row) && $row[0] == 15){
+		$daysToRemind = array(date("'Y-m-d'")); // will always remind on the day of the scheduled entries
+		$sqlDays = "select configParams_value from configParams where configParams_name like 'entryReminderDaysBefore'";
+		$prepDays = dbHelp::query($sqlDays);
+		$rowDays = dbHelp::fetchRowByIndex($prepDays);
+		$daysToRemindArray = explode(",", $rowDays[0]);
+		foreach($daysToRemindArray as $day){
+			$day = trim($day);
+			$tempTime = strtotime($day." day", strtotime("now"));
+			// Wont add the current day because its already included, change this later to be able to mail reminders not including the current day
+			if($tempTime !== false && $day != '0'){
+				$daysToRemind[] = date("'Y-m-d'", $tempTime);
+			}
+		}
+				// AND date(entry_datetime)='".date('Y-m-d')."' 
+				// AND date(entry_datetime)='2011-11-27' 
 		$sql = "
 			SELECT 
 				user_email
+				,user_login
 				,resource_id
 				,resource_name
 				,resource_resolution
@@ -507,63 +521,51 @@ function entriesReminder(){
 			WHERE
 				entry_user=user_id 
 				AND resource_id=entry_resource 
-				AND date(entry_datetime)='".date('Y-m-d')."' 
+				AND date(entry_datetime) in (".implode(",", $daysToRemind).") 
 				AND entry_status IN (1,2) 
 			ORDER BY 
-				user_email
+				user_login
 				,resource_name
 				,entry_datetime
 		";
-		
+
 		$this->Subject="Entry Reminder";
 		$this->ClearReplyTos();
 		$this->AddReplyTo("support@cirklo.org");
 		
 		$tempEmail = "";
+		$tempLogin = "";
 		$tempResource = "";
 		$prep = dbHelp::query($sql);
 		while($row = dbHelp::fetchRowByName($prep)){
-			if($row['user_email'] != $tempEmail){
-				// send email
-				if($tempEmail != ""){
+			// if($row['user_email'] != $tempEmail){
+			if($row['user_login'] != $tempLogin){
+				// if($tempEmail != ""){
+				if($tempLogin != ""){
 					$this->Body = $tempMsg;
 					$this->ClearAddresses();
 					$this->AddAddress($tempEmail, "");
+					// send email
 					if(!$this->Send()){
 						echo "Email error: ".$this->ErrorInfo;
 					}
-					// echo $this->Subject;
-					// echo "<br>";
-					// echo $tempEmail;
-					// echo "<br>";
-					// echo $tempMsg;
-					// echo "<br>";
 				}
 				$tempEmail = $row['user_email'];
-				$tempMsg = "You have the following bookings for today (".convertDate($row['entry_datetime'], "d/m/Y")."):\n";
+				$tempLogin = $row['user_login'];
+				// $tempMsg = "You have the following bookings for today (".convertDate($row['entry_datetime'], "d/m/Y")."):\n";
+				$tempMsg = "You have the following bookings:\n";
 				$tempResource = "";
 			}
 			if($row['resource_name'] != $tempResource){
 				$tempResource = $row['resource_name'];
-				// $tempMsg .= "<a href='".$_SESSION['path']."/weekview.php'>Resource</a> '".$tempResource."'\n";
-				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
-				// $urlPath = (!empty($_SERVER['HTTPS'])) ? " (https://".$_SERVER['SERVER_NAME']."weekview.php?resource=".$row['resource_id']."&date=".getMondayTimeFromDate(date('Ymd')).")" : " (http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'].")";
-				$monday = date("Ymd",$this->getMondayFromDate(date('ymd')));
-				// doesnt work when its executed by a cronjob (loses the server info, request would have to be done by the client for it to work)
-				// $protocol = "http";
-				// if(!empty($_SERVER['HTTPS'])){
-					// $protocol = "https";
-				// }
-				// $partialPath = "";
-				// $uriArray = explode('\\',str_replace('/', '\\', $_SERVER['REQUEST_URI']));
-				// for($i=0;$i<sizeOf($uriArray)-1;$i++){
-					// $partialPath .= $uriArray[$i];
-				// }
-				// $urlPath = " (".$protocol."://".$_SERVER['SERVER_NAME']."/".$partialPath."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
-				$urlPath = " (https://agendo.cirklo.org/".substr($_SESSION['path'],3)."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
-				$tempMsg .= "Resource '".$tempResource."'".$urlPath."\n";
+				$monday = date("Ymd", $this->getMondayFromDate(date('ymd')));
+				$tempMsg .= "Resource '".$tempResource."'\n";
 			}
-			$tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
+			// needs static address for when its executed by a cronjob (loses the server info. request would have to be done by the client for it to work)
+			$urlPath = " (https://agendo.cirklo.org/".substr($_SESSION['path'],3)."/weekview.php?resource=".$row['resource_id']."&date=".$monday.")";
+			// $tempMsg .= "\tfrom ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60))."\n";
+			$tempMsg .= "\tOn ".convertDate($row['entry_datetime'], "d/m/Y")." from ".convertDate($row['entry_datetime'], "H:i")." to ".date('H:i',(strtotime($row['entry_datetime']) + $row['entry_slots'] * $row['resource_resolution'] * 60)).". User the link below for quick access:\n";
+			$tempMsg .= "\t".$urlPath."\n";
 		}
 		
 		// send email for the last person on the list
@@ -574,12 +576,6 @@ function entriesReminder(){
 			if(!$this->Send()){
 				echo "Email error: ".$this->ErrorInfo;
 			}
-			// echo $this->Subject;
-			// echo "<br>";
-			// echo $tempEmail;
-			// echo "<br>";
-			// echo $tempMsg;
-			// echo "<br>";
 		}
 	}
 }
@@ -593,7 +589,5 @@ function getMondayFromDate($date){
 	return $date;
 }
 	
-
-
 } // end class
 ?>

@@ -26,14 +26,14 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 					possibleConfirmationText.innerHTML = "Confirmation Possible";
 				}
 				else{
-					var macFailReason = "You are not on the confirmation computer";
+					var macFailReason = "You are not on the confirmation computer or you need the latest version of Java from the link";
 					document.getElementById("possibleConfirmationImgNotOk").style.display = "table";
 					possibleConfirmationText.innerHTML = "Confirmation Not Possible";
 					if(noApplet){
 						macFailReason = 'Applets are not recognized. Please download Java\'s latest version from the link.';
-						possibleConfirmationText.href = "http://java.com/en/download/index.jsp";
-						possibleConfirmationText.style.textDecoration = 'underline';
 					}
+					possibleConfirmationText.style.textDecoration = 'underline';
+					possibleConfirmationText.href = "http://java.com/en/download/index.jsp";
 					possibleConfirmationText.title = macFailReason;
 				}
 			}
