@@ -26,6 +26,7 @@ foreach($_POST as $key=>$value){
 	$value = cleanValue($value);
     $msg .= $key.": ".$value."\n";
     if($key == 'Resource') $resource = $value;
+    if($key == 'Email') $userMail = $value;
 }
 
 // $sql = "SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_smtpsecure, mainconfig_smtpauth FROM mainconfig WHERE mainconfig_id = 1";
@@ -46,7 +47,7 @@ $mail->Password   = $configArray['password'];
 $mail->IsSMTP(); // telling the class to use SMTP
 $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
 $mail->SetFrom($configArray['email'], "Calendar administration");
-$mail->AddReplyTo($configArray['email'],"Calendar administration");   
+// $mail->AddReplyTo($configArray['email'],"Calendar administration");   
 // for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
 	// $row[$i] = $arr[1];
 // }
@@ -63,15 +64,17 @@ $mail->AddReplyTo($configArray['email'],"Calendar administration");
 // $mail->AddReplyTo($row[3],"Calendar Admin");
 
 // Would only send an email to the person responsible for the equipment
-$sql = "SELECT user_email from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_name LIKE '$resource'";
+$sql = "SELECT user_email from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_name LIKE :0";
 
 // Sends to all users with admin level (Bugworkers)
 // $sql = "SELECT user_email from ".dbHelp::getSchemaName().".user WHERE user_level = 0";
-$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+$res = dbHelp::query($sql, array($resource)) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
 // Used when there was just one responsible
-// $row = dbHelp::fetchRowByIndex($res);
+// $row = dbHelp::fetchRowByIndex($res);$userMail
 	$mail->Subject = "Calendar administration: new user";
 	$mail->Body = $msg;
+	$mail->ClearReplyTos();	//clear replys before receiving any email
+	$mail->AddReplyTo($userMail, "User");   
 	while ($row = dbHelp::fetchRowByIndex($res)){
 		$mail->AddAddress($row[0], "");
 	}

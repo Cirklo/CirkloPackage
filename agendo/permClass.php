@@ -143,7 +143,7 @@ function addAhead($date, $slots)     {
         $min=substr($date,10,2);
 		$lastSlotEnds = strtotime($date) + ($slots*$this->Resolution*60);// time format
         
-		$sql = "select configParams_value from configParams where configParams_name = 'bookingHour'";
+		$sql = "select configParams_value from configParams where configParams_name like 'bookingHour'";
 		$res = dbHelp::query($sql);
 		$arr = dbHelp::fetchRowByIndex($res);
 		$hour = $arr[0];

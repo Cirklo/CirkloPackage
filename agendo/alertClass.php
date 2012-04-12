@@ -110,8 +110,8 @@ function __construct($resource=0) {
 function setUser($user_id){
     
     // $sql="select concat(user_firstname,' ',user_lastname) name,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
-    $sql="select user_firstname,user_lastname,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
-    $res=dbHelp::query($sql);
+    $sql="select user_firstname,user_lastname,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id = :0";
+    $res=dbHelp::query($sql, array($user_id));
     $arruser=dbHelp::fetchRowByIndex($res);
     // $this->UserFullName=$arruser[0];
     // $this->UserEmail=$arruser[1];
@@ -170,13 +170,16 @@ function toWaitList($type){
         case 1:
             $this->Subject="Calendar waiting list";
             $this->Body=$msg;
-            $address = $arrStatus['user_email'];
-            $this->AddAddress($address, "");
+			$this->ClearReplyTos();	//clear replys before receiving any email
+			$this->AddReplyTo($this->RespName, $this->RespEmail);
+			$this->ClearAddresses();
+			$this->AddAddress($arrStatus['user_email'], "");
             if(!$this->Send()) {
                 echo "Mailer Error: " . $this->ErrorInfo;
-            } else {
+            } 
+			// else {
                 //echo "Message sent!";
-            }
+            // }
             break;
             case 0:
             break;
@@ -187,7 +190,6 @@ function toWaitList($type){
    * Depending on the configuration resource managers can have a msg evertime there is an entry
    * @param string datetime with the format yyyymmddhhii
    * @param integer resource (resource id)
-
 */
 
 function toAdmin($datetime,$extra,$type,$comment=''){
@@ -270,16 +272,17 @@ END:VCALENDAR";
             $this->Subject=strtoupper($type)." on " . $this->ResourceName ;
 			$this->ClearReplyTos();
             $this->AddReplyTo($this->UserEmail,$this->UserFullName);
+			$this->ClearAddresses();
+			$this->AddAddress($this->RespEmail, "");
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr;
-            $address = $this->RespEmail;
-			$this->ClearAddresses();
-			$this->AddAddress($address, "");
             if(!$this->Send()) {
                 // echo "Mailer Error: " . $this->ErrorInfo;
-            } else {
+                echo "Unable to send email: " . $this->ErrorInfo;
+            } 
+			// else {
                 // echo "Message sent!";
-            }
+            // }
             break;
 			
 		case 0:
@@ -339,12 +342,11 @@ function recover($user_id, $passRenewalResp = null){
 			break;
 			case 1:
 				$this->Subject="New password request";
-				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
+				// $this->AddReplyTo($this->UserEmail,$this->UserFullName);
 				// $this->Body="The randomly generated password for ".$user_id." is now ".$pwd;
 				$this->Body = $msg;
-				$address = $arr['user_email'];
 				$this->ClearAddresses();
-				$this->AddAddress($address, "");
+				$this->AddAddress($arr['user_email'], "");
 				// echo success or error message.... sniff :'(
 				if(!$this->Send()) {
 					// password is updated anyway
@@ -386,9 +388,6 @@ function nonconf(){
 				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between ".dbHelp::now()." and ".dbHelp::date_add(dbHelp::now(),'60', 'minute');
 				// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
     $res=dbHelp::query($sql) or die($sql);
-    // for ($i=0;$i<dbHelp::numberOfRows($res);$i++) {
-        // mysql_data_seek($res,$i);
-        // $arr=dbHelp::fetchRowByName($res);      
     while($arr=dbHelp::fetchRowByName($res)){
         $msg=date("Y-m-d H:i")." You did not confirm your entry on " . $arr['resource_name'] . " at ".$arr['entry_datetime'].". Please justify to ". $arr['resp'];
         switch ($arr['user_alert']) {
@@ -405,17 +404,18 @@ function nonconf(){
         case 1:
                 $this->Subject="No confirmation on ".$arr['date'];
 				$this->ClearReplyTos();	//clear replys before receiving any email
-				$this->AddReplyTo($this->UserEmail,$this->UserFullName);
-                $this->Body=$msg;
-                $address = $arr['user_email'];
+				$this->AddReplyTo("Resource Manager", $arr['resp']);
 				$this->ClearAddresses();
-				$this->AddAddress($address, "");
+				$this->AddAddress($arr['user_email'], "");
+
+				$this->Body=$msg;
                 echo $msg;
                 if(!$this->Send()) {
                     echo "Mailer Error: ".$this->ErrorInfo;
-                } else {
+                } 
+				// else {
                     //echo "Message sent!";
-                }
+                // }
 		break;
         case 0:
             break;
@@ -423,10 +423,6 @@ function nonconf(){
     }
     
 } // end function
-
-
-
-
 
 function fromAdmin($type,$extra=''){    
         if ($this->ResourceResp==$this->User) return;
@@ -467,15 +463,19 @@ function fromAdmin($type,$extra=''){
         break;
         case 1:
             $this->Subject="Calendar administrator warning";
-            $msg.=". $extrainfo Do not reply to this email";
-            $this->Body=$msg;
-            $address = $arr['user_email'];
-            $this->AddAddress($address, "");
-            if(!$this->Send()) {
+            // $msg.=". $extrainfo Do not reply to this email";
+            $msg .= $extrainfo;
+            $this->Body = $msg;
+			$this->ClearReplyTos();	//clear replys before receiving any email
+			$this->AddReplyTo($this->RespName, $this->RespEmail);
+			$this->ClearAddresses();
+			$this->AddAddress($arr['user_email'], "");
+           if(!$this->Send()) {
                 echo "Mailer Error: " . $this->ErrorInfo;
-            } else {
+            } 
+			// else {
                 //echo "Message sent!";
-            }
+            // }
             break;
             case 0:
             break;
@@ -484,7 +484,7 @@ function fromAdmin($type,$extra=''){
 }//end function
 
 function entriesReminder(){
-	$sql = "select configParams_value from configParams where configParams_name = 'entryReminderHour'";
+	$sql = "select configParams_value from configParams where configParams_name like 'entryReminderHour'";
 	$prep = dbHelp::query($sql);
 	$row = dbHelp::fetchRowByIndex($prep);
 				// AND date(entry_datetime)=".date('Y-m-d')." 

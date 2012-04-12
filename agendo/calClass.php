@@ -112,7 +112,7 @@ class calCell {
 			// echo "<td align=center lang=". $cellbgLight . " title=" . $this->Entry ." class='entryTd' " . $extra ." rowspan=". $this->NSlots .">". $this->Tag ."</td>\n";        
 		}
 		// echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots."><div style='overflow: hidden;width: 60px;text-overflow:ellipses;'>".$this->Tag."</div></td>\n";        
-		echo "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots.">".$this->Tag."</td>\n";        
+		return "<td ".$addId." align=center lang=". $cellbgLight . " title=" . $this->Entry ." ".$extra." rowspan=".$this->NSlots.">".$this->Tag."</td>\n";        
     }    
 }
 
@@ -234,6 +234,8 @@ class cal extends phpCollection{
   * @param $resource
 */
     function draw_week(){
+		$weekContent = "";
+	
         $this->Slot = array_fill(0, ($this->EndTime-$this->SlotStart)/(self::$Resolution/60), array_fill(0, 8, 0));
         $day=substr($this->StartDate,6,2);
         $month=substr($this->StartDate,4,2);
@@ -242,22 +244,22 @@ class cal extends phpCollection{
         $weekbefore=mktime(0,0,0,$month, $day-7,$year);
         $updatecount=0;
         
-        echo "<table class=calendar id=caltable align=center><tr><th>";
-        echo "<font size=1 >". date("M Y",mktime(0,0,0,$month,$day,$year));
-        echo "<br><a href=weekview.php?resource=" . $this->getResource() . "&date=". date("Ymd",$weekbefore) . ">";
-        echo "<img width=12px height=12px  src=pics/left.gif border=0>&nbsp;</a>";
-        echo "<a href=weekview.php?resource=" . $this->getResource() . "&date=". date("Ym").(date("d")-date("N")) . ">";
-        echo "<img width=10px src=pics/today.gif border=0>&nbsp;</a>";
-        echo "<a href=weekview.php?resource=" . $this->getResource() . "&date=". date("Ymd",$weekahead) . ">";
-        echo "<img width=12px height=12px src=pics/right.gif border=0></a>";
+        $weekContent .= "<table class=calendar id=caltable align=center><tr><th>";
+        $weekContent .= "<font size=1 >". date("M Y",mktime(0,0,0,$month,$day,$year));
+        $weekContent .= "<br><a href=weekview.php?resource=" . $this->getResource() . "&date=". date("Ymd",$weekbefore) . ">";
+        $weekContent .= "<img width=12px height=12px  src=pics/left.gif border=0>&nbsp;</a>";
+        $weekContent .= "<a href=weekview.php?resource=" . $this->getResource() . "&date=". date("Ym").(date("d")-date("N")) . ">";
+        $weekContent .= "<img width=10px src=pics/today.gif border=0>&nbsp;</a>";
+        $weekContent .= "<a href=weekview.php?resource=" . $this->getResource() . "&date=". date("Ymd",$weekahead) . ">";
+        $weekContent .= "<img width=12px height=12px src=pics/right.gif border=0></a>";
         
-        echo "</th>"; 
+        $weekContent .= "</th>"; 
         for ($i=1;$i<8;$i++) {
             $extra='';
             if (date('Ymd',mktime(0,0,0,$month,$day+$i,$year ))==date('Ymd')) $extra ="style='color:#bb3322'";
-            echo "<th $extra>" . date("d-D",mktime(0,0,0,$month,$day+$i,$year)) . "</th>";
+            $weekContent .= "<th $extra>" . date("d-D",mktime(0,0,0,$month,$day+$i,$year)) . "</th>";
         }
-        //echo "<th>" date("d", $this). "Monday</th>";
+        //$weekContent .= "<th>" date("d", $this). "Monday</th>";
         //<th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th><th>Sunday</th>";
         $this->SlotStart=$this->StartTime;
         
@@ -287,14 +289,14 @@ class cal extends phpCollection{
 		}
 		// *************************************************
         while ($nline<($this->EndTime-$this->StartTime)/(self::$Resolution/60)) {
-            echo "<tr>";
+            $weekContent .= "<tr>";
             $this->SlotStart=mktime($this->StartTime,self::$Resolution*$nline);
             $this->Duration=self::$Resolution;
             $from=date("H.i",$this->SlotStart);
             $to=date("H.i",mktime($this->StartTime,self::$Resolution*($nline+1)));
             $txt=$from."-".$to;
-            // echo "<td align=center width=10% class=date >". $txt ."</td>\n";
-            echo "<td align=center class=date style='width:90px'>". $txt ."</td>\n";
+            // $weekContent .= "<td align=center width=10% class=date >". $txt ."</td>\n";
+            $weekContent .= "<td align=center class=date style='width:90px'>". $txt ."</td>\n";
 
 			// $sql= "select user_login,entry_id,entry_user,entry_repeat, entry_status,entry_slots from entry,".dbHelp::getSchemaName().".user where entry_status<>3 and entry_resource=" . $this->getResource() ." and user_id=entry_user and ".dbHelp::getFromDate('entry_datetime','%Y%m%d')."='". $this->Day . "' and ".dbHelp::getFromDate('entry_datetime','%H%i')."='" . date('Hi',$this->SlotStart) . "' order by entry_id";
            for($weekday=1;$weekday<8;$weekday++){
@@ -362,9 +364,9 @@ class cal extends phpCollection{
 								// wtf($entryLastSlot, 'a');
 								if($nline == $entryLastSlot){
 									// Javascript function that reduces on rowspan of the entry that ends where this one starts by id
-									echo "<script type='text/javascript'>";
-									echo "calendarReduceRowSpan('".$weekdayNline[$weekday]."');";
-									echo "</script>";
+									$weekContent .= "<script type='text/javascript'>";
+									$weekContent .= "calendarReduceRowSpan('".$weekdayNline[$weekday]."');";
+									$weekContent .= "</script>";
 								}
 							}
 							
@@ -396,7 +398,7 @@ class cal extends phpCollection{
 								$this->Slot[$nline+$j][$weekday] = 1;
 							}
 							// $cell->designslot(1);
-							$cell->designslot(1, $nlineXweekday);
+							$weekContent .= $cell->designslot(1, $nlineXweekday);
 							// useless line, where is the get for this or any sort of use??
 							// $this->add($cell->getEntry(),$cell);
                         } else {
@@ -404,7 +406,7 @@ class cal extends phpCollection{
                             $cell->setEntry(0);
                             $updDay=$this->Day;
                             $cell->setNSlots(1); 
-                            $cell->designSlot(2);
+                            $weekContent .= $cell->designSlot(2);
 							
 							// useless line, where is the get for this or any sort of use??
 							// $this->add($ncells. "empty",$cell);
@@ -418,14 +420,14 @@ class cal extends phpCollection{
                         $cell->setTag('');
                         if ($this->Slot[$nline][$weekday]!=1){
                             if ($this->Update==0) {
-                                $cell->designSlot(0);
+                                $weekContent .= $cell->designSlot(0);
                             } else {
                                 if ($updatecount>0 and $this->Day==$updDay) {
                                     //$cell->setTag($updatecount);
-                                    $cell->designSlot(2);
+                                    $weekContent .= $cell->designSlot(2);
                                     $updatecount=$updatecount-1;
                                 } else {
-                                    $cell->designSlot(0);
+                                    $weekContent .= $cell->designSlot(0);
                                 }
                             }
 						}
@@ -433,16 +435,18 @@ class cal extends phpCollection{
 						// $this->add($ncells. "empty",$cell);
 						
                     } //case it doesn't have an entry
-                    //echo $cell->getEntry();
+                    //$weekContent .= $cell->getEntry();
                     //$cell->designSlot();
                     
                     $ncells=$ncells+1;    
                 //} //case not calendar hours
 			} // end week days
             $nline=$nline+1;
-            echo "</tr>";
+            $weekContent .= "</tr>";
         } // end of time
-        echo "</table>";
+        $weekContent .= "</table>";
+		
+		return $weekContent;
     }
 	
 	public function monitor($resource){
@@ -454,7 +458,6 @@ class cal extends phpCollection{
         	return true;
         }
     }
-
 }
 
 ?>

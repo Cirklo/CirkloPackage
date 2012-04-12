@@ -1,0 +1,23 @@
+body {
+	margin:0;
+	background: #1e4F54;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	color: white;
+}
+
+.link, .link:visited{
+	color: #F7C439;
+}
+
+.link:hover{
+	color: white;
+}
+
+.availableState{
+	
+}
+
+.inUseState{
+	
+}
+

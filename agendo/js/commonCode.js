@@ -1,17 +1,26 @@
-$(document).ready(function(){
-$("#resourceSearch").focus(function(){
-	// if(document.getElementById('resourceSearch') != null){
-		$("#resourceSearch").autocomplete({
-			source: "../agendo/commonCode.php?autocomplete",
-			minLength: 2,
-			select: function(event, ui) {
-						window.location = "weekview.php?resource=" + ui.item.id;
-					},
-			dataType: "json"
-		});
-	// }
-});
-});
+$(document).ready(
+	function(){
+		// Browser detection
+		if(!detect()){
+			showMessage("This browser may be incompatible with Agendo.");
+		}
+
+		$("#resourceSearch").focus(
+			function(){
+				// if(document.getElementById('resourceSearch') != null){
+					$("#resourceSearch").autocomplete({
+						source: "../agendo/commonCode.php?autocomplete",
+						minLength: 2,
+						select: function(event, ui) {
+									window.location = "weekview.php?resource=" + ui.item.id;
+								},
+						dataType: "json"
+					});
+				// }
+			}
+		);
+	}
+);
 
 function go (objIMG) {
 	groupViewOk = typeof(groupViewOk) != 'undefined' ? groupViewOk : false;
@@ -181,25 +190,50 @@ function ajaxRequest(url){
 
 function showMessage(msg, isError){
 	isError = isError || false; // sets isError as false by default, javascript is primitive and doesnt allow something like isError = false in the parameters
-	extra = '';
 	
 	// what should happen is its an error message
+	// if(isError){
+		// $(document).ready(function(){
+				// $.jnotify(msg, 'error', true);
+			// }
+		// );
+	// }
+	// else{
+		// $(document).ready(function(){
+				// $.jnotify(msg);
+			// }
+		// );
+	// }
+	
 	if(isError){
 		$(document).ready(function(){
-				$.jnotify(msg, 'error', true);
+				jError(msg,
+					{
+						autoHide : false // added in v2.0
+						,clickOverlay : true // added in v2.0
+					}
+				);
 			}
 		);
 	}
 	else{
 		$(document).ready(function(){
-				$.jnotify(msg);
+				jSuccess(msg,
+					{
+						clickOverlay : true // added in v2.0
+						,TimeShown : 2000
+						// ,MinWidth : 250
+						// ,ShowTimeEffect : 200
+						// ,HideTimeEffect : 200
+						// ,LongTrip :20
+						// ,HorizontalPosition : 'center'
+						// ,VerticalPosition : 'top'
+						// ,ShowOverlay : true
+						// ,ColorOverlay : '#000'
+						// ,OpacityOverlay : 0.3
+					}
+				);
 			}
 		);
 	}
-	
-	// alert(msg);
-	// $(document).ready(function(){
-			// $.jnotify(msg, extra);
-		// }
-	// );
 }

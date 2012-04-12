@@ -28,18 +28,13 @@
 					break;
 					// Opens a file dialog to download a csv with all the selected info (select all and select none will generate the same csv file)
 					case "downloadFile":
-						$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
-						// header("Content-type: application/vnd.ms-excel; name='excel'");
-						// header("Content-Disposition: filename=export.csv");
-						// header("Pragma: no-cache");
-						// header("Expires: 0");
 						header('Content-Type: application/force-download');
 						header('Content-disposition: attachment; filename=report.xls');
+						$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
 						echo generateCsvString($prep, $userCheck, $resourceCheck, $entryCheck);
 					break;
 					// Emails the department managers 
 					case "emailDepartments":
-						// $prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
 						emailDepartments($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
 						$json->success = true;
 						$json->message = "Report sent";
@@ -149,7 +144,6 @@
 	}
 	
 	// Returns a string with what the subtotal line should look for each department
-	// function showSubTotal($departmentId, $subTotal, $colspan, $isAdmin, $isPI, $showSubTotal){
 	function showSubTotal($departmentId, $subTotal, $colspan, $showSelects, $showSubTotal){
 		$style = "
 			color: black;
@@ -225,7 +219,6 @@
 		return $formatedString;
 	}
 	
-	// function generateHtmlResults($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp = false, $isAdmin = false, $isPI = false, $selectedDepartmentsArray = null, $isEmail = false){
 	function generateHtmlResults($prep, $userCheck, $resourceCheck, $entryCheck, $showSelects){
 		$formatedString = "";
 	
@@ -260,7 +253,6 @@
 			$subHeader .= "</td>";
 		}
 		$subHeader .= "</tr>";
-		// $prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
 		$departmentElements = 0;
 		while($row = dbHelp::fetchRowByName($prep)){
 			$hours = current($row);
@@ -280,7 +272,6 @@
 			){
 				if($previousDepartmentName != ""
 				){
-					// $formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, ($isAdmin || $isPI != false || $isResp != false), dbHelp::numberOfRows($prep) > 1);
 					$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $showSelects && !$isEmail, dbHelp::numberOfRows($prep) > 1);
 					$subTotal = 0;
 					$departmentElements = 0;
@@ -322,7 +313,6 @@
 		}
 		
 		// Used to show the last subtotal
-		// $formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, ($isAdmin || $isPI != false) && !$isEmail, dbHelp::numberOfRows($prep) > 1);
 		$formatedString .= showSubTotal($previousDepartmentName, $subTotal, $colspan, $showSelects && !$isEmail, dbHelp::numberOfRows($prep) > 1);
 		
 		$formatedString .= showTotal($total, $colspan);
@@ -458,10 +448,10 @@
 			$sql = "select user_email from ".dbHelp::getSchemaName().".user where user_id = :0";
 			$prepMail = dbHelp::query($sql, array($man));
 			$row = dbHelp::fetchRowByIndex($prepMail);
-			$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $deps);
 			$mail = getMailObject($defaultMailTitle, $row[0], $message, $from);
 			
 			// Adds the content of the xls file to the email as an attachment
+			// $prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $deps);
 			// $mail->AddStringAttachment(generateCsvString($prep, $userCheck, $resourceCheck, $entryCheck), "report.xls");
 
 			// Adds the content of the html file to the email as an attachment

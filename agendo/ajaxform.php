@@ -103,7 +103,8 @@ if(isset($_GET['val'])){ //new user form -> ajax response
     $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
     $mail->SetFrom($configArray['email'], "Calendar administration");
     // $mail->AddReplyTo($configArray['email'],"Calendar administration");   
-    $mail->AddReplyTo($user_email,"Calendar administration"); // altered to allow the resource manager to email the user right away
+	$mail->ClearReplyTos();	//clear replys before receiving any email
+    $mail->AddReplyTo($user_email, $user_name); // altered to allow the resource manager to email the user right away
 
 	// for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
 		// $row[$i] = $arr[1];

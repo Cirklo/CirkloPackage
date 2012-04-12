@@ -1,4 +1,4 @@
-// This class was altered by Pedro Pires (The chosen two)
+// This file was altered by Pedro Pires (The chosen two)
 var bgcolor1,bgcolor2 ;
 var mousedown=0,mousedownTimeout;
 var curDate=new Date();
@@ -7,17 +7,37 @@ var res_maxslots;
 var fadeConstant=1300;
 var showingMsg = false;
 var fadeCount;
+var dateToUseInGet = "";
+var resourceToUseInGet = "";
+
 // variable used for a patch in the checkfields function
 var usingSession;
 var detectedUser;
 var path = '';
 var numericXfield = 'numericXfield';// if changing this, change the style.css class name as well
 
-//bgcolor2='document..backgroundColor; // just to set bgcolor2 at the beggining
-
 	var impersonateUser = '';
 	$(document).ready(
 		function(){
+			if(macAddAppletUsed){
+				possibleConfirmationText = document.getElementById("possibleConfirmationText");
+				if(macIsConfirmed){
+					document.getElementById("possibleConfirmationImgOk").style.display = "table";
+					possibleConfirmationText.innerHTML = "Confirmation Possible";
+				}
+				else{
+					var macFailReason = "You are not on the confirmation computer";
+					document.getElementById("possibleConfirmationImgNotOk").style.display = "table";
+					possibleConfirmationText.innerHTML = "Confirmation Not Possible";
+					if(noApplet){
+						macFailReason = 'Applets are not recognized. Please download Java\'s latest version from the link.';
+						possibleConfirmationText.href = "http://java.com/en/download/index.jsp";
+						possibleConfirmationText.style.textDecoration = 'underline';
+					}
+					possibleConfirmationText.title = macFailReason;
+				}
+			}
+			
 			if(document.getElementById('usersList') != null){
 				$("#usersList").focus(function(){
 					$("#usersList").autocomplete({
@@ -34,6 +54,9 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 				impersonateUser = '';
 			}
 			
+			var intervalLength = 180000; // 3 minutes
+			var interval = setInterval('autoRefresh()', intervalLength);
+
 			// if((confirmImage = document.getElementById('confirmIsPossible')) != null){
 				// if(macIsConfirmed){
 					// confirmImage.src = "pics/green_light.png"
@@ -44,6 +67,39 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 			// }
 		}
 	);
+
+	// New auto refresh(for the calendar) function will go here
+	function autoRefresh(){
+		if(resourceToUseInGet != '' && dateToUseInGet != ''){
+			$.post(
+				"weekview.php?resource=" + resourceToUseInGet + "&date=" + dateToUseInGet
+				, {functionName: 'getCalendarWeek'}
+				,function(serverData){
+					if(serverData.success){
+						document.getElementById('calendar').innerHTML = serverData.calendar;
+					}
+					else{
+						showMessage(serverData.message, true);
+					}
+				}
+				,"json"
+				)
+				// This gets messed up because of the message display on this thing... Always shows an empty error string (messageInput value = '' ?)
+				// .error(
+					// function(error){
+						// showMessage(error.responseText, true);
+					// }
+				// )
+			;
+		}
+	}
+	
+	
+	// Sets the date and resource for use in the autorefresh feature
+	function setDateAndResource(resource, date){
+		dateToUseInGet = date;
+		resourceToUseInGet = resource;
+	}
 	
 	function impersonateCheckChange(check){
 		element = document.getElementById('impersonateCheck');
@@ -161,7 +217,7 @@ function swapColor(obj,tag,action){
 }
 
 // this function enables and disables end date for repetitions
-function activate_date(objInp){ objInp.disabled=(objInp.disabled^ true );}
+function activate_date(objInp){ objInp.disabled=(objInp.disabled^ true );} // exclusive or? (disabled=true)^true=> false, (disabled=false)^true=> true ?? how about objInp.disabled = !objInp.disabled ? :P 
 
 
 function hide_divs(div1,div2,div3) {
@@ -568,8 +624,11 @@ function ajaxEntries(method,url,nosync){
     }
 }
 
-macIsConfirmed = false;
+var macIsConfirmed = false;
+var noApplet = false;
+var macAddAppletUsed = false;
 function macConfimation(givenMac){
+	macAddAppletUsed = true;
 	if((applet = document.getElementById('zeeApplet')) != null){
 		macIsConfirmed = applet.rightMac();
 	}
@@ -583,6 +642,7 @@ function macConfimation(givenMac){
 		}
 		if((applet = document.getElementById('zeeApplet')) == null){
 			// showMessage('Applets are not recognized.');
+			noApplet = true;
 		}
 		else{
 			macIsConfirmed = applet.rightMac();

@@ -8,18 +8,33 @@
 	require_once("../agendo/functions.php");
 	require_once("../agendo/genMsg.php");
 
+	if (isset($_GET['date'])){
+		$calendarDate = cleanValue($_GET['date']);
+	} else {        
+		$calendarDate = date("Ymd",mktime(0,0,0, date("m"), date("d")-date("N"),date("Y")));
+	}
+	
+	$ressql = "select resource_status, resource_mac, resource_id from resource where resource_id = :0";
+	$res = dbHelp::query($ressql,array(cleanValue($_GET['resource'])));
+	$arr = dbHelp::fetchRowByName($res);
+	$resource = $arr['resource_id'];
+	
 	if(isset($_POST['functionName'])){
 		call_user_func(cleanValue($_POST['functionName']));
 		exit;
 	}
-
+	
 	importJs();
+	echo "<script type='text/javascript' src='../agendo/js/weekview.js'></script>";
+	// Sets the resouce and date in JS for later use in the auto refresh
+	echo "<script type='text/javascript'> setDateAndResource(".$resource.",'".$calendarDate."'); </script>";
 	initSession();
+	// <META HTTP-EQUIV="REFRESH" CONTENT="180" />
+
 ?>
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" /> 
-<META HTTP-EQUIV="REFRESH" CONTENT="180" />
 <meta name="keywords" content="" />
 <meta name="description" content="" /> 
 <link href="../agendo/css/style.css" rel="stylesheet" type="text/css" />
@@ -29,8 +44,6 @@
 <script type="text/javascript" src="../agendo/js/ajax.js"></script>
 <script type="text/javascript" src="../agendo/js/datefunc.js"></script>
 <script type="text/javascript" src="../agendo/js/overdiv.js"></script>
-<script type="text/javascript" src="../agendo/js/weekview.js"></script>
-<script type="text/javascript" src="../agendo/js/commonCode.js"></script>
 
 
 <?php
@@ -46,14 +59,7 @@ if(!secureIpSessionLogin()){
 error_reporting(0);
 
 // $resource=clean_input($_GET['resource']);
-$arrInput = array();
-$arrInput[] = cleanValue($_GET['resource']);
 // $ressql = "select resource_status, resource_mac from resource where resource_id = ".$resource;
-$ressql = "select resource_status, resource_mac, resource_id from resource where resource_id = :0";
-// $res = dbHelp::query($ressql) or die($ressql);
-$res = dbHelp::query($ressql,$arrInput) or die($ressql);
-$arr = dbHelp::fetchRowByName($res);
-$resource = $arr['resource_id'];
 
 // Flags for the resource type/status
 $imResstatus5 = ($arr['resource_status'] == 5); // quick scheduling
@@ -73,9 +79,9 @@ if($imResstatus3){ // user confirmation
 		echo "<param name='mac' value='".$arr['resource_mac']."'/>";
 	echo "</object>";
 	
-	// Checks if the macaddress associated to this resource is 
+	// Checks if the macaddress associated to this resource is the current one
 	echo "<script type='text/javascript'>";
-	echo "macConfimation('".$arr['resource_mac']."');";
+		echo "macConfimation('".$arr['resource_mac']."');";
 	echo "</script>";
 }
 //*************************************************************************
@@ -114,7 +120,7 @@ echo "<table id='legend'>";
 	echo "</tr>";
 echo "</table>";
 
-if($calendar->monitor($calendar->getResourceName())){
+if($calendar->monitor($calendar->getResourceName())){ // same object using 2 different methods one inside the other? :(
 	echo "<hr><p style='text-align:center'><a href=../agendo/monitor.php target='blank'>Monitored resource</a>";
 }
 if ($calendar->getLink()!='') echo "<hr><p style='text-align:center'>More info <a href='" . $calendar->getLink() . "' target=_blank>here</a>";
@@ -197,12 +203,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 	echo "</tr>";
 			
 // *******************************************        calendar stuff made here     ***********************************************************
-			if (isset($_GET['date'])){
-				$calendar->setStartDate(cleanValue($_GET['date']));
-			} else {        
-				$calendar->setStartDate(date("Ymd",mktime(0,0,0, date("m"), date("d")-date("N"),date("Y"))));
-			}
-		   if ($calendar->getStatus()==0 or $calendar->getStatus()==2) { //inactive or invisible
+			$calendar->setStartDate($calendarDate);
+			if ($calendar->getStatus()==0 or $calendar->getStatus()==2) { //inactive or invisible
 				echo "<tr>";
 					echo "<td>";
 					echo "<h1 style='color:#cc8888'>".$calendar->getResourceName()." not available for reservations</h1>";
@@ -223,16 +225,21 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$calendar->setEntry($entry);
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
 				
-				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=".$calendar->getEntry();
-				$res = dbHelp::query($sqlWeekDay);
+				// $sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=".$calendar->getEntry();
+				// $res = dbHelp::query($sqlWeekDay);
+				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=:0";
+				$res = dbHelp::query($sqlWeekDay, array($entry));
 				$arr1 = dbHelp::fetchRowByIndex($res);
 				$sqlWeekNumber = "select ".dbHelp::getFromDate("'".$arr1[0]."'",'%w');
 				$res = dbHelp::query($sqlWeekNumber);
 				$arr2 = dbHelp::fetchRowByIndex($res);
-				$sqle="select entry_user, entry_repeat, ".dbHelp::getFromDate(dbHelp::date_sub("'".$arr1[0]."'",$arr2[0],'day'),'%Y%m%d')." as date, ".dbHelp::getFromDate('entry_datetime','%h')." as dateHour, ".dbHelp::getFromDate('entry_datetime','%i')." as dateMinutes, entry_slots from entry where entry_id=".$calendar->getEntry();
 				
-				$rese=dbHelp::query($sqle);
+				// $sqle="select entry_user, entry_repeat, ".dbHelp::getFromDate(dbHelp::date_sub("'".$arr1[0]."'",$arr2[0],'day'),'%Y%m%d')." as date, ".dbHelp::getFromDate('entry_datetime','%h')." as dateHour, ".dbHelp::getFromDate('entry_datetime','%i')." as dateMinutes, entry_slots from entry where entry_id=".$calendar->getEntry();
+				// $rese=dbHelp::query($sqle);
+				$sqle="select entry_user, entry_repeat, ".dbHelp::getFromDate(dbHelp::date_sub("'".$arr1[0]."'",$arr2[0],'day'),'%Y%m%d')." as date, ".dbHelp::getFromDate('entry_datetime','%h')." as dateHour, ".dbHelp::getFromDate('entry_datetime','%i')." as dateMinutes, entry_slots from entry where entry_id=:0";
+				$rese=dbHelp::query($sqle, array($entry));
 				$arre= dbHelp::fetchRowByName($rese);
+				
 				$calendar->setStartDate($arre['date']);
 				$calendar->setCalRepeat($arre['entry_repeat']);
 				$user=$arre['entry_user'];
@@ -334,14 +341,19 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					echo "<tr>";
 						echo "<td colspan=2>";
-						// ************************************** mac green/red light ************************************
-						// if($imResstatus3){
-								// echo "<h2 align=center style='vertical-align:top;'>". $calendar->getResourceName();
-								// echo "&nbsp<img id='confirmIsPossible' style='vertical-align:bottom;' src=''/></h2>";
-						// }
-						// else{
 							echo "<h2 align=center>". $calendar->getResourceName() ."</h2>";
-						// }
+						// ************************************** mac green/red light ************************************
+						if($imResstatus3){
+							echo "<hr>";
+							echo "<div id='possibleConfirmation' style='text-align:center;font-size:13px;color:#EAE8D5;'>";
+								$confirmationImgStyle = "style='display:none;height:17px;width:17px;float:left;padding-left:5px;'";
+								echo "<img id='possibleConfirmationImgOk' src='pics/green_light.png' ".$confirmationImgStyle."/>";
+								echo "<img id='possibleConfirmationImgNotOk' src='pics/red_light.png' ".$confirmationImgStyle."/>";
+								echo "<a id='possibleConfirmationText' style='color:#EAE8D5;'>";
+									echo "Checking if confirmation is possible";
+								echo "</a>";
+							echo "</div>";
+						}
 						// ***********************************************************************************************
 						echo "</td>";
 					echo "</tr>";
@@ -399,7 +411,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 					//************* Weekly hours left ***************
 					//***********************************************
 	
-					if($calendar->monitor($calendar->getResourceName())){
+					if($calendar->monitor($calendar->getResourceName())){ // ...this doesnt make a whole lot of sense
 						echo "<tr><td colspan=2 align=center><a href=ekrano target='blank'>Monitored resource</a></td></tr>";
 						echo "<tr><td colspan=2><hr></td></tr>";
 					}
@@ -528,14 +540,15 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						// Wont be dislayed if theres an active user session
 						$display = 'table-cell';
-						if(isset($_SESSION['user_name']) && $_SESSION['user_name']!='')
+						// if(isset($_SESSION['user_name']) && $_SESSION['user_name']!='') // wtf was i thinking??
+						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!='')
 							$display = 'none';
 							
 						echo "<tr><td colspan=2 style='display:".$display."'><hr></td></tr>";
 
 						echo "<tr>";
 							echo "<td colspan=2 style='display:".$display."'>User Name<br>";
-							echo "<input name=user_id class=inpbox onkeypress='return noenter()' id=user_id lang=send title='' value=''  onblur=ajaxUser(this) />";
+							echo "<input name=user_id class=inpbox onkeypress='return noenter()' id=user_id lang=send title='' value='' onblur=ajaxUser(this) />";
 							echo "</td>";
 						echo "</tr>";
 						
@@ -553,11 +566,15 @@ echo "<table id='master' style='margin:auto' width=750>";
 							}
 							// elseif(hasPermission($_SESSION['user_id'], $resource)){
 							else{
+								require_once("../agendo/sampleHandling.php");
 								$tdButtonsDisplay = 'none';
 								$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
-								echo "<tr><td colspan=2 align='center'>";
-									echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='addSample();' />";
-								echo "</td></tr>";
+								echo "<tr>";
+									echo "<td colspan=2 style='text-align:center;'>";
+										// echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='window.open(\"../agendo/sampleHandling.php?interface=sampleInsertHtml&resource=".$resource."\", \"\", \"width=100, height=100\");' />";
+										echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='sampleInsertShowDivAndCheckUser(".$resource.");' />";
+									echo "</td>";
+								echo "</tr>";
 								
 								echo "<tr><td colspan=2><hr></td></tr>";
 							}
@@ -637,9 +654,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 			// ***************************** draw calendar *************************
 			echo "<td style='height:100%;vertical-align:top;'>";
-			echo "<div id=calendar class='calendar'> ";
+			echo "<div id='calendar' class='calendar'> ";
 				// calling method for design weekview
-				$calendar->draw_week();
+				echo $calendar->draw_week();
 			echo "</div>";
 			echo "</td>";
 			// *************************** end draw calendar ************************
@@ -702,6 +719,23 @@ echo "</div>";
 echo "</body>";
 echo "</html>";
 
+
+	// Returns just the calendar to JS to avoid the auto refresh header (hackfest)
+	function getCalendarWeek(){
+		try{
+			global $calendarDate;
+			global $resource;
+			$calendar=new cal($resource);
+			$calendar->setStartDate(date("Ymd",strtotime($calendarDate)));
+			$json->calendar = $calendar->draw_week();
+			$json->success = true;
+		}
+		catch(Exception $e){
+			$json->success = false;
+			$json->message = "Error: ".$e->getMessage();
+		}
+		echo json_encode($json);
+	}
 
 ?>
 

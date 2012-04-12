@@ -149,8 +149,8 @@
 					throw new Exception("This account is inactive.");
 				}
 			
-				$_SESSION['user_name'] = $arr[0];
-				$_SESSION['user_lastName'] = $arr[1];
+				// $_SESSION['user_name'] = $arr[0];
+				// $_SESSION['user_lastName'] = $arr[1];
 				$_SESSION['user_pass'] = $arr[2];
 				$_SESSION['user_id'] = $arr[3];
 				$_SESSION['database'] = dbHelp::getSchemaName();
@@ -172,12 +172,15 @@
 	function importJs($path = "../agendo"){
 		echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/commonCode.js'></script>";
-		echo "<link type='text/css' href='".$path."/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
-		echo "<script type='text/javascript' src='".$path."/js/jquery.jnotify.js'></script>";
+		// echo "<link type='text/css' href='".$path."/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
+		// echo "<script type='text/javascript' src='".$path."/js/jquery.jnotify.js'></script>";
+		echo "<link type='text/css' href='".$path."/css/jNotify.jquery.css' rel='stylesheet' media='all' />";
+		echo "<script type='text/javascript' src='".$path."/js/jNotify.jquery.min.js'></script>";
 		echo "<link href='".$path."/css/tipTip.css' rel='stylesheet' type='text/css'>";
 		echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
 		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
 		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
+		echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
 	}
 
 	function showMsg($message, $isError = false, $import = false){
@@ -217,31 +220,30 @@
 	}
 	
 	function loggedInAs($phpFile, $resource){
-		if(isset($_SESSION['user_name']) && $_SESSION['user_name']!=''){
+		// if(isset($_SESSION['user_name']) && $_SESSION['user_name']!=''){
+		if(isset($_SESSION['user_id']) && $_SESSION['user_id']!=''){
 			$textColor = 'white';
 			$textColorHover = '#F7C439';
 			$textSize = '10px';
+			$sql = "select user_firstname, user_lastname from ".dbHelp::getSchemaName().".user where user_id = :0";
+			$prep = dbHelp::query($sql, array($_SESSION['user_id']));
+			$row = dbHelp::fetchRowByIndex($prep);
 			echo "<div id='loggedAsDiv' align='right' valign='bottom'>";
-				echo "<label style='font-size:".$textSize.";color:".$textColor."'>Logged as ".$_SESSION['user_name']." ".$_SESSION['user_lastName']." | </label>";
+				// echo "<label style='font-size:".$textSize.";color:".$textColor."'>Logged as ".$_SESSION['user_name']." ".$_SESSION['user_lastName']." | </label>";
+				echo "<label style='font-size:".$textSize.";color:".$textColor."'>Logged as ".$row[0]." ".$row[1]." | </label>";
 				echo "<a style='cursor:pointer;font-size:".$textSize.";color:".$textColor."' onmouseover=\"this.style.color='".$textColorHover."'\" onmouseout=\"this.style.color='".$textColor."'\" title='Click here to logoff' onclick=logOff('".$phpFile.".php',".$resource.")> Logoff</a>";
 			echo "</div>";
 		}
 	}
 	
-	function validUserAndPass($user, $pass, $passCrypted = false){
+	function isValidUserAndPass($user, $pass, $passCrypted = false, $errorMessage = "Invalid username or password"){
 		if(!$passCrypted)
 			$pass = cryptPassword($pass);
 
-		$sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = '".$user."' and user_passwd = '".$pass."'";
-		$res=dbHelp::query($sql) or die ($sql);
-		if(dbHelp::numberOfRows($res) <= 0)
-			echo "Wrong Login";
-		else{
-			$arr=dbHelp::fetchRowByIndex($res);
-			$_SESSION['user_id'] = $arr[0];
-			$_SESSION['user_pass'] = $pass;
-			$_SESSION['database'] = dbHelp::getSchemaName();
-			echo "";
+		$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0 and user_passwd = :1";
+		$res = dbHelp::query($sql, array($user, $pass));
+		if(dbHelp::numberOfRows($res) <= 0){
+			throw new Exception($errorMessage);
 		}
 	}
 
@@ -464,12 +466,20 @@
 		return false;
 	}
 	
-	// Checks if a user is a resource manager, returns the resource or false
-	function isResp($user_id){
+	// Checks if a user is a resource manager, returns the resource(s) or false
+	function isResp($user_id, $resource = null){
 		if(isset($user_id) && $user_id != ''){
 			$resources = array();
-			$sql = "select resource_id from resource where resource_resp = :0";
-			$prepManager = dbHelp::query($sql, array($user_id));
+			$sqlArray = array($user_id);
+			$extraSql = "";
+			
+			if(isset($resource)){
+				$extraSql = " and resource_id = :1";
+				$sqlArray[] = $resource;
+			}
+			
+			$sql = "select resource_id from resource where resource_resp = :0".$extraSql;
+			$prepManager = dbHelp::query($sql, $sqlArray);
 			while($row = dbHelp::fetchRowByIndex($prepManager)){
 				$resources[] = $row[0];
 			}
@@ -486,13 +496,8 @@
 		$sql = "select permissions_level from permissions where permissions_user = :0 and permissions_resource = :1";
 		$prep = dbHelp::query($sql, array($userId, $resourceId));
 		$permissionsLevel = dbHelp::fetchRowByIndex($prep);
-		// if(dbHelp::numberOfRows($prep) > 0 && ){
-		// if($permissionsLevel != null && $permissionsLevel[0] != 0){
-			// wtf('YaY');
-			// return 
-		// }
+		
 		return $permissionsLevel != null && $permissionsLevel[0] != 0;
-		// return false;
 	}
 	
 	// Checks if a user is a department manager(PI), returns the resource or false
@@ -556,7 +561,8 @@
 		$resFlag=dbHelp::query($sqlFlag);
 		$arrFlag=dbHelp::fetchRowByIndex($resFlag);
 		if($arrFlag[0] == '1'){
-			if(isset($_SESSION['user_name']) && $_SESSION['user_name'] != ''){
+			// if(isset($_SESSION['user_name']) && $_SESSION['user_name'] != ''){
+			if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){ // again, wtf??
 				return true;
 			}
 			
@@ -670,5 +676,9 @@
 	
 	function convertDate($date, $toFormat){
 		return date($toFormat, strtotime($date));
+	}
+	
+	function isAjax(){
+		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 	}
 ?>
