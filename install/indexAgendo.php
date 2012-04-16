@@ -129,6 +129,7 @@ if (isset($_GET['class'])) {
 
 	// echo "<div class=logo>";
 	echo "<table class=equilist>";
+		$smallScript = "style='cursor:pointer' onclick='showMessage(\"Please sign in to be able to access resources.\")'";
 		if(!isset($class)){
 			echo "<tr>";
 				echo "<td class=title_>Most Used Resources</td>";
@@ -140,7 +141,7 @@ if (isset($_GET['class'])) {
 				if ($i==0) $max = $arr[0];
 				echo "<tr>";
 					$varFlag = "href=weekview.php?resource=" . $arr[2];
-					$smallScript = "style='cursor:pointer' onclick='$.jnotify(\"Please sign in to be able to access resources.\")'";
+					// $smallScript = "style='cursor:pointer' onclick='$.jnotify(\"Please sign in to be able to access resources.\")'";
 					if(!secureIpSessionLogin()){
 						$varFlag = $smallScript;
 					}
@@ -161,7 +162,7 @@ if (isset($_GET['class'])) {
 			$resResource=dbHelp::query($sql);
 			while($arrResource=dbHelp::fetchRowByIndex($resResource)){
 				$varFlag = "href=weekview.php?resource=" . $arrResource[3];
-				$smallScript = "style='cursor:pointer' onclick='$.jnotify(\"Please sign in to be able to access resources.\")'";
+				// $smallScript = "style='cursor:pointer' onclick='$.jnotify(\"Please sign in to be able to access resources.\")'";
 				if(!secureIpSessionLogin()){
 					$varFlag = $smallScript;
 				}
