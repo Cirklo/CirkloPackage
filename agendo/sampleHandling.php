@@ -4,7 +4,7 @@
 	// ******************
 	// Gets or Posts here
 	try{
-	// This flag controls if the error data is sent to the client on page generation or sent to JS by reply
+		// This flag controls if the error data is sent to the client on page generation or sent to JS by reply
 		$dontEchoThis = isAjax();
 
 
@@ -14,15 +14,25 @@
 			if(!isset($_POST['resource'])){
 				throw new Exception('Resource not specified');
 			}
+			
+			$userId = getUserId($_POST['userLogin'], $_POST['userPass']);
+			// Need this comparison in case $userId = 0.... Thats php for you...
+			if($userId === false){
+				throw new Exception('Wrong username or password');
+			}
+		
+			if(!hasPermission($userId, $resource) && isResp($userId, $resource) !== false){ // dont allow resp to add samples? allow resp to add samples in someones name?
+				throw new Exception('User is not allowed to add samples');
+			}
 		
 			switch($_POST['action']){
 				case "sampleInsertHtml": // Regular user view
-					$html = sampleInsertHtml($_POST['resource'], $_POST['userLogin'], $_POST['userPass']);
+					$html = sampleInsertHtml($userId, $_POST['resource']);
 					$json->html = $html;
 				break;
-				case "insertSample":
+				case "sampleInsert":
 					if(isset($_POST['sampleName'])){
-						sampleInsert($_POST['resource'], $_POST['sampleName']);
+						$json->message = sampleInsert($_POST['sampleName'], $userId, $_POST['resource']);
 					}
 				break;
 			}
@@ -36,7 +46,7 @@
 		echo "<link href='../agendo/css/sample.css' rel='stylesheet' type='text/css' />";
 		echo "<script type='text/javascript' src='../agendo/js/sample.js'></script>";
 		
-		echo "<div id='sampleInterfaceDiv' style='display:none;background:white;width:340px;margin:auto;position:absolute;border:2px solid black;padding:20px;'>";
+		echo "<div id='sampleInterfaceDiv'>";
 		echo "</div>";
 	}
 	catch(Exception $e){
@@ -53,33 +63,16 @@
 
 	// *********
 	// Functions
-	function sampleInsertHtml($resource, $userLogin, $userPass){
-		if(isset($_SESSION['user_id'])){
-			$userId = $_SESSION['user_id'];
-		}
-		elseif(isset($userLogin) && isset($userPass)){
-			$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0 and user_passwd = :1";
-			$prep = dbHelp::query($sql, array($userLogin, cryptPassword($userPass)));
-			if(dbHelp::numberOfRows($prep) > 0){
-				$row = dbHelp::fetchRowByIndex($prep);
-				$userId = $row[0];
-			}
-			else{
-				throw new Exception('Wrong user or password');
-			}
-		}
-		else{
-			throw new Exception('User not specified');
-		}
-		
-		if(!hasPermission($userId, $resource) && isResp($userId, $resource) !== false){
-			throw new Exception('User is not allowed to add samples');
-		}
-		
+	function sampleInsertHtml($userId, $resource){
 		$html = "";
 		$sql = "select resource_name from resource where resource_id = :0";
 		$prep = dbHelp::query($sql, array($resource));
 		$row = dbHelp::fetchRowByIndex($prep);
+		
+		$html .= "<a onclick='closeSampleInsertDiv();' onmouseover='this.style.cursor=\"pointer\"' style='position:absolute;top:0px;right:5px;color:#bb3322;font-size:16px;'>";
+			$html .= "x";
+		$html .= "</a>";
+		
 		$html .= "<label style='float:left;'>";
 			$html .= "New sample for ".$row[0].": ";
 		$html .= "</label>";
@@ -134,7 +127,26 @@
 		return $html;
 	}
 	
-	function sampleInsert(){
+	function sampleInsert($sampleName, $userId, $resource){
+		$sql = "insert into sample values(null, :0, :1, 1, :2)";
+		$prep = dbHelp::query($sql, array($sampleName, $userId, $resource));
+		return "Sample inserted";
+	}
+	
+	
+	// Returns a user id either from the session var or from the login and password text fields
+	function getUserId($userLogin, $userPass){
+		if(isset($_SESSION['user_id'])){
+			return $_SESSION['user_id'];
+		}
 		
+		$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0 and user_passwd = :1";
+		$prep = dbHelp::query($sql, array($userLogin, cryptPassword($userPass)));
+		if(isset($userLogin) && isset($userPass) && dbHelp::numberOfRows($prep) > 0){
+			$row = dbHelp::fetchRowByIndex($prep);
+			return $row[0];
+		}
+		
+		return false;
 	}
 ?>
