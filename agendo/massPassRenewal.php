@@ -54,22 +54,22 @@ require_once("commonCode.php");
 		while($row = dbHelp::fetchRowByIndex($prepManager)){
 			$resList .= ",".$row[0];
 		}
-		$userQuery = "select user_login, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user , permissions where permissions_resource in (".$resList.") and permissions_user = user_id and user_id != :0 group by user_login order by lower(user_firstname), lower(user_lastname)";
+		$userQuery = "select user_login, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user , permissions where permissions_resource in (".$resList.") and permissions_user = user_id and user_id != :0 group by user_login order by lower(user_firstname), lower(user_lastname), lower(user_login)";
 	}
 	else{ // Else its not a special user and shouldnt see the massPassRenewal screen
 		echo "<script type='text/javascript'>window.location='../".$_SESSION['path']."';</script>";
 	}
 	
-	$commonSelectStyle = "width:150px;";
+	$commonSelectStyle = "width:200px;";
 	$commonSelectSize = 10;
-	echo "<table id='main' style='margin:auto;width:500px;text-align:center;'>";
+	echo "<table id='main' style='margin:auto;width:600px;text-align:center;'>";
 		echo "<tr>";
 			echo "<td>";
 				echo "<h3 style='color:white;'>Pick Users from:</h3>";
 				$prep = dbHelp::query($userQuery, array($_SESSION['user_id']));
 				echo "<select multiple='multiple' size='".$commonSelectSize."' id='fromSelect' style='".$commonSelectStyle."'>";
 					while($row = dbHelp::fetchRowByIndex($prep)){
-						echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]."</option>";
+						echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]." (".$row[0].")</option>";
 					}
 				echo "</select>";
 			echo "</td>";
@@ -103,7 +103,7 @@ require_once("commonCode.php");
 		echo "<tr>";
 			echo "<td colspan='3'>";
 				echo "<br>";
-				echo "<a style='color:white;' onmouseover=\"this.style.color='#F7C439'\" onmouseout=\"this.style.color='#FFFFFF'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+				echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
 			echo "</td>";
 		echo "</tr>";
 	echo "</table>";

@@ -13,14 +13,15 @@ require_once("commonCode.php");
 			for($j = 0; $j < sizeOf($userLogins); $j++){
 				for($i = 0; $i < sizeOf($resources); $i++){
 					// If postgre will be used this will most likely not work... at all...
-					$sql = "REPLACE 
-							INTO 
-								permissions
-							SET 
-								permissions_user = :0,
-								permissions_resource = :1,
-								permissions_level = :2,
-								permissions_training = :3";
+					$sql = "
+						REPLACE INTO 
+							permissions
+						SET 
+							permissions_user = :0,
+							permissions_resource = :1,
+							permissions_level = :2,
+							permissions_training = :3
+					";
 					$prep = dbHelp::query($sql, array($userLogins[$j], $resources[$i], $permLevel, $training));
 				}
 			}
@@ -43,13 +44,13 @@ require_once("commonCode.php");
 	$sql = "select resource_id from resource where resource_resp = :0";
 	$prepManager = dbHelp::query($sql, array($_SESSION['user_id']));
 
+	$sqlPart1 = "select resource_id, resource_name from resource where resource_status not in (0, 2)";
+	$sqlPart2 = "order by lower(resource_name)";
 	if(dbHelp::numberOfRows($prepAdmin) > 0){ // Check if user is admin
-		$sql = "select resource_id, resource_name from resource order by lower(resource_name)";
-		$prepResources = dbHelp::query($sql);
+		$prepResources = dbHelp::query($sqlPart1." ".$sqlPart2);
 	}
 	elseif(dbHelp::numberOfRows($prepManager) > 0){ // Else check if user is a resource manager
-		$sql = "select resource_id, resource_name from resource where resource_resp = :0 order by lower(resource_name)";
-		$prepResources = dbHelp::query($sql, array($_SESSION['user_id']));
+		$prepResources = dbHelp::query($sqlPart1." and resource_resp = :0 ".$sqlPart2, array($_SESSION['user_id']));
 	}
 	else{ // Else its not a special user and shouldnt see the massPassRenewal screen
 		echo "<script type='text/javascript'>window.location='../".$_SESSION['path']."';</script>";
@@ -62,30 +63,35 @@ require_once("commonCode.php");
 	echo "<br>";
 	echo "<h1 style='text-align:center;color:#F7C439;'>Resource Access</h1>";
 	
-	$commonSelectStyle = "width:150px;";
+	$commonSelectStyle = "width:200px;";
 	$commonSelectSize = 10;
-	echo "<table id='main' style='margin:auto;width:500px;text-align:center;'>";
+	echo "<table id='main' style='margin:auto;width:600px;text-align:center;'>";
 		echo "<tr>";
 			echo "<td>";
 				echo "<h3 style='color:white;'>Pick Users from:</h3>";
-				$userQuery = "select user_id, user_firstname, user_lastname from ".dbHelp::getSchemaName().".user where user_id != :0 order by lower(user_firstname), lower(user_lastname)";
-				$prep = dbHelp::query($userQuery, array($_SESSION['user_id']));
+				$userQuery = "select user_id, user_firstname, user_lastname, user_login from ".dbHelp::getSchemaName().".user order by lower(user_firstname), lower(user_lastname), lower(user_login)";
+				$prep = dbHelp::query($userQuery);
 				echo "<select multiple='multiple' size='".$commonSelectSize."' id='fromSelect' style='".$commonSelectStyle."'>";
 					while($row = dbHelp::fetchRowByIndex($prep)){
-						echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]."</option>";
+						echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]." (".$row[3].")</option>";
 					}
 				echo "</select>";
 			echo "</td>";
 		
+			$margin = 6;
 			echo "<td>";
 				echo "<div>";
 					echo "<input type='button' value=' <<- ' title='Remove all' onclick='swapAll(\"toSelect\", \"fromSelect\");'/>";
+					// echo "<img style='margin-right:".$margin."px;margin-bottom:".$margin."px;' src='".$_SESSION['path']."/pics/double_arrow_button_left.png' title='Remove all' onclick='swapAll(\"toSelect\", \"fromSelect\");'/>";
 					echo "&nbsp";
 					echo "<input type='button' value=' ->> ' title='Add all' onclick='swapAll(\"fromSelect\", \"toSelect\");'/>";
+					// echo "<img style='margin-left:".$margin."px;margin-bottom:".$margin."px;' src='".$_SESSION['path']."/pics/double_arrow_button_right.png' title='Add all' onclick='swapAll(\"fromSelect\", \"toSelect\");'/>";
 					echo "<br>";
 					echo "<input type='button' value=' <- ' title='Remove selected' onclick='swapSelected(\"toSelect\", \"fromSelect\");'/>";
+					// echo "<img style='margin-right:".$margin."px;' src='".$_SESSION['path']."/pics/single_arrow_button_left.png' title='Remove selected' onclick='swapSelected(\"toSelect\", \"fromSelect\");'/>";
 					echo "&nbsp";
 					echo "<input type='button' value=' -> ' title='Add selected' onclick='swapSelected(\"fromSelect\", \"toSelect\");'/>";
+					// echo "<img style='margin-left:".$margin."px;' src='".$_SESSION['path']."/pics/single_arrow_button_right.png' title='Add selected' onclick='swapSelected(\"fromSelect\", \"toSelect\");'/>";
 				echo "</div>";
 			echo "</td>";
 		
@@ -98,7 +104,8 @@ require_once("commonCode.php");
 		
 		echo "<tr>";
 			echo "<td colspan='3'>";
-				echo "<div style='float:left'>";
+				// echo "<div style='float:left'>";
+				echo "<div>";
 					echo "<h3 style='color:white;'>Select resource(s):</h3>";
 					echo "<select multiple='multiple' size='6' id='resourcesSelect' style='width:250px'>";
 						while($row = dbHelp::fetchRowByIndex($prepResources)){
@@ -107,7 +114,8 @@ require_once("commonCode.php");
 					echo "</select>";
 				echo "</div>";
 
-				echo "<div style='float:right'>";
+				// echo "<div style='float:right'>";
+				echo "<div>";
 					echo "<h3 style='color:white;'>Access level:</h3>";
 					$sql = "select permlevel_id, permlevel_desc from permlevel";
 					$prep = dbHelp::query($sql);
