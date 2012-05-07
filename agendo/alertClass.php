@@ -330,58 +330,77 @@ function nonconf(){
     
     // $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,date_format(entry_datetime,'%d %M at %H:%i') as date from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and date_add(entry_datetime, interval resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60 minute) between now() and date_add(now(),interval 60 minute) and entry_user=user_id and entry_resource=resource_id and resource_status<>4";
 	// $sql="select user_email,user_mobile,user_alert,resource_name,(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,entry_id,".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date, entry_datetime from ".dbHelp::getSchemaName().".user,entry,resource where entry_status=2 and ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute')." and entry_user=user_id and resource_id=entry_resource and resource_status<>4";
-    $sql = "select 
-				user_email,
-				user_mobile,
-				user_alert,
-				resource_name,
-				entry_id,
-				entry_datetime,
-				entry_user,
-				".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date,
-				(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,
-				(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert
-			from ".dbHelp::getSchemaName().".user, entry, resource 
-			where 
-				entry_status=2 and 
-				entry_user=user_id and 
-				entry_resource = resource_id and 
-				resource_status<>4 and 
-				".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between ".dbHelp::now()." and ".dbHelp::date_add(dbHelp::now(),'60', 'minute');
-				// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
-    $res=dbHelp::query($sql) or die($sql);
+    $sql = "
+		select 
+			user_email,
+			user_mobile,
+			user_alert,
+			resource_name,
+			entry_id,
+			entry_datetime,
+			entry_user,
+			".dbHelp::getFromDate('entry_datetime','%d %M at %H:%i')." as date,
+			(select user_email from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp,
+			(select user_alert from ".dbHelp::getSchemaName().".user where user_id=resource_resp) as resp_alert,
+			resource_status
+		from 
+			".dbHelp::getSchemaName().".user
+			, entry
+			, resource 
+		where 
+			entry_status=2 and 
+			entry_user=user_id and 
+			entry_resource = resource_id and 
+			resource_status<>4 and 
+			".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." 
+		between ".dbHelp::now()." and ".dbHelp::date_add(dbHelp::now(),'60', 'minute')
+	;
+	// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
+    $res=dbHelp::query($sql);
     while($arr=dbHelp::fetchRowByName($res)){
-        $msg=date("Y-m-d H:i")." You did not confirm your entry on " . $arr['resource_name'] . " at ".$arr['entry_datetime'].". Please justify to ". $arr['resp'];
-        switch ($arr['user_alert']) {
-        case 2:
-            try {
-                $msg=str_replace(' ','%20',$msg);
-                echo $msg;
-                $url="http://192.168.52.35:8888/send?phone=". $arr['user_mobile'] . "&msg=" . $msg;
-                $handle = fopen($url, "r");
-            } catch (HttpException $ex) {
-                echo $ex;
-            }
-        break;
-        case 1:
-                $this->Subject="No confirmation on ".$arr['date'];
-				$this->ClearReplyTos();	//clear replys before receiving any email
-				$this->AddReplyTo("Resource Manager", $arr['resp']);
-				$this->ClearAddresses();
-				$this->AddAddress($arr['user_email'], "");
+		if($arr['resource_status'] == 6){ // sequencing
+			// Get the item ids associated with a past entry
+			$sqlItems = "select item_assoc_item from item_assoc where item_assoc_entry = :0";
+			$prep = dbHelp::query($sqlItems, array($arr['entry_id']));
+			// Sets the item state to Used
+			while($row = dbHelp::fetchRowByIndex($prep)){
+				$sqlItemState = "update item set item_state = 3 where item_id = :0";
+				$prep = dbHelp::query($sqlItemState, array($row[0]));
+			}
+		}
+		else{
+			$msg=date("Y-m-d H:i")." You did not confirm your entry on " . $arr['resource_name'] . " at ".$arr['entry_datetime'].". Please justify to ". $arr['resp'];
+			switch($arr['user_alert']){
+				case 2:
+					try {
+						$msg=str_replace(' ','%20',$msg);
+						echo $msg;
+						$url="http://192.168.52.35:8888/send?phone=". $arr['user_mobile'] . "&msg=" . $msg;
+						$handle = fopen($url, "r");
+					} catch (HttpException $ex) {
+						echo $ex;
+					}
+				break;
+				case 1:
+						$this->Subject="No confirmation on ".$arr['date'];
+						$this->ClearReplyTos();	//clear replys before receiving any email
+						$this->AddReplyTo("Resource Manager", $arr['resp']);
+						$this->ClearAddresses();
+						$this->AddAddress($arr['user_email'], "");
 
-				$this->Body=$msg;
-                echo $msg;
-                if(!$this->Send()) {
-                    echo "Mailer Error: ".$this->ErrorInfo;
-                } 
-				// else {
-                    //echo "Message sent!";
-                // }
-		break;
-        case 0:
-            break;
-        }
+						$this->Body=$msg;
+						echo $msg;
+						if(!$this->Send()) {
+							echo "Mailer Error: ".$this->ErrorInfo;
+						} 
+						// else {
+							//echo "Message sent!";
+						// }
+				break;
+				case 0:
+				break;
+			}
+		}
     }
     
 } // end function

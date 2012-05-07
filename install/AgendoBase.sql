@@ -97,6 +97,58 @@ CREATE TABLE IF NOT EXISTS `equip` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='monitored equipment' AUTO_INCREMENT=1 ;
 
 
+--
+-- Table structure for table `item`
+--
+
+CREATE TABLE IF NOT EXISTS `item` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_name` varchar(100) NOT NULL,
+  `item_user` int(11) NOT NULL,
+  `item_state` int(11) NOT NULL DEFAULT '0',
+  `item_resource` int(11) NOT NULL,
+  PRIMARY KEY (`item_id`),
+  KEY `item_user` (`item_user`),
+  KEY `item_state` (`item_state`),
+  KEY `item_resource` (`item_resource`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
+
+
+--
+-- Table structure for table `item_assoc`
+--
+
+CREATE TABLE IF NOT EXISTS `item_assoc` (
+  `item_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_assoc_entry` bigint(11) NOT NULL,
+  `item_assoc_item` int(11) NOT NULL,
+  PRIMARY KEY (`item_assoc_id`),
+  KEY `item_assoc_item` (`item_assoc_item`),
+  KEY `item_assoc_entry` (`item_assoc_entry`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Associates a item or items to an entry or entries' AUTO_INCREMENT=199 ;
+
+
+--
+-- Table structure for table `item_state`
+--
+
+CREATE TABLE IF NOT EXISTS `item_state` (
+  `item_state_id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_state_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`item_state_id`),
+  UNIQUE KEY `item_state_name_UNIQUE` (`item_state_name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The several states that a item may have are here' AUTO_INCREMENT=4 ;
+
+--
+-- Dumping data for table `item_state`
+--
+
+INSERT INTO `item_state` (`item_state_id`, `item_state_name`) VALUES
+(1, 'Available'),
+(2, 'In use'),
+(3, 'Used');
+
+
 -- --------------------------------------------------------
 --
 -- Dumping data for table `mask`
@@ -397,7 +449,8 @@ INSERT INTO `resstatus` (`resstatus_id`, `resstatus_name`) VALUES
 (2, 'Invisible'),
 (3, 'Pre-reservation with user confirmation'),
 (4, 'Pre-reservation with admin confirmation'),
-(5, 'Quick Scheduling');
+(5, 'Quick Scheduling'),
+(6, 'Sequencing');
 
 -- --------------------------------------------------------
 

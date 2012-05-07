@@ -191,7 +191,7 @@ function saveItemList(){
 
 	if(entries.length != 0){
 		if(lockedItems.length == 0){
-			showMessage("The locked item list can't be empty. JS", true);
+			showMessage("The locked item list can't be empty.", true);
 			return;
 		}
 		$.post(

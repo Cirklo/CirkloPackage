@@ -10,6 +10,23 @@ ALTER TABLE `announcement`
 
 
 --
+-- Constraints for table `item`
+--
+ALTER TABLE `item`
+  ADD CONSTRAINT `item_ibfk_1` FOREIGN KEY (`item_user`) REFERENCES `user` (`user_id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `item_ibfk_2` FOREIGN KEY (`item_state`) REFERENCES `item_state` (`item_state_id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `item_ibfk_3` FOREIGN KEY (`item_resource`) REFERENCES `resource` (`resource_id`) ON UPDATE CASCADE;
+
+  
+--
+-- Constraints for table `item_assoc`
+--
+ALTER TABLE `item_assoc`
+  ADD CONSTRAINT `item_assoc_ibfk_1` FOREIGN KEY (`item_assoc_item`) REFERENCES `item` (`item_id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `item_assoc_ibfk_2` FOREIGN KEY (`item_assoc_entry`) REFERENCES `entry` (`entry_id`) ON UPDATE CASCADE;
+
+  
+--
 -- Constraints for table `entry`
 --
 ALTER TABLE `entry`
