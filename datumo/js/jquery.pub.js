@@ -48,7 +48,8 @@ function clickPub(id,outlink){
 	$.get(url,{
 		pub:id},
 		function(data){
-			window.open(outlink);
+			// window.open(outlink);
+			window.open(outlink,'_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=no'); // not blocked using this method?
 		});
 }
 

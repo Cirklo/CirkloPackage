@@ -1,4 +1,4 @@
-// This file was altered by Pedro Pires (The chosen two)
+// This file was altered by Pedro Pires
 var bgcolor1,bgcolor2 ;
 var mousedown=0,mousedownTimeout;
 var curDate=new Date();
@@ -15,6 +15,8 @@ var usingSession;
 var detectedUser;
 var path = '';
 var numericXfield = 'numericXfield';// if changing this, change the style.css class name as well
+// var associated to the getCalendar function
+var interval;
 
 	var impersonateUser = '';
 	$(document).ready(
@@ -55,26 +57,17 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 			}
 			
 			var intervalLength = 180000; // 3 minutes
-			var interval = setInterval('autoRefresh()', intervalLength);
-
-			// if((confirmImage = document.getElementById('confirmIsPossible')) != null){
-				// if(macIsConfirmed){
-					// confirmImage.src = "pics/green_light.png"
-				// }
-				// else{
-					// confirmImage.src = "pics/red_light.png"
-				// }
-			// }
+			interval = setInterval('getCalendar()', intervalLength);
 		}
 	);
 
-	// New auto refresh(for the calendar) function will go here
-	function autoRefresh(){
+	// Gets the calendar html
+	function getCalendar(entry, action){
 		if(resourceToUseInGet != '' && dateToUseInGet != ''){
 			$.post(
 				"weekview.php?resource=" + resourceToUseInGet + "&date=" + dateToUseInGet
-				, {functionName: 'getCalendarWeek'}
-				,function(serverData){
+				, {functionName: 'getCalendarWeek', entry: entry, action: action}
+				, function(serverData){
 					if(serverData.success){
 						document.getElementById('calendar').innerHTML = serverData.calendar;
 					}
@@ -82,7 +75,7 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 						showMessage(serverData.message, true);
 					}
 				}
-				,"json"
+				, "json"
 				)
 				// This gets messed up because of the message display on this thing... Always shows an empty error string (messageInput value = '' ?)
 				// .error(
@@ -95,7 +88,7 @@ var numericXfield = 'numericXfield';// if changing this, change the style.css cl
 	}
 	
 	
-	// Sets the date and resource for use in the autorefresh feature
+	// Sets the date and resource for use in the getCalendar feature
 	function setDateAndResource(resource, date){
 		dateToUseInGet = date;
 		resourceToUseInGet = resource;
@@ -146,19 +139,24 @@ function setUsingSession(isUsing){
 function noenter() {
   return !(window.event && window.event.keyCode == 13); }
   
-function button_visibility(add,del,monitor,update,confirm) {
+function button_visibility(add,del,monitor,update,confirm){
     document.getElementById('delButton').disabled=del;
     document.getElementById('addButton').disabled=add;
     document.getElementById('monitorButton').disabled=monitor;
     document.getElementById('updateButton').disabled=update;
+	// if it exists
+	if(editItemsButton = document.getElementById('editItemsButton')){
+		editItemsButton.disabled = del; // disables when the del buttons is disabled and enables in the same way, why? Coz i didnt wanna create a var for this
+	}
+	
     if (res_status>2 || document.getElementById('update').value!=0){ // in the case there is no need for confirmation button
         document.getElementById('confirmButton').disabled=confirm ;
     } else {
-        //alert(confirm); 
         document.getElementById('confirmButton').disabled=true; 
     }
 }
 
+var selectedEntry = null;
 function swapColor(obj,tag,action){
     //document.getElementById('datefield').selection.empty();
     objStyle=obj.style;
@@ -169,29 +167,39 @@ function swapColor(obj,tag,action){
         table=document.getElementById('caltable');
         tablesize=table.rows.length;
         // for checking span use table.rows[i].cells[j].rowSpan;
-        
         if (action==1) { // select an existing entry
-            if (oUpdVal.value!=0) exit;
+            // if(oUpdVal && oUpdVal.value!=0){
+				// alert('teste');
+				// return;
+			// }
             clear_table(table);
             document.getElementById('addButton').value='All';
-            button_visibility(false,false,false,false,false);
+			if(res_status == 6){
+				button_visibility(false,false,false,false,true);
+			}
+			else{
+	            button_visibility(false,false,false,false,false);
+			}
+			selectedEntry = obj.title;
 			if (window.XMLHttpRequest){
 				xmlhttp=new XMLHttpRequest();
 			} else {
 				alert("Your browser does not support XMLHTTP!");
 				exit;
 			}
-			url='../agendo/ajax.php?entry=' +   obj.title + "&type=DisplayEntryInfo" ;
+			url='../agendo/ajax.php?entry=' + obj.title + "&type=DisplayEntryInfo" ;
+
 			xmlhttp.open('GET', url , true);
 			xmlhttp.send(null);
-			xmlhttp.onreadystatechange = function () {
-				if(xmlhttp.readyState==4) {
-				eval(xmlhttp.responseText);
-				//alert(xmlhttp.responseText);         
+			xmlhttp.onreadystatechange = function(){
+				if(xmlhttp.readyState==4){
+					eval(xmlhttp.responseText);
+					//alert(xmlhttp.responseText);         
 				}
 			}
         // } else {
         } else if(document.getElementById('addButton') != null){
+			selectedEntry = null;
             document.getElementById('addButton').value='Add';
 			for (i=1;i<tablesize;i++)
 				for (j=1;j<table.rows[i].cells.length;j++)
@@ -203,14 +211,12 @@ function swapColor(obj,tag,action){
         objStyle.backgroundColor='#aaaaaa';
         bgcolor1=objStyle.backgroundColor;
         bgcolor2=bgcolor1;
-        
-        //alert(bgcolor2);
-        
     } else {
         objStyle.backgroundColor=obj.lang;
         //bgcolor2=objStyle.backgroundColor;
-        if (action==1) button_visibility(true,true,true,true,true);
-        //alert(bgcolor2);
+        if(action==1){
+			button_visibility(true,true,true,true,true);
+		}
     }
     document.getElementById('entry').value=0;
     
@@ -219,24 +225,17 @@ function swapColor(obj,tag,action){
 // this function enables and disables end date for repetitions
 function activate_date(objInp){ objInp.disabled=(objInp.disabled^ true );} // exclusive or? (disabled=true)^true=> false, (disabled=false)^true=> true ?? how about objInp.disabled = !objInp.disabled ? :P 
 
-
-function hide_divs(div1,div2,div3) {
-    document.getElementById(div1).style.visibility='hidden';
-    document.getElementById(div2).style.visibility='hidden';
-    document.getElementById(div3).style.visibility='visible';
-}
 function clear_table(table,cleartitle){
     var i,j,bg;
     bg='#ffffff';
     tablesize=table.rows.length;
-    for (i=1;i<tablesize;i++)
-        for (j=1;j<table.rows[i].cells.length;j++) {
+    for(i=1;i<tablesize;i++){
+        for(j=1;j<table.rows[i].cells.length;j++){
             if (table.rows[i].cells[j].innerHTML=='' && cleartitle) table.rows[i].cells[j].title=0;
-        //    if (table.rows[i].cells[j].style.backgroundColor!=bgcolor2) bg=table.rows[i].cells[j].style.backgroundColor;
             if (!cleartitle && table.rows[i].cells[j].style.backgroundColor) table.rows[i].cells[j].style.backgroundColor=table.rows[i].cells[j].lang;
         }
+	}
 }
-
 
 function ManageEntries(action,ttime,tresolution) {
     var i,j,k=0,seed=0,add=0,tdatetime,tstartime;
@@ -245,21 +244,20 @@ function ManageEntries(action,ttime,tresolution) {
     table=document.getElementById('caltable');
     tablesize=table.rows.length;
 	
-    //code serves for eliminating javascript cache and to add multiple entries
-    code=Math.random();
-    document.getElementById('code').value=code;
-    
     //getting values from hidden input boxes
-    document.getElementById('action').value=action;
+    document.getElementById('action').value = action;
     entry=document.getElementById('entry').value;
     tdate=document.getElementById('tdate').value;
     resource=document.getElementById('resource').value;
-    document.getElementById('action').value=action;
     update=document.getElementById('update').value;
    
+    //code serves for eliminating javascript cache and to add multiple entries
+    code = Math.random();
+    document.getElementById('code').value = code;
+    
     // this is a hack to get a color object
     document.getElementById('code').style.backgroundColor='#aaaaaa';
-    bgcolor=document.getElementById('code').style.backgroundColor;    
+    bgcolor=document.getElementById('code').style.backgroundColor;
     
     var	impersonateUrl = "";
 	if(impersonateUser != ''){
@@ -268,39 +266,50 @@ function ManageEntries(action,ttime,tresolution) {
     switch(action) {
         case 'del':
 			detectedUser = true;
-            for (i=1;i<tablesize;i++) {
-                for (j=1;j<table.rows[i].cells.length;j++) {
-                    cell=table.rows[i].cells[j];
-                    if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)) {
-                        //alert(cell.style.backgroundColor);
-                        document.getElementById('entry').value=cell.title;
+            for(i=1; i<tablesize; i++){
+                for(j=1; j<table.rows[i].cells.length; j++){
+                    cell = table.rows[i].cells[j];
+                    if(cell.title!='0' && (cell.style.backgroundColor==bgcolor)){
+                        document.getElementById('entry').value = cell.title;
                         ajaxEntries('GET','../agendo/process.php?deleteall=0&resource=' + resource + impersonateUrl ,true);
                         //alert ("No entries were selected");
-                    }
+                   }
                 }
-                //alert(table.rows[i].cells.length);
             }
 			if(!detectedUser){
 				document.getElementById('entry').value = '0';
 			}
-            if (entry!='0') {
-            // if (entry!='0' && detectedUser) {
-                var resp=confirm('All associated entries will be deleted!');
+            if(entry != '0'){
+                var resp = confirm('All associated entries will be deleted!');
                 if (!(resp)) return;
                 ajaxEntries('GET','../agendo/process.php?deleteall=1&resource=' + resource + impersonateUrl,true);
                 clear_table(table,false);
-            }
+           }
+			button_visibility(true,true,true,true,true);
+			document.getElementById('entry').value = 0;
         break;
         case 'add':
             var arr=new Array(); // creates an array to define cells with rowspan>1
 			var getAssistance = document.getElementById('assistance').checked;
-            if (update>0) document.getElementById('entry').value=update; // for the update it has to send the entry
-            for (i=1;i<=tablesize;i++) {
+			var numberOfEntries = 0;
+
+            if (update>0){ // for the update it has to send the entry
+				document.getElementById('entry').value=update;
+				document.getElementById('updateButton').value='Update';
+				confirmValue = "Confirm";
+				if(res_status == 6){ // sequencing type of resource
+					confirmValue = "Cancel";
+				}
+				// document.getElementById('confirmButton').value='Confirm';
+				document.getElementById('confirmButton').value = confirmValue;
+				// document.getElementById('entry').value=document.getElementById('update').value = "0";
+			}
+            for(i=1;i<=tablesize;i++){
                 arr[i]= new Array();
                 for (j=1;j<8;j++) arr[i][j]=0; // fills the array
             }
-            for (i=1;i<tablesize;i++) {
-                for (j=1;j<table.rows[i].cells.length;j++) {
+            for(i=1;i<tablesize;i++){
+                for(j=1;j<table.rows[i].cells.length;j++){
                     span=table.rows[i].cells[j].rowSpan;
                     for (x=1;x<=(j+add);x++) add=arr[i][x]+add;
                     if (span>1) for (k=i+1 ;k<i+span;k++) arr[k][j+add]=1; // sets to 1 the fields without
@@ -308,111 +317,141 @@ function ManageEntries(action,ttime,tresolution) {
                 }
                 k=0;
             }
-           for (i=1;i<tablesize;i++) {
+			for(i=1;i<tablesize;i++){
                 ncells=table.rows[i].cells.length;
-                for (j=1;j<8;j++) {
+                for(j=1;j<8;j++){
                     add=0;
-                    for (x=1;x<=j;x++) add=arr[i][x]+add; // for checking where grow
+					
+					// for checking where grow
+                    for (x=1;x<=j;x++){
+						add=arr[i][x]+add;
+					}
+					
                     cell=table.rows[i].cells[j-add];
-                    if (cell.style.backgroundColor==bgcolor && cell.title=='0') {
-                        while (table.rows[i+k].cells[j-add].style.backgroundColor==bgcolor && ((i+k) < tablesize)){
+                    if(cell.style.backgroundColor==bgcolor && cell.title=='0'){ // if the cell is white colored and their title is 0, meaning its an empty entry
+                        while(table.rows[i+k].cells[j-add].style.backgroundColor==bgcolor && ((i+k) < tablesize)){
                             add=0;
                             seed=seed+1;
-                            for (x=1;x<=j;x++) add=arr[i+k][x]+add; // for checking where grow
+							
+							// for checking where grow
+                            for(x=1;x<=j;x++){
+								add=arr[i+k][x]+add;
+							}
+							
                             table.rows[i+k].cells[j-add].title=seed; // due to rowspan
                             k=k+1;
-                            if ((i+k)==tablesize) break;
+                            if ((i+k)==tablesize){
+								break;
+							}
                             add=0;  
-                            for (x=1;x<=j;x++) add=arr[i+k][x]+add; // for checking where grow
+							
+							// for checking where grow
+                            for (x=1;x<=j;x++){
+								add=arr[i+k][x]+add;
+							}
                         }
-                        if (res_maxslots<seed) {
-                            var resp=confirm('Exceeding daily maximum slots. Only reasonable in off peak time! Continue?');
-                            if (!(resp)) {
-                                window.location.href='weekview.php?resource=' + resource + '&date=' + tdate;
+						
+                        if(res_maxslots<seed){
+                            var resp = confirm('Exceeding daily maximum slots. Only reasonable in off peak time! Continue?');
+                            if(!(resp)){
+                                window.location.href = 'weekview.php?resource=' + resource + '&date=' + tdate;// remove?
                                 return;
                             }
-                            
                         }   
-                       tstarttime= parseInt(ttime)+(i-1)*(tresolution);
-                        if (seed==0) exit;
+						
+						tstarttime= parseInt(ttime)+(i-1)*(tresolution);
+                        // if (seed==0) exit;
+                        if (seed==0) return;
                         var entryDate = new Date(tdate.substring(0,4),parseInt(tdate.substring(4,6),10)-1,parseInt(tdate.substring(6,8),10)+j,Math.floor(tstarttime),Math.round((tstarttime-Math.floor(tstarttime))*60),'00');
                         ajaxEntries('GET','../agendo/process.php?' + 'slots=' + seed + impersonateUrl + '&datetime=' + formatDate(entryDate,"yyyyMMddHHmm") + '&resource=' + resource + '&assistance=' + getAssistance,true);
                         seed=0;
                         k=0;
-                    } else if(cell.title!='0' && document.getElementById('addButton').value=='All' && cell.style.backgroundColor==bgcolor2 )  {
-                        window.location.href='weekview.php?resource=' + resource + '&entry=' + cell.title;
-                    }
-                    
-                 }
-            }// end loop all
-        
+						
+ 						button_visibility(true,true,true,true,true);
+						document.getElementById('entry').value = 0;
+						document.getElementById('update').value = 0;
+					} 
+					else if(cell.title!='0' && document.getElementById('addButton').value=='All' && cell.style.backgroundColor==bgcolor2){ // all
+                        // window.location.href='weekview.php?resource=' + resource + '&entry=' + cell.title;
+						document.getElementById('entry').value = cell.title;
+                        getCalendar(cell.title, 'all');
+						button_visibility(true,false,true,true,true); // hides all buttons except del
+					}
+                }
+            }
         break;
         case 'update':
-            if (update!=0) {
+            if(update!=0){
                 ManageEntries('add',ttime,tresolution);
-            } else {
-                for (i=1;i<tablesize;i++) {
+            } 
+			else{
+                for(i=1;i<tablesize;i++){
                     for (j=1;j<table.rows[i].cells.length;j++) {
                         cell=table.rows[i].cells[j];
-                        if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)) {
-                            //alert(cell.style.backgroundColor);          
-                                window.location.href='weekview.php?resource=' + resource +'&update=' + cell.title +'&date=' + tdate;
-                        }
+                        if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)){
+							// window.location.href='weekview.php?resource=' + resource +'&update=' + cell.title +'&date=' + tdate;
+							document.getElementById('entry').value = cell.title;
+							document.getElementById('update').value = cell.title;
+							getCalendar(cell.title, 'update');
+							init();
+							return;
+                       }
                     }
                 }
             }
         break;
         case 'monitor':
-            for (i=1;i<tablesize;i++) {
-                //alert(bgcolor2);
-                for (j=1;j<table.rows[i].cells.length;j++) {
+            for(i=1;i<tablesize;i++){
+                for(j=1;j<table.rows[i].cells.length;j++){
                     cell=table.rows[i].cells[j];
-                    if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)) {
-                        //alert(cell.style.backgroundColor);
-                            document.getElementById('entry').value=cell.title;
-                            ajaxEntries('GET','../agendo/process.php?&resource=' + resource + impersonateUrl,true);
-                            clear_table(table,false);                 
-                    } else {
+                    if(cell.title!='0' && (cell.style.backgroundColor==bgcolor)){
+						document.getElementById('entry').value=cell.title;
+						ajaxEntries('GET','../agendo/process.php?&resource=' + resource + impersonateUrl,true);
+						clear_table(table,false);                 
+                    }
+					else{
                        //alert ("No entries were selected");
                     }
                 }
-                //alert(table.rows[i].cells.length);
             }
         break;
         case 'confirm':
-        	
             if (update!=0) { // in real its a cancel
-                window.location.href='weekview.php?resource=' + resource + '&date=' + tdate;
-               exit();
+				// window.location.href='weekview.php?resource=' + resource + '&date=' + tdate; // comment this?
+				// exit();
+				getCalendar();
+				button_visibility(true,true,true,true,true); // hides all buttons except del
+				document.getElementById('updateButton').value = 'Update';
+				document.getElementById('confirmButton').value = 'Confirm';
+				document.getElementById('addButton').value = 'Add';
+				document.getElementById('entry').value = 0;
+				document.getElementById('update').value = 0;
+				
+				return;
             }
             objForm=document.getElementById('entrymanage');
-            if (checkfield(objForm['user_id'])) exit;
-            if (checkfield(objForm['user_passwd'])) exit;
+            if (checkfield(objForm['user_id']) || checkfield(objForm['user_passwd'])){
+				exit;
+			}
             for (i=1;i<tablesize;i++) {
-                //alert(bgcolor2);
                 for (j=1;j<table.rows[i].cells.length;j++) {
                     cell=table.rows[i].cells[j];
                     if (cell.title!='0' && (cell.style.backgroundColor==bgcolor)) {
-                        //alert(cell.style.backgroundColor);
                         objForm=document.getElementById('entrymanage');
-                        
-                            document.getElementById('entry').value=cell.title;
-							myDiv = document.getElementById('InputComments');
-							AssignPosition(myDiv);
-							myDiv.style.display = "block";                
-                            //ajaxEntries('GET','process.php?&resource=' + resource,true,resource,tdate);
-                            //clear_table(table,false);                 
-                    } else {
+						document.getElementById('entry').value=cell.title;
+						myDiv = document.getElementById('InputComments');
+						AssignPosition(myDiv);
+						myDiv.style.display = "block";                
+						//ajaxEntries('GET','process.php?&resource=' + resource,true,resource,tdate);
+						//clear_table(table,false);                 
+                    } 
+					else{
                        //alert ("No entries were selected");
                     }
                 }
-                //alert(table.rows[i].cells.length);
             }
-            
         break;
-
-    } //
-  //  
+    }
 }
 
 function addcomments(entry) {
@@ -420,7 +459,8 @@ function addcomments(entry) {
     if (entry==0){ // has comments
         if (window.XMLHttpRequest){
             xmlhttp=new XMLHttpRequest();
-        } else {
+        }
+		else {
             alert("Your browser does not support XMLHTTP!");
             exit;
         }
@@ -492,7 +532,10 @@ function addcomments(entry) {
     
     ajaxEntries('GET','../agendo/process.php?resource=' + resource,true);
     clear_table(table,false); 
-    myForm.style.display = "none";
+	// Hide the comments div
+    document.getElementById('InputComments').style.display = "none";
+	// Cleans the data inside the comments
+	myForm[0].value = '';
 }
 
 checkedValue = '9001!';
@@ -514,8 +557,9 @@ function checkIfNotCheckedAux(field, last){
 	nonChecked = false;	
 	if(last){
 		if(!atLeastOneChecked){
-			document.getElementById('msg').innerHTML = "Field " + nameTable + " required!";
-			showfade('msg',fadeConstant);
+			// document.getElementById('msg').innerHTML = "Field " + nameTable + " required!";
+			// showfade('msg',fadeConstant);
+			showMessage("Field " + nameTable + " required!", true);
 			clear_table(document.getElementById('caltable'),true);
 			nonChecked = true;
 		}
@@ -526,82 +570,43 @@ function checkIfNotCheckedAux(field, last){
 	return nonChecked;
 }
 
+// function ajaxEntries(method,url,nosync){
 function ajaxEntries(method,url,nosync){
-    
-    document.body.style.cursor='wait';
-    
-    var nelements,par='',objForm;
+    // document.body.style.cursor='wait';
+    var nelements, par = '', objForm;
     action=document.getElementById('action').value;
     objForm=document.getElementById('entrymanage');
     date=document.getElementById('tdate').value;
     resource=document.getElementById('resource').value;
-    if (window.XMLHttpRequest){
-        xmlhttp=new XMLHttpRequest();
-    } else {
-        alert("Your browser does not support XMLHTTP!");  
-    }
+    // if (window.XMLHttpRequest){
+        // xmlhttp=new XMLHttpRequest();
+    // } else {
+        // alert("Your browser does not support XMLHTTP!");  
+    // }
 
-    switch(action) {
-    case 'add':
-        for (nelements=0;nelements<objForm.length;nelements++){
-			// its over 9000!!!!
-			if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
-				return;
-			else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
-				document.getElementById('msg').innerHTML = "Not a numeric value";
-				showfade('msg',fadeConstant);
-				clear_table(document.getElementById('caltable'),true);
+    switch(action){
+		case 'add':
+		case 'update':
+		case 'monitor':
+			if(!formElementsCheckedOut(objForm)){
 				return;
 			}
-            else if (checkfield(objForm[nelements]))
-				return;
-        }
-    break;
-	
-    case 'update':
-        for (nelements=0;nelements<objForm.length;nelements++){
-			// its over 9000!!!!
-			if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
-				return;
-            else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
-				document.getElementById('msg').innerHTML = "Not a numeric value";
-				showfade('msg',fadeConstant);
-				clear_table(document.getElementById('caltable'),true);
-				return;
-			}
-            else if (checkfield(objForm[nelements]))
-				return;
-        }
-    break;
-	
-    case 'del':
-        if (checkfield(objForm['user_id'])){detectedUser = false; return;}
-        if (checkfield(objForm['user_passwd'])){detectedUser = false; return;}
-    break;
-	
-    case 'monitor':
-        for (nelements=0;nelements<objForm.length;nelements++){
-            // its over 9000!!!!
-			if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
-				return;
-			else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
-				document.getElementById('msg').innerHTML = "Not a numeric value";
-				showfade('msg',fadeConstant);
-				clear_table(document.getElementById('caltable'),true);
-				return;
-			}
-           else if (checkfield(objForm[nelements]))
-				return;
-        }
+		break;
 		
-    break;
-	
-    case 'confirm':
-		par += 'mac=' + macIsConfirmed + '&';
-    break;
+		case 'del':
+			// if (checkfield(objForm['user_id'])){detectedUser = false; return;}
+			// if (checkfield(objForm['user_passwd'])){detectedUser = false; return;}
+			if (checkfield(objForm['user_id']) || checkfield(objForm['user_passwd'])){
+				detectedUser = false;
+				return;
+			}
+		break;
+		
+		case 'confirm':
+			par += 'mac=' + macIsConfirmed + '&';
+		break;
     }
 	
-    // objForm.user_id.value=objForm.user_id.title;
     // builds post string
     for (nelements=0;nelements<objForm.length;nelements++){
         if (objForm[nelements].lang=='send') {
@@ -614,14 +619,53 @@ function ajaxEntries(method,url,nosync){
     }
 
 	// par has username and pass
-	xmlhttp.open(method, url + '&' + par, nosync);
-	xmlhttp.send(null);
-    xmlhttp.onreadystatechange = function () {
-        if(xmlhttp.readyState==4) {
-            code=document.getElementById('code').value;
-            window.location.href='weekview.php?resource=' + resource + '&date=' + date+ '&code=' + code + '&msg=' + xmlhttp.responseText;
-        }
-    }
+	// $.get instead of the window.location thing below, i will probably regret this
+	$.get(
+		url + '&' + par
+		, function(serverData){
+			if(serverData.functionName){
+				window[serverData.functionName].apply(this, serverData.arguments); // calls a usermade function with dinamic name and arguments
+			}
+			else{
+				showMessage(serverData.message, serverData.isError);
+			}
+			clear_table(document.getElementById('caltable'),true);
+			getCalendar();
+		}
+		, "json"
+		)
+	;
+
+	userLogin = objForm.user_id.value;
+	userPass = objForm.user_passwd.value;
+	objForm.user_id.value = "";
+	objForm.user_passwd.value = "";
+
+	// xmlhttp.open(method, url + '&' + par, nosync);
+	// xmlhttp.send(null);
+    // xmlhttp.onreadystatechange = function(){
+        // if(xmlhttp.readyState==4) {
+            // code=document.getElementById('code').value;
+            // window.location.href='weekview.php?resource=' + resource + '&date=' + date+ '&code=' + code + '&msg=' + xmlhttp.responseText;
+        // }
+    // }
+}
+
+function formElementsCheckedOut(objForm){
+	for (nelements=0;nelements<objForm.length;nelements++){
+		// its over 9000!!!!
+		if(objForm[nelements].value == checkedValue && checkIfNotChecked(nelements, objForm))
+			return false;
+		else if (objForm[nelements].className == numericXfield && !textIsNumeric(objForm[nelements].value)){
+			showMessage("Not a numeric value", true);
+			clear_table(document.getElementById('caltable'),true);
+			return false;
+		}
+		else if (checkfield(objForm[nelements]))
+			return false;
+	}
+
+	return true;
 }
 
 var macIsConfirmed = false;
@@ -650,11 +694,13 @@ function macConfimation(givenMac){
 	}
 }
 
-function filljscombo(tagname,start,end,resolution,selection,entry) {
+function filljscombo(tagname,start,end,resolution,selection,entry){
     var i=0,sel='',dis=true;
-    if (entry!=0) dis=false;
+    if (entry!=0){
+		dis=false;
+	}
     document.write("<select lang=send id=" + tagname + " name=" + tagname + " disabled=" + dis + ">");
-    while (start<end) {
+    while(start<end){
         if (start==selection) sel='selected';
         document.write("<option " + sel + " value=" +i + ">"+ start + "</option>");
         i++;
@@ -663,45 +709,6 @@ function filljscombo(tagname,start,end,resolution,selection,entry) {
     }
     document.write("</select>");
     document.getElementById(tagname).disabled=dis;
-}
-
-function showfade(element,count) {
-	obj=document.getElementById('msg');
-	if (obj.innerHTML != ""){
-		// $.jnotify(obj.innerHTML);
-		showMessage(obj.innerHTML);
-		
-	// fadeCount = count;
-	// if(!showingMsg){
-		// obj=document.getElementById('msg');
-		// if (obj.innerHTML != "") {
-			// obj.style.color = 773333;
-			// obj.style.fontSize = 25;
-			// obj.style.visibility = 'visible';
-			// showingMsg = true;
-			// showFadeAux(element, fadeCount)
-		// }
-	}
-	document.body.style.cursor='default';
-} 
-
-function showFadeAux(element, count){
-	if(fadeCount > 0){
-		obj=document.getElementById(element);
-		try {
-			obj.filters.alpha.opacity=fadeCount/10; // for ie
-		} catch (err) {
-			obj.style.opacity=fadeCount/1000;
-		}
-		fadeCount = fadeCount - 20;
-		timerID = setTimeout("showFadeAux('" + element + "'," + fadeCount + ")", 100);
-	}
-	else{
-		obj.style.visibility = 'hidden';
-		obj.value='';
-		showingMsg = false;
-	    document.body.style.cursor='default';
-	}
 }
 
 function init(s,m){
@@ -731,12 +738,15 @@ function init(s,m){
 }
 
 function submitUser(resource) {
-    if((formObj=document.getElementById('edituser')) != null){
-		if (checkfield(formObj.user_idm)) return;
-		if (checkfield(formObj.user_passwd)) return;
-		formObj.user_idm.value=formObj.user_idm.title;
-	//    formObj.action='../agendo/index.php?resource=' + resource;
-		formObj.action='../agendo/index.php?resource=' + resource;
+    if((formObj = document.getElementById('edituser')) != null){
+		// if (checkfield(formObj.user_idm)) return;
+		// if (checkfield(formObj.user_passwd)) return;
+		if (checkfield(formObj.user_idm) || checkfield(formObj.user_passwd)){
+			return;
+		}
+
+		formObj.user_idm.value = formObj.user_idm.title;
+		formObj.action = '../agendo/index.php?resource=' + resource;
 		formObj.submit();
 	}
 }
@@ -784,3 +794,43 @@ function calendarReduceRowSpan(id){
 		element.rowSpan--;
 	}
 }
+
+function showfade(element,count){
+	obj=document.getElementById('msg');
+	if (obj.innerHTML != ""){
+		// $.jnotify(obj.innerHTML);
+		showMessage(obj.innerHTML);
+		
+	// fadeCount = count;
+	// if(!showingMsg){
+		// obj=document.getElementById('msg');
+		// if (obj.innerHTML != "") {
+			// obj.style.color = 773333;
+			// obj.style.fontSize = 25;
+			// obj.style.visibility = 'visible';
+			// showingMsg = true;
+			// showFadeAux(element, fadeCount)
+		// }
+	}
+	document.body.style.cursor='default';
+} 
+
+// not being used
+// function showFadeAux(element, count){
+	// if(fadeCount > 0){
+		// obj=document.getElementById(element);
+		// try {
+			// obj.filters.alpha.opacity=fadeCount/10; // for ie
+		// } catch (err) {
+			// obj.style.opacity=fadeCount/1000;
+		// }
+		// fadeCount = fadeCount - 20;
+		// timerID = setTimeout("showFadeAux('" + element + "'," + fadeCount + ")", 100);
+	// }
+	// else{
+		// obj.style.visibility = 'hidden';
+		// obj.value='';
+		// showingMsg = false;
+	    // document.body.style.cursor='default';
+	// }
+// }

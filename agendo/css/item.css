@@ -6,18 +6,30 @@
 	color: white;
 }
 
-.availableState{
-	
+.inputText, .selectList{
+	width:180px;
 }
 
-.inUseState{
-	
+.selectList{
+	height:150px;
 }
 
-#sampleInterfaceDiv{
+.optionState1{
+	background: #E6EFC2;
+}
+
+.optionState2{
+	background: #FBE3E4;
+}
+
+.buttons{
+	width:120px;
+	margin-left:20px;
+}
+
+#itemInterfaceDiv{
 	display:none;
 	background:white;
-	width:340px;
 	margin:auto;
 	position:absolute;
 	padding:20px;

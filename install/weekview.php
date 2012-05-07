@@ -4,6 +4,7 @@
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("../agendo/commonCode.php");
+	initSession();
 	require_once("../agendo/calClass.php");
 	require_once("../agendo/functions.php");
 	require_once("../agendo/genMsg.php");
@@ -26,9 +27,8 @@
 	
 	importJs();
 	echo "<script type='text/javascript' src='../agendo/js/weekview.js'></script>";
-	// Sets the resouce and date in JS for later use in the auto refresh
+	// Sets the resource and date in JS for later use in the auto refresh, yep the patching continues
 	echo "<script type='text/javascript'> setDateAndResource(".$resource.",'".$calendarDate."'); </script>";
-	initSession();
 	// <META HTTP-EQUIV="REFRESH" CONTENT="180" />
 
 ?>
@@ -92,8 +92,8 @@ if (isset($_GET['update'])) {$update=cleanValue($_GET['update']);$entry=cleanVal
 $calendar=new cal($resource,$update);
 
 //getting the variables 
-if (isset($_GET['action'])) {$action = cleanValue($_GET['action']);} else {$action =0;} ;
-if (isset($_GET['msg'])) {$msg =cleanValue($_GET['msg']);} else {$msg ='';} ;
+if (isset($_GET['action'])) {$action = cleanValue($_GET['action']);} else {$action = 0;} ;
+if (isset($_GET['msg'])) {$msg = cleanValue($_GET['msg']);} else {$msg ='';} ;
  
 //html body starts Here
 //##############################################
@@ -219,8 +219,11 @@ echo "<table id='master' style='margin:auto' width=750>";
 				exit;
 			}
 
-			if (isset($_POST['action'])) call_user_func(cleanValue($_POST['action']));
-			if (isset($_GET['entry'])){
+			if(isset($_POST['action'])){ // is this of any use?
+				call_user_func(cleanValue($_POST['action']));
+			}
+			
+			if(isset($_GET['entry'])){ // same as the next if?
 				$entry=(int)cleanValue($_GET['entry']);
 				$calendar->setEntry($entry);
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
@@ -230,6 +233,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=:0";
 				$res = dbHelp::query($sqlWeekDay, array($entry));
 				$arr1 = dbHelp::fetchRowByIndex($res);
+				
 				$sqlWeekNumber = "select ".dbHelp::getFromDate("'".$arr1[0]."'",'%w');
 				$res = dbHelp::query($sqlWeekNumber);
 				$arr2 = dbHelp::fetchRowByIndex($res);
@@ -244,10 +248,10 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$calendar->setCalRepeat($arre['entry_repeat']);
 				$user=$arre['entry_user'];
 				$nslots=$arre['entry_slots'];
-				// $entrystart=$arre['starttime'];
 				$entrystart= $arre['dateHour'] + $arre['dateMinutes']/60;
 				
-			} elseif ($update!=0) {
+			}
+			elseif($update != 0){ // same as the previous if?
 				$calendar->setEntry($update);
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
 				
@@ -268,9 +272,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$calendar->setCalRepeat($arre['entry_repeat']);
 				$user=$arre['entry_user'];
 				$nslots=$arre['entry_slots'];
-				$entrystart=$arre['starttime'];
 				$entrystart= $arre['dateHour'] + $arre['dateMinutes']/60;
-			} else {
+			}
+			else{
 					$calendar->setEntry(0);
 					$entrystart=0;
 					$nslots=1;
@@ -560,27 +564,25 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						echo "<tr><td colspan=2><hr></td></tr>";
 						
+						$restatus6EditButton = "";
 						if($imResstatus6){
+							require_once("../agendo/itemHandling.php");
 							if($calendar->isResp()){
-								$buttonDisplay2 = $buttonDisplay5 = 'none';
+								$buttonDisplay2 = 'none';
+								$restatus6EditButton = "<input type=button disabled id='editItemsButton' class='bu' title='Allows the editing of items in the entry' value='Edit' onClick=\"editEntryItems(".$resource.");\" />";
 							}
 							// elseif(hasPermission($_SESSION['user_id'], $resource)){
 							else{
-								require_once("../agendo/sampleHandling.php");
 								$tdButtonsDisplay = 'none';
 								$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
 								echo "<tr>";
 									echo "<td colspan=2 style='text-align:center;'>";
-										// echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='window.open(\"../agendo/sampleHandling.php?interface=sampleInsertHtml&resource=".$resource."\", \"\", \"width=100, height=100\");' />";
-										echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='sampleInsertShowDivAndCheckUser(".$resource.");' />";
+										echo "<input type='button' id='addItemButton' class='bu' title='Press to add/remove items' value='Add/Remove items' onClick='itemInsertShowDivAndCheckUser(".$resource.", \"itemInsertHtml\");' />";
 									echo "</td>";
 								echo "</tr>";
 								
 								echo "<tr><td colspan=2><hr></td></tr>";
 							}
-							// else{
-								// $tdButtonsDisplay = 'none';
-							// }
 						}
 					// Used to hide buttons
 					}
@@ -591,6 +593,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 					//*********************
 					echo "<tr style='display:".$tdButtonsDisplay.";' ><td colspan=2 align='center'>";
 						echo "<input type=button style='width:40px;display:".$buttonDisplay1.";' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\" />";
+						// This is rather horrible old chap, is there a better way to do this without rewritting the whole weekview.php?
+						echo $restatus6EditButton;
 						echo "<input type=button style='width:60px;display:".$buttonDisplay2.";' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\" />";
 						echo "<input type=button style='width:40px;display:".$buttonDisplay3.";' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" /><br>";
 						echo "<input type=button style='width:70px;display:".$buttonDisplay4.";' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" />";
@@ -677,7 +681,7 @@ echo "<div id=DisplayUserInfo style='display:none;position:absolute;z-index:99;p
 $sql = "select xfields_type, xfields_label, xfields_name, xfields_id from xfields where xfields_placement = 2 and xfields_resource = ".$resource;
 $res = dbHelp::query($sql);
 //for displaying user confirmation comments
-echo "<div id=InputComments style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
+echo "<div id='InputComments' style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;text-align:center;'>";
 	if(dbHelp::numberOfRows($res) > 0){
 		echo "<form id='confirmXfields'>";
 		while($arr = dbHelp::fetchRowByName($res)){
@@ -707,26 +711,39 @@ echo "<div id=InputComments style='display:none;position:absolute;border-style:s
 		echo "</form>";
 	}
 	
-    echo "<form name=entrycomments id=entrycomments>";
+    echo "<form name='entrycomments' id='entrycomments'>";
 		echo "<textarea name=txtcomments id=txtcomments rows=3 cols=25></textarea>";
     echo "</form>";
 	
-	echo "<center>";
 	echo "<a href='javascript:addcomments(0)' title='Confirm and leave the comment written above'>Comment and confirm</a>&nbsp;&nbsp;&nbsp;";
-	echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>";
+	echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>&nbsp;&nbsp;&nbsp;";
+	echo "<a onclick='document.getElementById(\"InputComments\").style.display=\"none\";document.getElementById(\"txtcomments\").value=\"\";'>Cancel</a>";
 echo "</div>";
 
 echo "</body>";
 echo "</html>";
 
 
-	// Returns just the calendar to JS to avoid the auto refresh header (hackfest)
+	// Returns just the calendar to JS to avoid the auto refresh header
 	function getCalendarWeek(){
 		try{
 			global $calendarDate;
 			global $resource;
 			$calendar=new cal($resource);
 			$calendar->setStartDate(date("Ymd",strtotime($calendarDate)));
+			if(isset($_POST['entry']) && isset($_POST['action'])){
+				$calendar->setEntry($_POST['entry']);
+				if($_POST['action'] == 'all'){
+					$sql = "select entry_repeat from entry where entry_id = :0";
+					$prep = dbHelp::query($sql, array($_POST['entry']));
+					$row = dbHelp::fetchRowByIndex($prep);
+					$calendar->setCalRepeat($row[0]);
+				}
+				elseif($_POST['action'] == 'update'){
+					$calendar->setCalUpdate($_POST['entry']);
+				}
+			}
+			
 			$json->calendar = $calendar->draw_week();
 			$json->success = true;
 		}

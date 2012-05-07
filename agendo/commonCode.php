@@ -7,9 +7,14 @@
   @Code used in lots of places and all joined in an artistic way to avoid copy pasting same methods in different places
 */
 	error_reporting (E_ERROR | E_WARNING | E_PARSE);
-	session_start();
-	// session_destroy();
+	// Checks if session has started already
+	if(session_id() == "") {
+		session_start();
+	}
+	
 	require_once("__dbHelp.php");
+	// Defaults the exception handler
+	exceptionHandling();
 	
 	if(isset($_GET['autocomplete'])){
 		autocompleteAgendo();
@@ -169,6 +174,7 @@
 		echo json_encode($json);
 	}
 
+	$jsWereImported = false;
 	function importJs($path = "../agendo"){
 		echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/commonCode.js'></script>";
@@ -181,6 +187,8 @@
 		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
 		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
+		global $jsWereImported;
+		$jsWereImported = true;
 	}
 
 	function showMsg($message, $isError = false, $import = false){
@@ -519,7 +527,8 @@
 	
 	// wtf = "write to file", not "what the fu..dge" 
 	function wtf($string, $mode = "w", $path = "c:/a.txt"){
-		$fh = fopen($path, $mode) or die("Can't open file!");
+		// $fh = fopen($path, $mode) or die("Can't open file!");
+		$fh = fopen($path, $mode);
 		fwrite($fh, $string."\n");
 		fclose($fh);
 	}
@@ -678,7 +687,57 @@
 		return date($toFormat, strtotime($date));
 	}
 	
+	// Checks if the current php file is being viewed due to a ajax request
 	function isAjax(){
 		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 	}
+	
+	// Detects if there was a get or post with ajax headers
+	function visualExceptionHandling($exception){
+		if(isAjax()){
+			$json->isError = true;
+			$json->message = $exception->getMessage();
+			echo json_encode($json);
+		}
+		else{
+			global $jsWereImported;
+			// check de ajax e se os JS já foram importados(variável no cliente a dizer)?
+			showMsg($exception->getMessage(), true, $jsWereImported);
+		}
+	}
+	
+	$exceptionFilePath = "../agendo/exception.log";
+	// Writes the exception error to a log file
+	function logFileExceptionHandling($exception){
+		global $exceptionFilePath;
+		$maxSize = 5000; // bytes
+		
+		if(file_exists($exceptionFilePath) && filesize($exceptionFilePath)+strlen($error) > $maxSize){
+			unlink($exceptionFilePath);
+		}
+		
+		$logMessage = "Error: ".$exception->getMessage()."\nOn: ".date("d/m/Y H:i:s")."\n";
+		wtf($logMessage, 'a', $exceptionFilePath);
+	}
+	
+	function exceptionHandling($byFile = false, $filePath = null){
+		$exceptionHandlingFunction = null;
+		
+		if($byFile === true){
+			global $exceptionFilePath;
+			if(isset($filePath)){
+				$exceptionFilePath = $filePath;
+			}
+			elseif(isset($_SESSION['path']) && $_SESSION['path'] != ''){
+				$exceptionFilePath = $_SESSION['path']."/exception.log";
+			}
+			$exceptionHandlingFunction = "logFileExceptionHandling";
+		}
+		elseif($byFile === false){
+			$exceptionHandlingFunction = "visualExceptionHandling";
+		}
+
+		set_exception_handler($exceptionHandlingFunction);
+	}
+	
 ?>

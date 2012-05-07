@@ -1,5 +1,9 @@
 <?php
-	session_start();
+	// Checks if session has started already
+	if(session_id() == "") {
+		session_start();
+	}
+
 	if(!isset($_SESSION['path']) || $_SESSION['path'] == ''){
 		echo "No path defined in session";
 		exit;
@@ -10,21 +14,18 @@
 	class dbHelp{ 
 	
 		private static $connect;
-		private static $schema; 
 		private static $dateHash;
-		private static $instance;
 
-		// no static contructors on PHP (WHY YOU NO STATIC CONSTRUCTORS?!?)
-		private function __construct(){
+		// this isnt read
+		// private function __construct(){
 			// $connect = new dbConnection();
 			// $schema = $connect->getSchemaName();
-			self::getConnect();
-		}
+			// self::getConnect();
+		// }
 		
 		public static function getConnect(){
 			if(!isset(self::$connect)){
 				self::$connect = new dbConnection();
-				self::$schema = self::$connect->getSchemaName();
 				// Beware that w in MySQL is (0..6) and D in PostGre is (1..7)
 				self::$dateHash = array("i" => "MI", "H" => "HH24", "h" => "HH12", "d" => "DD", "w" => "ID", "m" => "MM", "M" => "Month", "Y" => "YYYY");
 				self::setTimezone();
@@ -87,7 +88,7 @@
 				if($argsArray != null){
 					$argsText = "\nUsing the data array [".implode("; ", $argsArray)."]";
 				}
-				self::errorLog("Full sql query is: '".$sql."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
+				self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", $sql))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
 				throw new Exception("Database error, error logged.");
 			}
 			return $prepSql;
@@ -251,13 +252,31 @@
 			$maxSize = 5000; // bytes
 			$path = $_SESSION['path']."/dbErrorLog.txt";
 			if(file_exists($path) && filesize($path)+strlen($error) > $maxSize){
-				unlink ($path);
+				unlink($path);
 			}
-			$fh = fopen($path, "a") or die("Can't open/create db log file on path '".$path."'");
+			// $fh = fopen($path, "a") or die("Can't open/create db log file on path '".$path."'");
+			$fh = fopen($path, "a");
 			fwrite($fh, $error."\n");
 			fclose($fh);
 		}
 	
+		// Returns the in parentesis data (ex: '(:0, :1, :2, ....)') and an int with the size of the array or false in case the array is either null or empty
+		public static function inDataFromArray($array){
+			if(!isset($array) || !current($array)){
+				return false;
+			}
+			
+			$results = array();
+			$results['inData'] = "(:0";
+			$results['size'] = 1;
+			while(next($array)){
+				$results['inData'] .= ", :".$results['size'];
+				$results['size']++;
+			}
+			$results['inData'] .= ")";
+			
+			return $results;
+		}
 	}
 	// Fix for the lack of static contructors
 	dbHelp::getConnect();

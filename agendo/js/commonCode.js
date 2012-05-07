@@ -190,8 +190,7 @@ function ajaxRequest(url){
 
 function showMessage(msg, isError){
 	isError = isError || false; // sets isError as false by default, javascript is primitive and doesnt allow something like isError = false in the parameters
-	
-	// what should happen is its an error message
+
 	// if(isError){
 		// $(document).ready(function(){
 				// $.jnotify(msg, 'error', true);
@@ -204,36 +203,37 @@ function showMessage(msg, isError){
 			// }
 		// );
 	// }
-	
-	if(isError){
-		$(document).ready(function(){
-				jError(msg,
-					{
-						autoHide : false // added in v2.0
-						,clickOverlay : true // added in v2.0
-					}
-				);
-			}
-		);
-	}
-	else{
-		$(document).ready(function(){
-				jSuccess(msg,
-					{
-						clickOverlay : true // added in v2.0
-						,TimeShown : 2000
-						// ,MinWidth : 250
-						// ,ShowTimeEffect : 200
-						// ,HideTimeEffect : 200
-						// ,LongTrip :20
-						// ,HorizontalPosition : 'center'
-						// ,VerticalPosition : 'top'
-						// ,ShowOverlay : true
-						// ,ColorOverlay : '#000'
-						// ,OpacityOverlay : 0.3
-					}
-				);
-			}
-		);
+	if(typeof msg !== "undefined" && msg !== ''){ // wont do anything if the message isnt set or is empty
+		if(isError){ // what should happen is its an error message
+			$(document).ready(function(){
+					jError(msg,
+						{
+							autoHide : false // added in v2.0
+							,clickOverlay : true // added in v2.0
+						}
+					);
+				}
+			);
+		}
+		else{ // regular message
+			$(document).ready(function(){
+					jSuccess(msg,
+						{
+							clickOverlay : true // added in v2.0
+							,TimeShown : 2000
+							// ,MinWidth : 250
+							// ,ShowTimeEffect : 200
+							// ,HideTimeEffect : 200
+							// ,LongTrip :20
+							// ,HorizontalPosition : 'center'
+							// ,VerticalPosition : 'top'
+							// ,ShowOverlay : true
+							// ,ColorOverlay : '#000'
+							// ,OpacityOverlay : 0.3
+						}
+					);
+				}
+			);
+		}
 	}
 }

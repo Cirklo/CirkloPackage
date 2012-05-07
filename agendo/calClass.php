@@ -78,7 +78,7 @@ class calCell {
         if ($this->EntryStatus==4) $cellbgLight=cal::MonCellColorOff;
         if ($this->EntryStatus==9) $cellbgLight=cal::ErrCellColorOff;
         if ($this->EntryStatus==5) $cellbgLight=cal::InUseCellColorOff;
-        $cellgrey="#aaaaaa";
+        $cellgrey = "#aaaaaa";
         
 			// white-space: nowrap;
 			// text-overflow:ellipses;
@@ -90,21 +90,22 @@ class calCell {
 		";
 
         switch ($slotType){
-        case 0: // without entry
-            $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);' style='".$baseStyle."'";
-            break;
-        case 1: // with entry
-            $extra="OnMouseDown='swapColor(this,1,1);'";
-            if ($this->getRepeat()!='') {
-                $extra = $extra . " style='background:".$cellbgStrong.";".$baseStyle."'";
-            } else {
-                $extra = $extra . " style='background:".$cellbgLight.";".$baseStyle."'";
-            }
-            break;
-        case 2: // update
-            $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
-            $extra = $extra . " style='background:".$cellgrey.";".$baseStyle."'";
-            break;
+			case 0: // without entry
+				$extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);' style='".$baseStyle."'";
+			break;
+			case 1: // with entry
+			case 2: // update
+				$extra="OnMouseDown='swapColor(this,1,1);'";
+				if ($this->getRepeat()!='') {
+					$extra = $extra . " style='background:".$cellbgStrong.";".$baseStyle."'";
+				} else {
+					$extra = $extra . " style='background:".$cellbgLight.";".$baseStyle."'";
+				}
+			break;
+			// case 2: // update
+				// $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
+				// $extra = $extra . " style='background:".$cellgrey.";".$baseStyle."'";
+			// break;
         }
 		$addId = "";
 		if($nlineXweekday != ''){
@@ -200,7 +201,7 @@ class cal extends phpCollection{
     function setEntry($arg) {$this->Entry=$arg;}
     function setMaxSlots($arg) {$this->MaxSlots=$arg;}
     function setCalRepeat($arg) {$this->CalRepeat=$arg;}
-    //function setResStatus($arg) {$this->ResStatus=$arg;}
+    function setCalUpdate($arg) {$this->Update=$arg;}
 
     function getStartDate() {return $this->StartDate;}
     function getEntry() {return $this->Entry;}
@@ -361,7 +362,6 @@ class cal extends phpCollection{
 							if(isset($weekdayNline[$weekday])){
 								$weekdayNlineExploded = explode('-', $weekdayNline[$weekday]);
 								$entryLastSlot = (int)$weekdayNlineExploded[0] + (int)$weekdayNlineExploded[1] - 1;
-								// wtf($entryLastSlot, 'a');
 								if($nline == $entryLastSlot){
 									// Javascript function that reduces on rowspan of the entry that ends where this one starts by id
 									$weekContent .= "<script type='text/javascript'>";
@@ -412,21 +412,24 @@ class cal extends phpCollection{
 							// $this->add($ncells. "empty",$cell);
                         }
                         
-                    } else {
+                    }
+					else{
                         $cell->setNSlots(1);
                         $cell->setEntry('0');
                         $cell->setUser('');
                         $cell->setStartTime($this->SlotStart);
                         $cell->setTag('');
-                        if ($this->Slot[$nline][$weekday]!=1){
-                            if ($this->Update==0) {
+                        if ($this->Slot[$nline][$weekday] != 1){
+                            if($this->Update == 0){
                                 $weekContent .= $cell->designSlot(0);
-                            } else {
-                                if ($updatecount>0 and $this->Day==$updDay) {
+                            } 
+							else{
+                                if($updatecount>0 and $this->Day==$updDay) {
                                     //$cell->setTag($updatecount);
                                     $weekContent .= $cell->designSlot(2);
-                                    $updatecount=$updatecount-1;
-                                } else {
+                                    $updatecount = $updatecount-1;
+                                }
+								else{
                                     $weekContent .= $cell->designSlot(0);
                                 }
                             }

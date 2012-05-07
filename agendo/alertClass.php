@@ -38,11 +38,6 @@ private $RespAlert;
 */
 
 function __construct($resource=0) {
-    
-    // $sql = "SELECT mainconfig_host, mainconfig_port, mainconfig_password, mainconfig_email, mainconfig_smtpsecure, mainconfig_smtpauth FROM mainconfig WHERE mainconfig_id = 1";
-    // $res = dbHelp::query($sql) or die ("Error while making the query -> " . $sql);
-    // $row = dbHelp::fetchRowByIndex($res);
-	
 	$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
 	$res = dbHelp::query($sql);
 	$configArray = array();
@@ -59,36 +54,13 @@ function __construct($resource=0) {
     $this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
     $this->SetFrom($configArray['email'], "Calendar administration");
     $this->AddReplyTo($configArray['email'],"Calendar administration");   
-	// for($i=0; $arr = dbHelp::fetchRowByIndex($res); $i++){
-		// $row[$i] = $arr[1];
-	// }
-	
-	// $this->IsSMTP(); // telling the class to use SMTP
-    // $this->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-    // $this->SMTPAuth   = $row[5];                  // enable SMTP authentication
-    // $this->SMTPSecure = $row[4];                 // sets the prefix to the servier
-    // $this->Port       = $row[1];                   // set the SMTP port for the GMAIL server   
-    
-    // $this->Host       = $row[0];      // sets GMAIL as the SMTP server
-    // $this->Username   = $row[3];  // GMAIL username
-    // $this->Password   = $row[2];            // GMAIL password
-    // $this->SetFrom($row[3], 'Calendar Admin');
-    // $this->AddReplyTo($row[3],"Calendar Admin");
   
     $this->Resource=$resource;
     
-    // $sql="select user_id,user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id=". $this->Resource;
     $sql="select user_id,user_email,user_mobile, user_firstname,user_lastname,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id=". $this->Resource;
     $res=dbHelp::query($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     
-    // $this->ResourceResp=$arr[0];
-    // $this->RespEmail=$arr[1];
-    // $this->RespMobile=$arr[2];
-    // $this->RespName=$arr[3];
-    // $this->RespAlert=$arr[4];
-    // $this->ResourceName=$arr[5];
-    // $this->ResourceResolution=$arr[6];
     $this->ResourceResp=$arr[0];
     $this->RespEmail=$arr[1];
     $this->RespMobile=$arr[2];
@@ -108,15 +80,9 @@ function __construct($resource=0) {
 */
 
 function setUser($user_id){
-    
-    // $sql="select concat(user_firstname,' ',user_lastname) name,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
     $sql="select user_firstname,user_lastname,user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_id = :0";
     $res=dbHelp::query($sql, array($user_id));
     $arruser=dbHelp::fetchRowByIndex($res);
-    // $this->UserFullName=$arruser[0];
-    // $this->UserEmail=$arruser[1];
-    // $this->UserMobile=$arruser[2];
-    // $this->AlertType=$arruser[3];
     $this->UserFullName=$arruser[0]." ".$arruser[1];
     $this->UserEmail=$arruser[2];
     $this->UserMobile=$arruser[3];
@@ -141,10 +107,6 @@ function getResourceResp(){
 
 */
 function toWaitList($type){
-    
-    // $sql="select @edt:=entry_datetime,@res:=entry_resource from entry where entry_id=". $this->LastEntry;
-    // $res=dbHelp::query($sql);
-    // $sql="select user_mobile,user_email,date_format(entry_datetime,'%d, %M %Y') d, date_format(entry_datetime,'%H:%i') t,resource_name, user_alert from entry,".dbHelp::getSchemaName().".user,resource where entry_resource=resource_id and entry_user=user_id and entry_status=4 and entry_datetime=@edt and entry_resource=@res order by entry_id";
     $sql="select user_mobile,user_email,".dbHelp::getFromDate('entry_datetime','%d, %M %Y')." as d, ".dbHelp::getFromDate('entry_datetime','%H:%i')." as t,resource_name, user_alert from entry,".dbHelp::getSchemaName().".user,resource where entry_resource=resource_id and entry_user=user_id and entry_status=4 and (entry_datetime, entry_resource) in (select entry_datetime,entry_resource from entry where entry_id=". $this->LastEntry.") order by entry_id";
     $res=dbHelp::query($sql);
     $arrStatus=dbHelp::fetchRowByName($res);
@@ -229,7 +191,7 @@ END:VCALENDAR";
             break;
 			
         case 'comment':
-            $msg="Comment added  on ". $this->ResourceName . ":" . $comment;
+            $msg="Comment added on ". $this->ResourceName . ": " . $comment;
             break;
 			
         case 'assistance':
@@ -275,7 +237,7 @@ END:VCALENDAR";
 			$this->ClearAddresses();
 			$this->AddAddress($this->RespEmail, "");
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
-            $this->Body=$msg . "\n email: ". $this->UserEmail ."\nmobile:".$this->UserMobile ."\n".$mobileStr;
+            $this->Body=$msg . "\nEmail: ". $this->UserEmail ."\nMobile: ".$this->UserMobile ."\n".$mobileStr;
             if(!$this->Send()) {
                 // echo "Mailer Error: " . $this->ErrorInfo;
                 echo "Unable to send email: " . $this->ErrorInfo;
