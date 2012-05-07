@@ -10,6 +10,7 @@
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("../agendo/commonCode.php");
+	initSession();
 	require_once("../agendo/functions.php");
 	// logIn();
 	
@@ -18,7 +19,6 @@
 		exit;
 	}
 	importJs();
-	initSession();
 ?>
 
 <head>
