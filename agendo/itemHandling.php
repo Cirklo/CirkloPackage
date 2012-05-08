@@ -261,9 +261,35 @@
 		$html .= "<br>";
 		
 		$marginTop = 10;
-		$html .= "<input class='buttons' type='button' id='cancelButton' value='Delete' title='Cancels the operation, closes the menu and deletes the entry(ies)' onClick='closeitemInsertDiv(true);' style='float:left;margin-top:".$marginTop."px;'/>";
-		$html .= "<input class='buttons' type='button' id='saveButton' value='Save' title='Save current sample list' onClick='saveItemList();' style='margin:auto;margin-top:".$marginTop."px;'/>";
-		$html .= "<input class='buttons' type='button' id='emailButton' onclick='emailUsersFromItems();' value='Email' title='Email the users of the locked items' style='float:right;margin-top:".$marginTop."px;'/>";
+		$html .= "<input 
+			class='buttons' 
+			type='button' 
+			id='cancelButton' 
+			value='Delete' 
+			title='Cancels the operation, closes the menu and deletes the entry(ies)' 
+			onClick='closeitemInsertDiv(true);' 
+			style='float:left;margin-top:".$marginTop."px;'
+		/>";
+		
+		$html .= "<input 
+			class='buttons' 
+			type='button' 
+			id='saveButton' 
+			value='Save' 
+			title='Save current sample list' 
+			onClick='saveItemList();' 
+			style='margin:auto;margin-top:".$marginTop."px;'
+		/>";
+		
+		$html .= "<input 
+			class='buttons' 
+			type='button' 
+			id='emailButton' 
+			onclick='emailUsersFromItems();' 
+			value='Email' 
+			title='Email the users of the selected locked items' 
+			style='float:right;margin-top:".$marginTop."px;'
+		/>";
 	
 		$html .= "<br>";
 		
@@ -374,6 +400,7 @@
 					and item_id = item_assoc_item
 					and item_resource = :".($inData['size'])."
 					and item_state = 2
+					and user_id = item_user
 			";
 			$entriesArray[] = $resource; // pushing the resource in the entries array to then send to PDO for the sql query
 			$sqlEntry = $select." ".$fromEntry." ".$whereEntry." ".$orderBy;
