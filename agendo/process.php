@@ -103,7 +103,7 @@
 		
 		$entriesIdArray = array();
 		//building the repetition pattern
-		while ((substr($weekahead,0,8)<=$enddate) && ($w<53)) {
+		while((substr($weekahead,0,8)<=$enddate) && ($w<53)){
 			if (!$perm->addAhead($weekahead, $slots)){
 				throw new Exception($perm->getWarning());
 			}
@@ -206,7 +206,7 @@
 		if($perm->getResourceStatus() == 6){ // sequencing
 			$json->functionName = "itemInsertShowDivAndCheckUser";
 			// $json->arguments = array($resource, 'itemManagementHtml', $entriesIdArray);
-			$json->arguments = array($resource, 'itemManagementHtml', $entriesIdArray[0]);
+			$json->arguments = array($resource, 'itemManagementHtml', $entriesIdArray[0], true);
 		}
 		else{
 			$json->message = "Entry(ies) added";

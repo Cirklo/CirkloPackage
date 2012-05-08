@@ -80,103 +80,111 @@
 			$html .= "x";
 		$html .= "</a>";
 		
-		
-		if($isResp !== false){
-			$html .= "<label style='float:left;'>";
-				$html .= "Insert/remove item as user:";
-			$html .= "</label>";
+		$html .= "<div style='float:left;text-align:left;'>";
+			if($isResp !== false){
+				$html .= "<label style=''>";
+					$html .= "Insert or remove item as user:";
+				$html .= "</label>";
 
-			$html .= "<br>";
-		
-			$sql = "select distinct user_id, user_firstname, user_lastname, user_login, user_login from user, permissions where user_id = permissions_user and permissions_resource = :0 || user_id = :1";
-			$prep = dbHelp::query($sql, array($resource, $userId));
-			$html .= "<select id='asUserList' style='float:left;width:200px;' onchange='fillSubmittedListFromUser();'>";
+				$html .= "<br>";
+			
+				$sql = "select distinct user_id, user_firstname, user_lastname, user_login, user_login from user, permissions where user_id = permissions_user and permissions_resource = :0 || user_id = :1";
+				$prep = dbHelp::query($sql, array($resource, $userId));
+				$html .= "<select id='asUserList' class='userList' onchange='fillSubmittedListFromUser();'>";
 				while($row = dbHelp::fetchRowByIndex($prep)){
 					$html .= "<option value='".$row[0]."'>";
 					$html .= $row[1]." ".$row[2]." (".$row[3].")";
 					$html .= "</option>";
 				}
-			$html .= "</select>";
+				$html .= "</select>";
+				
+				$html .= "<br>";
+				$html .= "<br>";
+			}
+
+			$html .= "<label>";
+				$html .= "New item for ".$row[0].": ";
+			$html .= "</label>";
+			
+			$html .= "<br>";
+			
+			$html .= "<input class='inputText' type='text' id='itemName' style='float:left;'/>";
 			
 			$html .= "<br>";
 			$html .= "<br>";
-		}
+			
+			$html .= "<label style='float:left;'>";
+				$html .= "Submitted items not yet used:";
+			$html .= "</label>";
 
-		$html .= "<label style='float:left;'>";
-			$html .= "New item for ".$row[0].": ";
-		$html .= "</label>";
+			$html .= "<br>";
+			
+			// List where the submitted items will show
+			$html .= "<select class='selectList' id='submittedItems' multiple='multiple' style='float:left;'>";
+			$html .= "</select>";
+			
+			// Fills the list with items submitted by the user, not used in a sequencing session
+			$html .= "
+				<script>
+					fillItemsListOptions(".json_encode(getItems($userId, $resource)).");
+				</script>
+			";
+			
+			// Div that shows the possible states
+			$html .= "<div style='position:absolute;bottom:20px;right:20px;text-align:right;'>";
+				$heightAndWidth = 14;
+				$topMargin = 5;
+				$rightMargin = 5;
+				$sql = "select item_state_id, item_state_name from item_state where item_state_id != 3"; // remove the unecessary states in the query here
+				$prep = dbHelp::query($sql);
+				while($row = dbHelp::fetchRowByIndex($prep)){
+					$html .= "<div class='optionState".$row[0]."' style='float:right;width:".$heightAndWidth."px;height:".$heightAndWidth."px;margin-top:".$topMargin."px;'></div>";
+					$html .= "<label style='float:right;margin-right:".$rightMargin."px;margin-top:".$topMargin."px;'>".$row[1]."</label>";
+					$html .= "<br>";
+				}
+			$html .= "</div>";
 		
-		$html .= "<br>";
+		$html .= "</div>";
 		
-		$html .= "<input class='inputText' type='text' id='itemName' style='float:left;'/>";
-		$html .= "
-			<input type='button' 
-				class='buttons'
-				id='insertItemButton' 
-				value='Insert Item' 
-				onclick='itemInsertOrRemove()' 
-				title='Inserts the new item'
-				style='float:right;'
-			/>
-		";
-	
-		$html .= "<br>";
-		$html .= "<br>";
+		$html .= "<div style='float:right;'>";
+			$marginLeft = 20;
+			$html .= "
+				<input type='button' 
+					class='buttons'
+					id='insertItemButton' 
+					value='Insert Item' 
+					onclick='itemInsertOrRemove()' 
+					title='Inserts the new item'
+					style='margin-top:10px;margin-left:".$marginLeft."px;'
+				/>
+			";
 		
-		$html .= "<label style='float:left;'>";
-			$html .= "Submitted items not yet used:";
-		$html .= "</label>";
-
-		$html .= "<br>";
-		
-		// List where the submitted items will show
-		$html .= "<select class='selectList' id='submittedItems' multiple='multiple' style='float:left;'>";
-		$html .= "</select>";
-		
-		// Fills the list with items submitted by the user, not used in a sequencing session
-		$html .= "
-			<script>
-				fillItemsListOptions(".json_encode(getItems($userId, $resource)).");
-			</script>
-		";
-		
-		$html .= "
-			<input type='button' 
-				class='buttons'
-				id='removeItemButton' 
-				value='Remove Item' 
-				onclick='itemInsertOrRemove(true)' 
-				title='Removes the selected item(s)'
-				style='float:right;'
-			/>
-		";
-		
-		if($isResp !== false){
 			$html .= "<br>";
 			
 			$html .= "
 				<input type='button' 
 					class='buttons'
-					id='backButton' 
-					value='Back' 
-					onclick='back();' 
-					title='Return to the entry association screen'
-					style='float:right;margin-top:20px;'
+					id='removeItemButton' 
+					value='Remove Item' 
+					onclick='itemInsertOrRemove(true)' 
+					title='Removes the selected item(s)'
+					style='margin-top:20px;margin-left:".$marginLeft."px;'
 				/>
 			";
-		}
-		
-		// Div that shows the possible states
-		$html .= "<div style='position:absolute;bottom:20px;right:20px;text-align:right;'>";
-			$heightAndWidth = 14;
-			$topMargin = 5;
-			$rightMargin = 5;
-			$sql = "select item_state_id, item_state_name from item_state where item_state_id != 3"; // remove the unecessary states in the query here
-			$prep = dbHelp::query($sql);
-			while($row = dbHelp::fetchRowByIndex($prep)){
-				$html .= "<div class='optionState".$row[0]."' style='float:right;width:".$heightAndWidth."px;height:".$heightAndWidth."px;margin-top:".$topMargin."px;'></div>";
-				$html .= "<label style='float:right;margin-right:".$rightMargin."px;margin-top:".$topMargin."px;'>".$row[1]."</label>";
+			
+			if($isResp !== false){
 				$html .= "<br>";
+				
+				$html .= "
+					<input type='button' 
+						class='buttons'
+						id='backButton' 
+						value='Back' 
+						onclick='back();' 
+						title='Return to the entry association screen'
+						style='margin-top:110px;margin-left:".$marginLeft."px;'
+					/>
+				";
 			}
 		$html .= "</div>";
 		
@@ -189,9 +197,16 @@
 		}
 		else{
 			if($remove){
+				$extraSql = "";
+				$sql = "delete from item where item_id = :0 and item_resource = :1";
+				$sqlArray = array("nothingYet", $resource);
+				if(isResp($userId, $resource) === false){
+					$sqlArray[2] = $userId;
+					$sql .= " and item_user = :2";
+				}
 				foreach($items as $item){
-					$sql = "delete from item where item_id = :0 and item_user = :1 and item_resource = :2";
-					$prep = dbHelp::query($sql, array($item, $userId, $resource));
+					$sqlArray[0] = $item;
+					$prep = dbHelp::query($sql, $sqlArray);
 				}
 				return "Item(s) Removed";
 			}
@@ -215,7 +230,7 @@
 			
 			$html .= "<br>";
 
-			$html .= "<select class='selectList' id='submittedItems' multiple='multiple'>";
+			$html .= "<select class='selectListManager' id='submittedItems' multiple='multiple'>";
 			$html .= "</select>";
 		$html .= "</div>";
 				$html .= "&nbsp";
@@ -228,6 +243,8 @@
 			$html .= "<input type='button' value=' <- ' title='Remove selected' onclick='swapSelected(\"lockedItems\", \"submittedItems\");'/>";
 			$html .= "&nbsp";
 			$html .= "<input type='button' value=' -> ' title='Add selected' onclick='swapSelected(\"submittedItems\", \"lockedItems\");'/>";
+			$html .= "<br>";
+			$html .= "<input class='buttons' type='button' id='newItemButton' value='New Item' onclick='newItem();' style='margin-top:20px;'/>";
 		$html .= "</div>";
 
 		$html .= "<div style='float:left;text-align:left;'>";
@@ -237,25 +254,20 @@
 			
 			$html .= "<br>";
 
-			$html .= "<select class='selectList' id='lockedItems' multiple='multiple' onclick=''>";
+			$html .= "<select class='selectListManager' id='lockedItems' multiple='multiple' onclick=''>";
 			$html .= "</select>";
 		$html .= "</div>";
 
+		$html .= "<br>";
 		
-		$html .= "<div style='float:right;'>";
-			$html .= "<input class='buttons' type='button' id='saveButton' value='Save' title='Save current sample list' onClick='saveItemList();' style='margin-top:14px;'/>";
-			$html .= "<br>";
-			$html .= "<input class='buttons' type='button' id='cancelButton' value='Cancel' title='Cancels the operation, closes the menu and deletes the entry(ies)' onClick='closeitemInsertDiv(true);' style='margin-top:5px;'/>";
-			$html .= "<br>";
-			$html .= "<input class='buttons' type='button' id='newItemButton' value='New Item' onclick='newItem();' style='margin-top:44px;'/>";
-			$html .= "<br>";
-			$html .= "<input class='buttons' type='button' id='emailButton' onclick='emailUsersFromItems();' value='Email' title='Email the users of the locked items' style='margin-top:5px;'/>";
-
-		$html .= "</div>";
+		$marginTop = 10;
+		$html .= "<input class='buttons' type='button' id='cancelButton' value='Delete' title='Cancels the operation, closes the menu and deletes the entry(ies)' onClick='closeitemInsertDiv(true);' style='float:left;margin-top:".$marginTop."px;'/>";
+		$html .= "<input class='buttons' type='button' id='saveButton' value='Save' title='Save current sample list' onClick='saveItemList();' style='margin:auto;margin-top:".$marginTop."px;'/>";
+		$html .= "<input class='buttons' type='button' id='emailButton' onclick='emailUsersFromItems();' value='Email' title='Email the users of the locked items' style='float:right;margin-top:".$marginTop."px;'/>";
 	
 		$html .= "<br>";
 		
-		$html .= "<div style='float:left;text-align:left;width:100%;margin-top:20px;'>";
+		$html .= "<div style='float:left;text-align:left;width:100%;margin-top:".$marginTop."px;'>";
 			$html .= "<label>";		
 				$html .= "Email subject:";		
 			$html .= "</label>";
@@ -281,7 +293,7 @@
 		// Fills the list with items submitted by the user, not used in a sequencing session
 		$html .= "
 			<script>
-				fillItemsListOptions(".json_encode(getItems($userId, $resource, $entries)).");
+				fillItemsListOptions(".json_encode(getItems($userId, $resource, $entries, true)).");
 			</script>
 		";
 		
@@ -309,70 +321,86 @@
 	function getItems($userId, $resource, $entriesArray = null){
 		$itemsArray = array();
 		
-			$select = "
-				select 
-					item_id
-					, item_name
-					, item_state 
+		$select = "
+			select 
+				item_id
+				, item_name
+				, item_state 
+		";
+		
+		$from = "
+			from 
+				item
+		";
+		
+		$where = "
+			where
+				item_resource = :0
+				and item_state in (1, 2)
+		";
+		
+		$orderBy = "
+			order by 
+				item_state
+				, item_name
+		";
+			
+		$sqlArray = array($resource);
+		$inData = dbHelp::inDataFromArray($entriesArray);
+		if(isResp($userId, $resource) !== false && $inData !== false){ // its the resource manager and theres associated entries
+			$select .= "
+				, user_firstname
+				, user_lastname
 			";
 			
-			$from = "
-				from 
-					item
+			$from .= "
+				, user
 			";
 			
 			$where = "
 				where
 					item_resource = :0
-			";
-			
-			$orderBy = "
-				order by 
-					item_state
-					, item_name
-			";
-			
-		if(isResp($userId, $resource) !== false){
-			$inData = dbHelp::inDataFromArray($entriesArray);
-			if($inData !== false){
-				$from .= "
-					, item_assoc
-				";
-				$where = "
-					where 
-						item_assoc_entry in ".$inData['inData']." 
-						and item_resource = :".($inData['size'])."
-				";
-				$entriesArray[] = $resource; // pushing the resource in the entries array to then send to PDO for the sql query
-				$sql = $select." ".$from." ".$where." ".$orderBy;
-				$prep = dbHelp::query($sql, $entriesArray);
-			}
-			else{
-				$where .= "
 					and item_state = 1
-				";
-				$sql = $select." ".$from." ".$where." ".$orderBy;
-				$prep = dbHelp::query($sql, array($resource));
-			}
-			// $sql = "select item_id, item_name, item_state from item where item_resource = :0 ".$extraSql." order by item_state, item_name";
-		}
-		else{
-			$where = "
-				where
-					item_user = :0
-					and item_resource = :1
-					and item_state in (1, 2)
+					and user_id = item_user
 			";
-
-			// $sql = "select item_id, item_name, item_state from item where item_user = :0 and item_resource = :1 and item_state in (1, 2) order by item_state, item_name";
+			
+			$fromEntry = $from."
+				, item_assoc
+			";
+			
+			$whereEntry = "
+				where 
+					item_assoc_entry in ".$inData['inData']." 
+					and item_id = item_assoc_item
+					and item_resource = :".($inData['size'])."
+					and item_state = 2
+			";
+			$entriesArray[] = $resource; // pushing the resource in the entries array to then send to PDO for the sql query
+			$sqlEntry = $select." ".$fromEntry." ".$whereEntry." ".$orderBy;
+			$prepEntry = dbHelp::query($sqlEntry, $entriesArray);
+			while($rowEntry = dbHelp::fetchRowByIndex($prepEntry)){
+				$itemsArray[$rowEntry[0]] = array('name' => $rowEntry[1]." - ".$rowEntry[3]." ".$rowEntry[4], 'state' => $rowEntry[2]);
+			}
+			
 			$sql = $select." ".$from." ".$where." ".$orderBy;
-			$prep = dbHelp::query($sql, array($userId, $resource));
+			$prep = dbHelp::query($sql, $sqlArray);
+			while($row = dbHelp::fetchRowByIndex($prep)){
+				$itemsArray[$row[0]] = array('name' => $row[1]." - ".$row[3]." ".$row[4], 'state' => $row[2]);
+			}
+		}
+		else{ // regular user, needs sorting of the samples by user
+			$where .= "
+				and item_user = :1
+			";
+			$sqlArray[] = $userId;
+			
+			$sql = $select." ".$from." ".$where." ".$orderBy;
+			$prep = dbHelp::query($sql, $sqlArray);
+			while($row = dbHelp::fetchRowByIndex($prep)){
+				$itemsArray[$row[0]] = array('name' => $row[1], 'state' => $row[2]);
+			}
 		}
 
-		while($row = dbHelp::fetchRowByIndex($prep)){
-			$itemsArray[$row[0]] = array('name' => $row[1], 'state' => $row[2]);
-		}
-		
 		return $itemsArray;
 	}
 	

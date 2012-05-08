@@ -325,5 +325,6 @@ function back(){
 	divToShow.html("");
 	divToShow.hide();
 	
-	itemInsertShowDivAndCheckUser(currentResource, 'itemManagementHtml', null, true);	
+	itemInsertShowDivAndCheckUser(currentResource, 'itemManagementHtml', null, true);
+	// itemInsertShowDivAndCheckUser(currentResource, 'itemManagementHtml');
 }
