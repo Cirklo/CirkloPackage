@@ -293,6 +293,7 @@ class permClass{
 		break;
 		case 3:
 		case 4:
+		case 6: // sequencing
 			return 2; // return entry status as a pre-reserve
 		break;
 		default:

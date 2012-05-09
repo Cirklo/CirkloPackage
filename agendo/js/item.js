@@ -77,6 +77,7 @@ function closeitemInsertDiv(delEntries){
 	entries = new Array();
 	userLogin = "";
 	userPass = "";
+	getCalendar();
 }
 
 function itemInsertOrRemove(remove){
@@ -175,20 +176,23 @@ function saveItemList(){
 	items['locked'] = new Array();
 	items['submitted'] = new Array();
 	
-	var lockedItems = document.getElementById('lockedItems').options;
-	for(var i in lockedItems){
-		if(lockedItems[i].value){
-			items['locked'][items['locked'].length] = lockedItems[i].value;
-		}
-	}
-	
-	var submittedItems = document.getElementById('submittedItems').options;
-	for(var i in submittedItems){
-		if(submittedItems[i].value){
-			items['submitted'][items['submitted'].length] = submittedItems[i].value;
-		}
-	}
+	$("#lockedItems option").each(function(){
+		items['locked'][items['locked'].length] = this.value;
+	});
 
+	$("#submittedItems option").each(function(){
+		// items['submitted'][items['submitted'].length] = submittedItems[i].value;
+		items['submitted'][items['submitted'].length] = this.value;
+	});
+
+	// This wont work on chrome because god knows why, had the same for the submitted list...
+	// var lockedItems = document.getElementById('lockedItems').options;
+	// for(var i in lockedItems){
+		// if(lockedItems[i].value){
+			// items['locked'][items['locked'].length] = lockedItems[i].value;
+		// }
+	// }
+	
 	if(entries.length != 0){
 		if(lockedItems.length == 0){
 			showMessage("The locked item list can't be empty.", true);
@@ -327,4 +331,22 @@ function back(){
 	
 	itemInsertShowDivAndCheckUser(currentResource, 'itemManagementHtml', null, true);
 	// itemInsertShowDivAndCheckUser(currentResource, 'itemManagementHtml');
+}
+
+function done(){
+	$.post(
+		"../agendo/itemHandling.php"
+		, {action: 'done', 'entries[]': entries, userLogin: userLogin, userPass: userPass, resource: resource}
+		, function(serverData){
+			showMessage(serverData.message, serverData.isError);
+			closeitemInsertDiv();
+			getCalendar();
+		}
+		, "json"
+	)
+	.error(
+		function(errorData){
+			showMessage(errorData.responseText, true);
+		}
+	);
 }

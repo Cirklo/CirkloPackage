@@ -94,7 +94,7 @@
 		$arrrep=dbHelp::fetchRowByIndex($res);
 		$weekahead=$datetime;
 		$notify=new alert($resource);   
-		if ($repeat=='false') $enddate='999999999999';
+		if($repeat=='false') $enddate = '999999999999';
 		
 		$tempUser = $user_id;
 		if(isset($_GET['impersonate'])){

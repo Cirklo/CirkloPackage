@@ -53,6 +53,13 @@
 				}
 				$json->selectOptions = updateSubmittedList($_POST['asUser'], $_POST['resource']);
 			break;
+
+			case "done":
+				if($isResp === false){
+					throw new Exception('User doesn\'t have permission for this action');
+				}
+				$json->message = done($_POST['entries']);
+			break;
 		}
 		// $json->success = true;
 		echo json_encode($json);
@@ -76,7 +83,7 @@
 		$prep = dbHelp::query($sql, array($resource));
 		$row = dbHelp::fetchRowByIndex($prep);
 		
-		$html .= "<a onclick='closeitemInsertDiv();' onmouseover='this.style.cursor=\"pointer\"' style='position:absolute;top:0px;right:5px;color:#bb3322;font-size:16px;'>";
+		$html .= "<a onClick='closeitemInsertDiv();' onmouseover='this.style.cursor=\"pointer\"' style='position:absolute;top:0px;right:5px;color:#bb3322;font-size:16px;'>";
 			$html .= "x";
 		$html .= "</a>";
 		
@@ -153,7 +160,7 @@
 					class='buttons'
 					id='insertItemButton' 
 					value='Insert Item' 
-					onclick='itemInsertOrRemove()' 
+					onClick='itemInsertOrRemove()' 
 					title='Inserts the new item'
 					style='margin-top:10px;margin-left:".$marginLeft."px;'
 				/>
@@ -166,7 +173,7 @@
 					class='buttons'
 					id='removeItemButton' 
 					value='Remove Item' 
-					onclick='itemInsertOrRemove(true)' 
+					onClick='itemInsertOrRemove(true)' 
 					title='Removes the selected item(s)'
 					style='margin-top:20px;margin-left:".$marginLeft."px;'
 				/>
@@ -180,7 +187,7 @@
 						class='buttons'
 						id='backButton' 
 						value='Back' 
-						onclick='back();' 
+						onClick='back();' 
 						title='Return to the entry association screen'
 						style='margin-top:110px;margin-left:".$marginLeft."px;'
 					/>
@@ -219,7 +226,7 @@
 	}
 	
 	function itemManagementHtml($userId, $resource, $entries = null){
-		$html .= "<a onclick='closeitemInsertDiv();' onmouseover='this.style.cursor=\"pointer\"' style='position:absolute;top:0px;right:5px;color:#bb3322;font-size:16px;'>";
+		$html .= "<a onClick='closeitemInsertDiv();' onmouseover='this.style.cursor=\"pointer\"' style='position:absolute;top:0px;right:5px;color:#bb3322;font-size:16px;'>";
 			$html .= "x";
 		$html .= "</a>";
 		
@@ -235,16 +242,30 @@
 		$html .= "</div>";
 				$html .= "&nbsp";
 	
-		$html .= "<div style='margin-top:60px;margin-left:20px;margin-right:20px;float:left;'>";
-			$html .= "<input type='button' value=' <<- ' title='Remove all' onclick='swapAll(\"lockedItems\", \"submittedItems\");'/>";
+		$html .= "<div style='margin-top:20px;margin-left:20px;margin-right:20px;float:left;'>";
+			$html .= "<input type='button' value=' <<- ' title='Remove all' onClick='swapAll(\"lockedItems\", \"submittedItems\");'/>";
 			$html .= "&nbsp";
-			$html .= "<input type='button' value=' ->> ' title='Add all' onclick='swapAll(\"submittedItems\", \"lockedItems\");'/>";
+			$html .= "<input type='button' value=' ->> ' title='Add all' onClick='swapAll(\"submittedItems\", \"lockedItems\");'/>";
 			$html .= "<br>";
-			$html .= "<input type='button' value=' <- ' title='Remove selected' onclick='swapSelected(\"lockedItems\", \"submittedItems\");'/>";
+			$html .= "<input type='button' value=' <- ' title='Remove selected' onClick='swapSelected(\"lockedItems\", \"submittedItems\");'/>";
 			$html .= "&nbsp";
-			$html .= "<input type='button' value=' -> ' title='Add selected' onclick='swapSelected(\"submittedItems\", \"lockedItems\");'/>";
+			$html .= "<input type='button' value=' -> ' title='Add selected' onClick='swapSelected(\"submittedItems\", \"lockedItems\");'/>";
 			$html .= "<br>";
-			$html .= "<input class='buttons' type='button' id='newItemButton' value='New Item' onclick='newItem();' style='margin-top:20px;'/>";
+			$html .= "<input class='buttons' type='button' id='newItemButton' value='New Item' onClick='newItem();' style='margin-top:25px;'/>";
+			$html .= "<br>";
+			$html .= "
+				<input 
+					class='buttons' 
+					type='button' 
+					id='saveButton' 
+					value='Save' 
+					title='Save current sample list' 
+					onClick='saveItemList();' 
+					style='margin:auto;margin-top:17px;'
+				/>
+			";
+		
+			
 		$html .= "</div>";
 
 		$html .= "<div style='float:left;text-align:left;'>";
@@ -254,43 +275,51 @@
 			
 			$html .= "<br>";
 
-			$html .= "<select class='selectListManager' id='lockedItems' multiple='multiple' onclick=''>";
+			$html .= "<select class='selectListManager' id='lockedItems' multiple='multiple'>";
 			$html .= "</select>";
 		$html .= "</div>";
 
 		$html .= "<br>";
 		
 		$marginTop = 10;
-		$html .= "<input 
-			class='buttons' 
-			type='button' 
-			id='cancelButton' 
-			value='Delete' 
-			title='Cancels the operation, closes the menu and deletes the entry(ies)' 
-			onClick='closeitemInsertDiv(true);' 
-			style='float:left;margin-top:".$marginTop."px;'
-		/>";
+		$html .= "
+			<input 
+				class='buttons' 
+				type='button' 
+				id='cancelButton' 
+				value='Delete' 
+				title='Cancels the operation, closes the menu and deletes the entry(ies)' 
+				onClick='closeitemInsertDiv(true);' 
+				style='float:left;margin-top:".$marginTop."px;'
+			/>
+		";
 		
-		$html .= "<input 
-			class='buttons' 
-			type='button' 
-			id='saveButton' 
-			value='Save' 
-			title='Save current sample list' 
-			onClick='saveItemList();' 
-			style='margin:auto;margin-top:".$marginTop."px;'
-		/>";
-		
-		$html .= "<input 
-			class='buttons' 
-			type='button' 
-			id='emailButton' 
-			onclick='emailUsersFromItems();' 
-			value='Email' 
-			title='Email the users of the selected locked items' 
-			style='float:right;margin-top:".$marginTop."px;'
-		/>";
+		$html .= "
+			<input 
+				class='buttons' 
+				type='button' 
+				id='emailButton' 
+				onClick='emailUsersFromItems();' 
+				value='Email' 
+				title='Email the users of the selected locked items' 
+				style='float:right;margin-top:".$marginTop."px;'
+			/>
+		";
 	
+		$html .= "<br>";
+		
+		$html .= "
+			<input 
+				class='buttons' 
+				type='button' 
+				id='doneButton' 
+				onClick='done();' 
+				value='Done' 
+				title='Changes the state of the entry to confirmed and closes this menu'
+				style='margin:auto;margin-top:".$marginTop."px;'
+			/>
+		";
+		
 		$html .= "<br>";
 		
 		$html .= "<div style='float:left;text-align:left;width:100%;margin-top:".$marginTop."px;'>";
@@ -441,6 +470,10 @@
 			throw new Exception("There are no items");
 		}
 
+		if(!$inSql = dbHelp::inDataFromArray($entries)){
+			throw new Exception("Couldn't get entries");
+		}
+		
 		foreach($entries as $entry){ // all entries
 			foreach($items as $itemState=>$itemArray){ // all item states
 				foreach($itemArray as $item){ // all item that belong to a state
@@ -448,6 +481,9 @@
 				}
 			}
 		}
+		
+		$sql = "update entry set entry_status = 2 where entry_id in ".$inSql['inData'];
+		$prep = dbHelp::query($sql, $entries);
 		
 		return "Items saved";
 	}
@@ -459,7 +495,7 @@
 		$sql = "select item_assoc_id, item_state from item, item_assoc where item_assoc_entry = :0 and item_assoc_item = :1";
 		$prep = dbHelp::query($sql, $itemIdEntryArray);
 		$row = dbHelp::fetchRowByIndex($prep);
-			// wtf($row[0]."  ".$itemState."  ".$item['id'], 'a');
+
 		if(!isset($row[0]) && $stateArray[$itemState] == 2){
 			$sql = "insert into item_assoc values(null, :0, :1)";
 			dbHelp::query($sql, $itemIdEntryArray);
@@ -483,7 +519,6 @@
 			throw new Exception("Couldn't get items data");
 		}
 		
-		// wtf($inSql['inData']);
 		$mailToUsers = "";
 		$sql = "select distinct user_email from item, user where user_id = item_user and item_id in ".$inSql['inData'];
 		$prep = dbHelp::query($sql, $items);
@@ -494,9 +529,7 @@
 			while($row = dbHelp::fetchRowByIndex($prep)){
 				$mailToUsers .= ",".$row[0];
 			}
-			// wtf($mailToUsers);
 			return $mailToUsers;
-			// echo json_encode($json);
 		}
 		else{
 			throw new Exception("No users found");
@@ -506,5 +539,17 @@
 	
 	function updateSubmittedList($asUser, $resource){
 		return getItems($asUser, $resource);
+	}
+	
+	// change this
+	function done($entries){
+		if(!$inSql = dbHelp::inDataFromArray($entries)){
+			throw new Exception("Couldn't get entries");
+		}
+		
+		$sql = "update entry set entry_status = 1 where entry_id in ".$inSql['inData'];
+		$prep = dbHelp::query($sql, $entries);
+		
+		return "Entry(ies) confirmed";
 	}
 ?>

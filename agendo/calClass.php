@@ -374,7 +374,8 @@ class cal extends phpCollection{
 							$nlineXweekday = $weekdayNline[$weekday];
 						}
 						// *******************************************
-                        $cell->setEntryStatus($arr['entry_status'], $this->Status == 3 || $this->Status == 4);
+						// checks if its a confirm type resource
+                        $cell->setEntryStatus($arr['entry_status'], $this->Status == 3 || $this->Status == 4 || $this->Status == 6);
 						// If the action is not a update?
                         if ($this->Update != $cell->getEntry()){
 							$listStyle = "	

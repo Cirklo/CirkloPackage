@@ -358,48 +358,36 @@ function nonconf(){
 	// ".dbHelp::date_add('entry_datetime', 'resource_resolution*entry_slots+resource_confirmtol*resource_resolution+60','minute')." between now() and ".dbHelp::date_add('now()','60', 'minute');
     $res=dbHelp::query($sql);
     while($arr=dbHelp::fetchRowByName($res)){
-		if($arr['resource_status'] == 6){ // sequencing
-			// Get the item ids associated with a past entry
-			$sqlItems = "select item_assoc_item from item_assoc where item_assoc_entry = :0";
-			$prep = dbHelp::query($sqlItems, array($arr['entry_id']));
-			// Sets the item state to Used
-			while($row = dbHelp::fetchRowByIndex($prep)){
-				$sqlItemState = "update item set item_state = 3 where item_id = :0";
-				$prep = dbHelp::query($sqlItemState, array($row[0]));
-			}
-		}
-		else{
-			$msg=date("Y-m-d H:i")." You did not confirm your entry on " . $arr['resource_name'] . " at ".$arr['entry_datetime'].". Please justify to ". $arr['resp'];
-			switch($arr['user_alert']){
-				case 2:
-					try {
-						$msg=str_replace(' ','%20',$msg);
-						echo $msg;
-						$url="http://192.168.52.35:8888/send?phone=". $arr['user_mobile'] . "&msg=" . $msg;
-						$handle = fopen($url, "r");
-					} catch (HttpException $ex) {
-						echo $ex;
-					}
-				break;
-				case 1:
-						$this->Subject="No confirmation on ".$arr['date'];
-						$this->ClearReplyTos();	//clear replys before receiving any email
-						$this->AddReplyTo("Resource Manager", $arr['resp']);
-						$this->ClearAddresses();
-						$this->AddAddress($arr['user_email'], "");
+		$msg=date("Y-m-d H:i")." You did not confirm your entry on " . $arr['resource_name'] . " at ".$arr['entry_datetime'].". Please justify to ". $arr['resp'];
+		switch($arr['user_alert']){
+			case 2:
+				try {
+					$msg=str_replace(' ','%20',$msg);
+					echo $msg;
+					$url="http://192.168.52.35:8888/send?phone=". $arr['user_mobile'] . "&msg=" . $msg;
+					$handle = fopen($url, "r");
+				} catch (HttpException $ex) {
+					echo $ex;
+				}
+			break;
+			case 1:
+				$this->Subject="No confirmation on ".$arr['date'];
+				$this->ClearReplyTos();	//clear replys before sending the email
+				$this->AddReplyTo("Resource Manager", $arr['resp']);
+				$this->ClearAddresses();
+				$this->AddAddress($arr['user_email'], "");
 
-						$this->Body=$msg;
-						echo $msg;
-						if(!$this->Send()) {
-							echo "Mailer Error: ".$this->ErrorInfo;
-						} 
-						// else {
-							//echo "Message sent!";
-						// }
-				break;
-				case 0:
-				break;
-			}
+				$this->Body=$msg;
+				echo $msg;
+				if(!$this->Send()) {
+					echo "Mailer Error: ".$this->ErrorInfo;
+				} 
+				// else {
+					//echo "Message sent!";
+				// }
+			break;
+			case 0:
+			break;
 		}
     }
     
