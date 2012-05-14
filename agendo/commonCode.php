@@ -665,8 +665,8 @@
 		$lastDayDate = date('Ymd',$lastDayWeek);
 		
 		// use the dateBetween method to get the number of slots
-		$sql = "select sum(entry_slots), resource_resolution, resource_maxhoursweek, resource_resp from resource, entry where resource_id = ".$resource." and entry_user = ".$user_id." and entry_status in (1,2) and entry_resource = ".$resource." and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
-		$res = dbHelp::query($sql);
+		$sql = "select sum(entry_slots), resource_resolution, resource_maxhoursweek, resource_resp from resource, entry where resource_id = :0 and entry_user = :1 and entry_status in (1,2) and entry_resource = :0 and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
+		$res = dbHelp::query($sql, array($resource, $user_id));
 		$arr = dbHelp::fetchRowByIndex($res);
 		if(!isset($arr[0])){
 			$arr[0] = 0;

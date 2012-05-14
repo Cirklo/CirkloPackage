@@ -57,19 +57,45 @@ var interval;
 			}
 			
 			var intervalLength = 180000; // 3 minutes
-			interval = setInterval('getCalendar()', intervalLength);
+			// interval = setInterval('getCalendar()', intervalLength);
+			interval = setInterval('autoRefresh()', intervalLength);
+			
 		}
 	);
 
+	function autoRefresh(){
+		getCalendar();
+	}
+		
+	function hoursSlotsLeft(){
+		// hours and slots left feature ajax refresh
+		if(typeof document.getElementById('hoursLeftTd') != "undefined" && resourceToUseInGet != ''){
+			$.post(
+				"weekview.php?resource=" + resourceToUseInGet + "&date" + dateToUseInGet
+				, {functionName: "getTimeAndSlotsLeft"}
+				, function(serverData){
+					document.getElementById('hoursLeftTd').innerHTML = serverData.timeSlotsText;
+				}
+				, "json"
+			)				
+			// .error(
+				// function(error){
+					// showMessage(error.responseText, true);
+				// }
+			// );
+		}
+	}
+	
 	// Gets the calendar html
 	function getCalendar(entry, action){
-		if(resourceToUseInGet != '' && dateToUseInGet != ''){
+		if(resourceToUseInGet != ''){
 			$.post(
 				"weekview.php?resource=" + resourceToUseInGet + "&date=" + dateToUseInGet
 				, {functionName: 'getCalendarWeek', entry: entry, action: action}
 				, function(serverData){
 					if(serverData.success){
 						document.getElementById('calendar').innerHTML = serverData.calendar;
+						hoursSlotsLeft();
 					}
 					else{
 						showMessage(serverData.message, true);
@@ -640,7 +666,6 @@ function ajaxEntries(method,url,nosync){
 	userPass = objForm.user_passwd.value;
 	objForm.user_id.value = "";
 	objForm.user_passwd.value = "";
-
 	// xmlhttp.open(method, url + '&' + par, nosync);
 	// xmlhttp.send(null);
     // xmlhttp.onreadystatechange = function(){

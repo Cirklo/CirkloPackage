@@ -60,7 +60,7 @@
 		generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
 	}
 	else{
-		showMsg("You need to be logged in");
+		showMsg("You need to be logged in", true);
 		echo "<br>";
 
 		echo "<div style='margin:auto;width:200px;text-align:center;'>";
