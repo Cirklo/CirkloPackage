@@ -9,7 +9,7 @@
 	require_once("../agendo/functions.php");
 	require_once("../agendo/genMsg.php");
 
-	if (isset($_GET['date'])){
+	if (isset($_GET['date']) && $_GET['date'] != ""){
 		$calendarDate = cleanValue($_GET['date']);
 	} else {        
 		$calendarDate = date("Ymd",mktime(0,0,0, date("m"), date("d")-date("N"),date("Y")));
@@ -19,6 +19,7 @@
 	$res = dbHelp::query($ressql,array(cleanValue($_GET['resource'])));
 	$arr = dbHelp::fetchRowByName($res);
 	$resource = $arr['resource_id'];
+	// $isResp = isResp(); // make this var?
 	
 	if(isset($_POST['functionName'])){
 		call_user_func(cleanValue($_POST['functionName']));
@@ -370,48 +371,49 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					//***********************************************
 					//************* Weekly hours left ***************
-					if(isset($_SESSION['user_id']) && $calendar->getRespId() != $_SESSION['user_id']){
-						$day=substr($calendar->getStartDate(),6,2);
-						$month=substr($calendar->getStartDate(),4,2);
-						$year=substr($calendar->getStartDate(),0,4);
-						$slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
-						$day=substr($slotDate,6,2);
-						$month=substr($slotDate,4,2);
-						$year=substr($slotDate,0,4);
+					// if(isset($_SESSION['user_id']) && $calendar->getRespId() != $_SESSION['user_id']){
+						// $day=substr($calendar->getStartDate(),6,2);
+						// $month=substr($calendar->getStartDate(),4,2);
+						// $year=substr($calendar->getStartDate(),0,4);
+						// $slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
+						// $day=substr($slotDate,6,2);
+						// $month=substr($slotDate,4,2);
+						// $year=substr($slotDate,0,4);
 						
-						$arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
-						$totalSlots = $arrSRM[0];
-						$resolution = $arrSRM[1];
-						$maxHours 	= $arrSRM[2];
+						// $arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
+						// $totalSlots = $arrSRM[0];
+						// $resolution = $arrSRM[1];
+						// $maxHours 	= $arrSRM[2];
 
-						if($arrSRM[3] != $user_id && $maxHours != 0){
+						// if($arrSRM[3] != $user_id && $maxHours != 0){
+							// $timeUsed = $totalSlots * $resolution/60;
+							// $maxSlots = $maxHours * 60 / $resolution;
+							// $slotsLeft = $maxSlots - $totalSlots;
 							
-							$timeUsed = $totalSlots * $resolution/60;
-							$maxSlots = $maxHours * 60 / $resolution;
-							$slotsLeft = $maxSlots - $totalSlots;
+							// if($slotsLeft < 0){
+								// $slotsLeft = 0;
+							// }
 							
-							if($slotsLeft < 0){
-								$slotsLeft = 0;
-							}
-							
-							$timeLeft = $maxHours - $timeUsed;
-							if($timeLeft < 0){
-								$timeLeft = 0;
-							}
-							
+							// $timeLeft = $maxHours - $timeUsed;
+							// if($timeLeft < 0){
+								// $timeLeft = 0;
+							// }
+						$timeSlotsText = getTimeAndSlotsLeft();
+						if($timeSlotsText !== false){
 							echo "<tr>";
-								echo "<td colspan=2 align='center'>";
-								echo "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
+								echo "<td colspan='2' style='text-align:center;' id='hoursLeftTd'>";
+								// echo "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
+								echo $timeSlotsText;
 								echo "</td>";
 							echo "</tr>";
 							
 							echo "<tr>";
-								echo "<td colspan=2>";
+								echo "<td colspan='2'>";
 								echo "<hr>";
 								echo "</td>";
 							echo "</tr>";
 						}
-					}
+					// }
 					//************* Weekly hours left ***************
 					//***********************************************
 	
@@ -754,5 +756,50 @@ echo "</html>";
 		echo json_encode($json);
 	}
 
+	// returns the amount of time and slots left for a user for a resource
+	function getTimeAndSlotsLeft(){
+		global $calendarDate;
+		global $resource;
+		
+		if(isset($_SESSION['user_id']) && isResp($_SESSION['user_id'], $resource) === false){
+			$day=substr($calendarDate,6,2);
+			$month=substr($calendarDate,4,2);
+			$year=substr($calendarDate,0,4);
+			$slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
+			$day=substr($slotDate,6,2);
+			$month=substr($slotDate,4,2);
+			$year=substr($slotDate,0,4);
+			
+			$arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $resource);
+			$totalSlots = $arrSRM[0];
+			$resolution = $arrSRM[1];
+			$maxHours 	= $arrSRM[2];
+
+			// if($arrSRM[3] != $user_id && $maxHours != 0){
+			if($maxHours != 0){
+				$timeUsed = $totalSlots * $resolution / 60;
+				$maxSlots = $maxHours * 60 / $resolution;
+				$slotsLeft = $maxSlots - $totalSlots;
+				
+				if($slotsLeft < 0){
+					$slotsLeft = 0;
+				}
+				
+				$timeLeft = $maxHours - $timeUsed;
+				if($timeLeft < 0){
+					$timeLeft = 0;
+				}
+				
+				$timeSlotsText = "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
+				if(isAjax()){
+					$json->timeSlotsText = $timeSlotsText;
+					echo json_encode($json);
+				}
+				return $timeSlotsText;
+			}
+		}
+		
+		return false;
+	}
 ?>
 

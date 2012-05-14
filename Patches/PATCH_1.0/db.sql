@@ -94,8 +94,7 @@ CREATE TABLE IF NOT EXISTS `item_state` (
 
 INSERT INTO `item_state` (`item_state_id`, `item_state_name`) VALUES
 (1, 'Available'),
-(2, 'In use'),
-(3, 'Used');
+(2, 'In use');
 
 
 --
