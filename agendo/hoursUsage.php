@@ -90,7 +90,10 @@
 			
 			if($isAdmin){
 				$checkedPrivilege = "";
-				if($userLevel == 'admin'){
+				if(!isset($userLevel)){
+					$checkedPrivilege = 'checked';
+				}
+				elseif($userLevel == 'admin'){
 					$checkedPrivilege = 'checked';
 					$isRespTemp = $isPITemp = false;
 				}
@@ -106,7 +109,10 @@
 			
 			if($isPI !== false){
 				$checkedPrivilege = "";
-				if($userLevel == 'pi'){
+				if(!isset($userLevel)){
+					$checkedPrivilege = 'checked';
+				}
+				elseif($userLevel == 'pi'){
 					$checkedPrivilege = 'checked';
 					$isRespTemp = $isAdminTemp = false;
 				}
@@ -126,11 +132,14 @@
 
 			if($isResp !== false){
 				$checkedPrivilege = "";
-				if($userLevel == 'resp'){
+				if(!isset($userLevel)){
+					$checkedPrivilege = 'checked';
+				}
+				elseif($userLevel == 'resp'){
 					$checkedPrivilege = 'checked';
 					$isPITemp = $isAdminTemp = false;
 				}
-				
+			
 				$numberOfPrivileges++;
 				if($numberOfPrivileges > 1){
 					$privilegeHtml .= "<br>";
