@@ -21,6 +21,16 @@ function sendChecksAndDate(action, changeLocation){
 			urlPath += "&entryCheck";
 		}
 		
+		if(document.getElementById('adminRadio') && document.getElementById('adminRadio').checked == true){
+			urlPath += "&userLevel=admin";
+		}
+		else if(document.getElementById('piRadio') && document.getElementById('piRadio').checked == true){
+			urlPath += "&userLevel=pi";
+		}
+		else if(document.getElementById('respRadio') && document.getElementById('respRadio').checked == true){
+			urlPath += "&userLevel=resp";
+		}
+		
 		urlPath += "&beginDate=" + encodeURIComponent($('#beginDateText').val());
 		urlPath += "&endDate=" + encodeURIComponent($('#endDateText').val());
 		

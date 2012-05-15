@@ -12,6 +12,7 @@
 		$entryCheck = isset($_GET['entryCheck']);
 		$beginDate = $_GET['beginDate'];
 		$endDate = $_GET['endDate'];
+		$userLevel = $_GET['userLevel'];
 		
 		$selectedDepartmentsArray = null;
 		if(isset($_GET['departments'])){
@@ -24,7 +25,7 @@
 				switch($_GET['action']){
 					// Shows the results 
 					case "search":
-						generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI);
+						generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel);
 					break;
 					// Opens a file dialog to download a csv with all the selected info (select all and select none will generate the same csv file)
 					case "downloadFile":
@@ -46,7 +47,7 @@
 				$errorMessage = "Error: ".$e->getMessage();
 				if($returnErrorByEcho){
 					showMsg($errorMessage, true, true);
-					generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI);
+					generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel);
 				}
 				else{
 					$json->success = false;
@@ -57,7 +58,7 @@
 			exit;
 		}
 		
-		generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray);
+		generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel, $selectedDepartmentsArray);
 	}
 	else{
 		showMsg("You need to be logged in", true);
@@ -68,7 +69,7 @@
 		echo "</div>";
 	}
 
-	function generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray = null){
+	function generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel, $selectedDepartmentsArray = null){
 		importJs();
 		echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
 		echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
@@ -80,6 +81,86 @@
 		echo "<br>";
 		
 		echo "<table style='margin:auto;width:450px;text-align:right;'>";
+			// Show by user priviledges
+			$numberOfPrivileges = 0;
+			$privilegeHtml = "";
+			$isPITemp = $isPI;
+			$isAdminTemp = $isAdmin;
+			$isRespTemp = $isResp;
+			
+			if($isAdmin){
+				$checkedPrivilege = "";
+				if($userLevel == 'admin'){
+					$checkedPrivilege = 'checked';
+					$isRespTemp = $isPITemp = false;
+				}
+				
+				$numberOfPrivileges++;
+				$privilegeHtml .= "
+					<label style='color:white;float:right;margin-right:20px;'>
+						Administrator
+						<input type='radio' name='privilegesRadio' id='adminRadio' ".$checkedPrivilege."/>
+					</label>
+				";
+			}
+			
+			if($isPI !== false){
+				$checkedPrivilege = "";
+				if($userLevel == 'pi'){
+					$checkedPrivilege = 'checked';
+					$isRespTemp = $isAdminTemp = false;
+				}
+				
+				$numberOfPrivileges++;
+				if($numberOfPrivileges > 1){
+					$privilegeHtml .= "<br>";
+				}
+				
+				$privilegeHtml .= "
+					<label style='color:white;float:right;margin-right:20px;'>
+						Department Manager
+						<input type='radio' name='privilegesRadio' id='piRadio' ".$checkedPrivilege."/>
+					</label>
+				";
+			}
+
+			if($isResp !== false){
+				$checkedPrivilege = "";
+				if($userLevel == 'resp'){
+					$checkedPrivilege = 'checked';
+					$isPITemp = $isAdminTemp = false;
+				}
+				
+				$numberOfPrivileges++;
+				if($numberOfPrivileges > 1){
+					$privilegeHtml .= "<br>";
+				}
+				
+				$privilegeHtml .= "
+					<label style='color:white;float:right;margin-right:20px;'>
+						Resource Manager
+						<input type='radio' name='privilegesRadio' id='respRadio' ".$checkedPrivilege."/>
+					</label>
+				";
+			}
+			
+			if($numberOfPrivileges > 1){
+				echo "<tr>";
+					echo "<td colspan='2' style='text-align:center;color:#F7C439;font-size:14px;' title='Pick the user level you wish to view the information as'>";
+						echo "<fieldset style='width:200px;margin:auto;'>";
+						echo "<legend>User level:</legend>";
+						echo $privilegeHtml;
+						echo "</fieldset>";
+					echo "</td>";
+				echo "</tr>";
+				
+				echo "<tr>";
+					echo "<td>";
+						echo "<br>";
+					echo "</td>";
+				echo "</tr>";
+			}
+			
 			echo "<tr>";
 				echo "<td style='text-align:left;'>";
 					echo "<a>From date:</a>";
@@ -123,6 +204,7 @@
 					echo "Check the boxes above for additional information";
 				echo "</td>";
 			echo "</tr>";
+			
 		echo "</table>";
 		
 		echo "<br>";
@@ -130,7 +212,7 @@
 		// Table where the results will appear
 		echo "<div id='resultsDiv' style='margin:auto;width:800;text-align:center;'>";
 			if($beginDate != "" && $endDate != ""){
-				$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $deps);
+				$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isRespTemp, $isAdminTemp, $isPITemp, $deps);
 				echo generateHtmlResults($prep, $userCheck, $resourceCheck, $entryCheck, ($isAdmin || $isPI != false || $isResp != false));
 			}
 		echo "</div>";
@@ -339,7 +421,7 @@
 		$whereIsResp = "";
 		$whereDepartment = "user_id = entry_user and department_id = user_dep";
 		if(!$isAdmin){
-			if($isPI == false){
+			if($isPI === false){
 				$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
 				$prep = dbHelp::query($sql, array($_SESSION['user_id']));
 				$row = dbHelp::fetchRowByIndex($prep);
@@ -351,7 +433,7 @@
 				$whereDepartment = "user_id = entry_user and user_dep in (".$departments.") and department_id = user_dep";
 			}
 			
-			if($isResp != false){
+			if($isResp !== false){
 				$whereIsResp = "or user_id = entry_user and user_dep not in (".$departments.") and department_id = user_dep and entry_resource in (".implode(",", $isResp).")";
 			}
 		}
