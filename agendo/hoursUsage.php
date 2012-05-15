@@ -47,7 +47,7 @@
 				$errorMessage = "Error: ".$e->getMessage();
 				if($returnErrorByEcho){
 					showMsg($errorMessage, true, true);
-					generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel);
+					// generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel);
 				}
 				else{
 					$json->success = false;
@@ -236,43 +236,46 @@
 	
 	// Returns a string with what the subtotal line should look for each department
 	function showSubTotal($departmentId, $subTotal, $colspan, $showSelects, $showSubTotal){
-		$style = "
-			color: black;
-			font-size: 16px;
-			background-color: white;
-		";
-
+		$formatedString = "";
 		$sql = "select department_name from department where department_id = :0";
 		$prep = dbHelp::query($sql, array($departmentId));
-		$row = dbHelp::fetchRowByIndex($prep);
-		$departmentName = $row[0];
-		
-		$displaySubTotal = "none";
-		if($showSubTotal){
-			$displaySubTotal = "table";
+		if(dbHelp::numberOfRows($prep) > 0){
+			$row = dbHelp::fetchRowByIndex($prep);
+			$departmentName = $row[0];
+			
+			$displaySubTotal = "none";
+			if($showSubTotal){
+				$displaySubTotal = "table";
+			}
+
+			$displaySelects = "none";
+			if($showSelects){
+				$displaySelects = "table";
+			}
+				
+				$style = "
+					color: black;
+					font-size: 16px;
+					background-color: white;
+				";
+
+				$formatedString = "\n<tr style='".$style."'>";
+					$formatedString .= "\n<td colspan='".$colspan."'>";
+						$formatedString .=  "<label class='emailLabels' style='display:".$displaySelects.";margin-left:10px;float:left'>Select";
+							$formatedString .=  "<input type='checkBox' class='departmentChecks' id='".$departmentId."-EmailCheck' value='".$departmentId."'/>";
+						$formatedString .=  "</label>";
+					
+						$formatedString .=  "&nbsp";
+					
+						$formatedString .= "<label style='display:".$displaySubTotal.";float:right;margin-right:10px;'>";
+							$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentId."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
+						$formatedString .= "</label>";
+					$formatedString .= "</td>";
+				$formatedString .= "</tr>";
+			$formatedString .= "</table>";
+			$formatedString .= "<br>";
 		}
 
-		$displaySelects = "none";
-		if($showSelects){
-			$displaySelects = "table";
-		}
-			
-			$formatedString = "\n<tr style='".$style."'>";
-				$formatedString .= "\n<td colspan='".$colspan."'>";
-					$formatedString .=  "<label class='emailLabels' style='display:".$displaySelects.";margin-left:10px;float:left'>Select";
-						$formatedString .=  "<input type='checkBox' class='departmentChecks' id='".$departmentId."-EmailCheck' value='".$departmentId."'/>";
-					$formatedString .=  "</label>";
-				
-					$formatedString .=  "&nbsp";
-				
-					$formatedString .= "<label style='display:".$displaySubTotal.";float:right;margin-right:10px;'>";
-						$formatedString .= "Total for department ".$departmentName.": <a id='".$departmentId."SubTotal' name='".$subTotal."'>".$subTotal."</a>";
-					$formatedString .= "</label>";
-				$formatedString .= "</td>";
-			$formatedString .= "</tr>";
-		$formatedString .= "</table>";
-		$formatedString .= "<br>";
-		
 		return $formatedString;
 	}
 	
@@ -483,7 +486,7 @@
 			throw new Exception("Not a valid date");
 		}
 		elseif(strtotime($beginDate) > strtotime($endDate)){
-			throw new Exception("'From date' is after 'To date'");
+			throw new Exception("\'From date\' is after \'To date\'");
 		}
 		
 		$beginDate = dbHelp::convertToDate($beginDate);

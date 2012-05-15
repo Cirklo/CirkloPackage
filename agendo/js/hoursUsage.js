@@ -7,6 +7,13 @@ $(function() {
 function sendChecksAndDate(action, changeLocation){
 	changeLocation = typeof changeLocation !== 'undefined' ? changeLocation : true; // default value for this parameter, javascript....sheesh
 	if($('#beginDateText').val() != '' && $('#endDateText').val() != ''){
+		var dateFrom = new Date($('#beginDateText').val());
+		var dateTo = new Date($('#endDateText').val());
+		if(dateTo < dateFrom){
+			showMessage('\'From date\' is after \'To date\'', true);
+			return;
+		}
+		
 		urlPath = "hoursUsage.php?action=" + action;
 		
 		if($('#userCheck').attr('checked')){
@@ -77,7 +84,12 @@ function selectUnselectAll(element){
 }
 
 function email(){
-	urlPath = "hoursUsage.php?departments=" + JSON.stringify(getSelectedDepartments());
+	var departments = getSelectedDepartments();
+	if(departments.length == 0){
+		showMessage('No departements were detected', true);
+		return;
+	}
+	urlPath = "hoursUsage.php?departments=" + JSON.stringify(departments);
 	
 	$.post(
 		urlPath, 
@@ -100,10 +112,21 @@ function email(){
 function getSelectedDepartments(){
 	var elemArray = document.getElementById('resultsDiv').getElementsByClassName('departmentChecks');
 	var departments = new Array();
+	var noDepartments = new Array();
 	for(var i in elemArray){
-		if(elemArray[i].id != null && elemArray[i].value != null && elemArray[i].checked){ // fixed for chrome
-			departments[departments.length] = elemArray[i].value;
+		if(elemArray[i].id != null && elemArray[i].value != null){ // fixed for chrome
+			if(elemArray[i].checked){
+				departments[departments.length] = elemArray[i].value;
+			}
+			else{
+				noDepartments[noDepartments.length] = elemArray[i].value;
+			}
 		}
 	}
-	return departments;
+	
+	if(departments.length > 0){
+		return departments;
+	}
+	
+	return noDepartments;
 }
