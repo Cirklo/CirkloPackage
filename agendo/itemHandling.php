@@ -428,7 +428,7 @@
 					item_assoc_entry in ".$inData['inData']." 
 					and item_id = item_assoc_item
 					and item_resource = :".($inData['size'])."
-					and item_state = 2
+					and item_state in (2, 3)
 					and user_id = item_user
 			";
 			$entriesArray[] = $resource; // pushing the resource in the entries array to then send to PDO for the sql query
@@ -460,7 +460,7 @@
 		return $itemsArray;
 	}
 	
-	// Makes the association between items and an entry, an entry as x number of items and changes the state of the items to locked
+	// Makes the association between items and an entry, an entry as x number of items and changes the state of the items to locked (save button)
 	function associateEntriesAndItems($userId, $resource, $entries, $items){
 		if(isResp($userId, $resource) === false){
 			throw new Exception("User not allowed for this operation");
@@ -496,13 +496,17 @@
 		$prep = dbHelp::query($sql, $itemIdEntryArray);
 		$row = dbHelp::fetchRowByIndex($prep);
 
-		if(!isset($row[0]) && $stateArray[$itemState] == 2){
-			$sql = "insert into item_assoc values(null, :0, :1)";
-			dbHelp::query($sql, $itemIdEntryArray);
+		// if the item is in the locked section and not associated to an entry
+		if($stateArray[$itemState] == 2){
+			if(!isset($row[0])){
+				$sql = "insert into item_assoc values(null, :0, :1)";
+				dbHelp::query($sql, $itemIdEntryArray);
+			}
 			
 			$sql = "update item set item_state = 2 where item_id = :0";
 			dbHelp::query($sql, array($item['id']));
 		}
+		// if the item is in the locked section and not associated to an entry
 		elseif(isset($row[0]) && $stateArray[$itemState] == 1){
 			// changes the item status to available
 			$sqlItem = "update item set item_state = 1 where item_id = :0 and item_state != 1";
@@ -547,7 +551,7 @@
 			throw new Exception("Couldn't get entries");
 		}
 		
-		$sql = "update entry set entry_status = 1 where entry_id in ".$inSql['inData'];
+		$sql = "update entry, item, item_assoc set entry_status = 1, item_state = 3 where entry_id in ".$inSql['inData']." and item_assoc_entry = entry_id and item_id = item_assoc_item";
 		$prep = dbHelp::query($sql, $entries);
 		
 		return "Entry(ies) confirmed";
