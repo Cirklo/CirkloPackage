@@ -4,7 +4,7 @@ $(function() {
 });
 
 // Sends the checkBoxes states to the server and gets the appropriate table data
-function sendChecksAndDate(action, changeLocation){
+function sendChecksAndDate(action, departments, changeLocation){
 	changeLocation = typeof changeLocation !== 'undefined' ? changeLocation : true; // default value for this parameter, javascript....sheesh
 	if($('#beginDateText').val() != '' && $('#endDateText').val() != ''){
 		var dateFrom = new Date($('#beginDateText').val());
@@ -41,7 +41,8 @@ function sendChecksAndDate(action, changeLocation){
 		urlPath += "&beginDate=" + encodeURIComponent($('#beginDateText').val());
 		urlPath += "&endDate=" + encodeURIComponent($('#endDateText').val());
 		
-		urlPath += "&departments=" + JSON.stringify(getSelectedDepartments());
+		// urlPath += "&departments=" + JSON.stringify(getSelectedDepartments(getSelectedDepartments());
+		urlPath += "&departments=" + JSON.stringify(departments);
 		urlPath += "&changeLocation=" + changeLocation;
 		if(changeLocation){
 			window.location = urlPath;
@@ -83,50 +84,46 @@ function selectUnselectAll(element){
 	}
 }
 
-function email(){
-	var departments = getSelectedDepartments();
-	if(departments.length == 0){
-		showMessage('No departements were detected', true);
-		return;
-	}
-	urlPath = "hoursUsage.php?departments=" + JSON.stringify(departments);
-	
-	$.post(
-		urlPath, 
-		{
-			emailManagers: 'emailManagers'
-		},
-		function(serverData){
-			showMessage(serverData.message, !serverData.success);
-		},
-		"json")
-		.error(
-			function(error){
-				showMessage(error.responseText, true);
-			}
-		)
-	;
-}
-
 // Gets the selected departments
 function getSelectedDepartments(){
 	var elemArray = document.getElementById('resultsDiv').getElementsByClassName('departmentChecks');
 	var departments = new Array();
-	var noDepartments = new Array();
 	for(var i in elemArray){
 		if(elemArray[i].id != null && elemArray[i].value != null){ // fixed for chrome
 			if(elemArray[i].checked){
 				departments[departments.length] = elemArray[i].value;
 			}
-			else{
-				noDepartments[noDepartments.length] = elemArray[i].value;
-			}
 		}
 	}
 	
-	if(departments.length > 0){
-		return departments;
+	return departments;
+}
+
+function generateReport(){
+	var departments = getSelectedDepartments();
+	sendChecksAndDate('generateReport', departments);
+}
+
+var noDepartmentsMsg = "Please select at least one department";
+function emailDepartments(){
+	var departments = getSelectedDepartments();
+	if(departments.length == 0){
+		showMessage(noDepartmentsMsg, true);
+		return;
 	}
 	
-	return noDepartments;
+	var confirmEmail = confirm('Are you sure you wish to email all the selected departments?');
+	if(confirmEmail){
+		sendChecksAndDate('emailDepartments', departments, false);
+	}
+}
+
+function downloadFile(){
+	var departments = getSelectedDepartments();
+	if(departments.length == 0){
+		showMessage(noDepartmentsMsg, true);
+		return;
+	}
+	
+	sendChecksAndDate('downloadFile', departments);
 }

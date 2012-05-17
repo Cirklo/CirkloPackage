@@ -24,8 +24,8 @@
 				$returnErrorByEcho = $_GET['changeLocation'] == 'false' ? false : true;
 				switch($_GET['action']){
 					// Shows the results 
-					case "search":
-						generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel);
+					case "generateReport":
+						generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel, $selectedDepartmentsArray);
 					break;
 					// Opens a file dialog to download a csv with all the selected info (select all and select none will generate the same csv file)
 					case "downloadFile":
@@ -44,14 +44,13 @@
 				}
 			}
 			catch(Exception $e){
-				$errorMessage = "Error: ".$e->getMessage();
 				if($returnErrorByEcho){
-					showMsg($errorMessage, true, true);
-					// generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel);
+					showMsg($e->getMessage(), true, true);
+					generateBaseHtml($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $userLevel, $selectedDepartmentsArray);
 				}
 				else{
 					$json->success = false;
-					$json->message = $errorMessage;
+					$json->message = $e->getMessage();
 					echo json_encode($json);
 				}
 			}
@@ -204,7 +203,8 @@
 				echo "</td>";
 				
 				echo "<td style='text-align:right;'>";
-					echo "<input type='button' id='searchButton' value='Generate Report' onclick='sendChecksAndDate(\"search\")'/>";
+					// echo "<input type='button' id='searchButton' value='Generate Report' onclick='sendChecksAndDate(\"generateReport\")'/>";
+					echo "<input type='button' id='searchButton' value='Generate Report' onclick='generateReport();'/>";
 				echo "</td>";
 			echo "</tr>";
 			
@@ -221,7 +221,7 @@
 		// Table where the results will appear
 		echo "<div id='resultsDiv' style='margin:auto;width:800;text-align:center;'>";
 			if($beginDate != "" && $endDate != ""){
-				$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isRespTemp, $isAdminTemp, $isPITemp, $deps);
+				$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isRespTemp, $isAdminTemp, $isPITemp, $selectedDepartmentsArray);
 				echo generateHtmlResults($prep, $userCheck, $resourceCheck, $entryCheck, ($isAdmin || $isPI != false || $isResp != false));
 			}
 		echo "</div>";
@@ -327,8 +327,10 @@
 							$extraOptions .=  "<input type='checkBox' class='allCheck' onclick='selectUnselectAll(this);'/>";
 						$extraOptions .=  "</label>";
 
-						$extraOptions .=  "<input style='float:right;' type='button' value='Email Departments' onclick='sendChecksAndDate(\"emailDepartments\", false);'/>";
-						$extraOptions .=  "<input style='float:right;' type='button' value='Export to Excel' onclick='sendChecksAndDate(\"downloadFile\");'/>";
+						// $extraOptions .=  "<input style='float:right;' type='button' value='Email Departments' onclick='sendChecksAndDate(\"emailDepartments\", false);'/>";
+						// $extraOptions .=  "<input style='float:right;' type='button' value='Export to Excel' onclick='sendChecksAndDate(\"downloadFile\");'/>";
+						$extraOptions .=  "<input style='float:right;' type='button' value='Email Departments' onclick='emailDepartments();'/>";
+						$extraOptions .=  "<input style='float:right;' type='button' value='Export to Excel' onclick='downloadFile();'/>";
 					$extraOptions .=  "</div>";
 				$extraOptions .=  "</td>";
 			$extraOptions .= "</tr>";
@@ -419,15 +421,9 @@
 	function generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray = null){
 		// Just a precautionary measure to prevent sql injection
 		$selectedDepartmentsSql = "";
-		if(isset($selectedDepartmentsArray)){
-			$selectedDepartmentsSql .= " and (department_id = :0";
-			if(sizeOf($selectedDepartmentsArray) <= 0){
-				throw new Exception("Please select at least one department");
-			}
-			for($i=1; $i<sizeOf($selectedDepartmentsArray); $i++){
-				$selectedDepartmentsSql .= " or department_id = :".$i;
-			}
-			$selectedDepartmentsSql .= ")";
+		$inDepartmentData = dbHelp::inDataFromArray($selectedDepartmentsArray); 
+		if($inDepartmentData !== false){
+			$selectedDepartmentsSql = " and department_id in ".$inDepartmentData['inData'];
 		}
 		
 		$whereIsResp = "";
@@ -626,9 +622,6 @@
 	
 	// Big name, i know, but self explanatory and no comment is needed to describe this function. But my mind wasnt working so i wrote this.
 	function getManagersAndTheirDepartmentsFromDepartmentsList($departments){
-		if(sizeOf($departments) <= 0){
-			throw new Exception("Please select at least one department");
-		}
 		$mansAndDeps = array();
 		foreach($departments as $department){
 			$sql = "select user_id, department_id from ".dbHelp::getSchemaName().".user, department where user_id = department_manager and department_id = :0";

@@ -233,7 +233,7 @@ INSERT INTO `media` (`media_name`, `media_description`, `media_link`) VALUES
 ('How to change password', 'Changing password in Agendo', 'http://www.youtube.com/embed/6VVsQU-s0iU'),
 ('How to create a resource', 'Creating a new resource in Agendo resource scheduler', 'http://www.youtube.com/embed/wdOUev8EIPw'),
 ('Resource fields', 'How to create resource specific fields', 'http://www.youtube.com/watch?v=xdgfzPI_pjQ&feature=player_profilepage'),
-('Usage Report', 'Explains how to use the Usage Report feature', 'http://www.youtube.com/embed/an0o6E2wfzc');
+('Usage Report', 'Explains how to use the Usage Report feature', 'http://www.youtube.com/embed/GJazBXD7J1E');
 
 -- --------------------------------------------------------
 
