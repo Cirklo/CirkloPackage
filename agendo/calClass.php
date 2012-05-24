@@ -80,8 +80,6 @@ class calCell {
         if ($this->EntryStatus==5) $cellbgLight=cal::InUseCellColorOff;
         $cellgrey = "#aaaaaa";
         
-			// white-space: nowrap;
-			// text-overflow:ellipses;
 		$baseStyle = "
 			width: 70px;
 			overflow: hidden;
@@ -94,7 +92,6 @@ class calCell {
 				$extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);' style='".$baseStyle."'";
 			break;
 			case 1: // with entry
-			case 2: // update
 				$extra="OnMouseDown='swapColor(this,1,1);'";
 				if ($this->getRepeat()!='') {
 					$extra = $extra . " style='background:".$cellbgStrong.";".$baseStyle."'";
@@ -102,10 +99,10 @@ class calCell {
 					$extra = $extra . " style='background:".$cellbgLight.";".$baseStyle."'";
 				}
 			break;
-			// case 2: // update
-				// $extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
-				// $extra = $extra . " style='background:".$cellgrey.";".$baseStyle."'";
-			// break;
+			case 2: // update
+				$extra="OnMouseOver='swapColor(this,0,0);' OnMouseDown='swapColor(this,1,0);'";
+				$extra = $extra . " style='background:".$cellbgLight.";".$baseStyle."'";
+			break;
         }
 		$addId = "";
 		if($nlineXweekday != ''){

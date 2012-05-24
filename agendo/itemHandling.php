@@ -168,7 +168,7 @@
 							value='Insert Item' 
 							onclick='itemInsertOrRemove()' 
 							title='Inserts the new item'
-							style='margin-top:10px;margin-left:".$marginLeft."px;'
+							style='margin-top:10px;'
 						/>
 					";
 				
@@ -181,39 +181,23 @@
 							value='Remove Item' 
 							onclick='itemInsertOrRemove(true)' 
 							title='Removes the selected item(s)'
-							style='margin-top:20px;margin-left:".$marginLeft."px;'
+							style='margin-top:20px;'
 						/>
 					";
-				$html .= "</td>";
-			$html .= "</tr>";
-				
-			$html .= "<tr>";
-				// Shows the possible states
-				$html .= "<td style='vertical-align:bottom;text-align:right;color:".$color.";'>";
-					$heightAndWidth = 14;
-					$topMargin = 5;
-					$rightMargin = 5;
-					$sql = "select item_state_id, item_state_name from item_state where item_state_id != 3"; // remove the unecessary states in the query here
-					$prep = dbHelp::query($sql);
-					while($row = dbHelp::fetchRowByIndex($prep)){
-						$html .= "<div style='text-align:right;margin-top:".$topMargin."px;'>";
-							$html .= "<label style='margin-right:".$rightMargin."px;'>".$row[1]."</label>";
-							$html .= "<div class='optionState".$row[0]."' style='float:right;width:".$heightAndWidth."px;height:".$heightAndWidth."px;'></div>";
-						$html .= "</div>";
-					}
+
 					$html .= "<br>";
 					
 					$html .= "
-						<label>Select All&nbsp
-							<input type='checkbox' 
-								id='selectAllItemsCheck' 
-								onclick='selectAllItems();' 
-								title='Selects all items that are not in use'
-								style='float:right;'
-							/>
-						</label>
+						<input type='button' 
+							class='buttons'
+							id='uploadButton'
+							value='Import Items' 
+							title='Import items from file and send it as attachment to the resource manager'
+							style='margin-top:20px;'
+							onclick='upload();'
+						/>
 					";
-
+						
 					if($isResp !== false){
 						$html .= "<br>";
 						
@@ -224,85 +208,61 @@
 								value='Back' 
 								onclick='back();' 
 								title='Return to the entry association screen'
-								style='margin-top:10px;margin-left:".$marginLeft."px;'
+								style='margin-top:20px;'
 							/>
 						";
 					}
+					
+				$html .= "</td>";
+			$html .= "</tr>";
+			
+			$html .= "<tr>";
+				// Shows the possible states
+				$html .= "<td style='vertical-align:bottom;text-align:right;color:".$color.";'>";
+					$heightAndWidth = 14;
+					$topMargin = 5;
+					$rightMargin = 5;
+					$sql = "select item_state_id, item_state_name from item_state where item_state_id != 3"; // remove the unecessary states in the query here
+					$prep = dbHelp::query($sql);
+					while($row = dbHelp::fetchRowByIndex($prep)){
+						$html .= "<div style='text-align:right;float:right;margin-left:20px;'>";
+							$html .= "<label style='margin-right:".$rightMargin."px;'>".$row[1]."</label>";
+							$html .= "<div class='optionState".$row[0]."' style='float:right;width:".$heightAndWidth."px;height:".$heightAndWidth."px;'></div>";
+						$html .= "</div>";
+					}
+					$html .= "<br>";
+					
 				$html .= "</td>";
 			$html .= "</tr>";
 				
 			$html .= "<tr>";
+				$html .= "<td style='color:".$color.";text-align:left;'>";
+					$html .= "
+						<label>
+							<input type='checkbox' 
+								id='selectAllItemsCheck' 
+								onclick='selectAllItems();' 
+								title='Selects all items that are not in use'
+							/>
+							&nbspSelect All
+						</label>
+					";
+				$html .= "</td>";
+				
+				$html .= "<td>";
+				$html .= "</td>";
+			$html .= "</tr>";
+
+			$html .= "<tr>";
 				$html .= "<td style='color:".$color.";text-align:center;' colspan='2'>";
 					$html .= "<iframe id='submitIframe' name='submitIframe' style='display:none;'></iframe>";
+
+								// $html .= "<br>";
 					$html .= "
-						<form id='uploadFileForm' onsubmit='upload();' method='post' enctype='multipart/form-data' style='margin:auto;text-align:center;' target='submitIframe'>
+						<form id='uploadFileForm' method='post' enctype='multipart/form-data' style='margin:auto;text-align:center;' target='submitIframe'>
 					";
 							
-						$html .= "
-							<input type='submit' 
-								class='buttons'
-								id='uploadButton'
-								value='Import Items' 
-								title='Import items from file and send it as attachment to the resource manager'
-								style='margin-top:20px;margin-left:10px;float:right;'
-							/>
-						";
-						
-						$html .= "
-							<input type='file'
-								name='file'
-								id='file' 
-								style='margin-top:20px;'
-							/>
-						";
-								
-						$html .= "<br>";
-								
-						$html .= "<div style='margin-top:20px;'>";		
-							$html .= "<div style='float:left;text-align:left;'>";
-								$html .= "
-									<label>
-										Info starts at row:&nbsp
-										<input type='input' 
-											id='lineValue'
-											name='lineValue'
-											value='1' 
-											style='width:20px;'
-										/>
-									</label>
-								";
-
-								$html .= "<br>";
-										
-								$html .= "
-									<label>
-										Info is in column:&nbsp
-										<input type='input' 
-											id='columnValue'
-											name='columnValue'
-											value='0' 
-											style='width:20px;margin-top:5px;'
-										/>
-									</label>
-								";
-								
-							$html .= "</div>";
-							
-							$html .= "<div style='float:right;text-align:right;'>";
-								$html .= "
-									<label title='Email the selected file to the resource manager'>
-										Email&nbsp
-										<input type='checkbox' 
-											id='emailRespCheck' 
-											name='emailRespCheck' 
-											style='margin-top:3px;'
-											checked
-										/>
-									</label>
-								";
-
-								$html .= "<br>";
-										
+					$html .= "<div style='text-align:right;position:relative;'>";
 								$html .= "
 									<label title='Delimiter character used to distinguish columns'>
 										Delimiter:&nbsp
@@ -318,7 +278,61 @@
 										</select>
 									</label>
 								";
-							$html .= "</div>";
+						$html .= "
+							<input type='file'
+								name='file'
+								id='file' 
+							/>
+						";
+					$html .= "</div>";
+								
+						$html .= "<br>";
+								
+						// $html .= "<div style='margin-top:20px;'>";		
+						$html .= "<div style='text-align:left;position:relative;'>";		
+							// $html .= "<div style='float:left;text-align:left;'>";
+								$html .= "
+									<label>
+										Info starts at row:&nbsp
+										<input type='input' 
+											id='lineValue'
+											name='lineValue'
+											value='1' 
+											style='width:20px;'
+										/>
+									</label>
+								";
+
+								// $html .= "<br>";
+								$html .= "&nbsp";
+										
+								$html .= "
+									<label>
+										Info is in column:&nbsp
+										<input type='input' 
+											id='columnValue'
+											name='columnValue'
+											value='0' 
+											style='width:20px;margin-top:5px;'
+										/>
+									</label>
+								";
+								
+						$html .= "
+							<label style='position:absolute;bottom:0px;right:0px;' title='Email the selected file to the resource manager'>
+								<input type='checkbox' 
+									id='emailRespCheck' 
+									name='emailRespCheck' 
+									checked
+								/>
+								&nbspEmail
+							</label>
+						";
+							// $html .= "</div>";
+							
+							// $html .= "<div style='float:right;text-align:right;border:1px solid black;'>";
+
+							// $html .= "</div>";
 						$html .= "</div>";
 					$html .= "</form>";
 				$html .= "</td>";
@@ -714,6 +728,7 @@
 		// wtf($line."--".$column."--".$delimiter);
 		// wtf($_FILES["file"]["type"]);
 		try{
+			ini_set("auto_detect_line_endings", true);
 			if(
 				strpos($_FILES["file"]["type"], "excel") === false
 				&& $_FILES["file"]["type"] != "text/plain"

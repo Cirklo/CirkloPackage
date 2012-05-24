@@ -113,7 +113,6 @@ var interval;
 		}
 	}
 	
-	
 	// Sets the date and resource for use in the getCalendar feature
 	function setDateAndResource(resource, date){
 		dateToUseInGet = date;
