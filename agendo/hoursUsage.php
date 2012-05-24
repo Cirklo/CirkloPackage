@@ -531,7 +531,6 @@
 	
 	function emailDepartments($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $selectedDepartmentsArray){
 		$defaultMailTitle = "Usage report";
-		$from = "[AGENDO]";
 		$message = "The report was sent by attachment as html.";
 		$mansAndDeps = getManagersAndTheirDepartmentsFromDepartmentsList($selectedDepartmentsArray);
 		foreach($mansAndDeps as $man => $deps){
@@ -539,7 +538,7 @@
 			$sql = "select user_email from ".dbHelp::getSchemaName().".user where user_id = :0";
 			$prepMail = dbHelp::query($sql, array($man));
 			$row = dbHelp::fetchRowByIndex($prepMail);
-			$mail = getMailObject($defaultMailTitle, $row[0], $message, $from);
+			$mail = getMailObject($defaultMailTitle, $row[0], $message, "[AGENDO]", "support@cirklo.org");
 			
 			// Adds the content of the xls file to the email as an attachment
 			// $prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isResp, $isAdmin, $isPI, $deps);

@@ -590,7 +590,7 @@
 		return true;
 	}
 	
-	function getMailObject($subject, $address, $message, $replyToPerson, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
+	function getMailObject($subject, $address, $message, $replyToPerson, $replyToPersonMail, $auth = null, $secure = null, $port = null, $host = null, $username = null, $password = null){
 		require_once("../agendo/alert/class.phpmailer.php");
 		$mail = new PHPMailer();
 		
@@ -620,9 +620,10 @@
 			$mail->Password   = $password;
 		}	
 		
-		$mail->SetFrom($mail->Username, $replyToPerson);
+		$mail->SetFrom($mail->Username, "[AGENDO]");
 		$mail->Subject = $subject;
-		$mail->AddReplyTo($mail->Username, $replyToPerson);
+		$mail->ClearReplyTos();
+		$mail->AddReplyTo($replyToPersonMail, $replyToPerson);
 
 		$mail->Body = $message;
 		$mail->AddAddress($address, "");

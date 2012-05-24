@@ -481,7 +481,7 @@
 			// }
 			
 			// sendMail($subject, $address, $message, ($adminFirst." ".$adminLast), false, false, null, $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
-			$mail = getMailObject($subject, $address, $message, ($adminFirst." ".$adminLast), $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
+			$mail = getMailObject($subject, $address, $message, ($adminFirst." ".$adminLast), $adminMail, $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
 			sendMailObject($mail);
 
 			$datumoConstraintsFile = 'DatumoConstraints.sql';

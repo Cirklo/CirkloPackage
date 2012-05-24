@@ -729,13 +729,13 @@
 		// wtf($_FILES["file"]["type"]);
 		try{
 			ini_set("auto_detect_line_endings", true);
-			if(
-				strpos($_FILES["file"]["type"], "excel") === false
-				&& $_FILES["file"]["type"] != "text/plain"
-				&& $_FILES["file"]["type"] != "text/csv"
-			){
-				throw new Exception("Invalid file format");
-			}
+			// if(
+				// strpos($_FILES["file"]["type"], "excel") === false
+				// && $_FILES["file"]["type"] != "text/plain"
+				// && $_FILES["file"]["type"] != "text/csv"
+			// ){
+				// throw new Exception("Invalid file format");
+			// }
 			
 			if($_FILES["file"]["size"] > $maxFileSize){
 				throw new Exception("File too big");
@@ -774,8 +774,8 @@
 
 					$message = "User ".$rowUser[1]." ".$rowUser[2]."(".$rowUser[3].") imported the samples in this file.";
 					$subject = "Item(s) upload for resource '".$rowResp[1]."'";
-					$mailObject = getMailObject($subject, $rowResp[0], $message, $rowUser[0]);
-					$mailObject->AddAttachment($_FILES["file"]["tmp_name"], "itemFile.csv");
+					$mailObject = getMailObject($subject, $rowResp[0], $message, $rowUser[1]." ".$rowUser[2], $rowUser[0]);
+					$mailObject->AddAttachment($_FILES["file"]["tmp_name"], $rowUser[1]."_".$rowUser[2].".csv");
 					sendMailObject($mailObject);
 					$json->message .= " and the selected file was emailed";
 				}

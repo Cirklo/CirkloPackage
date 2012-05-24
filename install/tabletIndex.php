@@ -159,19 +159,19 @@ function cronTask(){
 
 function notifyUserAndResp($resource_name, $usersName, $usersPhoneNumber, $usersPhoneExtension, $usersEmail, $respEmail){
 	$subject = "Resource ".$resource_name." time usage was exceeded"; // $resource_name = resource_name
+	// $replyToPerson = "uicweb@igc.gulbenkian.pt";
+	echo "Resource ".$resource_name." time usage was exceeded by user ".$usersName.".\n";
 	$userMessage = "Resource ".$resource_name." time usage was exceeded and the resource's responsible has been notified."; // $resource_name = resource_name, Add 'blood will be spilled' in the message and give the user a proper beating so he won't do this again.
+	$mail = getMailObject($subject, $usersEmail, $userMessage, "Manager", $respEmail);
+	sendMailObject($mail);
+	
 	$responsibleMessage =  "Resource ".$resource_name." time usage was exceeded by user ".$usersName.".\n" // $resource_name = resource_name, $resData[0] = user first name, $resData[1] = user last name
 							."The user's details are:\n"
 							."Phone number: ".$usersPhoneNumber."\n" // $resData[2] = user Phone number
 							."Phone extension: ".$usersPhoneExtension."\n" // $resData[3] = user Phone extension
 							."Email: ".$usersEmail // $resData[4] = user Email
 							;
-	// $replyToPerson = "uicweb@igc.gulbenkian.pt";
-	echo "Resource ".$resource_name." time usage was exceeded by user ".$usersName.".\n";
-	$replyToPerson = "";
-	$mail = getMailObject($subject,$usersEmail, $userMessage, $replyToPerson);
-	sendMailObject($mail);
-	$mail = getMailObject($subject, $respEmail, $responsibleMessage, $replyToPerson);
+	$mail = getMailObject($subject, $respEmail, $responsibleMessage, $usersName, $usersEmail);
 	sendMailObject($mail);
 }
 
