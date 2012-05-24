@@ -14,6 +14,7 @@
 		$endDate = $_GET['endDate'];
 		$userLevel = $_GET['userLevel'];
 		
+		// show the selected departs as selected when refreshing the page? wont be trivial... make usercheck and other vars as global?
 		$selectedDepartmentsArray = null;
 		if(isset($_GET['departments'])){
 			$selectedDepartmentsArray = json_decode($_GET['departments'], true);

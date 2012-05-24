@@ -396,6 +396,7 @@ function ManageEntries(action,ttime,tresolution) {
  						button_visibility(true,true,true,true,true);
 						document.getElementById('entry').value = 0;
 						document.getElementById('update').value = 0;
+						clear_table(table,false); 
 					} 
 					else if(cell.title!='0' && document.getElementById('addButton').value=='All' && cell.style.backgroundColor==bgcolor2){ // all
                         // window.location.href='weekview.php?resource=' + resource + '&entry=' + cell.title;

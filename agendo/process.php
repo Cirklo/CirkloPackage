@@ -566,16 +566,17 @@
 		$sql = "update entry set entry_status = 1 where entry_id = :0";
 		$resPDO = dbHelp::query($sql, array($entry));
 		if(dbHelp::numberOfRows($resPDO) == 0){
-			throw new Exception("Unable to confirm this entry");
+			throw new Exception("No changes were made to this entry");
 		}
 		
 		// Delete other entries from that day for the same resource, we dont wanna know who was on waiting list?
-		// $sql = "select entry_datetime from entry where entry_id = :0";
-		// $res = dbHelp::query($sql, array($entry));
-		// $arr = dbHelp::fetchRowByIndex($res);
+		// no we dont.... if we do, "we" will have to fix the problem of showing the entry in blue due to having someone in waiting list
+		$sql = "select entry_datetime from entry where entry_id = :0";
+		$res = dbHelp::query($sql, array($entry));
+		$arr = dbHelp::fetchRowByIndex($res);
 
-		// $sql = "delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id <> :0 and entry_resource = :1";
-		// dbHelp::query($sql, array($entry, $resource));
+		$sql = "delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id <> :0 and entry_resource = :1";
+		dbHelp::query($sql, array($entry, $resource));
 		// ******************************************************************************************************
 		
 		$json->message = "Entry Confirmed";

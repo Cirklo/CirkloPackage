@@ -4,7 +4,7 @@
   @copyright 2010-2011 Pedro Pires
   @license http://www.gnu.org/copyleft/lesser.html Distributed under the Lesser General Public License (LGPL)
   @version 1.0
-  @Code used in lots of places and all joined in an artistic way to avoid copy pasting same methods in different places
+  @Code used in lots of places and all joined to avoid copy pasting same methods in different places
 */
 	error_reporting (E_ERROR | E_WARNING | E_PARSE);
 	// Checks if session has started already
@@ -13,6 +13,7 @@
 	}
 	
 	require_once("__dbHelp.php");
+	
 	// Defaults the exception handler
 	exceptionHandling();
 	

@@ -80,6 +80,8 @@ function getUserInfo(){
 	return email;
 }
 
+
+// hmm the complexity is strong with this one
 function textIsNumeric(textToCheck){
 	for(var i = 0; i < textToCheck.length; i++){
 		if(!textIsNumericAux(textToCheck.charAt(i))){

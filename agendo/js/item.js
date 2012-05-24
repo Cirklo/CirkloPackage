@@ -49,22 +49,10 @@ function closeitemInsertDiv(delEntries){
 	if(delEntries && entries){
 		var deleteThemAll = confirm('Do you want to close this screen and delete the added entry(and associated entries)?');
 		if(deleteThemAll){
-			for(i in entries){
-				$.get(
-					"../agendo/process.php"
-					// , {resource: resource, user_id: userLogin, user_passwd: userPass, deleteall: '1', action: 'del', entry: entries[i]}
-					, {resource: resource, user_id: userLogin, user_passwd: userPass, action: 'del', entry: entries[i]}
-					, function(serverData){
-						showMessage(serverData.message, serverData.isError);
-						getCalendar();
-					}
-					, "json")
-				.error(
-					function(errorData){
-						showMessage(errorData.responseText, true);
-					}
-				);
+			for(var i=0; i<entries.length-1; i++){
+				deleteEntry(entries[i], true);
 			}
+			deleteEntry(entries[entries.length-1], false);
 		}
 		else{
 			return;
@@ -78,6 +66,24 @@ function closeitemInsertDiv(delEntries){
 	userLogin = "";
 	userPass = "";
 	getCalendar();
+}
+
+function deleteEntry(entry, dontShowErrorMessage){
+	$.get(
+		"../agendo/process.php"
+		, {resource: resource, user_id: userLogin, user_passwd: userPass, action: 'del', entry: entry}
+		, function(serverData){
+			if(!dontShowErrorMessage || serverData.isError){
+				showMessage(serverData.message, serverData.isError);
+			}
+			getCalendar();
+		}
+		, "json")
+	.error(
+		function(errorData){
+			showMessage(errorData.responseText, true);
+		}
+	);
 }
 
 function itemInsertOrRemove(remove){
@@ -113,12 +119,23 @@ function itemInsertOrRemove(remove){
 		return;
 	}
 	
+	var url = "../agendo/itemHandling.php";
+	if(document.getElementById('asUserList') != null){
+		var asUser = document.getElementById('asUserList').options[document.getElementById('asUserList').selectedIndex].value;
+		url += "?asUser=" + asUser;
+	}
+	
 	$.post(
-		"../agendo/itemHandling.php"
+		url
 		,{action: 'itemInsertOrRemove', 'items[]': items, userLogin: userLogin, userPass: userPass, resource: currentResource, remove: remove}
 		,function(serverData){
 			if(!serverData.isError){
-				fillItemsListOptions(serverData.selectOptions);
+				if(asUser != null){
+					fillSubmittedListFromUser();
+				}
+				else{
+					fillItemsListOptions(serverData.selectOptions);
+				}
 			}
 			showMessage(serverData.message, serverData.isError);
 		}
@@ -168,6 +185,7 @@ function getNewOptionFrom(id, name, state){
 	jsonValue['id'] = id;
 	jsonValue['state'] = state;
 	newOption = new Option(name, JSON.stringify(jsonValue), false, false);
+	newOption.title = name;
 	return newOption;
 }
 
@@ -301,7 +319,7 @@ function newItem(){
 }
 
 function fillSubmittedListFromUser(){
-	if(typeof document.getElementById('asUserList').selectedIndex != "undefined"){
+	if(document.getElementById('asUserList') != null){
 		var asUser = document.getElementById('asUserList').options[document.getElementById('asUserList').selectedIndex].value;
 		$.post(
 			"../agendo/itemHandling.php"
@@ -349,4 +367,98 @@ function done(){
 			showMessage(errorData.responseText, true);
 		}
 	);
+}
+
+// this will stop multiple load functions for the iframe, using onready to create the function wont work because the iframe isnt created yet
+var loadFunctionExists = false;
+function upload(){
+	if(!textIsNumeric(document.getElementById("lineValue").value)){
+		showMessage("Row doesn't have a numeric value", true);
+		return;
+	}
+
+	if(!textIsNumeric(document.getElementById("columnValue").value)){
+		showMessage("Column doesn't have a numeric value", true);
+		return;
+	}
+
+	if(document.getElementById("file").value == ""){
+		showMessage("File not specified", true);
+		return;
+	}
+
+	var confirmMessage = "Are you sure you want to import items from the selected file?";
+	if(document.getElementById('emailRespCheck').checked){
+		confirmMessage = "Are you sure you want to import items from the selected file and email it as an attachment to the resource manager?";
+	}
+	
+	var confirmUpload = confirm(confirmMessage);
+	if(confirmUpload){
+		var action = "../agendo/itemHandling.php?action=upload&resource=" + resource;
+		if(userLogin && userPass){
+			action += "&userLogin=" + userLogin + "&userPass=" + userPass;
+		}
+		
+		document.forms["uploadFileForm"].action = action;
+		document.forms["uploadFileForm"].submit();
+		if(!loadFunctionExists){
+			$('#submitIframe').load(
+				function(){
+					loadFunctionExists = true;
+					var responseText = $('#submitIframe').contents().find('body').html();
+					$('#submitIframe').contents().find('body').html("");
+					
+					if(!responseText){
+						showMessage("No information from server", true);
+						return;
+					}
+					else{
+						var serverDataJson = JSON.parse(responseText);
+						showMessage(serverDataJson.message, serverDataJson.isError);
+						
+						getItems();
+					}
+				}
+			);	
+		}
+	}
+}
+
+function selectAllItems(){
+	var check = document.getElementById('selectAllItemsCheck').check;
+	selectAllItemsAux(!check);
+	document.getElementById('selectAllItemsCheck').check = !check;
+}
+
+function selectAllItemsAux(isSelected){
+	var submittedItems = document.getElementById('submittedItems').options;
+	var jsonValue = {};
+
+	for(var i=0; i<submittedItems.length; i++){
+		jsonValue = JSON.parse(submittedItems[i].value);
+		if(jsonValue['state'] == 1){
+			submittedItems[i].selected = isSelected;
+		}
+	}
+}
+
+function getItems(){
+	$.post(
+		"../agendo/itemHandling.php"
+		,{action: "getItems", userLogin: userLogin, userPass: userPass, resource: currentResource}
+		,function(serverData){
+			if(!serverData.isError){
+				fillItemsListOptions(serverData.items);
+			}
+			else{
+				showMessage(serverData.message, true);
+			}
+		}
+		,"json")
+		.error(
+			function(errorData){
+				showMessage(errorData.responseText, true);
+			}
+		)
+	;
 }
