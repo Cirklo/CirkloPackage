@@ -175,6 +175,7 @@ function button_visibility(add,del,monitor,update,confirm){
 	}
 	
     if (res_status>2 || document.getElementById('update').value!=0){ // in the case there is no need for confirmation button
+    // if (res_status>2){ // in the case there is no need for confirmation button
         document.getElementById('confirmButton').disabled=confirm ;
     } else {
         document.getElementById('confirmButton').disabled=true; 
@@ -187,24 +188,29 @@ function swapColor(obj,tag,action){
     objStyle=obj.style;
     oUpdVal=document.getElementById('update');
     oUpdBut=document.getElementById('updateButton');
+	
     if ((mousedown<10) && (tag==0))return;
-    if (objStyle.backgroundColor!=bgcolor1) {
+	
+    if (objStyle.backgroundColor != bgcolor1) {
         table=document.getElementById('caltable');
         tablesize=table.rows.length;
         // for checking span use table.rows[i].cells[j].rowSpan;
         if (action==1) { // select an existing entry
             // if(oUpdVal && oUpdVal.value!=0){
-				// alert('teste');
 				// return;
 			// }
             clear_table(table);
             document.getElementById('addButton').value='All';
-			if(res_status == 6){
-				button_visibility(false,false,false,false,true);
+			if(res_status > 2){
+				document.getElementById('update').value = document.getElementById('entry').value
 			}
-			else{
+			
+			// if(res_status == 6){
+				// button_visibility(false,false,false,false,true);
+			// }
+			// else{
 	            button_visibility(false,false,false,false,false);
-			}
+			// }
 			selectedEntry = obj.title;
 			if (window.XMLHttpRequest){
 				xmlhttp=new XMLHttpRequest();
@@ -230,8 +236,9 @@ function swapColor(obj,tag,action){
 				for (j=1;j<table.rows[i].cells.length;j++)
 					if (table.rows[i].cells[j].innerHTML!='')
 						table.rows[i].cells[j].style.backgroundColor=table.rows[i].cells[j].lang;
-			if (document.getElementById('update').value==0)
+			if (document.getElementById('update').value==0){
 				button_visibility(false,true,true,true,true);
+			}
         }
         objStyle.backgroundColor='#aaaaaa';
         bgcolor1=objStyle.backgroundColor;
@@ -419,7 +426,7 @@ function ManageEntries(action,ttime,tresolution) {
 							document.getElementById('entry').value = cell.title;
 							document.getElementById('update').value = cell.title;
 							getCalendar(cell.title, 'update');
-							init();
+							init(res_status, res_maxslots);
 							return;
                        }
                     }
@@ -736,7 +743,7 @@ function filljscombo(tagname,start,end,resolution,selection,entry){
     document.getElementById(tagname).disabled=dis;
 }
 
-function init(s,m){
+function init(s,m){ // s = res_status, m = res_maxslots
 	if(document.getElementById('enddate') != null){
 		document.getElementById('enddate').value = formatDate(curDate,"yyyy-M-dd");
 		if (document.getElementById('entry').value!='0') {

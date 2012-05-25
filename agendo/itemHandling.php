@@ -709,6 +709,9 @@
 		
 		$sql = "update entry, item, item_assoc set entry_status = 1, item_state = 3 where entry_id in ".$inSql['inData']." and item_assoc_entry = entry_id and item_id = item_assoc_item";
 		$prep = dbHelp::query($sql, $entries);
+		if(dbHelp::numberOfRows($prep) == 0){
+			throw new Exception("No changes were made to the entry(ies)");
+		}
 		
 		return "Entry(ies) confirmed";
 	}

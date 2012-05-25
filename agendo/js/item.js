@@ -352,6 +352,10 @@ function back(){
 }
 
 function done(){
+	if(selectedEntry){
+		entries[entries.length] = selectedEntry;
+	}
+	
 	$.post(
 		"../agendo/itemHandling.php"
 		, {action: 'done', 'entries[]': entries, userLogin: userLogin, userPass: userPass, resource: resource}

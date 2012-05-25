@@ -550,11 +550,11 @@
 		$macChecksOut = $_GET['mac'];
 
 		$perm = new permClass;
-		if (!$perm->setPermission($user_id,$resource,$user_passwd)){
+		if(!$perm->setPermission($user_id,$resource,$user_passwd)){
 			throw new Exception($perm->getWarning());
 		}
 		
-		if ($perm->getResourceStatus() == 4 && $perm->getWasAdmin()){
+		if($perm->getResourceStatus() == 4 && $perm->getWasAdmin()){
 			$notify = new alert($resource);
 			$notify->setEntry($entry);
 			$notify->fromAdmin('confirm');
