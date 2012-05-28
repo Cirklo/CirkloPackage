@@ -463,19 +463,19 @@
 			/>
 		";
 	
-		$html .= "<br>";
+		// $html .= "<br>";
 		
-		$html .= "
-			<input 
-				class='buttons' 
-				type='button' 
-				id='doneButton' 
-				onclick='done();' 
-				value='Done' 
-				title='Changes the state of the entry to confirmed and closes this menu'
-				style='margin:auto;margin-top:".$marginTop."px;'
-			/>
-		";
+		// $html .= "
+			// <input 
+				// class='buttons' 
+				// type='button' 
+				// id='doneButton' 
+				// onclick='done();' 
+				// value='Confirm' 
+				// title='Changes the state of the entry to confirmed and closes this menu'
+				// style='margin:auto;margin-top:".$marginTop."px;'
+			// />
+		// ";
 		
 		$html .= "<br>";
 		
@@ -707,31 +707,29 @@
 			throw new Exception("Couldn't get entries");
 		}
 		
-		$sql = "update entry, item, item_assoc set entry_status = 1, item_state = 3 where entry_id in ".$inSql['inData']." and item_assoc_entry = entry_id and item_id = item_assoc_item";
+		// sets the entry as confirmed
+		$sql = "update entry set entry_status = 1 where entry_id in ".$inSql['inData'];
 		$prep = dbHelp::query($sql, $entries);
 		if(dbHelp::numberOfRows($prep) == 0){
 			throw new Exception("No changes were made to the entry(ies)");
 		}
 		
+		// sets the items as used
+		$sql = "update item, item_assoc set item_state = 3 where item_assoc_entry in ".$inSql['inData']." and item_id = item_assoc_item";
+		$prep = dbHelp::query($sql, $entries);
+
 		return "Entry(ies) confirmed";
 	}
 	
 	function upload($line, $column, $delimiter, $userId, $resource, $emailRespCheck, $isResp, $asUser){
 		$maxFileSize = 100000; // bytes
-		// wtf('-----', 'a');
-		// foreach($_FILES['file'] as $postInfo){
-			// wtf($postInfo, 'a');
-		// }
-		
-		// wtf('-----');
-		// foreach($_POST as $postInfo){
-			// wtf($postInfo, 'a');
-		// }
-		
-		// wtf($line."--".$column."--".$delimiter);
-		// wtf($_FILES["file"]["type"]);
+
+		// try catch needed here due to an iframe being used
 		try{
+			// mac fix for line end problems
 			ini_set("auto_detect_line_endings", true);
+			
+			// mimetype filtering disabled for now, possible security issues?
 			// if(
 				// strpos($_FILES["file"]["type"], "excel") === false
 				// && $_FILES["file"]["type"] != "text/plain"
