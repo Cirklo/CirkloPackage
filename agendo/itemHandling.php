@@ -23,7 +23,7 @@
 	
 		$isResp = isResp($userId, $resource);
 		if(!hasPermission($userId, $resource) && $isResp === false){
-			throw new Exception('User doesn\'t have permission for this action');
+			throw new Exception("User does not have permission for this action");
 		}
 	
 		switch($action){
@@ -56,14 +56,14 @@
 			
 			case "updateSubmittedList":
 				if($isResp === false){
-					throw new Exception('User doesn\'t have permission for this action');
+					throw new Exception("User does not have permission for this action");
 				}
 				$json->selectOptions = updateSubmittedList($_POST['asUser'], $resource);
 			break;
 
 			case "done":
 				if($isResp === false){
-					throw new Exception('User doesn\'t have permission for this action');
+					throw new Exception("User does not have permission for this action");
 				}
 				$json->message = done($_POST['entries']);
 			break;
@@ -256,6 +256,7 @@
 			$html .= "<tr>";
 				$html .= "<td style='color:".$color.";text-align:center;' colspan='2'>";
 					$html .= "<iframe id='submitIframe' name='submitIframe' style='display:none;'></iframe>";
+					// $html .= "<iframe id='submitIframe' name='submitIframe'></iframe>";
 
 								// $html .= "<br>";
 					$html .= "
