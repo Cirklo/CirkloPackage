@@ -71,7 +71,7 @@ function closeitemInsertDiv(delEntries){
 function deleteEntry(entry, dontShowErrorMessage){
 	$.get(
 		"../agendo/process.php"
-		, {resource: resource, user_id: userLogin, user_passwd: userPass, action: 'del', entry: entry}
+		, {resource: currentResource, user_id: userLogin, user_passwd: userPass, action: 'del', entry: entry}
 		, function(serverData){
 			if(!dontShowErrorMessage || serverData.isError){
 				showMessage(serverData.message, serverData.isError);
@@ -219,7 +219,7 @@ function saveItemList(){
 		$.post(
 			"../agendo/itemHandling.php"
 			// , {'entries[]': entries, 'items[]': items, action: 'associateEntriesAndItems', userLogin: userLogin, userPass: userPass, resource: resource}
-			, {action: 'associateEntriesAndItems', 'entries[]': entries, items: JSON.stringify(items), userLogin: userLogin, userPass: userPass, resource: resource}
+			, {action: 'associateEntriesAndItems', 'entries[]': entries, items: JSON.stringify(items), userLogin: userLogin, userPass: userPass, resource: currentResource}
 			, function(serverData){
 				showMessage(serverData.message, serverData.isError);
 			}
@@ -289,7 +289,7 @@ function emailUsersFromItems(){
 	
 	$.post(
 		"../agendo/itemHandling.php"
-		, {action: "emailUsersFromItems", 'items[]': selectedList, userLogin: userLogin, userPass: userPass, resource: resource}
+		, {action: "emailUsersFromItems", 'items[]': selectedList, userLogin: userLogin, userPass: userPass, resource: currentResource}
 		, function(serverData){
 			if(serverData.isError){
 				showMessage(serverData.message, true);
@@ -323,7 +323,7 @@ function fillSubmittedListFromUser(){
 		var asUser = document.getElementById('asUserList').options[document.getElementById('asUserList').selectedIndex].value;
 		$.post(
 			"../agendo/itemHandling.php"
-			, {action: 'updateSubmittedList', userLogin: userLogin, userPass: userPass, resource: resource, asUser: asUser}
+			, {action: 'updateSubmittedList', userLogin: userLogin, userPass: userPass, resource: currentResource, asUser: asUser}
 			, function(serverData){
 				if(serverData.isError){
 					showMessage(serverData.message, true);
@@ -358,7 +358,7 @@ function done(){
 	
 	$.post(
 		"../agendo/itemHandling.php"
-		, {action: 'done', 'entries[]': entries, userLogin: userLogin, userPass: userPass, resource: resource}
+		, {action: 'done', 'entries[]': entries, userLogin: userLogin, userPass: userPass, resource: currentResource}
 		, function(serverData){
 			showMessage(serverData.message, serverData.isError);
 			closeitemInsertDiv();
@@ -398,7 +398,7 @@ function upload(){
 	
 	var confirmUpload = confirm(confirmMessage);
 	if(confirmUpload){
-		var action = "../agendo/itemHandling.php?action=upload&resource=" + resource;
+		var action = "../agendo/itemHandling.php?action=upload&resource=" + currentResource;
 		if(userLogin && userPass){
 			action += "&userLogin=" + userLogin + "&userPass=" + userPass;
 		}
