@@ -457,6 +457,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 				
 					$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'inline-table';
 					$tdButtonsDisplay = 'table-row';
+					$confirmButtonOnclick = "ManageEntries('confirm');"; // default confirm action
 					// Used to hide buttons
 					if(!$imResstatus5){
 					//**********************
@@ -571,7 +572,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 							require_once("../agendo/itemHandling.php");
 							if($calendar->isResp()){
 								$buttonDisplay2 = 'none';
-								$restatus6EditButton = "<input type=button disabled id='editItemsButton' class='bu' title='Allows the editing of items in the entry' value='Edit' onClick=\"editEntryItems(".$resource.");\" />";
+								$restatus6EditButton = "<input type=button disabled id='editItemsButton' class='bu' title='Allows the editing of items in the entry' value='Edit' onclick=\"editEntryItems(".$resource.");\" />";
+								$confirmButtonOnclick = "done();";
 							}
 							// elseif(hasPermission($_SESSION['user_id'], $resource)){
 							else{
@@ -579,30 +581,30 @@ echo "<table id='master' style='margin:auto' width=750>";
 								$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
 								echo "<tr>";
 									echo "<td colspan=2 style='text-align:center;'>";
-										echo "<input type='button' id='addItemButton' class='bu' title='Press to add/remove items' value='Add/Remove items' onClick='itemInsertShowDivAndCheckUser(".$resource.", \"itemInsertHtml\");' />";
+										echo "<input type='button' id='addItemButton' class='bu' title='Press to add/remove items' value='Add/Remove items' onclick='itemInsertShowDivAndCheckUser(".$resource.", \"itemInsertHtml\");' />";
 									echo "</td>";
 								echo "</tr>";
 								
 								echo "<tr><td colspan=2><hr></td></tr>";
 							}
 						}
-					// Used to hide buttons
 					}
-					else{
+					else{ // Used to hide buttons
 						$tdButtonsDisplay = 'none';
 						$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
 					}
 					//*********************
 					echo "<tr style='display:".$tdButtonsDisplay.";' ><td colspan=2 align='center'>";
-						echo "<input type=button style='width:40px;display:".$buttonDisplay1.";' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\" />";
+						echo "<input type=button style='width:40px;display:".$buttonDisplay1.";' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onclick=\"ManageEntries('del');\" />";
 						// This is rather horrible old chap, is there a better way to do this without rewritting the whole weekview.php?
 						echo $restatus6EditButton;
-						echo "<input type=button style='width:60px;display:".$buttonDisplay2.";' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\" />";
-						echo "<input type=button style='width:40px;display:".$buttonDisplay3.";' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" /><br>";
-						echo "<input type=button style='width:70px;display:".$buttonDisplay4.";' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" />";
-						echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\" />";
+						echo "<input type=button style='width:60px;display:".$buttonDisplay2.";' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onclick=\"ManageEntries('monitor');\" />";
+						echo "<input type=button style='width:40px;display:".$buttonDisplay3.";' onkeypress='return noenter()' id=addButton class=bu value='Add' onclick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" /><br>";
+						echo "<input type=button style='width:70px;display:".$buttonDisplay4.";' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onclick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" />";
+						echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onclick=\"".$confirmButtonOnclick."\" />";
+						// echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onclick=\"ManageEntries('confirm');\" />";
 					echo "</td></tr>";
-				
+
 					echo "<tr style='display:".$tdButtonsDisplay.";'><td colspan=2;><hr></td></tr>";
 				echo "</table>";
 				
