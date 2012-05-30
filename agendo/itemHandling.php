@@ -771,7 +771,7 @@
 					$rowUser = dbHelp::fetchRowByIndex($prep);
 
 					$sql = "select user_email, resource_name from ".dbHelp::getSchemaName().".user, resource where user_id = resource_resp and resource_id = :0";
-					$prep = dbHelp::query($sql, array($userId));
+					$prep = dbHelp::query($sql, array($resource));
 					$rowResp = dbHelp::fetchRowByIndex($prep);
 
 					$message = "User ".$rowUser[1]." ".$rowUser[2]."(".$rowUser[3].") imported the samples in this file.";

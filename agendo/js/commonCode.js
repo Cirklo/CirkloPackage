@@ -205,9 +205,10 @@ function showMessage(msg, isError){
 			// }
 		// );
 	// }
-	if(typeof msg !== "undefined" && msg !== ''){ // wont do anything if the message isnt set or is empty
+	if(typeof msg !== "undefined" && msg != null && msg !== ''){ // wont do anything if the message isnt set or is empty
 		if(isError){ // what should happen is its an error message
-			$(document).ready(function(){
+			$(document).ready(
+				function(){
 					jError(msg,
 						{
 							autoHide : false // added in v2.0

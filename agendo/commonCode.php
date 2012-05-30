@@ -646,7 +646,7 @@
 		ob_end_clean();
 
 		if($result === false){
-			throw new Exception($exceptionMessage." ".$echoStr);
+			throw new Exception($exceptionMessage."\n".strip_tags($echoStr));
 		}
 	}
 	
