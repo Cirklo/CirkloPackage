@@ -405,7 +405,7 @@ function upload(){
 		
 		document.forms["uploadFileForm"].action = action;
 		document.forms["uploadFileForm"].submit();
-		if(!loadFunctionExists){
+		if(loadFunctionExists === false){
 			$('#submitIframe').load(
 				function(){
 					loadFunctionExists = true;
