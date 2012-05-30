@@ -238,9 +238,10 @@ END:VCALENDAR";
 			$this->AddAddress($this->RespEmail, "");
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\nEmail: ". $this->UserEmail ."\nMobile: ".$this->UserMobile ."\n".$mobileStr;
-            if(!$this->Send()) {
+            if(!$this->Send()){
                 // echo "Mailer Error: " . $this->ErrorInfo;
-                echo "Unable to send email: " . $this->ErrorInfo;
+               echo "Unable to send email: " . $this->ErrorInfo;
+               // throw new Exception ("Unable to send email: " . $this->ErrorInfo);
             } 
 			// else {
                 // echo "Message sent!";

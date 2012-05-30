@@ -595,8 +595,8 @@
 		
 		if ($comments != ''){
 			$sql="update entry set entry_comments= :0 where entry_id= :1";
-			dbHelp::query($sql, array($comments, $entry));
-			if($notify->getResourceResp() != $user_id){
+			$prep = dbHelp::query($sql, array($comments, $entry));
+			if($notify->getResourceResp() != $user_id && dbHelp::numberOfRows($prep) > 0){
 				$notify->toAdmin(date("YmdHi"),'','comment',$comments);
 			}
 			$json->message = "Comment added";
