@@ -436,6 +436,12 @@
 				$row = dbHelp::fetchRowByIndex($prep);
 				$departments = $row[0];
 				$whereDepartment = "user_id = entry_user and user_dep = ".$departments." and department_id = user_dep";
+				
+				// just a regular user
+				if($isResp === false){
+					$selectedDepartmentsArray = array($departments, $_SESSION['user_id']);
+					$selectedDepartmentsSql = " and department_id = :0 and entry_user = :1";
+				}
 			}
 			else{
 				$departments = implode(",", $isPI);
