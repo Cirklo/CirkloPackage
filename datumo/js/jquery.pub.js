@@ -7,6 +7,9 @@ $(document).ready(function(){
 	var time=10000; 
 	//get script name
 	filename=getUrlName();
+	//initialize this var
+	var url = "";
+	
 	//distinguish between Agendo and Datumo (need to find a better way to do this)
 	if(filename=="weekview.php"){
 		//set correct path to pub script
