@@ -498,7 +498,7 @@
 			$sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
 					(1, :0, :1, :2, :3, 1, :4, :5, :6, :7, 1, 0)";
 			dbHelp::query($sql, array_slice($dataArray,0,8));	
-			
+		
 			// $sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
 					// (1, '".$institute."', '".$instituteAddress."', '".$institutePhone."', ".$instituteCountry.", 0)";
 			// dbHelp::query($sql);	
@@ -553,12 +553,12 @@
 					(10,'publicity', '0'),
 					(14,'timezone', :9)";
 			dbHelp::query($sql, array($institute, $instituteShort, $instituteUrl, $instituteHost, $institutePort, $institutePass, $instituteMail, $instituteSecure, $instituteAuth, $timezone));	
-					
+
 			dbHelp::scriptRead($sqlDatumoConstraints);
 			copyFolderTo('pics', $_SESSION['path']."/pics");
 			copyFolderTo('admin', $_SESSION['path']."/admin");
 			copyFolderTo('tablet', $_SESSION['path']."/tablet");
-			
+		
 //******* .htaccess ***********
 			if(($fileData = file_get_contents($_SESSION['path']."/admin/.htaccess")) == false){
 				throw new Exception("Wasn't able to open '.htaccess'.");

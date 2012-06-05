@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `price` (
   `price_resource` int(11) DEFAULT NULL,
   `price_type` int(11) DEFAULT NULL,
   PRIMARY KEY (`price_id`),
-  KEY `price_equip` (`price_resource`),
+  KEY `price_resource` (`price_resource`),
   KEY `price_type` (`price_type`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
@@ -351,6 +351,7 @@ INSERT INTO `pricetype` (`pricetype_id`, `pricetype_name`) VALUES
 (2, 'Academic'),
 (3, 'Campus'),
 (4, 'Comercial');
+
 
 --
 -- Table structure for table `repetition`

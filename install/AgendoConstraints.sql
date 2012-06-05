@@ -10,6 +10,13 @@ ALTER TABLE `announcement`
 
 
 --
+-- Limitadores para a tabela `institute`
+--
+ALTER TABLE `institute`
+  ADD CONSTRAINT `institute_ibfk_2` FOREIGN KEY (`institute_pricetype`) REFERENCES `pricetype` (`pricetype_id`);
+
+  
+--
 -- Constraints for table `item`
 --
 ALTER TABLE `item`
@@ -71,9 +78,10 @@ ALTER TABLE `pics`
 --
 ALTER TABLE `price`
   ADD CONSTRAINT `price_ibfk_6` FOREIGN KEY (`price_resource`) REFERENCES `resource` (`resource_id`),
-  ADD CONSTRAINT `price_ibfk_7` FOREIGN KEY (`price_type`) REFERENCES `pricetype` (`pricetype_id`);--
+  ADD CONSTRAINT `price_ibfk_7` FOREIGN KEY (`price_type`) REFERENCES `pricetype` (`pricetype_id`);
 
---
+
+  --
 -- Limitadores para a tabela `pubref`
 --
 ALTER TABLE `pubref`

@@ -1025,9 +1025,11 @@ CREATE TABLE IF NOT EXISTS `institute` (
   `institute_phone` int(11) DEFAULT NULL,
   `institute_country` int(11) NOT NULL,
   `institute_vat` int(11) DEFAULT NULL,
+  `institute_pricetype` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`institute_id`),
   KEY `institute_country` (`institute_country`),
-  KEY `institute_country_2` (`institute_country`)
+  KEY `institute_country_2` (`institute_country`),
+  KEY `institute_price_type` (`institute_pricetype`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=2 ;
 
 
@@ -1126,8 +1128,7 @@ INSERT INTO `menu` (`menu_id`, `menu_name`, `menu_description`, `menu_plugin`, `
 (1, 'My Calendar', 'Personal calendar', 1, 'mycalendar.php'),
 (2, 'Image upload', 'Resource image uploader', 1, 'resupload.php'),
 (3, 'Reservations', 'Return to reservation system', 1, '../pathMarker/index.php'),
-(4, 'Check in', 'Set up resource for local confirmation', 1, '../pathMarker/admin/cookie.php'),
-(5, 'Mailing', 'Mailing list tool', 1, 'mailing.php');
+(4, 'Mailing', 'Mailing list tool', 1, 'mailing.php');
 
 
 -- --------------------------------------------------------

@@ -24,7 +24,6 @@ ALTER TABLE `department`
 ALTER TABLE `institute`
   ADD CONSTRAINT `institute_ibfk_1` FOREIGN KEY (`institute_country`) REFERENCES `country` (`country_id`);
 
-
 --
 -- Limitadores para a tabela `menu`
 --

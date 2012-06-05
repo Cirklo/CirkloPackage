@@ -145,3 +145,8 @@ ALTER TABLE `item_assoc`
 UPDATE configParams SET configParams_value='1.5.7' WHERE configParams_name='AgendoVersion';
 --------------
 
+
+-- 2012-06-04
+-- new type of xfield, doesnt need to be filled
+INSERT INTO `xfieldsinputtype` (`xfieldsinputtype_id`, `xfieldsinputtype_type`) VALUES
+(5, 'EmptyAllowedText');

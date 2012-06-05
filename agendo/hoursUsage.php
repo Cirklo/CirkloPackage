@@ -223,7 +223,13 @@
 		echo "<div id='resultsDiv' style='margin:auto;width:800;text-align:center;'>";
 			if($beginDate != "" && $endDate != ""){
 				$prep = generatePrep($userCheck, $resourceCheck, $entryCheck, $beginDate, $endDate, $isRespTemp, $isAdminTemp, $isPITemp, $selectedDepartmentsArray);
-				echo generateHtmlResults($prep, $userCheck, $resourceCheck, $entryCheck, ($isAdmin || $isPI != false || $isResp != false));
+				if(dbHelp::numberOfRows($prep) != 0){
+					echo generateHtmlResults($prep, $userCheck, $resourceCheck, $entryCheck, ($isAdmin || $isPI != false || $isResp != false));
+					showMsg('Report generated');
+				}
+				else{
+					showMsg('No results were found', true);
+				}
 			}
 		echo "</div>";
 		
@@ -532,6 +538,7 @@
 				".$userGroupBy."
 				".$entryGroupBy."
 		";
+		
 		return dbHelp::query($sql, $selectedDepartmentsArray);
 	}
 	
