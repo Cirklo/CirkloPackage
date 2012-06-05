@@ -43,6 +43,9 @@ $(document).ready(function(){
  */
 
 function clickPub(id,outlink){
+	//initialize this var
+	var url = "";
+	
 	filename=getUrlName();
 	//distinguish between Agendo and Datumo (need to find a better way to do this)
 	if(filename=="weekview.php"){	url="../datumo/pub.php?count"; } 
