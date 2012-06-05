@@ -212,7 +212,8 @@ function showMessage(msg, isError){
 					jError(msg,
 						{
 							autoHide : false // added in v2.0
-							,clickOverlay : true // added in v2.0
+							// ,clickOverlay : true // added in v2.0
+							,ShowOverlay : false
 						}
 					);
 				}
@@ -230,7 +231,7 @@ function showMessage(msg, isError){
 							// ,LongTrip :20
 							// ,HorizontalPosition : 'center'
 							// ,VerticalPosition : 'top'
-							// ,ShowOverlay : true
+							,ShowOverlay : false
 							// ,ColorOverlay : '#000'
 							// ,OpacityOverlay : 0.3
 						}
