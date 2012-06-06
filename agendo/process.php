@@ -566,8 +566,13 @@
 		$sql = "update entry set entry_status = 1 where entry_id = :0";
 		$resPDO = dbHelp::query($sql, array($entry));
 		if(dbHelp::numberOfRows($resPDO) == 0){
-			throw new Exception("No changes were made to this entry");
-		}
+			// theres really no need for this
+			// throw new Exception("No changes were made to this entry");
+			// this is an ugly patch until i merge the addcomments method and this method
+			$json->message = "";
+			echo json_encode($json);
+			return;
+	}
 		
 		// Delete other entries from that day for the same resource, we dont wanna know who was on waiting list?
 		// no we dont.... if we do, "we" will have to fix the problem of showing the entry in blue due to having someone in waiting list
@@ -583,6 +588,7 @@
 		echo json_encode($json);
 	}
 
+	// merge this method with the confirm one?
 	function addcomments(){
 		$resource=cleanValue($_GET['resource']);
 		$entry=cleanValue($_GET['entry']);
@@ -594,11 +600,13 @@
 		$notify->setUser($user_id);
 		
 		if ($comments != ''){
+			// this is quite bad, it allows for comments to be changed over and over again
 			$sql="update entry set entry_comments= :0 where entry_id= :1";
 			$prep = dbHelp::query($sql, array($comments, $entry));
 			if($notify->getResourceResp() != $user_id && dbHelp::numberOfRows($prep) > 0){
 				$notify->toAdmin(date("YmdHi"),'','comment',$comments);
 			}
+			// this is ignored
 			$json->message = "Comment added";
 			echo json_encode($json);
 		}

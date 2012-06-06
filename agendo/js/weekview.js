@@ -323,7 +323,6 @@ function ManageEntries(action,ttime,tresolution) {
         case 'add':
             var arr=new Array(); // creates an array to define cells with rowspan>1
 			var getAssistance = document.getElementById('assistance').checked;
-			var numberOfEntries = 0;
 
             if (update>0){ // for the update it has to send the entry
 				document.getElementById('entry').value=update;
@@ -336,15 +335,26 @@ function ManageEntries(action,ttime,tresolution) {
 				document.getElementById('confirmButton').value = confirmValue;
 				// document.getElementById('entry').value=document.getElementById('update').value = "0";
 			}
+			
+			// fills the array
             for(i=1;i<=tablesize;i++){
                 arr[i]= new Array();
-                for (j=1;j<8;j++) arr[i][j]=0; // fills the array
+                for (j=1;j<8;j++)
+					arr[i][j]=0; 
             }
+			
             for(i=1;i<tablesize;i++){
                 for(j=1;j<table.rows[i].cells.length;j++){
                     span=table.rows[i].cells[j].rowSpan;
-                    for (x=1;x<=(j+add);x++) add=arr[i][x]+add;
-                    if (span>1) for (k=i+1 ;k<i+span;k++) arr[k][j+add]=1; // sets to 1 the fields without
+					
+                    for (x=1;x<=(j+add);x++)
+						add=arr[i][x]+add;
+						
+					// sets to 1 the fields without
+                    if (span>1) 
+						for (k=i+1 ;k<i+span;k++)
+							arr[k][j+add]=1; 
+							
                     add=0; 
                 }
                 k=0;
@@ -360,7 +370,7 @@ function ManageEntries(action,ttime,tresolution) {
 					}
 					
                     cell=table.rows[i].cells[j-add];
-                    if(cell.style.backgroundColor==bgcolor && cell.title=='0'){ // if the cell is white colored and their title is 0, meaning its an empty entry
+                    if(cell.style.backgroundColor==bgcolor && cell.title=='0'){ // if the cell is white colored and their title is 0, means its an empty cell
                         while(table.rows[i+k].cells[j-add].style.backgroundColor==bgcolor && ((i+k) < tablesize)){
                             add=0;
                             seed=seed+1;
@@ -370,7 +380,7 @@ function ManageEntries(action,ttime,tresolution) {
 								add=arr[i+k][x]+add;
 							}
 							
-                            table.rows[i+k].cells[j-add].title=seed; // due to rowspan
+                            table.rows[i+k].cells[j-add].title = seed; // due to rowspan
                             k=k+1;
                             if ((i+k)==tablesize){
 								break;
