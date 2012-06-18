@@ -18,12 +18,12 @@ function setWidth(divId, width){
 	// }
 }
 
-var resource = false;
+var resourceId = false;
 var date;
 function setResourceAndDate(zeeDate, res){
 	date = zeeDate;
 	if(res != false){
-		resource = res;
+		resourceId = res;
 	}
 }
 
@@ -47,7 +47,7 @@ function getTableData(){
 		if($('#userCheck').attr('checked')){
 			url += "&userLogged";
 		}
-		url += "&resource=" + resource;
+		url += "&resource=" + resourceId;
 		if($('#similarCheck').attr('checked')){
 			url += "&simEquip";
 		}

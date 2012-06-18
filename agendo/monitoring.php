@@ -13,14 +13,12 @@
 		$user = (int)$_SESSION['user_id'];
 	}
 	
-	if(isset($_GET['date'])){
-		// $date = date('Ymd', strtotime($_GET['date']));
-		// if(!isset($_GET['gimmeGroupViewData'])){
-			$date = date('Ymd', strtotime(" +1 days", strtotime($_GET['date'])));
-		// }
+	$dateString = strtotime($_GET['date']);
+	if($dateString === false){
+		$date = date('Ymd');
 	}
 	else{
-		$date = date('Ymd');
+		$date = date('Ymd', strtotime(" +1 days", strtotime($_GET['date'])));
 	}
 	
 	define('simEquip', isset($_GET['simEquip']));
@@ -74,7 +72,9 @@
 	importJs();
 	echo "<script type='text/javascript' src='../agendo/js/monitoring.js'></script>";
 	echo "<link href='../agendo/css/monitoring.css' rel='stylesheet' type='text/css' />";
-	echo  "<script type='text/javascript'>setResourceAndDate('".$date."', '".$resource."');</script>";
+	if($resource !== false){
+		echo  "<script type='text/javascript'>setResourceAndDate('".$date."', '".$resource."');</script>";
+	}
 	
 	if(isset($_GET['class']) && $_GET['class'] != 0){
 		echo  "<script type='text/javascript'>setClass(".$_GET['class'].");</script>";
@@ -218,7 +218,7 @@
 			order by
 				resource_name
 		";
-		
+
 		$prep = dbHelp::query($sql);
 		if(dbHelp::numberOfRows($prep) > 0){
 			while($row = dbHelp::fetchRowByName($prep)){
