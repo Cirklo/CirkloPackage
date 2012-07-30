@@ -571,8 +571,7 @@
 		$resFlag=dbHelp::query($sqlFlag);
 		$arrFlag=dbHelp::fetchRowByIndex($resFlag);
 		if($arrFlag[0] == '1'){
-			// if(isset($_SESSION['user_name']) && $_SESSION['user_name'] != ''){
-			if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){ // again, wtf??
+			if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){
 				return true;
 			}
 			

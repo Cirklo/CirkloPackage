@@ -65,6 +65,8 @@ ALTER TABLE `permissions`
   ADD CONSTRAINT `permissions_ibfk_5` FOREIGN KEY (`permissions_resource`) REFERENCES `resource` (`resource_id`),
   ADD CONSTRAINT `permissions_ibfk_6` FOREIGN KEY (`permissions_level`) REFERENCES `permlevel` (`permlevel_id`),
   ADD CONSTRAINT `permissions_ibfk_7` FOREIGN KEY (`permissions_training`) REFERENCES `bool` (`bool_id`);
+  
+ALTER TABLE permissions add unique (`permissions_user`, `permissions_resource`);
 
 --
 -- constraints for table `pics`
