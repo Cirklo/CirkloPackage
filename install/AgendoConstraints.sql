@@ -8,7 +8,14 @@
 ALTER TABLE `announcement`
   ADD CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`announcement_object`) REFERENCES `resource` (`resource_id`);
 
-
+  
+--
+-- Constraints for table `blacklist`
+--
+ALTER TABLE `blacklist`
+  ADD CONSTRAINT `blacklist_ibfk_1` FOREIGN KEY (`blacklist_user`) REFERENCES `user` (`user_id`);
+  
+  
 --
 -- Limitadores para a tabela `institute`
 --
@@ -40,7 +47,8 @@ ALTER TABLE `entry`
   ADD CONSTRAINT `entry_ibfk_10` FOREIGN KEY (`entry_user`) REFERENCES `user` (`user_id`),
   ADD CONSTRAINT `entry_ibfk_11` FOREIGN KEY (`entry_repeat`) REFERENCES `repetition` (`repetition_id`),
   ADD CONSTRAINT `entry_ibfk_12` FOREIGN KEY (`entry_status`) REFERENCES `status` (`status_id`),
-  ADD CONSTRAINT `entry_ibfk_13` FOREIGN KEY (`entry_resource`) REFERENCES `resource` (`resource_id`);
+  ADD CONSTRAINT `entry_ibfk_13` FOREIGN KEY (`entry_resource`) REFERENCES `resource` (`resource_id`),
+  ADD CONSTRAINT `entry_ibfk_14` FOREIGN KEY (`entry_project`) REFERENCES `project` (`project_id`);
 
 --
 -- Constraints for table `equip`
@@ -64,7 +72,8 @@ ALTER TABLE `permissions`
   ADD CONSTRAINT `permissions_ibfk_4` FOREIGN KEY (`permissions_user`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `permissions_ibfk_5` FOREIGN KEY (`permissions_resource`) REFERENCES `resource` (`resource_id`),
   ADD CONSTRAINT `permissions_ibfk_6` FOREIGN KEY (`permissions_level`) REFERENCES `permlevel` (`permlevel_id`),
-  ADD CONSTRAINT `permissions_ibfk_7` FOREIGN KEY (`permissions_training`) REFERENCES `bool` (`bool_id`);
+  ADD CONSTRAINT `permissions_ibfk_7` FOREIGN KEY (`permissions_training`) REFERENCES `bool` (`bool_id`),
+  ADD CONSTRAINT `permissions_ibfk_8` FOREIGN KEY (`permissions_project_default`) REFERENCES `project` (`project_id`);
   
 ALTER TABLE permissions add unique (`permissions_user`, `permissions_resource`);
 
@@ -83,7 +92,24 @@ ALTER TABLE `price`
   ADD CONSTRAINT `price_ibfk_7` FOREIGN KEY (`price_type`) REFERENCES `pricetype` (`pricetype_id`);
 
 
-  --
+--
+-- Constraints for table `proj_dep_assoc`
+--
+ALTER TABLE `proj_dep_assoc`
+  ADD CONSTRAINT `proj_dep_assoc_ibfk_1` FOREIGN KEY (`proj_dep_assoc_project`) REFERENCES `project` (`project_id`),
+  ADD CONSTRAINT `proj_dep_assoc_ibfk_2` FOREIGN KEY (`proj_dep_assoc_department`) REFERENCES `department` (`department_id`);
+  
+ALTER TABLE proj_dep_assoc ADD UNIQUE (proj_dep_assoc_project, proj_dep_assoc_department);
+--
+-- Constraints for table `happyhour_assoc`
+--
+ALTER TABLE `happyhour_assoc`
+  ADD CONSTRAINT `happyhour_assoc_ibfk_2` FOREIGN KEY (`happyhour_assoc_happyhour`) REFERENCES `happyhour` (`happyhour_id`),
+  ADD CONSTRAINT `happyhour_assoc_ibfk_3` FOREIGN KEY (`happyhour_assoc_resource`) REFERENCES `resource` (`resource_id`),
+  ADD CONSTRAINT `happyhour_assoc_ibfk_4` FOREIGN KEY (`happyhour_assoc_weekusage`) REFERENCES `bool` (`bool_id`);
+  
+  
+--
 -- Limitadores para a tabela `pubref`
 --
 ALTER TABLE `pubref`

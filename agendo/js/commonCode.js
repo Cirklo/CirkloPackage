@@ -2,7 +2,7 @@ $(document).ready(
 	function(){
 		// Browser detection
 		if(!detect()){
-			showMessage("This browser may be incompatible with Agendo.");
+			showMessage("This browser may be incompatible with Agendo.", true);
 		}
 
 		$("#resourceSearch").focus(
@@ -216,6 +216,7 @@ function showMessage(msg, isError){
 							,ShowOverlay : false
 						}
 					);
+					document.body.style.cursor = 'default';
 				}
 			);
 		}
@@ -240,4 +241,43 @@ function showMessage(msg, isError){
 			);
 		}
 	}
+	
+}
+
+function getOrPost(url, mainFunction, argsToSend, type, completedFunction, completedArgs, errorFunction, errorArgs){
+	type = type || 'post';
+	mainFunction = mainFunction || false;
+	argsToSend = argsToSend || false;
+	completedFunction = completedFunction || false;
+	completedArgs = completedArgs || false;
+	errorFunction = errorFunction || false;
+	errorArgs = errorArgs || false;
+	
+	// $.ajax(
+	$.post(
+		url
+		,{action: mainFunction, args: argsToSend}
+		,function(serverData){
+			if(!serverData.isError && mainFunction){
+				window[mainFunction](serverData);
+			}
+			showMessage(serverData.message, serverData.isError);
+		}
+		, "json"
+	)
+	.error(
+		function(error) {
+			if(errorFunction){
+				window[errorFunction](errorArgs);
+			}
+			showMessage(error.responseText, true);
+		}
+	)
+	.complete(
+		function(serverData){
+			if(completedFunction){
+				window[functionName](completedArgs);
+			}
+		}
+	);
 }

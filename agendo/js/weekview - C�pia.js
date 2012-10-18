@@ -220,7 +220,7 @@ function swapColor(obj,tag,action){
 			if(document.getElementById('assiduityDiv') && document.getElementById('assiduityDiv').style.display != 'none'){
 				$.post(
 					'../agendo/assiduity.php'
-					,{action: 'getDivData', entry: selectedEntry, resource: resourceToUseInGet}
+					,{action: 'getDivData', entry: selectedEntry}
 					,function(serverData){
 						updateAssiduityDivs(serverData);
 					}
@@ -308,7 +308,7 @@ function ManageEntries(action,ttime,tresolution) {
     tdate=document.getElementById('tdate').value;
     resource=document.getElementById('resource').value;
     update=document.getElementById('update').value;
-  
+   
     //code serves for eliminating javascript cache and to add multiple entries
     code = Math.random();
     document.getElementById('code').value = code;
@@ -376,11 +376,14 @@ function ManageEntries(action,ttime,tresolution) {
                 for(j=1;j<table.rows[i].cells.length;j++){
                     span=table.rows[i].cells[j].rowSpan;
 					
-                    for (x=1;x<=(j+add);x++) add=arr[i][x]+add;
+                    for (x=1;x<=(j+add);x++)
+						add=arr[i][x]+add;
 						
 					// sets to 1 the fields without
-                    if (span>1) for(k=i+1;k<i+span;k++) arr[k][j+add]=1;
-					
+                    if (span>1) 
+						for (k=i+1 ;k<i+span;k++)
+							arr[k][j+add]=1; 
+							
                     add=0; 
                 }
                 k=0;
@@ -421,6 +424,7 @@ function ManageEntries(action,ttime,tresolution) {
                         // if (seed==0) exit;
                         if (seed==0) return;
                         var entryDate = new Date(tdate.substring(0,4),parseInt(tdate.substring(4,6),10)-1,parseInt(tdate.substring(6,8),10)+j,Math.floor(tstarttime),Math.round((tstarttime-Math.floor(tstarttime))*60),'00');
+						alert(entryDate);
                         ajaxEntries('GET','../agendo/process.php?' + 'slots=' + seed + impersonateUrl + '&datetime=' + formatDate(entryDate,"yyyyMMddHHmm") + '&resource=' + resource + '&assistance=' + getAssistance,true);
                         seed=0;
                         k=0;
@@ -428,7 +432,7 @@ function ManageEntries(action,ttime,tresolution) {
  						button_visibility(true,true,true,true,true);
 						document.getElementById('entry').value = 0;
 						document.getElementById('update').value = 0;
-						// clear_table(table,false); 
+						clear_table(table,false); 
 					} 
 					else if(cell.title!='0' && document.getElementById('addButton').value=='All' && cell.style.backgroundColor==bgcolor2){ // all
                         // window.location.href='weekview.php?resource=' + resource + '&entry=' + cell.title;
@@ -479,7 +483,7 @@ function ManageEntries(action,ttime,tresolution) {
             }
         break;
         case 'confirm':
-			if (update!=0) { // in real its a cancel
+            if (update!=0) { // in real its a cancel
 				// window.location.href='weekview.php?resource=' + resource + '&date=' + tdate; // comment this?
 				// exit();
 				getCalendar();
@@ -492,12 +496,10 @@ function ManageEntries(action,ttime,tresolution) {
 				
 				return;
             }
-
             objForm=document.getElementById('entrymanage');
             if (checkfield(objForm['user_id']) || checkfield(objForm['user_passwd'])){
 				exit;
 			}
-			
             for (i=1;i<tablesize;i++) {
                 for (j=1;j<table.rows[i].cells.length;j++) {
                     cell=table.rows[i].cells[j];
@@ -510,9 +512,9 @@ function ManageEntries(action,ttime,tresolution) {
 						//ajaxEntries('GET','process.php?&resource=' + resource,true,resource,tdate);
 						//clear_table(table,false);                 
                     } 
-					// else{
+					else{
                        //alert ("No entries were selected");
-                    // }
+                    }
                 }
             }
         break;
@@ -601,9 +603,6 @@ function addcomments(entry) {
     document.getElementById('InputComments').style.display = "none";
 	// Cleans the data inside the comments
 	myForm[0].value = '';
-	
-	document.getElementById('entry').value = 0;
-	document.getElementById('update').value = 0;
 }
 
 checkedValue = '9001!';

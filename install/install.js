@@ -3,7 +3,7 @@ $(function(){
 	// document.getElementById('makeHtConnect').disabled = false;
 });
 
-function showMessage(msg){
+function showYellowMessage(msg){
 	// $.jnotify(msg);
 	document.getElementById('successError').innerHTML = msg;
 }
@@ -11,24 +11,26 @@ function showMessage(msg){
 function checkMail(address){
 	$.post('install.php', {functionName: 'checkMail', address: address},
 		function(phpMessage){
-			showMessage(phpMessage);
+			showYellowMessage(phpMessage);
 		}
 	);
 }
 
-function back(){
-	backBool = confirm('Going back will delete the changes you made, are you sure?');
-	if(backBool){
-		document.getElementById('firstScreen').style.display='table';
-		document.getElementById('databaseData').style.display='none'
-		document.getElementById('makeHtConnect').disabled = false;
-		$.post('install.php', {functionName: 'back', path: path},
-			function(phpMessage){
-				showMessage(phpMessage);
-			}
-		);
-	}
-}
+// comment this
+// function back(){
+	// backBool = confirm('Going back will delete the changes you made, are you sure?');
+	// if(backBool){
+		// document.getElementById('firstScreen').style.display='table';
+		// document.getElementById('databaseData').style.display='none'
+		// document.getElementById('makeHtConnect').disabled = false;
+		// $.post('install.php', {functionName: 'back', path: path},
+			// function(serverData){
+				// showYellowMessage(serverData.message);
+			// }
+			// , 'json'
+		// );
+	// }
+// }
 
 detectedErrorOnJS = false;
 messageToShow = '';
@@ -44,22 +46,22 @@ function postMe(functionName){
 	}
 	
 	if(detectedErrorOnJS){
-		showMessage(messageToShow);
+		showYellowMessage(messageToShow);
 	}
 	else{
-		showMessage("Importing data from the script, please wait.");
+		showYellowMessage("Importing data from the script, please wait.");
 		document.getElementById('applySql').disabled = true;
 		document.getElementById('makeHtConnect').disabled = true;
-		document.getElementById('back').disabled = true;
+		// document.getElementById('back').disabled = true;
 	
 		$.post	('install.php', {functionName: functionName, 'data[]': data},
 				function(serverData){
-					document.getElementById('back').disabled = false;
+					// document.getElementById('back').disabled = false;
 					document.getElementById('makeHtConnect').disabled = false;
 					document.getElementById('applySql').disabled = false;
 					extraText = '';
 
-					if(serverData.success){
+					if(!serverData.isError){
 						if(functionName == 'makeHtConnect'){
 							document.getElementById('firstScreen').style.display='none';
 							document.getElementById('databaseData').style.display='table';
@@ -125,12 +127,12 @@ function postMe(functionName){
 							document.getElementById('applySql').disabled = true;
 						}
 					}
-					showMessage(serverData.message.replace("\n", "<br>") + extraText);
+					showYellowMessage(serverData.message.replace("\n", "<br>") + extraText);
 				}, 'json'
 			)
 			.error(
 				function(error) {
-					showMessage(error.responseText);
+					showYellowMessage("error-" + error.responseText + "-error", true);
 				}
 			)
 		;

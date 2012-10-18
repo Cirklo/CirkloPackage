@@ -31,21 +31,38 @@ class calCell {
     function setStartDate($arg) {$this->StartDate=$arg;}
     function setRepeat($arg)    {$this->Repeat=$arg;}
     function setEntryStatus($arg, $isConfirmRes = false)    {
-        if ($arg==2 or $arg==4) {
-                $datetime=$this->getStartDate(). date('Hi',$this->getStartTime());
-                $min=substr($datetime,10,2);
-                $hour=substr($datetime,8,2);
-                $year=substr($datetime,0,4);
-                $month=substr($datetime,4,2);
-                $day=substr($datetime,6,2);
-                $endtime=mktime($hour,$min + (cal::getConfTolerance()+$this->getNSlots()) * cal::getResolution(),0,$month,$day,$year);
-                $now=mktime(date("H"),date("i"),date("s"),date("m"),date("d"),date("Y"));
-                if ($endtime<$now && $isConfirmRes) {
-                    $arg=9;
-                }
-        }
+        if($arg==2 || $arg==4){
+			$datetime=$this->getStartDate().date('Hi',$this->getStartTime());
+			$min=substr($datetime,10,2);
+			$hour=substr($datetime,8,2);
+			$year=substr($datetime,0,4);
+			$month=substr($datetime,4,2);
+			$day=substr($datetime,6,2);
+			$endtime=mktime($hour,$min + (cal::getConfTolerance()+$this->getNSlots()) * cal::getResolution(),0,$month,$day,$year);
+			$now=mktime(date("H"),date("i"),date("s"),date("m"),date("d"),date("Y"));
+			
+			if($endtime<$now && $isConfirmRes){
+				if($arg==4){
+					// "Y-m-d H:i:s"
+					$mysqlDate = convertDate($this->getStartDate(), 'Y-m-d')." ".date('H:i:00',$this->getStartTime());
+					
+					// get the first entry of a specific date, its the one that is not on waiting list
+					$sql = "select entry_status from entry where entry_datetime = :0 and entry_resource = (select entry_resource from entry where entry_id = :1) and entry_status in (1, 2)";
+					$prep = dbHelp::query($sql, array($mysqlDate, $this->Entry));
+					$res = dbHelp::fetchRowByIndex($prep);
+					
+					$arg = 1;
+					if($res[0] == 2){
+						$arg = 9;
+					}
+				}
+				else{
+					$arg = 9;
+				}
+			}
+		}
         
-        $this->EntryStatus=$arg;
+        $this->EntryStatus = $arg;
     }
     function setNextUser($arg)    {$this->NextUser=$arg;}
     

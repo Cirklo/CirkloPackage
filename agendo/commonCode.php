@@ -6,16 +6,15 @@
   @version 1.0
   @Code used in lots of places and all joined to avoid copy pasting same methods in different places
 */
+	// the type of error that will be "caught"
 	error_reporting (E_ERROR | E_WARNING | E_PARSE);
+	
 	// Checks if session has started already
 	if(session_id() == "") {
 		session_start();
 	}
 	
 	require_once("__dbHelp.php");
-	
-	// Defaults the exception handler
-	exceptionHandling();
 	
 	if(isset($_GET['autocomplete'])){
 		autocompleteAgendo();
@@ -135,8 +134,8 @@
 		}
 		//*****************************************
 		try{
-			$sql= "select user_firstname, user_lastname, user_passwd, user_id, user_level from ".dbHelp::getSchemaName().".user where user_login = '".$userLogin."' and user_passwd = '".$pass."'";
-			$res=dbHelp::query($sql) or die ($sql);
+			$sql= "select user_firstname, user_lastname, user_passwd, user_id, user_level from ".dbHelp::getSchemaName().".user where user_login = :0 and user_passwd = :1";
+			$res=dbHelp::query($sql, array($userLogin, $pass)) or die ($sql);
 			if (dbHelp::numberOfRows($res) == 0){
 				// ********** Imap section *********
 				if($externalLogin){
@@ -151,9 +150,11 @@
 			}
 			else{
 				$arr=dbHelp::fetchRowByIndex($res);
-				if($arr[4] == '3'){ // Inactive account
-					throw new Exception("This account is inactive.");
-				}
+				// if($arr[4] == '3'){ // Inactive account
+					// throw new Exception("This account is inactive.");
+				// }
+
+				isBlacklisted($arr[3]);
 			
 				// $_SESSION['user_name'] = $arr[0];
 				// $_SESSION['user_lastName'] = $arr[1];
@@ -193,7 +194,7 @@
 	}
 
 	function showMsg($message, $isError = false, $import = false){
-		if($import){
+		if($import && !isAjax()){
 			importJs();
 		}
 		$isError = (string)$isError;// needs this because javascript is as old as Elvis(well, almost) and cant handle booleans from PHP
@@ -367,12 +368,16 @@
 								echo "<input type=button style='font-size:11px' onclick=\"window.location='../datumo/index.php'\" value='AdminArea' />";
 							echo "</td>";
 						echo "</tr>";
-						
-						echo "<tr>";
-							echo "<td style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/makeConfirmRes.php'\" value='Resource Settings' />";
-							echo "</td>";
-						echo "</tr>";
+
+						$sql = "select resource_id, resource_name from resource where resource_status = 3 and resource_resp = :0"; // user confirmation
+						$prep = dbHelp::query($sql, array($_SESSION['user_id']));
+						if(isAdmin($_SESSION['user_id']) || dbHelp::numberOfRows($prep) > 0){
+							echo "<tr>";
+								echo "<td style='text-align:center'>";
+									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/makeConfirmRes.php'\" value='Resource Settings' />";
+								echo "</td>";
+							echo "</tr>";
+						}
 						
 						echo "<tr>";
 							echo "<td colspan='2' style='text-align:center'>";
@@ -413,11 +418,11 @@
 						echo "</td>";
 					echo "</tr>";
 
-					echo "<tr>";
-						echo "<td align=center colspan=2>";
-							echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
-						echo "</td>";
-					echo "</tr>";
+					// echo "<tr>";
+						// echo "<td align=center colspan=2>";
+							// echo "<input type=button style='font-size:11px' onclick=submitUser('../agendo/makeConfirmRes.php',null,null,null) value='Resource Settings' />";
+						// echo "</td>";
+					// echo "</tr>";
 				echo "</table>";
 
 				echo "<table>";
@@ -524,6 +529,14 @@
 			}
 		}
 		return false;
+	}
+	
+	function isBlacklisted($userId){
+		$sql = "select blacklist_user from blacklist where blacklist_user = :0";
+		$res = dbHelp::query($sql, array($userId));
+		if(dbHelp::numberOfRows($res) > 0){
+			throw new Exception("This account is inactive.");
+		}		
 	}
 	
 	// wtf = "write to file", not "what the fu..dge" 
@@ -634,23 +647,36 @@
 	}
 	
 	// Sends the mail object, its objective is patch the crappy send method of the mailer class (seriously, send = false means error? ever heard of exceptions??)
-	function sendMailObject($mailObject, $exceptionMessage = false){
-		if(!$exceptionMessage){
-			$exceptionMessage = "Unable to send the email, please check the mail settings.";
-		}
-		
+	function sendMailObject($mailObject, $throwException = true){
 		ob_start();
 			$result = $mailObject->Send();
 			$echoStr = ob_get_contents();
 		ob_end_clean();
 
 		if($result === false){
+			$exceptionMessage = "Unable to send the email.";
 			throw new Exception($exceptionMessage."\n".strip_tags($echoStr));
 		}
 	}
 	
-	// Returns all the number of lots used by a user in the week of the date given for a given resource, its resolution and the max ammount of hours a user can use the resource, and if
+	function getHappyHoursFromResource($resource){
+		$hhArray = array();
+		
+		// getting all happyhours for this resource, in theory happy hours dont have any time colision(triggers (not by my choice))
+		$sql = "select happyhour_assoc_happyhour from happyhour_assoc where happyhour_assoc_resource = :0 and happyhour_assoc_weekusage = 1";
+		$prep = dbHelp::query($sql, array($resource));
+		while($row = dbHelp::fetchRowByIndex($prep)){
+			$hhArray[] = new HappyHour($row[0]);
+		}
+		
+		return $hhArray;
+	}
+	
+	// Returns all the number of slots used by a user in the week of the given date for a given resource, its resolution and the max ammount of hours a user can use the resource
+	// $arr[0] = sum(entry_slots) as slotsUsed, $arr[1] = resource_resolution, $arr[2] = resource_maxhoursweek, $arr[3] = resource_resp 
 	function getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource){
+		require_once("hoursUsageAux.php");
+		
 		// convert datetime to time and get day of the week
 		$timeDate = mktime(0, 0, 0, $month, $day, $year);
 		$dayOfTheWeek = date('N', $timeDate);
@@ -666,12 +692,41 @@
 		$lastDayDate = date('Ymd',$lastDayWeek);
 		
 		// use the dateBetween method to get the number of slots
-		$sql = "select sum(entry_slots), resource_resolution, resource_maxhoursweek, resource_resp from resource, entry where resource_id = :0 and entry_user = :1 and entry_status in (1,2) and entry_resource = :0 and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
-		$res = dbHelp::query($sql, array($resource, $user_id));
-		$arr = dbHelp::fetchRowByIndex($res);
-		if(!isset($arr[0])){
-			$arr[0] = 0;
+		// $sql = "select sum(entry_slots), resource_resolution, resource_maxhoursweek, resource_resp from resource, entry where resource_id = :0 and entry_user = :1 and entry_status in (1,2) and entry_resource = :0 and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
+		// $res = dbHelp::query($sql, array($resource, $user_id));
+		// $arr = dbHelp::fetchRowByIndex($res);
+		// if(!isset($arr[0])){
+			// $arr[0] = 0;
+		// }
+		
+		$hhArray = getHappyHoursFromResource($resource);
+		
+		$arr = array();
+		$sql = "select resource_resolution, resource_maxhoursweek, resource_resp from resource where resource_id = :0";
+		$prep = dbHelp::query($sql, array($resource));
+		$row = dbHelp::fetchRowByIndex($prep);
+		$arr[1] = $row[0]; // resource_resolution
+		$arr[2] = $row[1]; // resource_maxhoursweek
+		$arr[3] = $row[2]; // resource_resp
+		
+		$totalSlots = 0;
+		$happyHourTime = 0;
+		if($arr[2] > 0){
+			$tempArray = array();
+			$sql = "select entry_datetime, entry_slots from entry where entry_user = :0 and entry_status in (1,2) and entry_resource = :1 and ".dbHelp::dateBetween("entry_datetime", dbHelp::convertDateStringToTimeStamp($firstDayDate,'%Y%m%d'), dbHelp::convertDateStringToTimeStamp($lastDayDate,'%Y%m%d'));
+			$prep = dbHelp::query($sql, array($user_id, $resource));
+			while($row = dbHelp::fetchRowByName($prep)){
+				$totalSlots += $row['entry_slots'];
+				
+				foreach($hhArray as $hh){
+					if(($tempArray = $hh->getCostAndDiscountTime($row['entry_datetime'], $row['entry_slots'], $arr[1], 0)) !== false){
+						$happyHourTime += $tempArray['time'];
+					}
+				}
+			}
 		}
+
+		$arr[0] = $totalSlots - ceil($happyHourTime / $arr[1]);
 
 		return $arr;
 	}
@@ -721,6 +776,17 @@
 		wtf($logMessage, 'a', $exceptionFilePath);
 	}
 	
+	function shutdownHandler(){
+		$error = error_get_last();
+		if(!empty($error)){
+			// $json->message = "File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL;
+			// $json->isError = true;
+			// echo json_encode($json);
+			showMsg("File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL);
+			// throw new Exception("File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL);
+		}
+	}
+	
 	function exceptionHandling($byFile = false, $filePath = null){
 		$exceptionHandlingFunction = null;
 		
@@ -741,4 +807,31 @@
 		set_exception_handler($exceptionHandlingFunction);
 	}
 	
+	function htmlEncoding(){
+		// echo "<meta http-equiv='Content-type' content='text/html;charset=UTF-8'>"; // html4
+		echo "<meta charset='UTF-8'>"; // html5
+	}
+	
+	function errorHandling($errno, $errstr, $errfile, $errline){
+		if(
+			$errno === E_ERROR
+			|| $errno === E_WARNING
+			|| $errno === E_PARSE
+			// || $errno === E_NOTICE
+		){
+			$message = $errstr;
+			$errfile = str_replace("\\", "/", $errfile);
+			$errfile = explode("/", $errfile);
+			$message .= " on file ".$errfile[sizeOf($errfile) - 1];
+			$message .= " line ".$errline;
+			throw new ErrorException($message);
+		}
+		
+		return true;
+	}
+	
+	// Errors handling
+	exceptionHandling();
+	set_error_handler('errorHandling');
+	register_shutdown_function('shutdownHandler');
 ?>

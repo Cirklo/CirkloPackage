@@ -6,12 +6,18 @@ require_once("commonCode.php");
 		$userLogins = $_POST['userLogins'];
 		$training = $_POST['training'];
 		$permLevel = $_POST['permLevel'];
+		$sendMails = $_POST['sendMails'];
 		
 		$error = false;
 		$msg = "Access given to users";
 		try{
-			for($j = 0; $j < sizeOf($userLogins); $j++){
-				for($i = 0; $i < sizeOf($resources); $i++){
+			// for($j = 0; $j < sizeOf($userLogins); $j++){
+				// for($i = 0; $i < sizeOf($resources); $i++){
+			$sqlMail = "select user_email, resource_name, permlevel_desc from ".dbHelp::getSchemaName().".user, resource, permlevel where user_id = :0 and resource_id = :1 and permlevel_id = :2";
+			$replyToPerson = "";
+			$replyToPersonMail = "";
+			foreach($userLogins as $userId){
+				foreach($resources as $resource){
 					// If postgre will be used this will most likely not work... at all...
 					$sql = "
 						REPLACE INTO 
@@ -22,7 +28,16 @@ require_once("commonCode.php");
 							permissions_level = :2,
 							permissions_training = :3
 					";
-					$prep = dbHelp::query($sql, array($userLogins[$j], $resources[$i], $permLevel, $training));
+					$prep = dbHelp::query($sql, array($userId, $resource, $permLevel, $training));
+					if($sendMails == 'true'){
+						$prepMail = dbHelp::query($sqlMail, array($userId, $resource, $permLevel));
+						$resMail = dbHelp::fetchRowByIndex($prepMail);
+						$subject = "Access changed for resource ".$resMail[1];
+						$message = "You now have the access type \"".$resMail[2]."\"";
+						$mailObj = getMailObject($subject, $resMail[0], $message, $replyToPerson, $replyToPersonMail);
+						// throw exception ? show error message case it fails to send one email?
+						sendMailObject($mailObj, false);
+					}
 				}
 			}
 		}
@@ -56,6 +71,7 @@ require_once("commonCode.php");
 		echo "<script type='text/javascript'>window.location='../".$_SESSION['path']."';</script>";
 	}
 	
+	htmlEncoding();
 	importJs();
 	echo "<link href='css/intro.css' rel='stylesheet' type='text/css' />";
 	echo "<script type='text/javascript' src='js/givePermission.js'></script>";
@@ -114,24 +130,35 @@ require_once("commonCode.php");
 					echo "</select>";
 				echo "</div>";
 
-				// echo "<div style='float:right'>";
-				echo "<div>";
-					echo "<h3 style='color:white;'>Access level:</h3>";
-					$sql = "select permlevel_id, permlevel_desc from permlevel";
-					$prep = dbHelp::query($sql);
-					echo "<select size='1' id='permLevelSelect' style='width:150px'>";
-						while($row = dbHelp::fetchRowByIndex($prep)){
-							echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]."</option>";
-						}
-					echo "</select>";
-
-					echo "<h3 style='color:white;'>Training:</h3>";
-					echo "<select size='1' id='trainingSelect' style='width:150px'>";
-						echo "<option value='0'>No</option>";
-						echo "<option value='1'>Yes</option>";
-					echo "</select>";
-
+				echo "<div style='display:table;margin:auto;'>";
+					echo "<div style='display:table-cell;'>";
+						echo "<h3 style='color:white;'>Access level:</h3>";
+						$sql = "select permlevel_id, permlevel_desc from permlevel";
+						$prep = dbHelp::query($sql);
+						echo "<select size='1' id='permLevelSelect' style='width:150px'>";
+							while($row = dbHelp::fetchRowByIndex($prep)){
+								echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]."</option>";
+							}
+						echo "</select>";
+					echo "</div>";
+					
+					echo "&nbsp";
+					
+					echo "<div style='display:table-cell;'>";
+						echo "<h3 style='color:white;'>Training:</h3>";
+						echo "<select size='1' id='trainingSelect' style='width:150px'>";
+							echo "<option value='0'>No</option>";
+							echo "<option value='1'>Yes</option>";
+						echo "</select>";
+					echo "</div>";
 				echo "</div>";
+				
+				echo "<br>";
+				
+				echo "<label style='color:white;'>";
+					echo "Email users";
+					echo "<input type='checkbox' id='emailCheck' />";
+				echo "</label>";
 			echo "</td>";
 		echo "</tr>";
 

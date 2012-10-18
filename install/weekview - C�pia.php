@@ -4,12 +4,11 @@
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("../agendo/commonCode.php");
-	initSession();
 	require_once("../agendo/calClass.php");
 	require_once("../agendo/functions.php");
 	require_once("../agendo/genMsg.php");
 
-	if (isset($_GET['date']) && $_GET['date'] != ""){
+	if (isset($_GET['date'])){
 		$calendarDate = cleanValue($_GET['date']);
 	} else {        
 		$calendarDate = date("Ymd",mktime(0,0,0, date("m"), date("d")-date("N"),date("Y")));
@@ -19,7 +18,6 @@
 	$res = dbHelp::query($ressql,array(cleanValue($_GET['resource'])));
 	$arr = dbHelp::fetchRowByName($res);
 	$resource = $arr['resource_id'];
-	// $isResp = isResp(); // make this var?
 	
 	if(isset($_POST['functionName'])){
 		call_user_func(cleanValue($_POST['functionName']));
@@ -28,8 +26,9 @@
 	
 	importJs();
 	echo "<script type='text/javascript' src='../agendo/js/weekview.js'></script>";
-	// Sets the resource and date in JS for later use in the auto refresh, yep the patching continues
+	// Sets the resouce and date in JS for later use in the auto refresh
 	echo "<script type='text/javascript'> setDateAndResource(".$resource.",'".$calendarDate."'); </script>";
+	initSession();
 	// <META HTTP-EQUIV="REFRESH" CONTENT="180" />
 
 ?>
@@ -93,24 +92,12 @@ if (isset($_GET['update'])) {$update=cleanValue($_GET['update']);$entry=cleanVal
 $calendar=new cal($resource,$update);
 
 //getting the variables 
-if (isset($_GET['action'])) {$action = cleanValue($_GET['action']);} else {$action = 0;} ;
-if (isset($_GET['msg'])) {$msg = cleanValue($_GET['msg']);} else {$msg ='';} ;
-
+if (isset($_GET['action'])) {$action = cleanValue($_GET['action']);} else {$action =0;} ;
+if (isset($_GET['msg'])) {$msg =cleanValue($_GET['msg']);} else {$msg ='';} ;
+ 
 //html body starts Here
 //##############################################
 echo "<body onload=init(" . $calendar->getStatus() . "," . $calendar->getMaxSlots() . ")>";
-
-$showCheckBoxMailList = false;
-if(isset($_SESSION['user_id'])){
-	$showCheckBoxMailList = true;
-	$sql = 'select permissions_sendmail, permissions_id from permissions where permissions_user = :0 and permissions_resource = :1';
-	$prep = dbHelp::query($sql, array($_SESSION['user_id'], $resource));
-	$res = dbHelp::fetchRowByIndex($prep);
-	$mailListCheck = '';
-	if(dbHelp::numberOfRows($prep) > 0 && $res[0] == 1){
-		$mailListCheck = 'checked';
-	}
-}
 
 //for displaying help
 echo "<div id=help style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
@@ -121,14 +108,6 @@ echo "<p style='text-align:center'>Daily Maximum Slot Number: " . $calendar->get
 echo "<p style='text-align:center'><a target=_new href=../agendo/prices.php>Click to look at prices (excluding VAT and dedicated assistance)</a></p>";
 if ($calendar->getStatus()==3) echo "<p style='text-align:center'>Tolerance for confirmation " . $calendar->getConfTolerance()*$calendar->getResolution()/60 . " hours(s) before or after entry"."</p>";
 echo "<p style='text-align:center'>Further info: <a href="  . $calendar->getLink() . ">" .$calendar->getLink() . "</a></p>" ;
-
-if($showCheckBoxMailList){
-	echo "<hr />";
-	echo "<p style='text-align:center' title='Click to receive emails when entries are updated or deleted'>";
-		echo "<label>Automatic delete and update warning <input type='checkbox' id='weekviewMailingList' ".$mailListCheck." onclick='mailListCheck(this, ".$resource.");' /></label>";
-	echo "</p>";
-}
-
 echo "<hr />";
 
 echo "<table id='legend'>";
@@ -240,11 +219,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 				exit;
 			}
 
-			if(isset($_POST['action'])){ // is this of any use?
-				call_user_func(cleanValue($_POST['action']));
-			}
-			
-			if(isset($_GET['entry'])){ // same as the next if?
+			if (isset($_POST['action'])) call_user_func(cleanValue($_POST['action']));
+			if (isset($_GET['entry'])){
 				$entry=(int)cleanValue($_GET['entry']);
 				$calendar->setEntry($entry);
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
@@ -254,7 +230,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$sqlWeekDay = "select ".dbHelp::date_sub(dbHelp::getFromDate('entry_datetime','%Y%m%d'),'1','day')." from entry where entry_id=:0";
 				$res = dbHelp::query($sqlWeekDay, array($entry));
 				$arr1 = dbHelp::fetchRowByIndex($res);
-				
 				$sqlWeekNumber = "select ".dbHelp::getFromDate("'".$arr1[0]."'",'%w');
 				$res = dbHelp::query($sqlWeekNumber);
 				$arr2 = dbHelp::fetchRowByIndex($res);
@@ -269,10 +244,10 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$calendar->setCalRepeat($arre['entry_repeat']);
 				$user=$arre['entry_user'];
 				$nslots=$arre['entry_slots'];
+				// $entrystart=$arre['starttime'];
 				$entrystart= $arre['dateHour'] + $arre['dateMinutes']/60;
 				
-			}
-			elseif($update != 0){ // same as the previous if?
+			} elseif ($update!=0) {
 				$calendar->setEntry($update);
 				$sql ="SELECT xfields_name, xfieldsval_value, xfields_label, xfields_type, xfields_id, xfields_placement from xfields, xfieldsval, xfieldsinputtype where xfieldsval_field=xfields_id and xfields_resource=" . $calendar->getResource(). " and xfieldsval_entry=".$calendar->getEntry()." and xfields_placement = 1 group by xfields_id, xfields_type";
 				
@@ -293,9 +268,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 				$calendar->setCalRepeat($arre['entry_repeat']);
 				$user=$arre['entry_user'];
 				$nslots=$arre['entry_slots'];
+				$entrystart=$arre['starttime'];
 				$entrystart= $arre['dateHour'] + $arre['dateMinutes']/60;
-			}
-			else{
+			} else {
 					$calendar->setEntry(0);
 					$entrystart=0;
 					$nslots=1;
@@ -391,49 +366,48 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					//***********************************************
 					//************* Weekly hours left ***************
-					// if(isset($_SESSION['user_id']) && $calendar->getRespId() != $_SESSION['user_id']){
-						// $day=substr($calendar->getStartDate(),6,2);
-						// $month=substr($calendar->getStartDate(),4,2);
-						// $year=substr($calendar->getStartDate(),0,4);
-						// $slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
-						// $day=substr($slotDate,6,2);
-						// $month=substr($slotDate,4,2);
-						// $year=substr($slotDate,0,4);
+					if(isset($_SESSION['user_id']) && $calendar->getRespId() != $_SESSION['user_id']){
+						$day=substr($calendar->getStartDate(),6,2);
+						$month=substr($calendar->getStartDate(),4,2);
+						$year=substr($calendar->getStartDate(),0,4);
+						$slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
+						$day=substr($slotDate,6,2);
+						$month=substr($slotDate,4,2);
+						$year=substr($slotDate,0,4);
 						
-						// $arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
-						// $totalSlots = $arrSRM[0];
-						// $resolution = $arrSRM[1];
-						// $maxHours 	= $arrSRM[2];
+						$arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
+						$totalSlots = $arrSRM[0];
+						$resolution = $arrSRM[1];
+						$maxHours 	= $arrSRM[2];
 
-						// if($arrSRM[3] != $user_id && $maxHours != 0){
-							// $timeUsed = $totalSlots * $resolution/60;
-							// $maxSlots = $maxHours * 60 / $resolution;
-							// $slotsLeft = $maxSlots - $totalSlots;
+						if($arrSRM[3] != $user_id && $maxHours != 0){
 							
-							// if($slotsLeft < 0){
-								// $slotsLeft = 0;
-							// }
+							$timeUsed = $totalSlots * $resolution/60;
+							$maxSlots = $maxHours * 60 / $resolution;
+							$slotsLeft = $maxSlots - $totalSlots;
 							
-							// $timeLeft = $maxHours - $timeUsed;
-							// if($timeLeft < 0){
-								// $timeLeft = 0;
-							// }
-						$timeSlotsText = getTimeAndSlotsLeft();
-						if($timeSlotsText !== false){
+							if($slotsLeft < 0){
+								$slotsLeft = 0;
+							}
+							
+							$timeLeft = $maxHours - $timeUsed;
+							if($timeLeft < 0){
+								$timeLeft = 0;
+							}
+							
 							echo "<tr>";
-								echo "<td colspan='2' style='text-align:center;' id='hoursLeftTd'>";
-								// echo "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
-								echo $timeSlotsText;
+								echo "<td colspan=2 align='center'>";
+								echo "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
 								echo "</td>";
 							echo "</tr>";
 							
 							echo "<tr>";
-								echo "<td colspan='2'>";
+								echo "<td colspan=2>";
 								echo "<hr>";
 								echo "</td>";
 							echo "</tr>";
 						}
-					// }
+					}
 					//************* Weekly hours left ***************
 					//***********************************************
 	
@@ -477,7 +451,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 				
 					$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'inline-table';
 					$tdButtonsDisplay = 'table-row';
-					$confirmButtonOnclick = "ManageEntries('confirm');"; // default confirm action
 					// Used to hide buttons
 					if(!$imResstatus5){
 					//**********************
@@ -567,11 +540,9 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						// Wont be dislayed if theres an active user session
 						$display = 'table-cell';
-						$showIfUserLogged = 'none';
-						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!=''){
+						// if(isset($_SESSION['user_name']) && $_SESSION['user_name']!='') // wtf was i thinking??
+						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!='')
 							$display = 'none';
-							$showIfUserLogged = 'table-cell';
-						}
 							
 						echo "<tr><td colspan=2 style='display:".$display."'><hr></td></tr>";
 
@@ -587,101 +558,45 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "</td>";
 						echo "</tr>";
 
-						// user assiduity goes here
-						$sql = "select configParams_value from configParams where configParams_name = 'showAssiduity'";
-						$prep = dbHelp::query($sql);
-						$row = dbHelp::fetchRowByIndex($prep);
-						
-						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!=''){
-							if($row[0] == 1){
-								// echo "<tr><td colspan=2 style='display:".$showIfUserLogged."'><hr></td></tr>";
-								echo "<tr><td colspan=2><hr></td></tr>";
-
-								echo "<tr>";
-									// echo "<td colspan=2 style='text-align:center;display:".$showIfUserLogged.";'>";
-									echo "<td colspan=2 style='text-align:center;'>";
-										require_once("../agendo/assiduity.php");
-									echo "</td>";
-								echo "</tr>";
-							}
-						// **************************
-						
-						// project listing goes here
-						// if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){
-							$sql = "select distinct project_name, project_id from project, proj_dep_assoc, ".dbHelp::getSchemaName().".user where project_id = proj_dep_assoc_project and proj_dep_assoc_department = user_dep and user_id = :0 or project_id = 1";
-							$prep = dbHelp::query($sql, array($_SESSION['user_id']));
-							if(dbHelp::numberOfRows($prep) > 0){
-								// echo "<tr><td colspan=2 style='display:".$showIfUserLogged."'><hr></td></tr>";
-								echo "<tr><td colspan=2><hr></td></tr>";
-
-								echo "<tr>";
-									// echo "<td colspan=2 style='text-align:center;display:".$showIfUserLogged.";'>";
-									echo "<td colspan=2 style='text-align:center;'>";
-										$sqlSelected = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
-										$prepSelected = dbHelp::query($sqlSelected, array($_SESSION['user_id'], $resource));
-										$resSelected = dbHelp::fetchRowByIndex($prepSelected);
-										$selectedProj = $resSelected[0];
-										
-										echo "<select id='projectList' style='width:100px;'>";
-											echo "<option value='-1'>No project</option>";
-											while($res = dbHelp::fetchRowByIndex($prep)){
-												$isSelected = "";
-												if($res[1] == $selectedProj){
-													$isSelected = "selected='selected'";
-												}
-												echo "<option value='".$res[1]."' ".$isSelected.">".$res[0]."</option>";
-											}
-										echo "</select>";
-										
-										echo "&nbsp";
-										
-										echo "<input type='button' value='Set' onclick='setProjectAsDefault(".$resource.")' title='Set the selected project as default'/>";
-									echo "</td>";
-								echo "</tr>";
-							}
-						}
-						// ***************************************************
-						
 						echo "<tr><td colspan=2><hr></td></tr>";
 						
-						$restatus6EditButton = "";
 						if($imResstatus6){
-							require_once("../agendo/itemHandling.php");
 							if($calendar->isResp()){
-								$buttonDisplay2 = 'none';
-								$restatus6EditButton = "<input type=button disabled id='editItemsButton' class='bu' title='Allows the editing of items in the entry' value='Edit' onclick=\"editEntryItems(".$resource.");\" />";
-								$confirmButtonOnclick = "done();";
+								$buttonDisplay2 = $buttonDisplay5 = 'none';
 							}
 							// elseif(hasPermission($_SESSION['user_id'], $resource)){
 							else{
+								require_once("../agendo/sampleHandling.php");
 								$tdButtonsDisplay = 'none';
 								$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
 								echo "<tr>";
 									echo "<td colspan=2 style='text-align:center;'>";
-										echo "<input type='button' id='addItemButton' class='bu' title='Press to add/remove items' value='Add/Remove items' onclick='itemInsertShowDivAndCheckUser(".$resource.", \"itemInsertHtml\");' />";
+										// echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='window.open(\"../agendo/sampleHandling.php?interface=sampleInsertHtml&resource=".$resource."\", \"\", \"width=100, height=100\");' />";
+										echo "<input type='button' id='addSampleButton' class='bu' title='Press to add sample for sequencing' value='Add Sample' onClick='sampleInsertShowDivAndCheckUser(".$resource.");' />";
 									echo "</td>";
 								echo "</tr>";
 								
 								echo "<tr><td colspan=2><hr></td></tr>";
 							}
+							// else{
+								// $tdButtonsDisplay = 'none';
+							// }
 						}
+					// Used to hide buttons
 					}
-					else{ // Used to hide buttons
+					else{
 						$tdButtonsDisplay = 'none';
 						$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'none';
 					}
 					//*********************
 					echo "<tr style='display:".$tdButtonsDisplay.";' ><td colspan=2 align='center'>";
-						echo "<input type=button style='width:40px;display:".$buttonDisplay1.";' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onclick=\"ManageEntries('del');\" />";
-						// This is rather horrible old chap, is there a better way to do this without rewritting the whole weekview.php?
-						echo $restatus6EditButton;
-						echo "<input type=button style='width:60px;display:".$buttonDisplay2.";' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onclick=\"ManageEntries('monitor');\" />";
-						echo "<input type=button style='width:40px;display:".$buttonDisplay3.";' onkeypress='return noenter()' id=addButton class=bu value='Add' onclick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" /><br>";
-						echo "<input type=button style='width:70px;display:".$buttonDisplay4.";' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onclick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" />";
-						echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onclick=\"".$confirmButtonOnclick."\" />";
-						// echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onclick=\"ManageEntries('confirm');\" />";
+						echo "<input type=button style='width:40px;display:".$buttonDisplay1.";' onkeypress='return noenter()' id=delButton class=bu title='Deletes the selected entry' value='Del' onClick=\"ManageEntries('del');\" />";
+						echo "<input type=button style='width:60px;display:".$buttonDisplay2.";' onkeypress='return noenter()' id=monitorButton class=bu title='Puts the user on a waiting list for the selected entry' value='WaitList' onClick=\"ManageEntries('monitor');\" />";
+						echo "<input type=button style='width:40px;display:".$buttonDisplay3.";' onkeypress='return noenter()' id=addButton class=bu value='Add' onClick=\"ManageEntries('add','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" /><br>";
+						echo "<input type=button style='width:70px;display:".$buttonDisplay4.";' onkeypress='return noenter()' id=updateButton  class=bu value='Update' onClick=\"ManageEntries('update','" . $calendar->getStartTime(). "','" . cal::getResolution()/60 . "');\" />";
+						echo "<input type=button style='width:70px;display:".$buttonDisplay5.";' onkeypress='return noenter()' id=confirmButton class=bu value='Confirm' onClick=\"ManageEntries('confirm');\" />";
 					echo "</td></tr>";
-
+				
 					echo "<tr style='display:".$tdButtonsDisplay.";'><td colspan=2;><hr></td></tr>";
 				echo "</table>";
 				
@@ -762,7 +677,7 @@ echo "<div id=DisplayUserInfo style='display:none;position:absolute;z-index:99;p
 $sql = "select xfields_type, xfields_label, xfields_name, xfields_id from xfields where xfields_placement = 2 and xfields_resource = ".$resource;
 $res = dbHelp::query($sql);
 //for displaying user confirmation comments
-echo "<div id='InputComments' style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;text-align:center;'>";
+echo "<div id=InputComments style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
 	if(dbHelp::numberOfRows($res) > 0){
 		echo "<form id='confirmXfields'>";
 		while($arr = dbHelp::fetchRowByName($res)){
@@ -792,40 +707,26 @@ echo "<div id='InputComments' style='display:none;position:absolute;border-style
 		echo "</form>";
 	}
 	
-    echo "<form name='entrycomments' id='entrycomments'>";
+    echo "<form name=entrycomments id=entrycomments>";
 		echo "<textarea name=txtcomments id=txtcomments rows=3 cols=25></textarea>";
     echo "</form>";
 	
-	// echo "<a href='javascript:addcomments(0)' title='Confirm and leave the comment written above'>Comment and confirm</a>&nbsp;&nbsp;&nbsp;";
-	echo "<a href='javascript:addcomments(0)' title='Confirm and leave the comment written above'>Confirm</a>&nbsp;&nbsp;&nbsp;";
-	// echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>&nbsp;&nbsp;&nbsp;";
-	echo "<a onclick='document.getElementById(\"InputComments\").style.display=\"none\";document.getElementById(\"txtcomments\").value=\"\";'>Cancel</a>";
+	echo "<center>";
+	echo "<a href='javascript:addcomments(0)' title='Confirm and leave the comment written above'>Comment and confirm</a>&nbsp;&nbsp;&nbsp;";
+	echo "<a href='javascript:addcomments()' title='Confirm without leaving a comment'>Confirm</a>";
 echo "</div>";
 
 echo "</body>";
 echo "</html>";
 
 
-	// Returns just the calendar to JS to avoid the auto refresh header
+	// Returns just the calendar to JS to avoid the auto refresh header (hackfest)
 	function getCalendarWeek(){
 		try{
 			global $calendarDate;
 			global $resource;
 			$calendar=new cal($resource);
 			$calendar->setStartDate(date("Ymd",strtotime($calendarDate)));
-			if(isset($_POST['entry']) && isset($_POST['action'])){
-				$calendar->setEntry($_POST['entry']);
-				if($_POST['action'] == 'all'){
-					$sql = "select entry_repeat from entry where entry_id = :0";
-					$prep = dbHelp::query($sql, array($_POST['entry']));
-					$row = dbHelp::fetchRowByIndex($prep);
-					$calendar->setCalRepeat($row[0]);
-				}
-				elseif($_POST['action'] == 'update'){
-					$calendar->setCalUpdate($_POST['entry']);
-				}
-			}
-			
 			$json->calendar = $calendar->draw_week();
 			$json->success = true;
 		}
@@ -836,82 +737,5 @@ echo "</html>";
 		echo json_encode($json);
 	}
 
-	// returns the amount of time and slots left for a user for a resource
-	function getTimeAndSlotsLeft(){
-		global $calendarDate;
-		global $resource;
-		
-		if(isset($_SESSION['user_id']) && isResp($_SESSION['user_id'], $resource) === false){
-			$day=substr($calendarDate,6,2);
-			$month=substr($calendarDate,4,2);
-			$year=substr($calendarDate,0,4);
-			$slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
-			$day=substr($slotDate,6,2);
-			$month=substr($slotDate,4,2);
-			$year=substr($slotDate,0,4);
-			
-			$arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $resource);
-			$totalSlots = $arrSRM[0];
-			$resolution = $arrSRM[1];
-			$maxHours 	= $arrSRM[2];
-
-			// if($arrSRM[3] != $user_id && $maxHours != 0){
-			if($maxHours != 0){
-				$timeUsed = $totalSlots * $resolution / 60;
-				$maxSlots = $maxHours * 60 / $resolution;
-				$slotsLeft = $maxSlots - $totalSlots;
-				
-				if($slotsLeft < 0){
-					$slotsLeft = 0;
-				}
-				
-				$timeLeft = $maxHours - $timeUsed;
-				if($timeLeft < 0){
-					$timeLeft = 0;
-				}
-				
-				$timeSlotsText = "You have ".$timeLeft." hours (".$slotsLeft." entries) left to book";
-				if(isAjax()){
-					$json->timeSlotsText = $timeSlotsText;
-					echo json_encode($json);
-				}
-				return $timeSlotsText;
-			}
-		}
-		
-		return false;
-	}
-	
-	function mailListCheck(){
-		if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['check'])){
-			if($_POST['check'] == 'false'){
-				$value = 0;
-				$message = 'User removed from mailing list';
-				$check = false;
-			}
-			else{
-				$value = 1;
-				$message = 'User inserted to mailing list';
-				$check = true;
-			}
-			$sql = "update permissions set permissions_sendmail = ".$value." where permissions_user = :0 and permissions_resource = :1";
-			$prep = dbHelp::query($sql, array($_SESSION['user_id'], $_POST['resource']));
-			$json = new stdClass();
-			$json->message = $message;
-			$json->check = $value;
-			echo json_encode($json);
-		}
-	}
-	
-	function setProjectAsDefault(){
-		if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['project'])){
-			// $project = ($_POST['project'] == '-1') ? null : $_POST['project'];
-			$project = $_POST['project'];
-			$sql = "update permissions set permissions_project_default = :0 where permissions_user = :1 and permissions_resource = :2";
-			$prep = dbHelp::query($sql, array($project, $_SESSION['user_id'], $_POST['resource']));
-			$json = new stdClass();
-			$json->message = "Default project changed";
-			echo json_encode($json);
-		}
-	}
 ?>
+

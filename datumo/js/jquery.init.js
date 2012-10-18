@@ -31,8 +31,9 @@ $(document).ready(function() {
 							  pass:$('#user_passwd').val()},
 							  function(data){
 								  //return the data
-								  if(data.length!=0){
-									  $.jnotify("Wrong login");
+								  if(data.length != 0){
+									  // $.jnotify("Wrong login");
+									  $.jnotify("->" + data + "<-");
 								  } else {
 									  window.location = "../datumo/index.php";
 								  }

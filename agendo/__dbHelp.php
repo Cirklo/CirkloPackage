@@ -34,17 +34,24 @@
 		}
 		
 		private static function setTimezone(){
-			try{
-				$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
-				$res = self::query($sql);
-				$arr = self::fetchRowByIndex($res);
-				date_default_timezone_set($arr[0]);
-			}
-			catch(Exception $e){
+			// try{
+				$sql = "SELECT table_schema FROM information_schema.tables WHERE table_schema = '".self::getSchemaName()."' and table_name = 'configParams'";
+				$prep = self::query($sql);
+				if(dbHelp::numberOfRows($prep) > 0){
+					$sql = "select configParams_value from configParams where configParams_name = 'timezone'";
+					$res = self::query($sql);
+					$arr = self::fetchRowByIndex($res);
+					if(isset($arr[0])){
+						// if the timezone isnt valid it wont throw an exception just a notice that will probably be ignored
+						date_default_timezone_set($arr[0]);
+					}
+				}
+			// }
+			// catch(Exception $e){
 				// not handled
-				return false;
-			}
-			return true;
+				// return false;
+			// }
+			// return true;
 		}
 
 		public static function now(){

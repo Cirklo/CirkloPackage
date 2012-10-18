@@ -15,6 +15,12 @@ INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_i
 INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'restree',7);
 INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'resaccess',7);
 INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'happyhour',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'happyhour_assoc',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'project',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'proj_assoc',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'price',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'blacklist',7);
 END IF;
 IF new.user_level=1 THEN
 INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',5);
@@ -37,4 +43,4 @@ SET NEW.user_level=OLD.user_level;
 END IF;
 END
 //
-DELIMITER;
+DELIMITER ;

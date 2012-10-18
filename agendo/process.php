@@ -47,12 +47,19 @@
 		//****************
 		
 		$arr = getSlotsResolutionMaxHours($day, $month, $year, $user_id, $resource);
-
+		
+		// takes the current number of slots and returns the ones not in a happyhour usage
+		if(($slotsNotInHH = filterHappyHourSlotsOut($hour, $min, $day, $month, $year, $slots, $resource, $arr[1])) === false){
+			$slotsNotInHH = $slots;
+		}
+		
+		// $arr[0] = sum(entry_slots), $arr[1] = resource_resolution, $arr[2] = resource_maxhoursweek, $arr[3] = resource_resp 
 		if($arr[3] != $user_id && $arr[2] != 0){
+			// $totalTime = ($arr[0] + $slots) * $arr[1] / 60;
+			$totalTime = ($arr[0] + $slotsNotInHH) * $arr[1] / 60;
+			$timeUsed = $arr[0] * $arr[1] / 60;
 			// check if the number of slots*resolution is bigger then the resource_maxhoursweek
 			// if so, return error and exit
-			$totalTime = ($arr[0] + $slots) * $arr[1] / 60;
-			$timeUsed = $arr[0] * $arr[1] / 60;
 			if($totalTime > $arr[2]){
 				throw new Exception("You cannot book more then ".$arr[2]." hours per week, you have ".($arr[2] - $timeUsed)." hours left.");
 				exit;
@@ -101,6 +108,31 @@
 			$tempUser = (int)$_GET['impersonate'];
 		}
 		
+		// assigning project to entry section
+		$projectValue = "";
+		if(isset($_GET['selectedProject'])){
+			$projectValue = $_GET['selectedProject'];
+			if($projectValue == '-1'){
+				$projectValue = null;
+			}
+		}
+		else{
+			$sql = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
+			$prep = dbHelp::query($sql, array($tempUser, $resource));
+			$res = dbHelp::fetchRowByIndex($prep);
+			// if(!isset($res[0])){
+				// $projectValue = null;
+			// }
+			// else{
+				$projectValue = $res[0];
+			// }
+		}
+		// ***********************************
+		
+		// assigning happy hour discount
+		
+		// *****************************
+		
 		$entriesIdArray = array();
 		//building the repetition pattern
 		while((substr($weekahead,0,8)<=$enddate) && ($w<53)){
@@ -123,33 +155,38 @@
 					,entry_resource
 					,entry_action
 					,entry_comments
+					".(isset($projectValue) ? ",entry_project" : "")."
 				) 
 				values(
-					".$tempUser."
+					:0
 					,".dbHelp::convertDateStringToTimeStamp($weekahead,'%Y%m%d%H%i')."
-					," . $slots ."
-					,". $assistance ."," . $arrrep[0] ."
-					,".$EntryStatus."
-					," . $resource . "
-					, '".date('Y-m-d H:i:s',time())."'
+					,:1
+					,:2,".$arrrep[0]."
+					,:3
+					,:4
+					,'".date('Y-m-d H:i:s',time())."'
 					,NULL
+					".(isset($projectValue) ? ",:5" : "")."
 				)
 			";
-			dbHelp::query($sql);
+			$sqlDataArray = array($tempUser, $slots, $assistance, $EntryStatus, $resource);
+			if(isset($projectValue)){
+				$sqlDataArray[] = $projectValue;
+			}
+			dbHelp::query($sql, $sqlDataArray);
 
-			// impersonate user here by get
 			$sql="
 				SELECT 
 					entry_id 
 				from 
 					entry 
 				where 
-					entry_user = ".$tempUser." 
+					entry_user = :0 
 					and entry_datetime = ".dbHelp::convertDateStringToTimeStamp($weekahead, '%Y%m%d%H%i')." 
 					and entry_repeat = ".$arrrep[0] ." 
-					and entry_resource = ".$resource
-			;
-			$res=dbHelp::query($sql);
+					and entry_resource = :1
+			";
+			$res=dbHelp::query($sql, array($tempUser, $resource));
 			$last=dbHelp::fetchRowByIndex($res);
 			$entriesIdArray[] = $last[0];
 			
@@ -163,14 +200,14 @@
 				from 
 					xfields 
 				where 
-					xfields_resource=".$resource." 
+					xfields_resource=:0 
 					and xfields_placement = 1 
 				group by 
 					xfields_id
 					, xfields_type
 				"
 			;
-			$res=dbHelp::query($sql);
+			$res=dbHelp::query($sql, array($resource));
 			$extra= array();
 			while($arr=dbHelp::fetchRowByIndex($res)){
 				$val = '';
@@ -224,8 +261,8 @@
 		$entry=(int)cleanValue($_GET['entry']);
 
 		// Gets the all the users, entry_ids and status of the given entry_id date, of a given resource
-		$sql = "SELECT entry_user,entry_id,entry_status, entry_datetime FROM entry where entry_datetime in (select entry_datetime from entry where entry_id=".$entry.") and entry_resource=".$resource." AND entry_status IN ( 1, 2, 4 ) order by entry_id";
-		$res = dbHelp::query($sql);
+		$sql = "SELECT entry_user,entry_id,entry_status, entry_datetime FROM entry where entry_datetime in (select entry_datetime from entry where entry_id = :0) and entry_resource = :1 AND entry_status IN ( 1, 2, 4 ) order by entry_id";
+		$res = dbHelp::query($sql, array($entry, $resource));
 		$perm = new permClass;
 		$tempUser = $user_id;
 		$found = false;
@@ -246,8 +283,8 @@
 			}
 		}
 
-		$sqlResp = "SELECT resource_resp FROM resource where resource_id=".$resource;
-		$resResp = dbHelp::query($sqlResp);
+		$sqlResp = "SELECT resource_resp FROM resource where resource_id = :0";
+		$resResp = dbHelp::query($sqlResp, array($resource));
 		$arrResp = dbHelp::fetchRowByIndex($resResp);
 		if(!$perm->setPermission($user_id,$resource,$user_passwd)){
 			throw new Exception($perm->getWarning());
@@ -265,17 +302,16 @@
 		if (!$perm->addBack($arr[3], true)){
 			throw new Exception($perm->getWarning());
 		}
-		$extra = "";
 		
-		$sql="select entry_repeat,".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i').",entry_status from entry where entry_id=".$entry;
-		$res=dbHelp::query($sql);
+		$sql="select entry_repeat,".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i').",entry_status from entry where entry_id = :0";
+		$res=dbHelp::query($sql, array($entry));
 		$arr=dbHelp::fetchRowByIndex($res);
 		$status=$arr[2]; // to set the waitlist with the same status as previous one
 		if ($deleteall==1){     
 			$repeat = $arr[0];
-			$sql="update entry set entry_status=3 where entry_repeat= ".$repeat.$extra;
+			$sql="update entry set entry_status=3 where entry_repeat = ".$repeat;
 		} else {
-			$sql="update entry set entry_status=3 where entry_id = ".$seekentry.$extra;
+			$sql="update entry set entry_status=3 where entry_id = ".$seekentry;
 		}
 		
 		$resPDO = dbHelp::query($sql);
@@ -293,8 +329,8 @@
 				}
 				$notify->toWaitList('delete'); // for waiting list. As to be send before update the entry to regular.    
 				
-				$sql = "select entry_resource,entry_datetime from entry where entry_id=". $entry;
-				$res = dbHelp::query($sql);
+				$sql = "select entry_resource,entry_datetime from entry where entry_id = :0";
+				$res = dbHelp::query($sql, array($entry));
 				$arr = dbHelp::fetchRowByIndex($res);
 
 				$sql = "update entry set entry_status=".$status." where entry_status=4 and entry_resource=".$arr[0]." and entry_datetime='".$arr[1]."'";
@@ -336,6 +372,7 @@
 		}
 		
 		$json->message = "Entry(ies) deleted!";
+		mailingList($entry);
 		echo json_encode($json);
 	}
 
@@ -386,10 +423,12 @@
 		}
 
 		//checking datetime before update
-		$sql="select entry_datetime, entry_resource, entry_user, entry_id from entry where entry_id= :0";
+		$sql="select entry_datetime, entry_resource, entry_user, entry_id, entry_slots from entry where entry_id= :0";
 		$resdt=dbHelp::query($sql, array($entry));
 		$arrdt=dbHelp::fetchRowByIndex($resdt);
 		$entry = $arrdt[3];
+		$oldSlots = $arrdt[4];
+		$oldDate = $arrdt[0];
 
 		// Doesnt let the entry be removed if its before the currenttime - delhour
 		if(!$perm->addBack($arrdt[0], true)){
@@ -418,8 +457,21 @@
 			}
 		}
 		
-		$sql="update entry set entry_user=".$arrdt[2].", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots=".$slots.", entry_action = '".date('Y-m-d H:i:s',time())."' where entry_id=". $entry;
-		$resPDO = dbHelp::query($sql.$extra);
+		// assigning project to entry section
+		$extraDataArray = array($slots);
+		$projectUpdateSql = "";
+		if(isset($_GET['selectedProject'])){
+			$projectUpdateSql = ",entry_project=:1";
+			$projectValue = $_GET['selectedProject'];
+			if($projectValue == '-1'){
+				$projectValue = NULL;
+			}
+			$extraDataArray[] = $projectValue;
+		}
+		// *******************
+		
+		$sql = "update entry set entry_user=".$arrdt[2].", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots= :0, entry_action = '".date('Y-m-d H:i:s',time())."' ".$projectUpdateSql." where entry_id=". $entry;
+		$resPDO = dbHelp::query($sql, $extraDataArray);
 		if(dbHelp::numberOfRows($resPDO) == 0){
 			throw new Exception("Entry info not updated.");
 		} 
@@ -428,7 +480,7 @@
 			$sql = "select entry_id, user_id from entry,".dbHelp::getSchemaName().".user where entry_user=user_id and entry_status=4 and entry_datetime='".$arrdt[0]."' and entry_resource=".$arrdt[1]." order by entry_id";
 			$res = dbHelp::query($sql);
 			$arrStatus = dbHelp::fetchRowByIndex($res);
-			if (dbHelp::numberOfRows($res)>0) {
+			if(dbHelp::numberOfRows($res)>0){
 				$notify = new alert($resource);
 				$notify->setUser($arrStatus[1]);
 				$notify->setEntry($arrStatus[0]);
@@ -466,6 +518,7 @@
 		}
 		
 		$json->message = "Entry info updated!";
+		mailingList($entry, $oldDate, $oldSlots);
 		echo json_encode($json);
 	}
 
@@ -576,12 +629,12 @@
 		
 		// Delete other entries from that day for the same resource, we dont wanna know who was on waiting list?
 		// no we dont.... if we do, "we" will have to fix the problem of showing the entry in blue due to having someone in waiting list
-		$sql = "select entry_datetime from entry where entry_id = :0";
-		$res = dbHelp::query($sql, array($entry));
-		$arr = dbHelp::fetchRowByIndex($res);
+		// $sql = "select entry_datetime from entry where entry_id = :0";
+		// $res = dbHelp::query($sql, array($entry));
+		// $arr = dbHelp::fetchRowByIndex($res);
 
-		$sql = "delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id <> :0 and entry_resource = :1";
-		dbHelp::query($sql, array($entry, $resource));
+		// $sql = "delete from entry where entry_datetime='".$arr[0]."' and entry_status in (1,2,4) and entry_id <> :0 and entry_resource = :1";
+		// dbHelp::query($sql, array($entry, $resource));
 		// ******************************************************************************************************
 		
 		$json->message = "Entry Confirmed";
@@ -630,6 +683,9 @@
 			$sql= "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0";
 			$res=dbHelp::query($sql, array($_GET['user_id']));
 			$arr=dbHelp::fetchRowByIndex($res);
+			
+			isBlacklisted($arr[0]);
+			
 			return $arr[0];
 		}
 	}
@@ -641,5 +697,55 @@
 		else{
 			return cryptPassword(cleanValue($_GET['user_passwd']));
 		}
+	}
+	
+	function mailingList($entry, $oldDate = null, $oldSlots = 0){
+		$sql = "select entry_datetime, entry_slots, resource_resolution, resource_name, resource_id, entry_user from entry, resource where entry_id = :0 and resource_id = entry_resource";
+		$prep = dbHelp::query($sql, array($entry));
+		$res = dbHelp::fetchRowByIndex($prep);
+		$finalDate = date('Y-m-d H:i:00',(strtotime($res[0]) + $res[1] * $res[2] * 60));
+		
+		$resource = $res[4];
+		$user = $res[5];
+		$replyToPerson = "";
+		$replyToPersonMail = "";
+		if(!isset($oldDate)){
+			$subject = 'Entry removed';
+			$message = "Resource is now available from ".$res[0]." to ".$finalDate." on resource ".$res[3];
+		}
+		else{
+			$oldFinalDate = date('Y-m-d H:i:00',(strtotime($oldDate) + $oldSlots * $res[2] * 60));
+			$subject = 'Entry updated';
+			$message = "Booking for resource ".$res[3]." from ".$oldDate." to ".$oldFinalDate." has changed to start at ".$res[0]." and to end at ".$finalDate;
+		}
+
+		$sql = "select user_email, user_firstname from permissions, user where permissions_resource = ".$resource." and permissions_sendmail = 1 and user_id = permissions_user and permissions_user != ".$user;
+		$prep = dbHelp::query($sql, array($entry));
+		while($res = dbHelp::fetchRowByIndex($prep)){
+			$mailObj = getMailObject($subject, $res[0], $message, $replyToPerson, $replyToPersonMail);
+			sendMailObject($mailObj, false);
+			// sendMailObject($mailObj);
+		}
+	}
+	
+	function filterHappyHourSlotsOut($hour, $min, $day, $month, $year, $slots, $resource, $resourceResolution){
+		$hhArray = getHappyHoursFromResource($resource);
+		
+		$temp = current($hhArray);
+		if(isset($temp) && $resourceResolution != 0){
+			$hhTime = 0;
+			// 'Y-m-d H:i:00'
+			$date = $year."-".$month."-".$day." ".$hour.":".$min.":00";
+			foreach($hhArray as $hh){
+				if(($tempArray = $hh->getCostAndDiscountTime($date, $slots, $resourceResolution, 0)) !== false){
+					$hhTime += $tempArray['time'];
+				}
+			}
+			$slots -= ceil($hhTime / $resourceResolution);
+			
+			return $slots;
+		}
+		
+		return false;
 	}
 ?>

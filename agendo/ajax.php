@@ -156,10 +156,36 @@ function DisplayUserInfo() {
 
 function DisplayEntryInfo() {
     $entry=cleanValue($_GET['entry']);
+	
+	// project javascript update here
+	if(isset($_SESSION['user_id'])){
+		$sql = "select entry_project from entry where entry_id = :0 and entry_user = :1";
+		$prep = dbHelp::query($sql, array($entry, $_SESSION['user_id']));
+		// $proj = 1;
+		if(dbHelp::numberOfRows($prep) > 0){
+			$res = dbHelp::fetchRowByIndex($prep);
+			$proj = $res[0];
+
+			// if($res[0] == null){
+				// echo "changeProjectListIndexTo(-1);";
+			// }
+			// else{
+			// }
+		}
+		else{
+			$sql = "select permissions_project_default from permissions where permissions_resource = :0 and permissions_user = :1";
+			$prep = dbHelp::query($sql, array($_GET['resource'], $_SESSION['user_id']));
+			$res = dbHelp::fetchRowByIndex($prep);
+			$proj = $res[0];
+		}
+		echo "changeProjectListIndexTo(".$proj.");";
+	}
+	//*************************
+	
     // $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=".$entry." and xfields_placement = 1 group by xfields_id, xfields_type";
     // $res=dbHelp::query($sql) or die ($sql);
-    $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=:0 and xfields_placement = 1 group by xfields_id, xfields_type";
-    $res=dbHelp::query($sql, array($entry)) or die ($sql);
+    $sql = "select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=:0 and xfields_placement = 1 group by xfields_id, xfields_type";
+    $res = dbHelp::query($sql, array($entry));
     
 	while($arr=dbHelp::fetchRowByIndex($res)){
 		if($arr[2] == 2 || $arr[2] == 3)

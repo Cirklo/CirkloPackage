@@ -35,7 +35,12 @@ function sendUserAndResourceList(){
 	}
 			
 	if(toList.length > 0 && resources.length > 0){
-		var confirmed = confirm("Are you sure you want to give this access level for the selected resources for all these users?");
+		var sendMails = document.getElementById('emailCheck').checked;
+		var addedText = "";
+		if(sendMails){
+			var addedText = "email and ";
+		}
+		var confirmed = confirm("Are you sure you want to " + addedText + "give this access level for the selected resources for all these users?");
 		if(confirmed){
 			for(var i=0; i<toList.length; i++){
 				userLogins[i] = toList[i].value;
@@ -44,7 +49,7 @@ function sendUserAndResourceList(){
 			if(userLogins.length > 0){
 				$.post(
 					"givePermission.php", 
-					{userLogins: userLogins, resources: resources, permLevel: permLevel, training: training},
+					{userLogins: userLogins, resources: resources, permLevel: permLevel, training: training, sendMails: sendMails},
 					function(serverData){
 						showMessage(serverData.msg, serverData.error);
 					},

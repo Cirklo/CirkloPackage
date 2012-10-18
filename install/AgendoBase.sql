@@ -32,6 +32,19 @@ CREATE TABLE IF NOT EXISTS `allowedips` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `blacklist`
+--
+
+CREATE TABLE IF NOT EXISTS `blacklist` (
+  `blacklist_id` int(11) NOT NULL AUTO_INCREMENT,
+  `blacklist_user` int(11) NOT NULL,
+  PRIMARY KEY (`blacklist_id`),
+  UNIQUE KEY `blacklist_user_2` (`blacklist_user`),
+  KEY `blacklist_user` (`blacklist_user`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+--
 -- Table structure for table `board`
 --
 
@@ -44,11 +57,12 @@ CREATE TABLE IF NOT EXISTS `board` (
 
 
 INSERT INTO `configParams` (`configParams_name`, `configParams_value`) VALUES
-('AgendoVersion', '1.5.4'),
+('AgendoVersion', '1.5.6'),
 ('bookingHour', '9'),
 ('imapCheck', '0'),
 ('imapHost', ''),
-('imapMailServer', '');
+('imapMailServer', ''),
+('showAssiduity', '0');
 -- --------------------------------------------------------
 --
 -- Table structure for table `entry`
@@ -65,12 +79,14 @@ CREATE TABLE IF NOT EXISTS `entry` (
   `entry_resource` int(11) NOT NULL,
   `entry_action` datetime NOT NULL,
   `entry_comments` tinytext COLLATE utf8_bin,
+  `entry_project` int(11) DEFAULT NULL,
   PRIMARY KEY (`entry_id`),
   KEY `entry_user` (`entry_user`),
   KEY `entry_resource` (`entry_resource`),
   KEY `entry_repeat` (`entry_repeat`),
-  KEY `entry_status` (`entry_status`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1288 ;
+  KEY `entry_status` (`entry_status`),
+  KEY `entry_project` (`entry_project`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -98,6 +114,35 @@ CREATE TABLE IF NOT EXISTS `equip` (
 
 
 --
+-- Table structure for table `happyhour`
+--
+CREATE TABLE IF NOT EXISTS `happyhour` (
+  `happyhour_id` int(11) NOT NULL AUTO_INCREMENT,
+  `happyhour_name` varchar(100) NOT NULL,
+  `happyhour_discount` tinyint(3) NOT NULL,
+  `happyhour_starthour` tinyint(2) NOT NULL,
+  `happyhour_endhour` tinyint(2) NOT NULL,
+  `happyhour_startday` tinyint(1) NOT NULL,
+  `happyhour_endday` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`happyhour_id`),
+  UNIQUE KEY `happyhour_name` (`happyhour_name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+--
+-- Table structure for table `happyhour_assoc`
+--
+CREATE TABLE IF NOT EXISTS `happyhour_assoc` (
+  `happyhour_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
+  `happyhour_assoc_resource` int(11) NOT NULL,
+  `happyhour_assoc_happyhour` int(11) NOT NULL,
+  `happyhour_assoc_weekusage` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`happyhour_assoc_id`),
+  KEY `happyhour_assoc_happyhour` (`happyhour_assoc_happyhour`),
+  KEY `happyhour_assoc_weekusage` (`happyhour_assoc_weekusage`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+
+--
 -- Table structure for table `item`
 --
 
@@ -111,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `item` (
   KEY `item_user` (`item_user`),
   KEY `item_state` (`item_state`),
   KEY `item_resource` (`item_resource`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 
 --
@@ -176,7 +221,13 @@ INSERT INTO `mask` (`mask_table`, `mask_name`, `mask_pic`) VALUES
 ('status','Reservation status',NULL),
 ('xfieldsinputtype','Field types',NULL),
 ('xfieldsval','Resource field values',NULL),
-('announcement','Announcements', NULL);	
+('announcement','Announcements', NULL),
+('happyhour', 'Happy hour creation', NULL),
+('happyhour_assoc', 'Happy hour association', NULL),
+('project', 'Project creation', NULL),
+('proj_dep_assoc', 'Project association', NULL),
+('price', 'Price association', NULL),
+('blacklist', 'Blacklist users', NULL);	
 
 
 -- --------------------------------------------------------
@@ -233,7 +284,15 @@ INSERT INTO `media` (`media_name`, `media_description`, `media_link`) VALUES
 ('How to change password', 'Changing password in Agendo', 'http://www.youtube.com/embed/6VVsQU-s0iU'),
 ('How to create a resource', 'Creating a new resource in Agendo resource scheduler', 'http://www.youtube.com/embed/wdOUev8EIPw'),
 ('Resource fields', 'How to create resource specific fields', 'http://www.youtube.com/watch?v=xdgfzPI_pjQ&feature=player_profilepage'),
-('Usage Report', 'Explains how to use the Usage Report feature', 'http://www.youtube.com/embed/GJazBXD7J1E');
+('Usage Report', 'Explains how to use the Usage Report feature', 'http://www.youtube.com/embed/GJazBXD7J1E'),
+('Assiduity', 'Shows how to activate the feature and what info it displays', 'http://www.youtube.com/embed/xUYXSV9fPxU'),
+('Mailing list', 'Shows how to a user can receive mail notifications from a specific resource when entries are updated or deleted', 'http://www.youtube.com/embed/NbfxDicb_wI'),
+('Happy hour creation', 'Shows how to create a happy hour', 'http://www.youtube.com/embed/e6zNf4KlH-4'),
+('Happy hour association', 'Shows how to associate a resource to a happy hour', 'http://www.youtube.com/embed/wbl2vDif61U'),
+('Project creation', 'Shows how to create a project', 'http://www.youtube.com/embed/KAeaHu61jJ8'),
+('Project association', 'Shows how to associate a project to a department', 'http://www.youtube.com/embed/c5__HiA6sww'),
+('Project on weekview', 'Show how to use projects on the weekview screen', 'http://www.youtube.com/embed/wswWo0UC9Tw'),
+('Blacklist users', 'Shows how to blacklist users preventing them from doing anything on agendo', 'http://www.youtube.com/embed/tyTB_CfE4kM');
 
 -- --------------------------------------------------------
 
@@ -260,11 +319,15 @@ CREATE TABLE IF NOT EXISTS `permissions` (
   `permissions_resource` int(11) NOT NULL,
   `permissions_level` tinyint(4) NOT NULL,
   `permissions_training` int(11) NOT NULL,
+  `permissions_sendmail` tinyint(1) DEFAULT NULL,
+  `permissions_project_default` int(11) DEFAULT NULL,
   PRIMARY KEY (`permissions_id`),
+  UNIQUE KEY `permissions_user_2` (`permissions_user`,`permissions_resource`),
   KEY `permissions_user` (`permissions_user`),
   KEY `permissions_resource` (`permissions_resource`),
   KEY `permissions_level` (`permissions_level`),
-  KEY `permissions_training` (`permissions_training`)
+  KEY `permissions_training` (`permissions_training`),
+  KEY `permissions_project_default` (`permissions_project_default`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -351,6 +414,31 @@ INSERT INTO `pricetype` (`pricetype_id`, `pricetype_name`) VALUES
 (2, 'Academic'),
 (3, 'Campus'),
 (4, 'Comercial');
+
+
+--
+-- Table structure for table `project`
+--
+CREATE TABLE IF NOT EXISTS `project` (
+  `project_id` int(11) NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(100) NOT NULL,
+  `project_account` int(11) NOT NULL,
+  `project_discount` tinyint(3) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`project_id`),
+  UNIQUE KEY `project_account` (`project_account`,`project_name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+--
+-- Table structure for table `proj_dep_assoc`
+--
+CREATE TABLE IF NOT EXISTS `proj_dep_assoc` (
+  `proj_dep_assoc_id` int(11) NOT NULL,
+  `proj_dep_assoc_project` int(11) NOT NULL,
+  `proj_dep_assoc_department` int(11) NOT NULL,
+  PRIMARY KEY (`proj_dep_assoc_id`),
+  KEY `proj_dep_assoc_project` (`proj_dep_assoc_project`),
+  KEY `proj_dep_assoc_department` (`proj_dep_assoc_department`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --

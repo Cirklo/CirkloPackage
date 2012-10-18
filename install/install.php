@@ -11,6 +11,7 @@
 	// header('Content-Type:text/html; charset=UTF-8');
 	// echo " <html><head><meta http-equiv='Content-type' value='text/html; charset=utf-8'></head>";
 	// echo "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Frameset//EN' 'http://www.w3.org/TR/html4/frameset.dtd'>";
+	echo "<meta charset='UTF-8'>"; // html5
 	echo "<script type='text/javascript' src='../agendo/js/jquery-1.5.2.min.js'></script>";
 	echo "<link type='text/css' href='../agendo/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
 	echo "<script type='text/javascript' src='../agendo/js/jquery.jnotify.js'></script>";
@@ -100,7 +101,8 @@
 		echo "<tr>";
 				echo "<td align='center' style='padding:10px' colspan=2>";
 				echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id)></input>";
-				echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
+				// comment this
+				// echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
 				echo "</td>";
 
 				// echo "<td align='center' style='padding:10px' colspan=2>";
@@ -300,7 +302,8 @@
 
 		echo "<tr>";
 			echo "<td align='center' colspan=3>";
-				echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
+				// comment this
+				// echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
 				echo "<input id='applySql'			type='button'	value='Finish'				onclick=postMe(this.id) disabled></input>";
 			echo "</td>";
 		echo "</tr>";
@@ -315,13 +318,13 @@
 	
 	// Gets current path and adds the previous path to create the htconnect file
 	function makeHtConnect(){
-		$successMsg = "Database connection successfully established.";
-		$msg = $successMsg;
+		$msg = "Database connection successfully established.";
 		$separateArray = getSeparator();
 		$systemSeparator = $separateArray[0];
 		$echoSeparator = $separateArray[1];
 		
 		try{
+			$isError = false;
 			if(!is_readable(getcwd()) || !is_writable(getcwd())) {
 				throw new Exception("You don't have the proper read/write file permissions.\nIf using Linux, go to the command line, find the folder/directory where the 'Install', 'Agendo' and 'Datumo' folders are located and type 'sudo chmod -R 777 .' .");
 			}
@@ -419,232 +422,205 @@
 		}
 		catch(Exception $e){
 			$msg = $e->getMessage();
+			$isError = true;
 		}
 		
 		wtlog($msg,'a');
 		$json->message = $msg;
-		$json->success = ($msg == $successMsg);
+		$json->isError = $isError;
 		echo json_encode($json);
 	}
 	
 	// apply the sql script
 	function applySql(){
-		$successMsg = "Successfully imported all database settings.";
-		$msg = $successMsg;
+		$msg = "Successfully imported all database settings.";
 		$separateArray = getSeparator();
 		$systemSeparator = $separateArray[0];
 		$echoSeparator = $separateArray[1];
 			
-		try{
-			require_once("../agendo/commonCode.php");
-			$dataArray = $_POST['data'];
-			if(!isset($dataArray)){
-				throw new Exception("Did not get any information from client.");
-			}
-			
-			$adminId = 		$dataArray[0];
-			$dataArray[1] = cryptPassword($dataArray[1]);
-			$adminPass = 	$dataArray[1];
-			$adminFirst = 	$dataArray[2];
-			$adminLast = 	$dataArray[3];
-			$adminPhone = 	$dataArray[4];
-			$adminExt = 	$dataArray[5];
-			$adminMobile = 	$dataArray[6];
-			$adminMail = 	$dataArray[7];
-			
-			$institute = 		$dataArray[8];
-			$instituteShort = 	$dataArray[9];
-			$instituteUrl = 	$dataArray[10];
-			$instituteMail = 	$dataArray[11];
-			$institutePass = 	$dataArray[12];
-			$instituteHost = 	$dataArray[13];
-			$institutePort = 	$dataArray[14];
-			$instituteSecure = 	$dataArray[15];
-			$instituteAuth = 	$dataArray[16];
-			$instituteAddress = $dataArray[17];
-			$institutePhone = 	$dataArray[18];
-			$instituteCountry = $dataArray[19];
-			$department = 		$dataArray[20];
-			$software =			$dataArray[21];
-			$timezone =			$dataArray[22];
-			// $sendEmail =		$dataArray[22];
-			// $makeDB = 		(boolean)$dataArray[16];
-			// $dbName = 		$dataArray[17];
-			
-			$address = "info@cirklo.org";
-			$subject = "A new institute is installing Cirklo software.";
-			$message = "Administrator: ".$adminFirst." ".$adminLast."\nEmail: ".$adminMail."\nInstitute: ".$institute."\nDate: ".date("F j, Y, g:i a");
-			// if($sendEmail){
-			if(!checkMailAux($instituteMail)){
-				throw new Exception("Invalid email, please input a valid email address.");
-			}
-			// }
-			
-			// sendMail($subject, $address, $message, ($adminFirst." ".$adminLast), false, false, null, $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
-			$mail = getMailObject($subject, $address, $message, ($adminFirst." ".$adminLast), $adminMail, $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
-			sendMailObject($mail);
-
-			$datumoConstraintsFile = 'DatumoConstraints.sql';
-			$datumoTriggersFile = 'DatumoTriggers.sql';
-			$currentFile = $datumoConstraintsFile;
-			
-			if(($sqlDatumoConstraints = file_get_contents($currentFile)) == false && ($sqlDatumoTriggers = file_get_contents(($currentFile = $datumoTriggersFile))) == false){
-				throw new Exception("Failed to open ".$currentFile.".");
-			}
-			
-			// $sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
-					// (1, '".$adminId."', '".$adminPass."', '".$adminFirst."', '".$adminLast."', 1, '".$adminPhone."', '".$adminExt."', '".$adminMobile."', '".$adminMail."', 1, 0)";
-			// dbHelp::query($sql);	
-			$sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
-					(1, :0, :1, :2, :3, 1, :4, :5, :6, :7, 1, 0)";
-			dbHelp::query($sql, array_slice($dataArray,0,8));	
+		require_once("../agendo/commonCode.php");
+		$dataArray = $_POST['data'];
+		if(!isset($dataArray)){
+			throw new Exception("Did not get any information from client.");
+		}
 		
-			// $sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
-					// (1, '".$institute."', '".$instituteAddress."', '".$institutePhone."', ".$instituteCountry.", 0)";
-			// dbHelp::query($sql);	
-			$sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
-					(1, :0, :1, :2, :3, 0)";
-			dbHelp::query($sql, array($institute, $instituteAddress, $institutePhone, $instituteCountry));	
-			
-			// $sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
-					// (1, '".$department."', 1, 1)";
-			// dbHelp::query($sql);	
-			$sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
-					(1, :0, 1, 1)";
-			dbHelp::query($sql, array($department));	
-			
-			$institute = 		$dataArray[8];
-			$instituteShort = 	$dataArray[9];
-			$instituteUrl = 	$dataArray[10];
-			$instituteMail = 	$dataArray[11];
-			$institutePass = 	$dataArray[12];
-			$instituteHost = 	$dataArray[13];
-			$institutePort = 	$dataArray[14];
-			$instituteSecure = 	$dataArray[15];
-			$instituteAuth = 	$dataArray[16];
-			$instituteAddress = $dataArray[17];
-			$institutePhone = 	$dataArray[18];
-			$instituteCountry = $dataArray[19];
-			// $sql = "INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
-					// (0, 'institute', '".$institute."'),
-					// (1, 'shortname', '".$instituteShort."'),
-					// (2, 'url', '".$instituteUrl."'),
-					// (3, 'secureresources', '0'),
-					// (4, 'host', '".$instituteHost."'),
-					// (5, 'port', '".$institutePort."'),
-					// (6, 'password', '".$institutePass."'),
-					// (7, 'email', '".$instituteMail."'),
-					// (8, 'smtpsecure', '".$instituteSecure."'),
-					// (9, 'smtpauth', '".$instituteAuth."'),
-					// (10,'publicity', '0'),
-					// (14,'timezone', '".$timezone."')";
-			// dbHelp::query($sql);	
-			$sql = "INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
-					(0, 'institute', :0),
-					(1, 'shortname', :1),
-					(2, 'url', :2),
-					(3, 'secureresources', '0'),
-					(4, 'host', :3),
-					(5, 'port', :4),
-					(6, 'password', :5),
-					(7, 'email', :6),
-					(8, 'smtpsecure', :7),
-					(9, 'smtpauth', :8),
-					(10,'publicity', '0'),
-					(14,'timezone', :9)";
-			dbHelp::query($sql, array($institute, $instituteShort, $instituteUrl, $instituteHost, $institutePort, $institutePass, $instituteMail, $instituteSecure, $instituteAuth, $timezone));	
-
-			dbHelp::scriptRead($sqlDatumoConstraints);
-			copyFolderTo('pics', $_SESSION['path']."/pics");
-			copyFolderTo('admin', $_SESSION['path']."/admin");
-			copyFolderTo('tablet', $_SESSION['path']."/tablet");
+		$adminId = 		$dataArray[0];
+		$dataArray[1] = cryptPassword($dataArray[1]);
+		$adminPass = 	$dataArray[1];
+		$adminFirst = 	$dataArray[2];
+		$adminLast = 	$dataArray[3];
+		$adminPhone = 	$dataArray[4];
+		$adminExt = 	$dataArray[5];
+		$adminMobile = 	$dataArray[6];
+		$adminMail = 	$dataArray[7];
 		
+		$institute = 		$dataArray[8];
+		$instituteShort = 	$dataArray[9];
+		$instituteUrl = 	$dataArray[10];
+		$instituteMail = 	$dataArray[11];
+		$institutePass = 	$dataArray[12];
+		$instituteHost = 	$dataArray[13];
+		$institutePort = 	$dataArray[14];
+		$instituteSecure = 	$dataArray[15];
+		$instituteAuth = 	$dataArray[16];
+		$instituteAddress = $dataArray[17];
+		$institutePhone = 	$dataArray[18];
+		$instituteCountry = $dataArray[19];
+		$department = 		$dataArray[20];
+		$software =			$dataArray[21];
+		$timezone =			$dataArray[22];
+		// $sendEmail =		$dataArray[22];
+		// $makeDB = 		(boolean)$dataArray[16];
+		// $dbName = 		$dataArray[17];
+		
+		$address = "info@cirklo.org";
+		$subject = "A new institute is installing Cirklo software.";
+		$message = "Administrator: ".$adminFirst." ".$adminLast."\nEmail: ".$adminMail."\nInstitute: ".$institute."\nDate: ".date("F j, Y, g:i a");
+		// if($sendEmail){
+		if(!checkMailAux($instituteMail)){
+			throw new Exception("Invalid email, please input a valid email address.");
+		}
+		// }
+		
+		$mail = getMailObject($subject, $address, $message, ($adminFirst." ".$adminLast), $adminMail, $instituteAuth, $instituteSecure, $institutePort, $instituteHost, $instituteMail, $institutePass);
+		sendMailObject($mail);
+
+		$datumoConstraintsFile = 'DatumoConstraints.sql';
+		$datumoTriggersFile = 'DatumoTriggers.sql';
+		$currentFile = $datumoConstraintsFile;
+		
+		if(
+		!($sqlDatumoConstraints = file_get_contents($currentFile))
+		|| !($sqlDatumoTriggers = file_get_contents(($currentFile = $datumoTriggersFile)))
+		){
+			throw new Exception("Failed to open ".$currentFile.".");
+		}
+
+		// $sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
+				// (1, '".$adminId."', '".$adminPass."', '".$adminFirst."', '".$adminLast."', 1, '".$adminPhone."', '".$adminExt."', '".$adminMobile."', '".$adminMail."', 1, 0)";
+		// dbHelp::query($sql);	
+		$sql = "INSERT INTO `user` (`user_id`, `user_login`, `user_passwd`, `user_firstname`, `user_lastname`, `user_dep`, `user_phone`, `user_phonext`, `user_mobile`, `user_email`, `user_alert`, `user_level`) VALUES
+				(1, :0, :1, :2, :3, 1, :4, :5, :6, :7, 1, 0)";
+		dbHelp::query($sql, array_slice($dataArray,0,8));	
+	
+		// $sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
+				// (1, '".$institute."', '".$instituteAddress."', '".$institutePhone."', ".$instituteCountry.", 0)";
+		// dbHelp::query($sql);	
+		$sql = "INSERT INTO `institute` (`institute_id`, `institute_name`, `institute_address`, `institute_phone`, `institute_country`, `institute_vat`) VALUES
+				(1, :0, :1, :2, :3, 0)";
+		dbHelp::query($sql, array($institute, $instituteAddress, $institutePhone, $instituteCountry));	
+		
+		// $sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
+				// (1, '".$department."', 1, 1)";
+		// dbHelp::query($sql);	
+		$sql = "INSERT INTO `department` (`department_id`, `department_name`, `department_inst`, `department_manager`) VALUES
+				(1, :0, 1, 1)";
+		dbHelp::query($sql, array($department));	
+		$institute = 		$dataArray[8];
+		$instituteShort = 	$dataArray[9];
+		$instituteUrl = 	$dataArray[10];
+		$instituteMail = 	$dataArray[11];
+		$institutePass = 	$dataArray[12];
+		$instituteHost = 	$dataArray[13];
+		$institutePort = 	$dataArray[14];
+		$instituteSecure = 	$dataArray[15];
+		$instituteAuth = 	$dataArray[16];
+		$instituteAddress = $dataArray[17];
+		$institutePhone = 	$dataArray[18];
+		$instituteCountry = $dataArray[19];
+		$sql = "INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
+				(0, 'institute', :0),
+				(1, 'shortname', :1),
+				(2, 'url', :2),
+				(3, 'secureresources', '0'),
+				(4, 'host', :3),
+				(5, 'port', :4),
+				(6, 'password', :5),
+				(7, 'email', :6),
+				(8, 'smtpsecure', :7),
+				(9, 'smtpauth', :8),
+				(10,'publicity', '0'),
+				(14,'timezone', :9)";
+		dbHelp::query($sql, array($institute, $instituteShort, $instituteUrl, $instituteHost, $institutePort, $institutePass, $instituteMail, $instituteSecure, $instituteAuth, $timezone));	
+
+		dbHelp::scriptRead($sqlDatumoConstraints);
+		copyFolderTo('pics', $_SESSION['path']."/pics");
+		copyFolderTo('admin', $_SESSION['path']."/admin");
+		copyFolderTo('tablet', $_SESSION['path']."/tablet");
+	
 //******* .htaccess ***********
-			if(($fileData = file_get_contents($_SESSION['path']."/admin/.htaccess")) == false){
-				throw new Exception("Wasn't able to open '.htaccess'.");
-			}
-			
-			$absPath = getcwd();
-			$absPath = str_replace('\\', '/', $absPath);
-			$absPath = str_ireplace('install', substr($_SESSION['path'], 3)."/admin/", $absPath);
-			$fileData = str_replace('pathMarker', $absPath, $fileData);
-			wtlog('.htaccess path marker replaced successfully','a');
+		if(($fileData = file_get_contents($_SESSION['path']."/admin/.htaccess")) == false){
+			throw new Exception("Wasn't able to open '.htaccess'.");
+		}
+		
+		$absPath = getcwd();
+		$absPath = str_replace('\\', '/', $absPath);
+		$absPath = str_ireplace('install', substr($_SESSION['path'], 3)."/admin/", $absPath);
+		$fileData = str_replace('pathMarker', $absPath, $fileData);
+		wtlog('.htaccess path marker replaced successfully','a');
 
-			if(!file_put_contents($_SESSION['path']."/admin/.htaccess", $fileData)){
-				throw new Exception("Couldn't create the .htaccess file in '".$_SESSION['path']."/admin/");
-			}
+		if(!file_put_contents($_SESSION['path']."/admin/.htaccess", $fileData)){
+			throw new Exception("Couldn't create the .htaccess file in '".$_SESSION['path']."/admin/");
+		}
 //*****************************
 
-			// Eventually change this if there are other softwares to install
-			if($software != "agendo"){
-				loadTriggers($sqlDatumoTriggers, $echoSeparator);
-			}
-			// Eventually change this if there are other softwares to install
-			else{
-				if(
-				!copy(($filename = 'indexAgendo.php'), $_SESSION['path']."/index.php") || 
-				!copy(($filename = 'tabletIndex.php'), $_SESSION['path']."/tabletIndex.php") || 
-				!copy(($filename = 'weekview.php'), $_SESSION['path']."/weekview.php")
-				){
-					throw new Exception("Couldn't create the '".$filename."' file in '".$_SESSION['path']."'.");
-				}
-
-				$agendoBaseFile = 'AgendoBase.sql';
-				$agendoConstraintsFile = 'AgendoConstraints.sql';
-				$agendoTriggersFile = 'AgendoTriggers.sql';
-				$currentFile = $agendoBaseFile;
-				if(
-				!($sqlAgendo = file_get_contents($currentFile)) || 
-				!($sqlAgendoContraints = file_get_contents(($currentFile = $agendoConstraintsFile))) ||
-				!($sqlAgendoTriggers = file_get_contents(($currentFile = $agendoTriggersFile)))
-				){
-					throw new Exception("Failed to open '".$currentFile."'.");
-				}
-				
-				// tablesAlreadyExist($sqlAgendo); // not being used since the database is not created if it already exists
-
-				dbHelp::scriptRead($sqlAgendo);
-				dbHelp::scriptRead($sqlAgendoContraints);
-				loadTriggers($sqlAgendoTriggers, $echoSeparator);
-			}
+		// Eventually change this if there are other softwares to install
+		if($software != "agendo"){
+			loadTriggers($sqlDatumoTriggers, $echoSeparator);
 		}
-		catch(Exception $e){
-			$msg = $e->getMessage();
-		}
+		// Eventually change this if there are other softwares to install
+		else{
+			if(
+			!copy(($filename = 'indexAgendo.php'), $_SESSION['path']."/index.php") || 
+			!copy(($filename = 'tabletIndex.php'), $_SESSION['path']."/tabletIndex.php") || 
+			!copy(($filename = 'weekview.php'), $_SESSION['path']."/weekview.php")
+			){
+				throw new Exception("Couldn't create the '".$filename."' file in '".$_SESSION['path']."'.");
+			}
+
+			$agendoBaseFile = 'AgendoBase.sql';
+			$agendoConstraintsFile = 'AgendoConstraints.sql';
+			$agendoTriggersFile = 'AgendoTriggers.sql';
+			$currentFile = $agendoBaseFile;
+			if(
+			!($sqlAgendo = file_get_contents($currentFile))
+			|| !($sqlAgendoContraints = file_get_contents(($currentFile = $agendoConstraintsFile)))
+			|| !($sqlAgendoTriggers = file_get_contents(($currentFile = $agendoTriggersFile)))
+			){
+				throw new Exception("Failed to open '".$currentFile."'.");
+			}
+			
+			// tablesAlreadyExist($sqlAgendo); // not being used since the database is not created if it already exists
+
+			dbHelp::scriptRead($sqlAgendo);
+			dbHelp::scriptRead($sqlAgendoContraints);
+			loadTriggers($sqlAgendoTriggers, $echoSeparator);
+			}
 		
 		wtlog($msg,'a');
 		$json->message = $msg;
-		$json->success = ($msg == $successMsg);
 		echo json_encode($json);
 	}
 	
-	function back(){
-		$message = "No path was created yet";
-		$path = strip_tags($_POST['path']);
+	// comment this
+	// function back(){
+		// $message = "No path was created yet";
+		// $path = strip_tags($_POST['path']);
 		
-		if(isset($path)){
-			$_SESSION['path'] = "../".$path;
-			require_once("../agendo/commonCode.php");
-			try{
-				$sql = "drop database ".dbHelp::getSchemaName();
-				dbHelp::query($sql);
-				$message = "Database deleted.<br>";
-			}
-			catch(Exception $e){
-				$message = $e->getMessage()."<br>";
-			}
+		// if(isset($path)){
+			// $_SESSION['path'] = "../".$path;
+			// require_once("../agendo/commonCode.php");
+			// $databaseName = dbHelp::getSchemaName();
+			// $sql = "drop database ".dbHelp::getSchemaName();
+			// dbHelp::query($sql);
+			// $message = "'".$databaseName."' database deleted.<br>";
 
-			try{
-				rrmdir($_SESSION['path']);
-				$message = $message.$_SESSION['path']." folder removed.<br>";
-			}
-			catch(Exception $e){
-				$message = $message.$e->getMessage()."<br>";
-			}
-		}
-		echo $message;
-		session_destroy();
-	}
+			// rrmdir($_SESSION['path']);
+			// $message = $message."'".$path."' folder removed.<br>";
+		// }
+		// $json->message = $message;
+		// echo json_encode($json);
+	// }
 	
 	function rrmdir($dir) {
 		if (is_dir($dir)) {

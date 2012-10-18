@@ -14,14 +14,9 @@ if(isset($_SESSION['path']) or $_SESSION['path']!=""){
 }
 
 //require_once ".htconnect.php";
-
 class dbConn{
 	public function __construct(){
 		$conn=new dbConnection();
 	}
 }
-
-
-
 ?>
-

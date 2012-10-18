@@ -27,34 +27,34 @@
 		try{
 			if(isset($_SESSION['user_id'])){
 				$user = $_SESSION['user_id'];
-					$sql = "select resource_id, resource_name from resource where resource_status = 3 and resource_resp = :0"; // user confirmation
-					$res = dbHelp::query($sql, array($user));
-					$resourcesQuantity = dbHelp::numberOfRows($res);
-					if($resourcesQuantity != 0){
-						echo "<P ALIGN=center>";
-							echo "<object type='application/x-java-applet' WIDTH='500' HEIGHT='200' id='zeeApplet'>";
-								echo "<param name='codebase' value = '.' />";
-								echo "<param name='archive' value='macApp.jar'/>";
-								echo "<param name='code' value='MacAddressApplet'/>";
-								echo "<param name='scriptable' value='true'/>";
+				$sql = "select resource_id, resource_name from resource where resource_status = 3 and resource_resp = :0"; // user confirmation
+				$res = dbHelp::query($sql, array($user));
+				$resourcesQuantity = dbHelp::numberOfRows($res);
+				if($resourcesQuantity != 0){
+					echo "<P ALIGN=center>";
+						echo "<object type='application/x-java-applet' WIDTH='500' HEIGHT='200' id='zeeApplet'>";
+							echo "<param name='codebase' value = '.' />";
+							echo "<param name='archive' value='macApp.jar'/>";
+							echo "<param name='code' value='MacAddressApplet'/>";
+							echo "<param name='scriptable' value='true'/>";
 
-								echo "<param name='color' value='#1e4F54'/>";
-								echo "<param name='url' value='".getUrl()."'/>";
-								echo "<param name='action' value='associateRes'/>";
-								echo "<param name='numberOfResources' value='".$resourcesQuantity."'/>";
-								$i = 0;
-								while($arr = dbHelp::fetchRowByIndex($res)){
-									echo "<param name='resource".$i."Id' value='".$arr[0]."'/>";
-									echo "<param name='resource".$i."Name' value='".$arr[1]."'/>";
-									$i++;
-								}
-								echo "<P>The application was not recognized by the browser. Try downloading the latest Java version <a href='http://java.com/en/download/index.jsp'>here</a></P>";
-							echo "</object>";
-						echo "</P>";
-					}
-					else{
-						throw new Exception('You need to login as a resource responsible');
-					}
+							echo "<param name='color' value='#1e4F54'/>";
+							echo "<param name='url' value='".getUrl()."'/>";
+							echo "<param name='action' value='associateRes'/>";
+							echo "<param name='numberOfResources' value='".$resourcesQuantity."'/>";
+							$i = 0;
+							while($arr = dbHelp::fetchRowByIndex($res)){
+								echo "<param name='resource".$i."Id' value='".$arr[0]."'/>";
+								echo "<param name='resource".$i."Name' value='".$arr[1]."'/>";
+								$i++;
+							}
+							echo "<P>The application was not recognized by the browser. Try downloading the latest Java version <a href='http://java.com/en/download/index.jsp'>here</a></P>";
+						echo "</object>";
+					echo "</P>";
+				}
+				else{
+					throw new Exception('You need to login as a resource responsible');
+				}
 			}
 			else{
 				throw new Exception('You need to login');

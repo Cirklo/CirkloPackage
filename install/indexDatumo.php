@@ -1,9 +1,14 @@
 <?php 
 //set current working directory
-session_start();
-$pathOfIndex = $_SERVER['SCRIPT_NAME'];
-$pathOfIndex = substr($pathOfIndex,0,strlen($pathOfIndex)-strlen("/index.php"));
-$_SESSION['path']=$pathOfIndex;
+// session_start();
+// $pathOfIndex = $_SERVER['SCRIPT_NAME'];
+// $pathOfIndex = substr($pathOfIndex,0,strlen($pathOfIndex)-strlen("/index.php"));
+// $_SESSION['path']=$pathOfIndex;
+
+	session_start();
+	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
+	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
+
 ?>
 
 <link href="../datumo/css/index.css" media="screen" rel="stylesheet" type="text/css" />
