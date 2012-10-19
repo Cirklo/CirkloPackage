@@ -122,7 +122,7 @@ class permClass{
 		if (substr($this->Permission,3,1)) {
 			return true;
 		} else {
-			$this->warning='You cannot add entries for this resouce!';
+			$this->warning='You cannot add entries for this resource!';
 			return false;
 		}
 			
