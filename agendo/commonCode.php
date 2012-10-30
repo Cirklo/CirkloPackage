@@ -369,21 +369,21 @@
 							echo "</td>";
 						echo "</tr>";
 
-						$sql = "select resource_id, resource_name from resource where resource_status = 3 and resource_resp = :0"; // user confirmation
-						$prep = dbHelp::query($sql, array($_SESSION['user_id']));
-						if(isAdmin($_SESSION['user_id']) || dbHelp::numberOfRows($prep) > 0){
-							echo "<tr>";
-								echo "<td style='text-align:center'>";
-									echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/makeConfirmRes.php'\" value='Resource Settings' />";
-								echo "</td>";
-							echo "</tr>";
-						}
+						// $sql = "select resource_id, resource_name from resource where resource_status = 3 and resource_resp = :0"; // user confirmation
+						// $prep = dbHelp::query($sql, array($_SESSION['user_id']));
+						// if(isAdmin($_SESSION['user_id']) || dbHelp::numberOfRows($prep) > 0){
+							// echo "<tr>";
+								// echo "<td style='text-align:center'>";
+									// echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/makeConfirmRes.php'\" value='Resource Settings' />";
+								// echo "</td>";
+							// echo "</tr>";
+						// }
 						
-						echo "<tr>";
-							echo "<td colspan='2' style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/hoursUsage.php'\" value='Usage Report' />";
-							echo "</td>";
-						echo "<tr>";
+						// echo "<tr>";
+							// echo "<td colspan='2' style='text-align:center'>";
+								// echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/hoursUsage.php'\" value='Usage Report' />";
+							// echo "</td>";
+						// echo "<tr>";
 					echo "</table>";
 				}
 				
@@ -449,19 +449,19 @@
 						echo "</td>";
 					echo "<tr>";
 					
-					if(isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) != false){ // Check if user is admin or resource responsible
-						echo "<tr>";
-							echo "<td colspan=2 style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
-							echo "</td>";
-						echo "<tr>";
+					// if(isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) != false){ // Check if user is admin or resource responsible
+						// echo "<tr>";
+							// echo "<td colspan=2 style='text-align:center'>";
+								// echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/massPassRenewal.php'\" value='Password Generation' />";
+							// echo "</td>";
+						// echo "<tr>";
 
-						echo "<tr>";
-							echo "<td colspan=2 style='text-align:center'>";
-								echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/givePermission.php'\" value='Resource Access' />";
-							echo "</td>";
-						echo "<tr>";
-					}
+						// echo "<tr>";
+							// echo "<td colspan=2 style='text-align:center'>";
+								// echo "<input type=button style='font-size:11px' onclick=\"window.location='../agendo/givePermission.php'\" value='Resource Access' />";
+							// echo "</td>";
+						// echo "<tr>";
+					// }
 				echo "</table>";
 			echo "</form>";
 		echo "</div>";

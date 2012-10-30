@@ -94,9 +94,9 @@ function DisplayUserInfo() {
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,date_format(entry_datetime,'%H:%i') s,date_format(date_add(entry_datetime,interval resource_resolution*entry_slots minute),'%H:%i') e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
 	// $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
 	// $res=dbHelp::query($sqlAux) or die ($sqlAux);
-    $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id= :0";
-    $res=dbHelp::query($sqlAux, array($value)) or die ($sqlAux);
-    $arr=dbHelp::fetchRowByIndex($res);
+    // $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id= :0";
+    // $res=dbHelp::query($sqlAux, array($value)) or die ($sqlAux);
+    // $arr=dbHelp::fetchRowByIndex($res);
 	
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
     // $res=dbHelp::query($sql) or die ($sql);
@@ -113,7 +113,7 @@ function DisplayUserInfo() {
     $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=:0";
     $res=dbHelp::query($sql, array($value)) or die ($sql);
     $arr=dbHelp::fetchRowByIndex($res);
-    echo "<table style='".$style."'>";
+    echo "<table id='popUpDisplayTable' style='".$style."'>";
     echo "<tr><td>Time: </td><td>" . $arr[8] ."-" .$arr[9] ."</td></tr>";
     echo "<tr><td>Name: </td><td>" . $arr[0] . " " . $arr[1] . "</td></tr>";
 	
@@ -125,6 +125,22 @@ function DisplayUserInfo() {
 		echo "<tr><td>Phone ext: </td><td>" . $arr[5] . "</td></tr>";
 		echo "<tr><td>Department: </td><td>" . $arr[6] . "</td></tr>";
 		echo "<tr><td>Institute: </td><td>" . $arr[7] . "</td></tr>";
+		
+		// user assiduity goes here
+		$sql = "select configParams_value from configParams where configParams_name = 'showAssiduity'";
+		$prep = dbHelp::query($sql);
+		$row = dbHelp::fetchRowByIndex($prep);
+
+		if($row[0] == 1){
+			// echo "<tr><td colspan=2><hr></td></tr>";
+
+			// echo "<tr>";
+				// echo "<td colspan=2 style='text-align:center;'>";
+					require_once("../agendo/assiduity.php");
+				// echo "</td>";
+			// echo "</tr>";
+		}
+		// **************************
 	}
 	
 	$sql = "
@@ -140,7 +156,8 @@ function DisplayUserInfo() {
 			and entry_resource = res 
 			and entry_datetime = entryDate 
 			and entry_status = 4 
-		order by entry_id asc
+		order by
+			entry_id asc
 	";
     $res=dbHelp::query($sql, array($value)) or die ($sql);
 	$arr=dbHelp::fetchRowByIndex($res);

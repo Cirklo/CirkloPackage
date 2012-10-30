@@ -21,12 +21,12 @@
 	$path = $_SESSION['path'];
 	$color = '#1e4F54';
 	echo "<body bgcolor='".$color."'>";
-		echo "<div style='text-align:center'>";
-			echo "<a href='".$path."' style='color:#F7C439'>Back to reservations</a>";
-		echo "</div>";
 		try{
 			if(isset($_SESSION['user_id'])){
 				$user = $_SESSION['user_id'];
+				if(isResp($user) === false){
+					throw new Exception("You are not the manager of any resources");
+				}
 				$sql = "select resource_id, resource_name from resource where resource_status = 3 and resource_resp = :0"; // user confirmation
 				$res = dbHelp::query($sql, array($user));
 				$resourcesQuantity = dbHelp::numberOfRows($res);
@@ -63,6 +63,12 @@
 		catch(Exception $e){
 			showMsg($e->getMessage(), true);
 		}
+
+		echo "<div style='text-align:center'>";
+			// echo "<a href='".$path."' style='color:#F7C439'>Back to reservations</a>";
+			echo "<a href='../datumo/' style='color:#F7C439'>Back to datumo</a>";
+		echo "</div>";
+		
 	echo "</body>";
 	
 	// returns the url for this file

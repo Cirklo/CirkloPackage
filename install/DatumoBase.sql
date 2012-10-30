@@ -1125,9 +1125,9 @@ CREATE TABLE IF NOT EXISTS `menu` (
 --
 
 INSERT INTO `menu` (`menu_id`, `menu_name`, `menu_description`, `menu_plugin`, `menu_url`) VALUES
-(1, 'My Calendar', 'Personal calendar', 1, 'mycalendar.php'),
-(2, 'Image upload', 'Resource image uploader', 1, 'resupload.php'),
-(3, 'Reservations', 'Return to reservation system', 1, '../pathMarker/index.php'),
+(1, 'Back to reservations', 'Return to reservation system', 1, '../pathMarker/index.php'),
+(2, 'My Calendar', 'Personal calendar', 1, 'mycalendar.php'),
+(3, 'Image upload', 'Resource image uploader', 1, 'resupload.php'),
 (4, 'Mailing', 'Mailing list tool', 1, 'mailing.php');
 
 

@@ -28,6 +28,10 @@ function sendChecksAndDate(action, departments, changeLocation){
 			urlPath += "&entryCheck";
 		}
 		
+		if($('#projectCheck').attr('checked')){
+			urlPath += "&projectCheck";
+		}
+		
 		if(document.getElementById('adminRadio') && document.getElementById('adminRadio').checked == true){
 			urlPath += "&userLevel=admin";
 		}

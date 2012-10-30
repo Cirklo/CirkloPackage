@@ -2,7 +2,8 @@ $(document).ready(
 	function(){
 		// Browser detection
 		if(!detect()){
-			showMessage("This browser may be incompatible with Agendo.", true);
+			// showMessage("This browser may be incompatible with Agendo.", true);
+			window.location = "../agendo/errorPage.php";
 		}
 
 		$("#resourceSearch").focus(

@@ -441,20 +441,22 @@
 		}
 		
 		// if resource needs confirmation by resp or user
-		if (!$perm->getWasAdmin() && ($perm->getResourceStatus() == 4 || $perm->getResourceStatus() == 3)){ 
+		// if (!$perm->getWasAdmin() && ($perm->getResourceStatus() == 4 || $perm->getResourceStatus() == 3)){
+		// always sets the entry updated to unconfirmed
+		if ($perm->getResourceStatus() == 4 || $perm->getResourceStatus() == 3){ 
 			// current date in time format
 			$todaysDate = time(date("YmdHi"));
 
-			$sql="select entry_status from entry where entry_id = :0";
-			$res = dbHelp::query($sql, array($entry));
-			$arr = dbHelp::fetchRowByIndex($res);
+			// $sql="select entry_status from entry where entry_id = :0";
+			// $res = dbHelp::query($sql, array($entry));
+			// $arr = dbHelp::fetchRowByIndex($res);
 			
 			$delHourLimit = strtotime($datetime) + $perm->getResourceDelHour()*60*60;
 			$dateBackLimit = date("YmdHi", $delHourLimit);
-			if ($delHourLimit > $todaysDate) {
+			// if ($delHourLimit > $todaysDate) {
 				$sql="update entry set entry_status = 2 where entry_id = :0";
 				$res = dbHelp::query($sql, array($entry));
-			}
+			// }
 		}
 		
 		// assigning project to entry section

@@ -7,13 +7,16 @@
 		$isResp = isResp($_SESSION['user_id']);
 		$isAdmin = isAdmin($_SESSION['user_id']);
 		$isPI = isPI($_SESSION['user_id']);
+		$userLevel = $_GET['userLevel'];
 		
 		$userCheck = isset($_GET['userCheck']);
 		$resourceCheck = isset($_GET['resourceCheck']);
 		$entryCheck = isset($_GET['entryCheck']);
+		$projectCheck = isset($_GET['projectCheck']);
+		
 		$beginDate = $_GET['beginDate'];
 		$endDate = $_GET['endDate'];
-		$userLevel = $_GET['userLevel'];
+		
 		$happyHourArray = array();
 		$resources = array();
 		$results = array();
@@ -56,7 +59,8 @@
 		echo "<br>";
 
 		echo "<div style='margin:auto;width:200px;text-align:center;'>";
-			echo "<a class='link' href='".$_SESSION['path']."/'>Back to reservations</a>";
+			// echo "<a class='link' href='".$_SESSION['path']."/'>Back to admin area</a>";
+			echo "<a class='link' href='../datumo/'>Back to admin area</a>";
 		echo "</div>";
 		exit;
 	}
@@ -136,7 +140,7 @@
 		
 		if($numberOfPrivileges > 1){
 			echo "<tr>";
-				echo "<td colspan='2' style='text-align:center;color:#F7C439;font-size:14px;' title='Pick the user level you wish to view the information as'>";
+				echo "<td colspan='4' style='text-align:center;color:#F7C439;font-size:14px;' title='Pick the user level you wish to view the information as'>";
 					echo "<fieldset style='width:200px;margin:auto;'>";
 					echo "<legend>User level:</legend>";
 					echo $privilegeHtml;
@@ -153,46 +157,72 @@
 		// *********************************************
 		
 		echo "<tr>";
-			echo "<td style='text-align:left;'>";
+			echo "<td colspan='2' style='text-align:left;'>";
 				echo "<a>From date:</a>";
 				echo "&nbsp";
 				echo "<input type='text' id='beginDateText' style='text-align:center;' value='".$beginDate."'/>";
 			echo "</td>";
 
-			echo "<td style='text-align:right;'>";
+			echo "<td colspan='2' style='text-align:right;'>";
 				echo "<a>To date:</a>";
 				echo "&nbsp";
 				echo "<input type='text' id='endDateText' style='text-align:center;' value='".$endDate."'/>";
 			echo "</td>";
 		echo "</tr>";
 
+		echo "<tr>";
+			echo "<td>";
+				echo "<br>";
+			echo "</td>";
+		echo "</tr>";
+		
 		$checked = "";
 		echo "<tr>";
+			// echo "<td style='text-align:center;'>";
 			echo "<td style='text-align:center;'>";
 				echo "<label style='float:left;'>User";
 					$checked = ($userCheck) ? "checked" : "";
 					echo "<input type='checkBox' id='userCheck' ".$checked."/>";
 				echo "</label>";
+			echo "</td>";
 
+			echo "<td style='text-align:center;'>";
 				echo "<label>Resource";
 					$checked = ($resourceCheck) ? "checked" : "";
 					echo "<input type='checkBox' id='resourceCheck' ".$checked."/>";
 				echo "</label>";
+			echo "</td>";
 
+			echo "<td style='text-align:center;'>";
 				echo "<label style='float:right;'>Entry";
 					$checked = ($entryCheck) ? "checked" : "";
 					echo "<input type='checkBox' id='entryCheck' ".$checked."/>";
 				echo "</label>";
 			echo "</td>";
+
+			echo "<td style='text-align:center;'>";
+				echo "<label style='float:right;'>Project";
+					$checked = ($projectCheck) ? "checked" : "";
+					echo "<input type='checkBox' id='projectCheck' ".$checked."/>";
+				echo "</label>";
+			echo "</td>";
+		echo "</tr>";
 			
-			echo "<td style='text-align:right;'>";
-				echo "<input type='button' id='searchButton' value='Generate Report' onclick='generateReport();'/>";
+		echo "<tr>";
+			echo "<td colspan='4' style='text-align:center;color:#F7C439;font-size:14px;'>";
+				echo "Check the boxes above for additional information";
 			echo "</td>";
 		echo "</tr>";
 		
 		echo "<tr>";
-			echo "<td colspan='2' style='text-align:left;color:#F7C439;font-size:14px;'>";
-				echo "Check the boxes above for additional information";
+			echo "<td>";
+				echo "<br>";
+			echo "</td>";
+		echo "</tr>";
+		
+		echo "<tr>";
+			echo "<td colspan='4' style='text-align:center;'>";
+				echo "<input type='button' id='searchButton' value='Generate Report' onclick='generateReport();'/>";
 			echo "</td>";
 		echo "</tr>";
 		
@@ -203,8 +233,15 @@
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1024;text-align:center;'>";
 		$html = generateHtml();
+		$backLink = "
+			<div style='margin:auto;width:200px;text-align:center;'>
+				<a class='link' name='back' href='../datumo/'>Back to admin area</a>
+			</div>
+		";
 
 		if(!empty($html)){
+			echo $backLink;
+	
 			$extraOptions = "<div style='display:table;text-align:center;width:100%;'>";
 				$extraOptions .= "<label style='float:left;margin-left:3px;'>Select all";
 					$extraOptions .= "<input type='checkBox' class='allCheck' onclick='selectUnselectAll(this);'/>";
@@ -230,9 +267,8 @@
 	
 	echo "<br>";
 
-	echo "<div style='margin:auto;width:200px;text-align:center;'>";
-		echo "<a class='link' name='back' href='".$_SESSION['path']."/'>Back to reservations</a>";
-	echo "</div>";
+	// echo "<a class='link' name='back' href='".$_SESSION['path']."/'>Back to reservations</a>";
+	echo $backLink;
 	
 	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
 	function startTable($departmentId, $deparmentName, $headerArray, $colspan){
@@ -390,7 +426,7 @@
 	}
 	
 	function fieldLabelFunctionAssoc($notCsv = true){
-		global $userCheck, $resourceCheck, $entryCheck, $argumentsArray, $labelWidthArray;
+		global $userCheck, $resourceCheck, $entryCheck, $projectCheck, $argumentsArray, $labelWidthArray;
 		
 		$regularSelectArray = array();
 		$functionSelectArray = array();
@@ -450,6 +486,16 @@
 			$selectArray[] = "entry_resource";
 		}
 
+		if($projectCheck == 1){
+			// label to field association
+			$functionSelectArray['projectFormat'] = array("args" => array("project_name"));
+			$size++;
+
+			// extra fields on the select section of the query
+			$selectArray[] = "project_name";
+			$selectArray[] = "project_id";
+		}
+
 		// static function field association
 		$functionSelectArray['usageCost'] = array("args" => array("entry_resource", "entry_datetime", "entry_slots", "price_value", "project_discount"));
 		$size += 2;
@@ -473,7 +519,7 @@
 	function generateResults($selectedDepartmentsArray = null){
 		global $results, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate;
 		$results = array();
-		
+
 		if(empty($beginDate) || empty($endDate)){
 			return;
 		}
@@ -608,7 +654,7 @@
 		$resource = $resources[$res[$args[0]]];
 
 		$price = 0;
-		if(isset($price)){
+		if(isset($res[$args[3]])){
 			$price = $res[$args[3]];
 		}
 		
@@ -631,10 +677,14 @@
 		$tempUsage = $usageAndCost["noDiscountTime"] + $usageAndCost['discountTime'];
 		$usage += $tempUsage;
 		$tempDiscountCost = $usageAndCost["discountCost"] * (100 - $projDiscount) * 0.01;
-		$discountedCost += ($usageAndCost["noDiscountCost"] * (100 - $projDiscount) * 0.01) + $tempDiscountCost;
-		$noDiscountCost += $tempUsage * $price / 60;
-		$discountCost = $noDiscountCost - $discountedCost;
 
+		// needed to round both of these so there wouldnt be results like -0, in cases like both $discountedCost and $noDiscountCost were 3,3333333333333
+		$roundBy = 10;
+		$discountedCost += round(($usageAndCost["noDiscountCost"] * (100 - $projDiscount) * 0.01) + $tempDiscountCost, $roundBy);
+		$noDiscountCost += round($tempUsage * $price / 60, $roundBy);
+
+		$discountCost = $noDiscountCost - $discountedCost;
+		
 		return array(
 			"Duration" => array('value' => $usage)
 			, 'Discount' => array('value' => $discountCost)
@@ -667,6 +717,16 @@
 		);
 	}
 	
+	function projectFormat(&$res, &$args){
+		$formatedValue = "No project";
+		if(isset($res[$args[0]])){
+			$formatedValue = $res[$args[0]];
+		}
+		return array(
+			'Project' => array('value' => $formatedValue, 'lineKey' => 'project_id')
+		);
+	}
+	
 	// function generateHtml(){
 	function generateHtml($selectedDepartmentsArray = null, $showSelects = true){
 		global $labelWidthArray, $argumentsArray, $results;
@@ -681,6 +741,7 @@
 			, "Duration" => array('function' => 'usageHtml', 'width' => 90, 'value' => 0)
 			, "Subtotal" => array('function' => 'costFormat', 'width' => 75, 'value' => 0)
 			, "Discount" => array('function' => 'costFormat', 'width' => 75, 'value' => 0)
+			, "Project" => array('width' => 80)
 			, "Total" => array('function' => 'costFormat', 'width' => 100, 'value' => 0)
 		);
 		
@@ -793,9 +854,10 @@
 			, "Duration" => 'usageCsv'
 			, "Subtotal" => 'costFormat'
 			, "Discount" => 'costFormat'
+			, "Project" => null
 			, "Total" => 'costFormat'
 		);
-		
+
 		// headers ****************
 		$firstLine = current($results);
 		$headerArray = array();
@@ -818,7 +880,10 @@
 				if(isset($function)){
 					$value = $function($line[$label]);
 				}
-				$csvData .= "\"".$value."\"".$columnSeparator;
+				
+				if(isset($value)){
+					$csvData .= "\"".$value."\"".$columnSeparator;
+				}
 			}
 
 			$csvData .= $lineSeparator;

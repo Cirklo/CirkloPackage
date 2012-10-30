@@ -117,13 +117,13 @@ echo "<div id=help style='display:none;position:absolute;border-style:solid;bord
 echo "<p style='text-align:center'>Equipment status: " . $calendar->getStatusName()."</p>";
 echo "<p style='text-align:center'>Equipment Responsible: <a href=mailto:" . $calendar->getRespEmail() . ">". $calendar->getRespName() . "</a>"."</p>";
 echo "<p style='text-align:center'>Delete Tolerance: " . $calendar->getDelTolerance(). " hour(s)"."</p>";
-echo "<p style='text-align:center'>Daily Maximum Slot Number: " . $calendar->getMaxSlots()."</p>";
+echo "<p style='text-align:center'>Daily Maximum (warning): " .($calendar->getMaxSlots()*$calendar->getResolution()/60)." hour(s)</p>";
 echo "<p style='text-align:center'><a target=_new href=../agendo/prices.php>Click to look at prices (excluding VAT and dedicated assistance)</a></p>";
 if ($calendar->getStatus()==3) echo "<p style='text-align:center'>Tolerance for confirmation " . $calendar->getConfTolerance()*$calendar->getResolution()/60 . " hours(s) before or after entry"."</p>";
-echo "<p style='text-align:center'>Further info: <a href="  . $calendar->getLink() . ">" .$calendar->getLink() . "</a></p>" ;
+echo "<p style='text-align:center'>Further info: <a href=".$calendar->getLink().">".$calendar->getLink()."</a></p>" ;
 
 if($showCheckBoxMailList){
-	echo "<hr />";
+	echo "<hr/>";
 	echo "<p style='text-align:center' title='Click to receive emails when entries are updated or deleted'>";
 		echo "<label>Automatic delete and update warning <input type='checkbox' id='weekviewMailingList' ".$mailListCheck." onclick='mailListCheck(this, ".$resource.");' /></label>";
 	echo "</p>";
@@ -587,24 +587,22 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "</td>";
 						echo "</tr>";
 
-						// user assiduity goes here
-						$sql = "select configParams_value from configParams where configParams_name = 'showAssiduity'";
-						$prep = dbHelp::query($sql);
-						$row = dbHelp::fetchRowByIndex($prep);
-						
 						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!=''){
-							if($row[0] == 1){
-								// echo "<tr><td colspan=2 style='display:".$showIfUserLogged."'><hr></td></tr>";
-								echo "<tr><td colspan=2><hr></td></tr>";
+							// user assiduity goes here
+							// $sql = "select configParams_value from configParams where configParams_name = 'showAssiduity'";
+							// $prep = dbHelp::query($sql);
+							// $row = dbHelp::fetchRowByIndex($prep);
+							
+							// if($row[0] == 1){
+								// echo "<tr><td colspan=2><hr></td></tr>";
 
-								echo "<tr>";
-									// echo "<td colspan=2 style='text-align:center;display:".$showIfUserLogged.";'>";
-									echo "<td colspan=2 style='text-align:center;'>";
-										require_once("../agendo/assiduity.php");
-									echo "</td>";
-								echo "</tr>";
-							}
-						// **************************
+								// echo "<tr>";
+									// echo "<td colspan=2 style='text-align:center;'>";
+										// require_once("../agendo/assiduity.php");
+									// echo "</td>";
+								// echo "</tr>";
+							// }
+							// **************************
 						
 						// project listing goes here
 						// if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){

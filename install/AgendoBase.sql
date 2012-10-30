@@ -199,7 +199,6 @@ INSERT INTO `item_state` (`item_state_id`, `item_state_name`) VALUES
 -- Dumping data for table `mask`
 --
 
-
 INSERT INTO `mask` (`mask_table`, `mask_name`, `mask_pic`) VALUES
 ('xfields', 'Fields configuration', NULL),
 ('resource', 'Resources', NULL),
@@ -226,7 +225,7 @@ INSERT INTO `mask` (`mask_table`, `mask_name`, `mask_pic`) VALUES
 ('happyhour_assoc', 'Happy hour association', NULL),
 ('project', 'Project creation', NULL),
 ('proj_dep_assoc', 'Project association', NULL),
-('price', 'Price association', NULL),
+('price', 'Resource prices', NULL),
 ('blacklist', 'Blacklist users', NULL);	
 
 

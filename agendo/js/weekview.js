@@ -217,7 +217,7 @@ function swapColor(obj,tag,action){
 	            button_visibility(false,false,false,false,false);
 			// }
 			selectedEntry = obj.title;
-			if(document.getElementById('assiduityDiv') && document.getElementById('assiduityDiv').style.display != 'none'){
+			if(document.getElementById('popUpDisplayTable')){
 				$.post(
 					'../agendo/assiduity.php'
 					,{action: 'getDivData', entry: selectedEntry, resource: resourceToUseInGet}
@@ -966,3 +966,61 @@ function changeProjectListIndexTo(valueToSearchFor){
 	    // document.body.style.cursor='default';
 	// }
 // }
+
+function updateAssiduityDivs(serverData){
+	if(serverData.isError){
+		showMessage(serverData.message, true);
+	}
+	else{
+		// check if at least one of the elements needed is available (not very elegant, but theres a deadline)
+		if(document.getElementById('lineBrkTr')){
+			var assidVisualArray = serverData.assidVisualArray;
+			var entriesStatusArray = serverData.entriesStatusArray;
+			var totalEntries = serverData.totalEntries;
+			var element;
+
+			for(i in assidVisualArray){
+				document.getElementById(assidVisualArray[i]).style.display = 'table-row';
+			}
+
+			document.getElementById('titleTr').cells[0].innerHTML = "Assiduity in " + totalEntries + " entries";
+			// <tr id='".$status[0]."' style='display:none;'>
+				// <td>".$status[1]." </td>
+				// <td>
+					// <div id='".$status[0]."Div' style='width:5px;background-color:".$status[2].";'></div>
+					// <label id='".$status[0]."Label'>
+						// 0%
+					// </label>
+				// </td>
+			// </tr>
+
+			var percentage;
+			var width;
+			for(key in entriesStatusArray){
+				element = document.getElementById(key + 'Tr');
+				element.style.display = 'table-row';
+				
+				// javascript doesnt round down to 2 decimal places.... god help us all
+				percentage = Math.round(entriesStatusArray[key][0] / totalEntries * 100);
+				// width = percentage / 100 * 100;
+				width = percentage;
+				element = document.getElementById(key + 'Div');
+				$(element).animate({width: width + "px"});
+
+				element = document.getElementById(key + 'Label');
+				element.innerHTML = " " + percentage + "%"
+			}
+		// $('#assiduityUserName').html(serverData.username);
+		}
+	}
+	
+	// lineBrkTr = document.getElementById("lineBrkTr");
+	// titleBrkTr = document.getElementById("titleBrkTr");
+	// confirmedDiv = document.getElementById("confirmedTr");
+	// unconfirmedDiv = document.getElementById("unconfirmedTr");
+	// deletedDiv = document.getElementById("deletedTr");
+	
+	// confirmedDiv.style.display = 'table-row';
+	// unconfirmedDiv.style.display = 'table-row';
+	// deletedDiv.style.display = 'table-row';
+}
