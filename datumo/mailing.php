@@ -125,66 +125,7 @@ $level=$perm->getUserLevel();
 echo "<header>";
 	echo "<h1>Datumo Administration Area: ".strtoupper($table)."</h1>";
 	//navigation bar display
-	echo "<nav class=navigation>";
-		echo "<ul class=dropdown id=menu>";
-			echo "<li><a href=index.php>Home</a>";
-			echo "<li><a>Reports</a>";
-				echo "<ul class=dropdown>"; 
-					//need to create a class to handle reports, treeviews and plots. Only show the available one to this user
-					$reports=$menu->getReports();
-					echo "<li class=rtarrow><a>My reports</a>";
-						echo "<ul>";
-						//loop through all available reports
-						foreach($reports as $key=>$value){
-							echo "<li><a href=javascript:void(0) onclick=window.open('report.php?report=$key','_blank','height=550px,width=850px,scrollbars=yes');>".$value."</a></li>";
-						}
-							//echo "<li><a href=#>Report 1</a></li>";
-						echo "</ul>";
-					echo "</li>";
-					echo "<li><a href=javascript:void(0) onclick=window.open('".$conn->getFolder()."/genReport.php','mywindow','height=500px,width=500px,scrollbars=yes')>Create report</a></li>";
-					$treeviews=$menu->getTreeviews();
-					echo "<li class='rtarrow'><a>Treeviews</a>";
-						echo "<ul>";
-						//loop through all available treeview reports
-						foreach($treeviews as $key=>$value){
-							echo "<li><a href=javascript:void(0) onclick=window.open('treeview.php?tree=$key','_blank','height=550px,width=550px,scrollbars=yes');>$value</a></li>";
-						}	
-						echo "</ul>";
-					echo "</li>";
-					$plots=$menu->getPlots();
-					echo "<li class='rtarrow'><a>Plots</a>";
-						echo "<ul>";
-						//loop through all plots
-						foreach($plots as $key=>$value){
-							echo "<li><a href=javascript:void(0) onclick=window.open('plot.php?plot_id=$key','_blank','width=820px,height=550px,menubar=yes')>$value</a></li>";
-						}
-						echo "</ul>";
-					echo "</li>";
-					//display export to Excel option if the current table is a view
-					if(isset($table) and ($display->checkTableType($table) or $level==0))
-						echo "<li><a href=excel.php?table=$table title='Export data to xls file'>Export to Excel</a></li>";
-				echo "</ul>";
-			echo "</li>";
-			echo "<li><a href=http://www.cirklo.org/datumo_help.php target=_blank>Help</a></li>";
-			echo "<li><a href=javascript:void(0) onclick=window.open('helpdesk.php','_blank','height=400px,width=365px,resizable=no,menubar=no')>Helpdesk</a>";
-			echo "<li><a>About</a>";
-				echo "<ul class=dropdown>";
-					echo "<li><a href=http://www.cirklo.org/datumo.php target=_blank>Datumo</a></li>";
-					echo "<li><a href=http://www.cirklo.org target=_blank>Cirklo</a></li>";
-				echo "</ul>"; 
-			echo "</li>";
-			//log in and out information
-			echo "<li class=login>You are logged as $login! ";
-			echo "<a href=session.php?logout style='color:#f7c439;text-decoration:underline;'>Sign out</a></li>";
-			//External links
-			echo "<li class=external>";
-			echo "<a href='http://www.facebook.com/pages/Cirklo/152674671417637' target=_blank><img src=pics/fb.png width=30px border=0 title='Visit our Facebook page'>";
-			echo "&nbsp;&nbsp;";
-			echo "<a href='http://www.youtube.com/user/agendocirklo' target=_blank><img src=pics/youtube.png width=30px border=0 title='Feature videos'></a>";
-			echo "</li>";
-		echo "</ul>";
-		
-	echo "</nav>";
+	header_nav($user_id);
 echo "</header>";
 /********************************************END OF HEADER / CONTENT GOES NEXT**********************************************/
 
@@ -198,7 +139,7 @@ $config->compat();
 echo "</div>";
 
 //echo "<div class=main lang=exp>";
-echo "<div lang=exp style='border:0px solid;position:relative;float:left;padding-left:30px;margin-top:0px;width:500px'>";
+echo "<div lang=exp style='border:0px solid;position:relative;float:left;padding-left:30px;margin-top:0px;width:500px;z-index:-1'>";
 echo "<h3>Mailing tool</h3>";
 //email subject
 echo "<div lang=exp id=content style='position:relative;border:0px solid;'>";
@@ -207,7 +148,7 @@ echo "<input type=button name=sendMail id=sendMail value='Send email' onclick=se
 
 echo "</div>";
 
-echo "<div lang=exp style='position:relative;float:left;margin-top:20px;width:200px;border:0px solid'>";
+echo "<div lang=exp style='position:relative;float:left;margin-top:20px;width:200px;border:0px solid;'>";
 //to who are we going to send the email
 echo "To: ";
 //which tables are available for mailing?
@@ -219,7 +160,7 @@ echo "<option value=resource>Resource users</option>";
 echo "<option value=resourcetype>Resource type</option>";
 echo "</select>";
 //div to insert new selector
-echo "<div lang=exp style='border:0px solid;position:relative;float:left;;overflow:auto;margin-top:20px' id=mailDiv>";
+echo "<div lang=exp style='border:0px solid;position:relative;float:left;overflow:auto;margin-top:20px' id=mailDiv>";
 echo "</div>";
 echo "</div>";
 echo "<divlang=exp  style='position:relative;float:right;padding-left:10px;margin-top:10px;margin-right:20px;'>";

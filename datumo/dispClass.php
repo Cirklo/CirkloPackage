@@ -511,9 +511,11 @@ class dispClass{
 	public function headers($bool,$stype,$table,$nrows,$order,$page){
 		for($i=0;$i<sizeof($this->header);$i++){
 			echo "<td valign=top class=headers>";
+			$bool = False;
 			if($this->FKtable[$i]!="" and $i!=0 and !$bool){ //is this a foreign key?
 				//need to define class in order not to trigger somekind of stupid bug related with jquery
-				echo "<a class=exp href=javascript:void(0) onclick=window.open('list.php?table=".$this->FKtable[$i]."','_blank','width=350,height=400,scrollbars=yes') style='text-decoration:none' title='click to view all the available keys'><b>".strtoupper($this->header[$i])."</b></a>";
+				echo "<b>".strtoupper($this->header[$i])."</b>";
+				echo "<a class=exp href=javascript:void(0) onclick=window.open('list.php?table=".$this->FKtable[$i]."','_blank','width=350,height=400,scrollbars=yes') style='text-decoration:none' title='click to view all the available keys'>&nbsp;&nbsp;<img src=pics/alert.png width=16px border=0></a>";
 			} else {
 				echo "<a class=exp><b>".strtoupper($this->header[$i])."</b></a>";				
 //				echo strtoupper($this->header[$i]);

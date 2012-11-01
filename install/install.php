@@ -318,6 +318,9 @@
 	
 	// Gets current path and adds the previous path to create the htconnect file
 	function makeHtConnect(){
+		//initialize JSON object
+		$json=new stdClass();
+		
 		$msg = "Database connection successfully established.";
 		$separateArray = getSeparator();
 		$systemSeparator = $separateArray[0];

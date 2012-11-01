@@ -82,6 +82,9 @@
 	}
 
 	function logIn(){
+		//initialize JSON object
+		$json=new stdClass();
+		
 		$userLogin=cleanValue($_POST['login']);
 		$pass=cleanValue($_POST['pass']);
 		// $resource=$_GET['resource'];
@@ -750,6 +753,10 @@
 	
 	// Detects if there was a get or post with ajax headers
 	function visualExceptionHandling($exception){
+		
+		//initialize JSON object
+		$json=new stdClass();
+		
 		if(isAjax()){
 			$json->isError = true;
 			$json->message = $exception->getMessage();

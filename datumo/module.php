@@ -44,10 +44,18 @@ class module{
 		foreach ($this->pdo->query($sql) as $row){ //loop through all tables
 			$i++; //increment counter to handle row display 
 			//initialize row
+			//change schema 
+			$this->pdo->dbConn();
+			
+			$query = "SELECT mask_name FROM mask WHERE mask_table='$row[0]'";
+			$sql = $this->pdo->query($query);
+			$r = $sql->fetch();
+			
 			if($i==1)	echo "<tr>";
-			echo "<td width=100px><label title='$row[1]'>$row[0]</label></td>";
+			echo "<td width=250px><label title='$row[1]'>$row[0] - <b>$r[0]</b></label></td>";
 			//end row
 			if($i==4){	echo "</tr>";$i=0;}
+			$this->pdo->dbInfo();
 		}
 		echo "</table>";
 	}

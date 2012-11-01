@@ -18,6 +18,81 @@ if(isset($_GET['type']) and !isset($_GET['sidx'])){
 	}
 }
 
+function header_nav($user_id){
+	require_once "dispClass.php";
+	$display = new dispClass();
+	require_once "menu.php";
+	$menu= new menu($user_id);
+	require_once "resClass.php";
+	$perm = new restrictClass();
+	
+	//get user info
+	$perm->userInfo($user_id);
+	$login=$perm->getUserLogin();
+	$level=$perm->getUserLevel();
+	
+	
+	echo "<nav class=navigation>";
+		echo "<ul class=dropdown id=menu>";
+			echo "<li><a href=index.php>Home</a>";
+			echo "<li><a>Reports</a>";
+				echo "<ul class=dropdown>"; 
+					echo "<li><a href=../agendo/hoursUsage.php>Usage report</a></li>";
+					$plots=$menu->getPlots();
+					echo "<li class='rtarrow'><a>Plots</a>";
+						echo "<ul>";
+						//loop through all plots
+						foreach($plots as $key=>$value){
+							echo "<li><a href=javascript:void(0) onclick=window.open('plot.php?plot_id=$key','_blank','width=820px,height=550px,menubar=yes')>$value</a></li>";
+						}
+						echo "</ul>";
+					echo "</li>";
+					//display export to Excel option if the current table is a view
+					if(isset($table) and ($display->checkTableType($table) or $level==0))
+						echo "<li><a href=excel.php?table=$table title='Export data to xls file'>Export to Excel</a></li>";
+				echo "</ul>";
+			echo "</li>";
+			echo "<li><a>Tools</a>";
+				echo "<ul class=dropdown>";
+					echo "<li title='Set resource for local confirmation'><a href=../agendo/makeConfirmRes.php>In site confirmation</a></li>";
+					echo "<li title='Give resource permissions to user'><a href=../agendo/givePermission.php>Resource permission</a></li>";
+					echo "<li title='Send a message to other Agendo user'><a href=mailing.php>Send message</a></li>";
+					echo "<li><a href=resupload.php>Resource image upload</a></li>";
+					echo "<li title='Generate random passwords for multiple users'><a href=../agendo/massPassRenewal.php>Password generator</a></li>";
+				echo "</ul>"; 
+			echo "</li>";
+			echo "<li><a>Help</a>";
+				echo "<ul class=dropdown>";
+					echo "<li><a href=http://www.cirklo.org/datumo_help.php target=_blank>Help</a></li>";
+					echo "<li><a href=http://www.youtube.com/user/agendocirklo target=_blank>Tutorials</a></li>";
+				echo "</ul>"; 
+			echo "</li>";
+			echo "<li><a href=javascript:void(0) onclick=window.open('helpdesk.php','_blank','height=400px,width=365px,resizable=no,menubar=no')>Helpdesk</a>";
+			echo "<li><a>About</a>";
+				echo "<ul class=dropdown>";
+					echo "<li><a href=http://www.cirklo.org/datumo.php target=_blank>Datumo</a></li>";
+					echo "<li><a href=http://www.cirklo.org target=_blank>Cirklo</a></li>";
+				echo "</ul>"; 
+			echo "</li>";
+			//log in and out information
+			echo "<li class=login>You are logged as $login! ";
+			echo "<a href=session.php?logout style='color:#f7c439;text-decoration:underline;'>Sign out</a></li>";
+			//External links
+			echo "<li class=external>";
+			echo "<a href='http://www.facebook.com/pages/Cirklo/152674671417637' target=_blank><img src=pics/fb.png width=30px border=0 title='Visit our Facebook page'>";
+			echo "&nbsp;&nbsp;";
+			echo "<a href='http://www.youtube.com/user/agendocirklo' target=_blank><img src=pics/youtube.png width=30px border=0 title='Feature videos'></a>";
+			echo "</li>";
+		echo "</ul>";
+		
+	echo "</nav>";
+	
+	
+	
+	
+	
+}
+
 /**
  * Method to distinguish between odd and even numbers
  */
