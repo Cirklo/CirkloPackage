@@ -329,12 +329,34 @@
 				}
 				$notify->toWaitList('delete'); // for waiting list. As to be send before update the entry to regular.    
 				
-				$sql = "select entry_resource,entry_datetime from entry where entry_id = :0";
-				$res = dbHelp::query($sql, array($entry));
-				$arr = dbHelp::fetchRowByIndex($res);
+				// get the resource and date of the initial entry
+				// $sql = "select entry_id from (select entry_resource,entry_datetime from entry where entry_id = :0), entry ";
+				// $sql = "
+					// select 
+						// entry_id 
+					// from 
+						// (select entry_resource as res,entry_datetime as date from entry where entry_id = :0) temp 
+						// inner join 
+							// entry 
+						// on 
+							// entry_resource = res 
+							// and entry_datetime = date 
+					// where 
+						// entry_id != :0 
+						// and entry_status = 4 
+					// order by 
+						// entry_action
+					// ";
+				// $res = dbHelp::query($sql, array($entry));
+				// $arr = dbHelp::fetchRowByIndex($res);
 
-				$sql = "update entry set entry_status=".$status." where entry_status=4 and entry_resource=".$arr[0]." and entry_datetime='".$arr[1]."'";
-				$res = dbHelp::query($sql);
+				// if(dbHelp::numberOfRows($res) > 0){
+				if(($waitListEntry = waitListAuxFunction($entry)) !== false){
+					// $sql = "update entry set entry_status=".$status." where entry_status=4 and entry_resource=".$arr[0]." and entry_datetime='".$arr[1]."'";
+					// changes the status of the first entry_id found
+					$sql = "update entry set entry_status=".$status." where entry_id = :0";
+					$res = dbHelp::query($sql, array($waitListEntry));
+				}
 			}
 			
 			//always notify if it was deleted from admin
@@ -746,6 +768,34 @@
 			$slots -= ceil($hhTime / $resourceResolution);
 			
 			return $slots;
+		}
+		
+		return false;
+	}
+	
+	// returns the first entry_id of a set of entries in waiting list
+	function waitListAuxFunction($entry_id){
+		$sql = "
+			select 
+				entry_id 
+			from 
+				(select entry_resource as res,entry_datetime as date from entry where entry_id = :0) temp 
+				inner join 
+					entry 
+				on 
+					entry_resource = res 
+					and entry_datetime = date 
+			where 
+				entry_id != :0 
+				and entry_status = 4 
+			order by 
+				entry_action
+			";
+		$res = dbHelp::query($sql, array($entry_id));
+		$arr = dbHelp::fetchRowByIndex($res);
+
+		if(dbHelp::numberOfRows($res) > 0){
+			return $arr[0];
 		}
 		
 		return false;
