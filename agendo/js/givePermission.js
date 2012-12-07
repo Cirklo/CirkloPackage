@@ -22,19 +22,33 @@ function swapSelected(from, to){
 function sendUserAndResourceList(){
 	toList = document.getElementById("toSelect").options;
 	resourcesList = document.getElementById("resourcesSelect").options;
-	permLevel = document.getElementById("permLevelSelect").options[document.getElementById("permLevelSelect").selectedIndex].value;
-	training = document.getElementById("trainingSelect").options[document.getElementById("trainingSelect").selectedIndex].value;
-
+	
+	var permLevelIndex = 0;
+	if(document.getElementById("permLevelSelect").selectedIndex){
+		permLevelIndex = document.getElementById("permLevelSelect").selectedIndex;
+	}
+	var trainingIndex = 0;
+	if(document.getElementById("trainingSelect").selectedIndex){
+		trainingIndex = document.getElementById("trainingSelect").selectedIndex;
+	}
+	permLevel = document.getElementById("permLevelSelect").options[permLevelIndex].value;
+	training = document.getElementById("trainingSelect").options[trainingIndex].value;
+	
 	userLogins = new Array();
 	resources = new Array();
-	
+	resourcesSelectedFlag = false;
 	for(var i=0; i<resourcesList.length; i++){
 		if(resourcesList[i].selected){
 			resources[resources.length] = resourcesList[i].value;
+			resourcesSelectedFlag = true;
 		}
 	}
+	
+	if(!resourcesSelectedFlag){
+		showMessage('Please select at least one resource');
+	}
 			
-	if(toList.length > 0 && resources.length > 0){
+	if(toList.length > 0){
 		var sendMails = document.getElementById('emailCheck').checked;
 		var addedText = "";
 		if(sendMails){
@@ -45,7 +59,6 @@ function sendUserAndResourceList(){
 			for(var i=0; i<toList.length; i++){
 				userLogins[i] = toList[i].value;
 			}
-			
 			if(userLogins.length > 0){
 				$.post(
 					"givePermission.php", 
@@ -57,5 +70,8 @@ function sendUserAndResourceList(){
 				;
 			}
 		}
+	}
+	else{
+		showMessage('Please select at least one user');
 	}
 }

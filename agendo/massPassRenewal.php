@@ -2,31 +2,44 @@
 require_once("commonCode.php");
 
 	if(isset($_POST['userId']) && isset($_POST['userLogins'])){
-		require_once("alertClass.php");
-		$alert = new alert();
+		$json = new stdClass();
+		try{
+			if(!isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) === false){
+				throw new Exception("You are not allowed to perform this action");
+			}
+			
+			require_once("alertClass.php");
+			$alert = new alert();
 
-		$passRequester = $_POST['userId'];
-		$userLogins = $_POST['userLogins'];
-		
-		// Ignore echos
-		ob_start();
-		$error = false;
-		for($i = 0; $i < sizeOf($userLogins); $i++){
-			$error = !$alert->recover($userLogins[$i], $passRequester);
+			$passRequester = $_POST['userId'];
+			$userLogins = $_POST['userLogins'];
+			
+			// Ignore echos
+			ob_start();
+			$error = false;
+			$user = $userLogins[$i];
+			for($i = 0; $i < sizeOf($userLogins); $i++){
+				$error = !$alert->recover($userLogins[$i], $passRequester);
+				if($error){
+					break;
+				}
+			}
+			ob_end_clean();
+			// Stop ignoring echos
+
+			$json->error = $error;
 			if($error){
-				break;
+				$json->msg = "An error occurred while reseting the password for user: ".$user;
+			}
+			else{
+				$json->msg = "Emails sent";
 			}
 		}
-		ob_end_clean();
-		// Stop ignoring echos
-
-		$json->error = $error;
-		if($error){
-			$json->msg = "An error occurred";
+		catch(Exception $e){
+			$error = true;
+			$msg = "Error: ".$e->getMessage();
 		}
-		else{
-			$json->msg = "Emails sent";
-		}
+		
 		echo json_encode($json);
 		exit;
 	}
@@ -36,7 +49,7 @@ require_once("commonCode.php");
 	echo "<script type='text/javascript' src='js/massPassRenewal.js'></script>";
 
 	echo "<br>";
-	echo "<h1 style='text-align:center;color:#F7C439;'>Users password renewal</h1>";
+	echo "<h1 style='text-align:center;color:#F7C439;'>Multiple Password Reset</h1>";
 	echo "<br>";
 	
 	$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_level = 0 and user_id = :0";
@@ -69,7 +82,7 @@ require_once("commonCode.php");
 				$prep = dbHelp::query($userQuery, array($_SESSION['user_id']));
 				echo "<select multiple='multiple' size='".$commonSelectSize."' id='fromSelect' style='".$commonSelectStyle."'>";
 					while($row = dbHelp::fetchRowByIndex($prep)){
-						echo "<option value='".$row[0]."'>".$row[1]." ".$row[2]." (".$row[0].")</option>";
+						echo "<option value='".$row[0]."' title='".$row[1]." ".$row[2]."'>".$row[1]." ".$row[2]." (".$row[0].")</option>";
 					}
 				echo "</select>";
 			echo "</td>";
@@ -103,7 +116,8 @@ require_once("commonCode.php");
 		echo "<tr>";
 			echo "<td colspan='3'>";
 				echo "<br>";
-				echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+				// echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+				echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='../datumo/'>Back to Admin Area</a>";
 			echo "</td>";
 		echo "</tr>";
 	echo "</table>";

@@ -306,7 +306,7 @@
 		$sql="select entry_repeat,".dbHelp::getFromDate('entry_datetime','%Y%m%d%H%i').",entry_status from entry where entry_id = :0";
 		$res=dbHelp::query($sql, array($entry));
 		$arr=dbHelp::fetchRowByIndex($res);
-		$status=$arr[2]; // to set the waitlist with the same status as previous one
+		// $status=$arr[2]; // to set the waitlist with the same status as previous one, this is bad, will make the next user on the waiting list automaticaly confirmed
 		if ($deleteall==1){     
 			$repeat = $arr[0];
 			$sql="update entry set entry_status=3 where entry_repeat = ".$repeat;
@@ -329,32 +329,15 @@
 				}
 				$notify->toWaitList('delete'); // for waiting list. As to be send before update the entry to regular.    
 				
-				// get the resource and date of the initial entry
-				// $sql = "select entry_id from (select entry_resource,entry_datetime from entry where entry_id = :0), entry ";
-				// $sql = "
-					// select 
-						// entry_id 
-					// from 
-						// (select entry_resource as res,entry_datetime as date from entry where entry_id = :0) temp 
-						// inner join 
-							// entry 
-						// on 
-							// entry_resource = res 
-							// and entry_datetime = date 
-					// where 
-						// entry_id != :0 
-						// and entry_status = 4 
-					// order by 
-						// entry_action
-					// ";
-				// $res = dbHelp::query($sql, array($entry));
-				// $arr = dbHelp::fetchRowByIndex($res);
-
-				// if(dbHelp::numberOfRows($res) > 0){
 				if(($waitListEntry = waitListAuxFunction($entry)) !== false){
 					// $sql = "update entry set entry_status=".$status." where entry_status=4 and entry_resource=".$arr[0]." and entry_datetime='".$arr[1]."'";
 					// changes the status of the first entry_id found
-					$sql = "update entry set entry_status=".$status." where entry_id = :0";
+					// $sql = "update entry set entry_status=".$status." where entry_id = :0"; // makes the next user confirmed if the deleter had already confirmed it
+					$status = 1;
+					if($perm->getResourceStatus() == 3 || $perm->getResourceStatus() == 4){
+						$status = 2;
+					}
+					$sql = "update entry set entry_status = ".$status." where entry_id = :0";
 					$res = dbHelp::query($sql, array($waitListEntry));
 				}
 			}
@@ -401,7 +384,7 @@
 	function update(){
 		$datetime=cleanValue($_GET['datetime']);
 		$slots=(int)cleanValue($_GET['slots']);
-		
+		$assistance = ($_GET['assistance'] == 'true') ? 1: 0;
 		$user_id=getUserId();
 		$user_passwd=getPass();
 
@@ -494,24 +477,85 @@
 		}
 		// *******************
 		
-		$sql = "update entry set entry_user=".$arrdt[2].", entry_datetime=".dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i').",entry_slots= :0, entry_action = '".date('Y-m-d H:i:s',time())."' ".$projectUpdateSql." where entry_id=". $entry;
+		// get waiting list data before update
+		$waitListData = waitListAuxFunction($entry, true);
+		$newDate = dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i');
+		$sql = "update entry set entry_user=".$arrdt[2].", entry_datetime=".$newDate.",entry_slots= :0, entry_action = '".date('Y-m-d H:i:s',time())."' ".$projectUpdateSql.", entry_assistance = ".$assistance." where entry_id=". $entry;
 		$resPDO = dbHelp::query($sql, $extraDataArray);
 		if(dbHelp::numberOfRows($resPDO) == 0){
+			// this should never occur because the action date should always be different then the one previously set
 			throw new Exception("Entry info not updated.");
-		} 
+		}
 		else {
-			//notification for waiting list
-			$sql = "select entry_id, user_id from entry,".dbHelp::getSchemaName().".user where entry_user=user_id and entry_status=4 and entry_datetime='".$arrdt[0]."' and entry_resource=".$arrdt[1]." order by entry_id";
-			$res = dbHelp::query($sql);
-			$arrStatus = dbHelp::fetchRowByIndex($res);
-			if(dbHelp::numberOfRows($res)>0){
-				$notify = new alert($resource);
-				$notify->setUser($arrStatus[1]);
-				$notify->setEntry($arrStatus[0]);
-				$notify->toWaitList('update'); //only eventually notify if not delete from monitor
+			//notification for waiting list, deletes the first user on the waiting list, not particularly usefull
+			// $sql = "select entry_id, user_id from entry,".dbHelp::getSchemaName().".user where entry_user=user_id and entry_status=4 and entry_datetime='".$arrdt[0]."' and entry_resource=".$arrdt[1]." order by entry_id";
+			// $res = dbHelp::query($sql);
+			// $arrStatus = dbHelp::fetchRowByIndex($res);
+			// if(dbHelp::numberOfRows($res)>0){
+				// $notify = new alert($resource);
+				// $notify->setUser($arrStatus[1]);
+				// $notify->setEntry($arrStatus[0]);
+				// $notify->toWaitList('update'); //only eventually notify if not delete from monitor
 				
-				$sql = "delete from entry where entry_id=".$arrStatus[0]; // deleting a monitoring entry
-				dbHelp::query($sql);
+				// $sql = "delete from entry where entry_id=".$arrStatus[0]; // deleting a monitoring entry
+				// dbHelp::query($sql);
+			// }
+			
+			// not using the "toWaitList" from alertClass because its way too complex and doesnt iterate through all the users in waiting list
+			$compareRes = dateAndTimeCompare($oldDate, $oldSlots, $datetime, $slots, $resolution);
+			// 0 means its the same date
+			if($compareRes != 0){
+				if($waitListData !== false){
+					$tempEntryRow = array();
+					$sql = "select user_firstname, user_lastname, user_email, resource_name from resource join user on resource_resp = user_id where resource_id = :0";
+					$prep = dbHelp::query($sql, array($resource));
+					$row = dbHelp::fetchRowByIndex($prep);
+					$replyToPerson = $row[0]." ".$row[1];
+					$replyToPersonMail = $row[2];
+					$resName = $row[3];
+					
+					$sql = "select user_email from ".dbHelp::getSchemaName().".user where user_id=:0";
+					// completely out of the original slot(s)
+					if($compareRes == -1){
+						$tempEntryRow = current($waitListData);
+						$prep = dbHelp::query($sql, array($tempEntryRow['entry_user']));
+						$row = dbHelp::fetchRowByIndex($prep);
+						$subject = "You are booked for resource ".$resName;
+						$address = $row[0];
+						$message = "You are now booked for resource ".$resName." at ".$oldDate.".";
+						
+						$resstatus = 1;
+						if($perm->getResourceStatus() == 4 || $perm->getResourceStatus() == 3){
+							$resstatus = 2;
+							$message .= "\nPlease confirm the entry.";
+						}
+						// no need to put the vars in an array when making the query, they are safe
+						$sql = "update entry set entry_status=".$resstatus." where entry_id=".$tempEntryRow['entry_id'];
+						$res = dbHelp::query($sql);
+						
+						$mailObj = getMailObject($subject, $address, $message, $replyToPerson, $replyToPersonMail);
+						sendMailObject($mailObj);
+					}
+					else{
+						$subject = "Entry for resource ".$resName." has changed";
+						$newDateEnd = dbHelp::convertToDate(strtotime($datetime) + $slots * $resolution * 60, true);
+
+						$messageBegin = "Entry for ".$resName." that started at ".$oldDate." and ended at ";
+						$messageEnd = " was changed to start at ".dbHelp::convertToDate($datetime)." and end at ".$newDateEnd.".\nPlease check if you want to stay on the waiting list at the new time.";
+						foreach($waitListData as $tempEntryRow){
+							$prep = dbHelp::query($sql, array($tempEntryRow['entry_user']));
+							$row = dbHelp::fetchRowByIndex($prep);
+							$address = $row[0];
+							
+							$sqlEntry = "update entry set entry_datetime=".$newDate.",entry_slots= :0, entry_action = '".date('Y-m-d H:i:s',time())."' where entry_id=".$tempEntryRow['entry_id'];
+							$resPDO = dbHelp::query($sqlEntry, array($slots));
+							$tempTime = strtotime($tempEntryRow['entry_datetime']) + $tempEntryRow['entry_slots'] * $resolution * 60;
+							$tempOldDateEnd = dbHelp::convertToDate($tempTime, true);
+							$mailObj = getMailObject($subject, $address, $messageBegin.$tempOldDateEnd.$messageEnd, $replyToPerson, $replyToPersonMail);
+							sendMailObject($mailObj);
+						}
+					}
+				}
 			}
 		}
 		
@@ -530,14 +574,14 @@
 		$notify->setUser($user_id);
 		$notify->setSlots($slots);
 		$notify->setEntry($entry);
-		if ($perm->getResourceStatus()==4) {
+		if($perm->getResourceStatus()==4){
 			$notify->toAdmin($datetime,$extra,'update');
 		}
 		
-		if ($perm->getWasAdmin()){
-			$notify=new alert($resource);
-			$notify->setEntry($entry);
-			$notify->setUser($user_id);
+		if($perm->getWasAdmin()){
+			// $notify=new alert($resource);
+			// $notify->setEntry($entry);
+			// $notify->setUser($user_id);
 			$notify->fromAdmin('update',$extra);
 		}
 		
@@ -773,11 +817,11 @@
 		return false;
 	}
 	
-	// returns the first entry_id of a set of entries in waiting list
-	function waitListAuxFunction($entry_id){
+	// returns the first entry_id and entry_user of a set of entries in waiting list or if $giveAll == true returns all the entries with status = 4
+	function waitListAuxFunction($entry_id, $giveAll = false){
 		$sql = "
 			select 
-				entry_id 
+				*
 			from 
 				(select entry_resource as res,entry_datetime as date from entry where entry_id = :0) temp 
 				inner join 
@@ -788,16 +832,38 @@
 			where 
 				entry_id != :0 
 				and entry_status = 4 
-			order by 
-				entry_action
-			";
+		";
 		$res = dbHelp::query($sql, array($entry_id));
-		$arr = dbHelp::fetchRowByIndex($res);
-
 		if(dbHelp::numberOfRows($res) > 0){
+			if($giveAll){
+				$waitingListArray = array();
+				while($arr = dbHelp::fetchRowByName($res)){
+					$waitingListArray[] = $arr;
+				}
+				return $waitingListArray;
+			}
+			$arr = dbHelp::fetchRowByIndex($res);
 			return $arr[0];
 		}
 		
 		return false;
+	}
+	
+	
+	function dateAndTimeCompare($oldDate, $oldSlots, $newDate, $newSlots,  $resolution){
+		if($oldDate == $newDate && $oldResolution == $newResolution)
+			return 0; // same time
+			
+		$oldTimeStart = strtotime($oldDate);
+		$oldTimeEnd = $oldTimeStart + $oldSlots * $resolution * 60;
+		
+		$newTimeStart = strtotime($newDate);
+		$newTimeEnd = $newTimeStart + $newSlots * $resolution * 60;
+		// throw new Exception(date('Y-m-d H:i:00', $oldTimeStart)."-".date('Y-m-d H:i:00', $oldTimeEnd)."     ".date('Y-m-d H:i:00', $newTimeStart)."-".date('Y-m-d H:i:00', $newTimeEnd));
+		if($newTimeEnd <= $oldTimeStart || $newTimeStart >= $oldTimeEnd){
+			return -1; // completely out of the original slot(s)
+		}
+		
+		return 1; // partially the same
 	}
 ?>

@@ -2,6 +2,20 @@
 	require_once("commonCode.php");
 	require_once("hoursUsageAux.php");
 	
+	htmlEncoding();
+	importJs();
+	
+	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
+	echo "<link href='css/hourUsage.css' rel='stylesheet' type='text/css' />";
+	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
+	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
+	
+	$backLink = "
+		<div style='margin:auto;width:200px;text-align:center;'>
+			<a class='link' name='back' href='../datumo/'>Back to Admin Area</a>
+		</div>
+	";
+
 	// If user not logged shows error message
 	if(isset($_SESSION['user_id'])){
 		$isResp = isResp($_SESSION['user_id']);
@@ -51,27 +65,27 @@
 		}
 	}
 	else{
-		htmlEncoding();
-		importJs();
-		echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
+		// htmlEncoding();
+		// importJs();
+		// echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
 		
 		showMsg("You need to be logged in", true);
 		echo "<br>";
 
-		echo "<div style='margin:auto;width:200px;text-align:center;'>";
-			// echo "<a class='link' href='".$_SESSION['path']."/'>Back to admin area</a>";
-			echo "<a class='link' href='../datumo/'>Back to admin area</a>";
-		echo "</div>";
+		echo $backLink;
+		// echo "<div style='margin:auto;width:200px;text-align:center;'>";
+			// echo "<a class='link' href='../datumo/'>Back to Admin Area</a>";
+		// echo "</div>";
 		exit;
 	}
 
-	htmlEncoding();
-	importJs();
+	// htmlEncoding();
+	// importJs();
 	
-	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
-	echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
-	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
-	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
+	// echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
+	// echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
+	// echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
+	// echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
 	
 	echo "<a name='top'></a>";
 	
@@ -232,15 +246,9 @@
 	
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1024;text-align:center;'>";
+		echo $backLink;
 		$html = generateHtml();
-		$backLink = "
-			<div style='margin:auto;width:200px;text-align:center;'>
-				<a class='link' name='back' href='../datumo/'>Back to admin area</a>
-			</div>
-		";
-
 		if(!empty($html)){
-			echo $backLink;
 	
 			$extraOptions = "<div style='display:table;text-align:center;width:100%;'>";
 				$extraOptions .= "<label style='float:left;margin-left:3px;'>Select all";
@@ -261,14 +269,13 @@
 				echo "<a class='link' href='#back'>Bottom</a>";
 			echo "</div>";
 			
+			echo "<br>";
+			// echo "<a class='link' name='back' href='".$_SESSION['path']."/'>Back to reservations</a>";
+			echo $backLink;
+	
 			showMsg('Report generated');
 		}
 	echo "</div>";
-	
-	echo "<br>";
-
-	// echo "<a class='link' name='back' href='".$_SESSION['path']."/'>Back to reservations</a>";
-	echo $backLink;
 	
 	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
 	function startTable($departmentId, $deparmentName, $headerArray, $colspan){
@@ -847,11 +854,12 @@
 		$lineSeparator = "\n";
 		
 		$displayArray = array(
-			"Username" => null
+			"Department" => null
+			, "Username" => null
 			, "Resource" => null
 			, "Entry date" => null
-			, "Price per hour" => null
 			, "Duration" => 'usageCsv'
+			, "Price per hour" => null
 			, "Subtotal" => 'costFormat'
 			, "Discount" => 'costFormat'
 			, "Project" => null

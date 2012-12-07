@@ -27,6 +27,7 @@
 	}
 
 	function autocompleteAgendo(){
+		$json = new stdClass();
 		$value = strtolower($_GET['term']);
 		// $sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
 		// $res = dbHelp::query($sql);
@@ -41,6 +42,9 @@
 	}
 
 	function getUsersList(){
+		// has to be an array for the jquery autocomplete plugin
+		// $json = new stdClass();
+		$json = array();
 		$value = explode(' ', $_GET['term']);
 		$operand = "or";
 		
@@ -83,7 +87,7 @@
 
 	function logIn(){
 		//initialize JSON object
-		$json=new stdClass();
+		$json = new stdClass();
 		
 		$userLogin=cleanValue($_POST['login']);
 		$pass=cleanValue($_POST['pass']);
@@ -267,8 +271,9 @@
 	// Buttons for help, videos, resources and user/management
 	function echoUserVideosResourceHelpLinks(){
 		echo "<div id='linksImages'>";
-			echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.open('http://www.cirklo.org/agendo_help.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1000,height=600')\" align='right' />";
-			echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right' />";
+			// echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.open('http://www.cirklo.org/agendo_help.php','_blank','directories=no,status=no,menubar=yes,location=yes,resizable=yes,scrollbars=yes,width=1000,height=600')\" align='right' />";
+			echo "<img style='cursor:pointer' width=30px id=help title='help' src=pics/ask.png onclick=\"javascript:window.location = 'http://wiki.cirklo.org';\" align='right' />";
+			// echo "<img style='cursor:pointer' width=30px id=video title='feature videos' src=pics/video.png onclick=go(this) align='right' />";
 			echo "<img style='cursor:pointer' width=30px id=resources title='resource type' src=pics/resource.png onclick=go(this) align='right' />";
 			$extraGet = '';
 			// $action = "onclick=\"showMessage('Resource needs to be specified or user has to be logged on.');\"";
@@ -649,7 +654,7 @@
 		return $mail;
 	}
 	
-	// Sends the mail object, its objective is patch the crappy send method of the mailer class (seriously, send = false means error? ever heard of exceptions??)
+	// Sends the mail object, its objective is to patch the crappy send method of the mailer class (seriously, send = false means error? ever heard of exceptions??)
 	function sendMailObject($mailObject, $throwException = true){
 		ob_start();
 			$result = $mailObject->Send();
@@ -755,7 +760,7 @@
 	function visualExceptionHandling($exception){
 		
 		//initialize JSON object
-		$json=new stdClass();
+		$json = new stdClass();
 		
 		if(isAjax()){
 			$json->isError = true;
@@ -764,8 +769,7 @@
 		}
 		else{
 			global $jsWereImported;
-			// check de ajax e se os JS já foram importados(variável no cliente a dizer)?
-			showMsg($exception->getMessage(), true, $jsWereImported);
+			showMsg($exception->getMessage(), true, !$jsWereImported);
 		}
 	}
 	
@@ -820,6 +824,7 @@
 	}
 	
 	function errorHandling($errno, $errstr, $errfile, $errline){
+			// wtf($errno."   ".$errstr."   ".$errfile."   ".$errline);
 		if(
 			$errno === E_ERROR
 			|| $errno === E_WARNING
@@ -833,7 +838,6 @@
 			$message .= " line ".$errline;
 			throw new ErrorException($message);
 		}
-		
 		return true;
 	}
 	

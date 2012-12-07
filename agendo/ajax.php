@@ -210,6 +210,16 @@ function DisplayEntryInfo() {
 		else
 			echo "document.getElementById('".$arr[0]."-".$arr[3]."').value='".$arr[1]."';";
     }
+
+    $sql = "select entry_assistance from entry where entry_id = :0";
+    $res = dbHelp::query($sql, array($entry));
+	$arr=dbHelp::fetchRowByIndex($res);
+	$value = 'false';
+    if($arr[0] == 1){
+		$value = 'true';
+	}
+	echo "if(document.getElementById('assistance'))";
+	echo "document.getElementById('assistance').checked=".$value.";";
 }
 
 ?>

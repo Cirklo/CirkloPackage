@@ -58,11 +58,11 @@
 			return "'".date("Y-m-d H:i:s")."'";
 		}
 		
-		public static function convertToDate($date, $isTime = false){
+		public static function convertToDate($dateOrTime, $isTime = false){
 			if($isTime){
-				return date("Y-m-d H:i:s", $time);
+				return date("Y-m-d H:i:s", $dateOrTime);
 			}
-			return date("Y-m-d H:i:s", strtotime($date));
+			return date("Y-m-d H:i:s", strtotime($dateOrTime));
 		}
 		
 		public static function changeToDatabase($db){

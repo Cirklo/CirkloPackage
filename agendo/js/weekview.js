@@ -21,6 +21,7 @@ var interval;
 	var impersonateUser = '';
 	$(document).ready(
 		function(){
+			document.body.style.cursor='default';
 			if(macAddAppletUsed){
 				possibleConfirmationText = document.getElementById("possibleConfirmationText");
 				if(macIsConfirmed){
@@ -116,6 +117,7 @@ var interval;
 				// )
 			;
 		}
+		document.getElementById('msg').innerHTML = "";
 	}
 	
 	// Sets the date and resource for use in the getCalendar feature
@@ -437,7 +439,8 @@ function ManageEntries(action,ttime,tresolution) {
 						button_visibility(true,false,true,true,true); // hides all buttons except del
 					}
                 }
-            }
+			}
+		getCalendar();
         break;
         case 'update':
             if(update!=0){
@@ -650,7 +653,6 @@ function ajaxEntries(method,url,nosync){
     // } else {
         // alert("Your browser does not support XMLHTTP!");  
     // }
-
     switch(action){
 		case 'add':
 		case 'update':
@@ -761,7 +763,7 @@ function macConfimation(givenMac){
 	}
 	else{
 		try{
-			html = "<applet code='MacAddressApplet' archive='../agendo/macApp.jar'	width='0' height='0' id='zeeApplet' ><param name='color' value='#1e4F54' /><param name='action' value='checkMac' />	<param name='mac' value='" + givenMac + "' /></applet>";
+			html = "<applet code='MacAddressApplet' archive='../agendo/macApp.jar' width='0' height='0' id='zeeApplet' ><param name='color' value='#1e4F54' /><param name='action' value='checkMac' />	<param name='mac' value='" + givenMac + "' /></applet>";
 			document.writeln(html);
 		}
 		catch(err){
@@ -883,7 +885,7 @@ function showfade(element,count){
 	if (obj.innerHTML != ""){
 		// $.jnotify(obj.innerHTML);
 		showMessage(obj.innerHTML);
-		
+		document.body.style.cursor='default';
 	// fadeCount = count;
 	// if(!showingMsg){
 		// obj=document.getElementById('msg');

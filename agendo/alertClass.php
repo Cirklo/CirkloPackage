@@ -36,7 +36,7 @@ private $RespAlert;
   * @method noreturn sets the sender email configuration
   * @
 */
-
+// $resource=0, this probabably generates a huge amount of warnings and maybe errors, avoid this class as much as possible
 function __construct($resource=0) {
 	$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
 	$res = dbHelp::query($sql);
@@ -56,11 +56,10 @@ function __construct($resource=0) {
     $this->AddReplyTo($configArray['email'],"Calendar administration");   
   
     $this->Resource=$resource;
-    
     $sql="select user_id,user_email,user_mobile, user_firstname,user_lastname,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id=". $this->Resource;
     $res=dbHelp::query($sql);
     $arr=dbHelp::fetchRowByIndex($res);
-    
+    // $resource = 0, makes this pretty horrible
     $this->ResourceResp=$arr[0];
     $this->RespEmail=$arr[1];
     $this->RespMobile=$arr[2];
@@ -107,42 +106,46 @@ function getResourceResp(){
 
 */
 function toWaitList($type){
+	// only uses the first result out of a query that searches what are quite probably millions of lines, not particularly usefull
     $sql="select user_mobile,user_email,".dbHelp::getFromDate('entry_datetime','%d, %M %Y')." as d, ".dbHelp::getFromDate('entry_datetime','%H:%i')." as t,resource_name, user_alert from entry,".dbHelp::getSchemaName().".user,resource where entry_resource=resource_id and entry_user=user_id and entry_status=4 and (entry_datetime, entry_resource) in (select entry_datetime,entry_resource from entry where entry_id=". $this->LastEntry.") order by entry_id";
     $res=dbHelp::query($sql);
     $arrStatus=dbHelp::fetchRowByName($res);
         
-    if (dbHelp::numberOfRows($res)>0) {
+    if(dbHelp::numberOfRows($res)>0){
         switch ($type) {
             case 'delete':
-                $msg="You are booked for using " . $this->ResourceName . "  at " . $arrStatus['t'] . " on the " .   $arrStatus['d'] . ". Confirm and update on website. ";
+                $msg="You are booked for ".$this->ResourceName."  at ".$arrStatus['t']." on the ".$arrStatus['d'].". Please confirm on the website. ";
             break;
+			
             case 'update':
-                  $msg="Due to an entry update your monitored entry was delete from ". $this->Resource . " at " . $arrStatus['t']  . " on the " .  $arrStatus['d'] . ". Visite the calendar for there might be free spots.";
+                  $msg="Due to an entry update, your monitored entry was removed from ". $this->ResourceName . " at " . $arrStatus['t']  . " on the " .  $arrStatus['d'] . ". Check the calendar, there might be available spots.";
             break;
         }
-        switch ($arrStatus['user_alert']) {
-        case 2:
-            try {
-                $url="http://192.168.52.35:8888/send?phone=". $arrStatus['user_mobile'] . "&msg=" . str_replace(' ','%20',$msg);
-                $handle = fopen($url, "r");
-            } catch (HttpException $ex) {
-                echo $ex;
-            }
-        break;
-        case 1:
-            $this->Subject="Calendar waiting list";
-            $this->Body=$msg;
-			$this->ClearReplyTos();	//clear replys before receiving any email
-			$this->AddReplyTo($this->RespName, $this->RespEmail);
-			$this->ClearAddresses();
-			$this->AddAddress($arrStatus['user_email'], "");
-            if(!$this->Send()) {
-                echo "Mailer Error: " . $this->ErrorInfo;
-            } 
-			// else {
-                //echo "Message sent!";
-            // }
+        switch($arrStatus['user_alert']){
+			case 2:
+				try {
+					$url="http://192.168.52.35:8888/send?phone=". $arrStatus['user_mobile'] . "&msg=" . str_replace(' ','%20',$msg);
+					$handle = fopen($url, "r");
+				} catch (HttpException $ex) {
+					echo $ex;
+				}
+			break;
+			
+			case 1:
+				$this->Subject="Calendar waiting list";
+				$this->Body=$msg;
+				$this->ClearReplyTos();	//clear replys before receiving any email
+				$this->AddReplyTo($this->RespName, $this->RespEmail);
+				$this->ClearAddresses();
+				$this->AddAddress($arrStatus['user_email'], "");
+				if(!$this->Send()) {
+					echo "Mailer Error: " . $this->ErrorInfo;
+				} 
+				// else {
+					//echo "Message sent!";
+				// }
             break;
+			
             case 0:
             break;
         }
@@ -558,6 +561,6 @@ function getMondayFromDate($date){
 	$date = $dateTime - ($weekDay)*24*60*60;
 	return $date;
 }
-	
+
 } // end class
 ?>

@@ -1,7 +1,12 @@
 <?php
 require_once("commonCode.php");
 
-	if(isset($_POST['resources']) && isset($_POST['userLogins'])){
+	if(isset($_POST['resources']) && isset($_POST['userLogins']) && (isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) !== false)){
+		$json = new stdClass();
+		if(!isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) === false){
+			throw new Exception("You are not allowed to perform this action");
+		}
+		
 		$resources = $_POST['resources'];
 		$userLogins = $_POST['userLogins'];
 		$training = $_POST['training'];
@@ -68,7 +73,8 @@ require_once("commonCode.php");
 		$prepResources = dbHelp::query($sqlPart1." and resource_resp = :0 ".$sqlPart2, array($_SESSION['user_id']));
 	}
 	else{ // Else its not a special user and shouldnt see the massPassRenewal screen
-		echo "<script type='text/javascript'>window.location='../".$_SESSION['path']."';</script>";
+		// echo "<script type='text/javascript'>window.location='../".$_SESSION['path']."';</script>";
+		echo "<script type='text/javascript'>window.location='../datumo/';</script>";
 	}
 	
 	htmlEncoding();
@@ -77,7 +83,7 @@ require_once("commonCode.php");
 	echo "<script type='text/javascript' src='js/givePermission.js'></script>";
 
 	echo "<br>";
-	echo "<h1 style='text-align:center;color:#F7C439;'>Resource Access</h1>";
+	echo "<h1 style='text-align:center;color:#F7C439;'>Resource Permission</h1>";
 	
 	$commonSelectStyle = "width:200px;";
 	$commonSelectSize = 10;
@@ -172,7 +178,8 @@ require_once("commonCode.php");
 		echo "<tr>";
 			echo "<td colspan='3'>";
 				echo "<br>";
-				echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to reservations</a>";
+				// echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='".$_SESSION['path']."/'>Back to Admin Area</a>";
+				echo "<a style='color:#F7C439;' onmouseover=\"this.style.color='#FFFFFF'\" onmouseout=\"this.style.color='#F7C439'\" href='../datumo/'>Back to Admin Area</a>";
 			echo "</td>";
 		echo "</tr>";
 	echo "</table>";

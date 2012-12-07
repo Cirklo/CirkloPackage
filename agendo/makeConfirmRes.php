@@ -21,6 +21,8 @@
 	$path = $_SESSION['path'];
 	$color = '#1e4F54';
 	echo "<body bgcolor='".$color."'>";
+	echo "<br>";
+	echo "<h1 style='text-align:center;color:#F7C439;'>Set Local Confirmation</h1>";
 		try{
 			if(isset($_SESSION['user_id'])){
 				$user = $_SESSION['user_id'];
@@ -53,7 +55,7 @@
 					echo "</P>";
 				}
 				else{
-					throw new Exception('You need to login as a resource responsible');
+					throw new Exception('You need to login as a resource manager');
 				}
 			}
 			else{
@@ -66,7 +68,7 @@
 
 		echo "<div style='text-align:center'>";
 			// echo "<a href='".$path."' style='color:#F7C439'>Back to reservations</a>";
-			echo "<a href='../datumo/' style='color:#F7C439'>Back to datumo</a>";
+			echo "<a href='../datumo/' style='color:#F7C439'>Back to Admin Area</a>";
 		echo "</div>";
 		
 	echo "</body>";

@@ -34,7 +34,7 @@ function go (objIMG) {
     objDIV=document.getElementById(objIMG.id + 'div');
     if (s.substring(s.length-5,s.length)!="_.png"){
 		// document.getElementById(name).src = 'pics/' + name + '.png'
-        document.getElementById('video').src='pics/video.png';
+        // document.getElementById('video').src='pics/video.png';
         document.getElementById('help').src='pics/ask.png';
         document.getElementById('resources').src='pics/resource.png';
         document.getElementById('user').src='pics/user.png';

@@ -7,12 +7,12 @@ $(function() {
 function sendChecksAndDate(action, departments, changeLocation){
 	changeLocation = typeof changeLocation !== 'undefined' ? changeLocation : true; // default value for this parameter, javascript....sheesh
 	if($('#beginDateText').val() != '' && $('#endDateText').val() != ''){
-		var dateFrom = new Date($('#beginDateText').val());
-		var dateTo = new Date($('#endDateText').val());
-		if(dateTo < dateFrom){
-			showMessage('\'From date\' is after \'To date\'', true);
-			return;
-		}
+		// var dateFrom = new Date($('#beginDateText').val());
+		// var dateTo = new Date($('#endDateText').val());
+		// if(dateTo < dateFrom){
+			// showMessage('\'From date\' is after \'To date\'', true);
+			// return;
+		// }
 		
 		urlPath = "hoursUsage.php?action=" + action;
 		
