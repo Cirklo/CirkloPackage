@@ -245,7 +245,7 @@
 	echo "<br>";
 	
 	// Table where the results will appear
-	echo "<div id='resultsDiv' style='margin:auto;width:1024;text-align:center;'>";
+	echo "<div id='resultsDiv' style='margin:auto;width:1150;text-align:center;'>";
 		echo $backLink;
 		$html = generateHtml();
 		if(!empty($html)){
