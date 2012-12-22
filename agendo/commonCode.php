@@ -410,7 +410,7 @@
 					
 					echo "<tr>";
 						echo "<td><label>Password</label></td>";
-						echo "<td><input type=password style='font-size:11px' id=user_passwd name=user_passwd value='' /></td>";
+						echo "<td><input type=password style='font-size:11px' id=user_passwd name=user_passwd value='' onkeypress='getEnter(event, \"".$phpFile."\", ".$resource.");'/></td>";
 					echo "</tr>";
 					
 					echo "<tr>";
@@ -793,7 +793,8 @@
 			// $json->message = "File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL;
 			// $json->isError = true;
 			// echo json_encode($json);
-			showMsg("File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL);
+			// showMsg("File: ".str_replace("\\", "/", $error['file'])." | ln: ".$error['line']." | msg: ".$error['message'].PHP_EOL);
+			showMsg("File: ".str_replace("\\", "/", $error['file'])." | ln: ".$error['line']." | msg: ".$error['message'], true);
 			// throw new Exception("File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL);
 		}
 	}
@@ -824,7 +825,6 @@
 	}
 	
 	function errorHandling($errno, $errstr, $errfile, $errline){
-			// wtf($errno."   ".$errstr."   ".$errfile."   ".$errline);
 		if(
 			$errno === E_ERROR
 			|| $errno === E_WARNING

@@ -127,12 +127,7 @@
 				$projectValue = $res[0];
 			// }
 		}
-		// ***********************************
-		
-		// assigning happy hour discount
-		
-		// *****************************
-		
+
 		$entriesIdArray = array();
 		//building the repetition pattern
 		while((substr($weekahead,0,8)<=$enddate) && ($w<53)){
@@ -479,6 +474,7 @@
 		
 		// get waiting list data before update
 		$waitListData = waitListAuxFunction($entry, true);
+		
 		$newDate = dbHelp::convertDateStringToTimeStamp($datetime,'%Y%m%d%H%i');
 		$sql = "update entry set entry_user=".$arrdt[2].", entry_datetime=".$newDate.",entry_slots= :0, entry_action = '".date('Y-m-d H:i:s',time())."' ".$projectUpdateSql.", entry_assistance = ".$assistance." where entry_id=". $entry;
 		$resPDO = dbHelp::query($sql, $extraDataArray);
@@ -486,8 +482,8 @@
 			// this should never occur because the action date should always be different then the one previously set
 			throw new Exception("Entry info not updated.");
 		}
-		else {
-			//notification for waiting list, deletes the first user on the waiting list, not particularly usefull
+		else{
+			// notification for waiting list, deletes the first user on the waiting list, not particularly usefull
 			// $sql = "select entry_id, user_id from entry,".dbHelp::getSchemaName().".user where entry_user=user_id and entry_status=4 and entry_datetime='".$arrdt[0]."' and entry_resource=".$arrdt[1]." order by entry_id";
 			// $res = dbHelp::query($sql);
 			// $arrStatus = dbHelp::fetchRowByIndex($res);

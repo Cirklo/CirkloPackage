@@ -1,0 +1,21 @@
+body {
+	margin:0;
+	background: #1e4F54;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	font-size:12px;
+	font-style:normal;
+	color: white;
+}
+
+h1{
+	color: #F7C439;
+	text-align: center;
+}
+
+.link, .link:visited{
+	color: #F7C439;
+}
+
+.link:hover{
+	color: white;
+}

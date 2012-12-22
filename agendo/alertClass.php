@@ -36,14 +36,14 @@ private $RespAlert;
   * @method noreturn sets the sender email configuration
   * @
 */
-// $resource=0, this probabably generates a huge amount of warnings and maybe errors, avoid this class as much as possible
-function __construct($resource=0) {
+function __construct($resource = false) {
 	$sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
 	$res = dbHelp::query($sql);
 	$configArray = array();
 	for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
 		$configArray[$arr[0]] = $arr[1];
 	}
+	
 	$this->SMTPAuth   = $configArray['smtpauth'];
 	$this->SMTPSecure = $configArray['smtpsecure'];
 	$this->Port       = $configArray['port'];
@@ -55,22 +55,20 @@ function __construct($resource=0) {
     $this->SetFrom($configArray['email'], "Calendar administration");
     $this->AddReplyTo($configArray['email'],"Calendar administration");   
   
-    $this->Resource=$resource;
-    $sql="select user_id,user_email,user_mobile, user_firstname,user_lastname,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id=". $this->Resource;
-    $res=dbHelp::query($sql);
-    $arr=dbHelp::fetchRowByIndex($res);
-    // $resource = 0, makes this pretty horrible
-    $this->ResourceResp=$arr[0];
-    $this->RespEmail=$arr[1];
-    $this->RespMobile=$arr[2];
-    $this->RespName=$arr[3]." ".$arr[4];
-    $this->RespAlert=$arr[5];
-    $this->ResourceName=$arr[6];
-    $this->ResourceResolution=$arr[7];
-    
-	// ??
-    // $res=dbHelp::query($sql);
-    // $arr=dbHelp::fetchRowByName($res);
+    $this->Resource = $resource;
+	if($resource !== false){
+		$sql="select user_id,user_email,user_mobile, user_firstname,user_lastname,user_alert,resource_name,resource_resolution from ".dbHelp::getSchemaName().".user,resource where resource_resp=user_id and resource_id = :0";
+		$res=dbHelp::query($sql, array($this->Resource));
+		$arr=dbHelp::fetchRowByIndex($res);
+		
+		$this->ResourceResp=$arr[0];
+		$this->RespEmail=$arr[1];
+		$this->RespMobile=$arr[2];
+		$this->RespName=$arr[3]." ".$arr[4];
+		$this->RespAlert=$arr[5];
+		$this->ResourceName=$arr[6];
+		$this->ResourceResolution=$arr[7];
+	}
 }
 /**
    * Sets user info: email and full name
@@ -100,10 +98,10 @@ function setEntry($entry){
 function getResourceResp(){
     return $this->ResourceResp;
 }
+
 /**
    * In the case of an entry it triggers one warning event.
    * @param integer entry
-
 */
 function toWaitList($type){
 	// only uses the first result out of a query that searches what are quite probably millions of lines, not particularly usefull
@@ -467,6 +465,7 @@ function entriesReminder(){
 		$sqlDays = "select configParams_value from configParams where configParams_name like 'entryReminderDaysBefore'";
 		$prepDays = dbHelp::query($sqlDays);
 		$rowDays = dbHelp::fetchRowByIndex($prepDays);
+		// this is horrible, should be done in a way that didnt involve parsing a string
 		$daysToRemindArray = explode(",", $rowDays[0]);
 		foreach($daysToRemindArray as $day){
 			$day = trim($day);

@@ -7,6 +7,7 @@
 	
 	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/hourUsage.css' rel='stylesheet' type='text/css' />";
+	echo "<link href='css/base.css' rel='stylesheet' type='text/css' />";
 	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
 	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
 	

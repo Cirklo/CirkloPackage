@@ -23,6 +23,12 @@ $(document).ready(
 	}
 );
 
+function getEnter(e, phpFile, resource){
+	if (e.keyCode == 13){
+		submitUser(phpFile + '.php', resource, null, null);
+	}	
+}
+
 function go (objIMG) {
 	groupViewOk = typeof(groupViewOk) != 'undefined' ? groupViewOk : false;
     s=objIMG.src;
