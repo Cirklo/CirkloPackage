@@ -1,53 +1,41 @@
-$(document).ready(
-	function(){
-	   $('#projectList').multiselect(
-			{
-				noneSelectedText: 'Select project(s)'
-				,height: 'auto'
-				,multiple: false
-				,selectedList: 1
-			}
-	   ).multiselectfilter();
+var activeMatrix = {};
+var defaultArray = {};
 
-	   $('#resourceList').multiselect(
-			{
-				noneSelectedText: 'Select resource(s)'
-				,selectedText: '# of # selected'
-				,height: 'auto'
-			}
-	   ).multiselectfilter();
+function selectAllFromDep(department, checked){
+	$('#dep-' + department).find('input:checkbox').each(function () {
+		this.checked = checked;
+		sendCheckedToArray(department, this.value, this.checked);
+     });
+}
+
+function sendCheckedToArray(department, project, checked){
+	if(!activeMatrix[department]){
+		activeMatrix[department] = {};
 	}
-);
+	activeMatrix[department][project] = checked;
+}
 
-$("#projectList").bind("multiselectoptgrouptoggle", function(event, ui){});
+function changeDefault(department, project){
+	defaultArray[department] = project;
+}
 
-function assignProjs(){
-	var projects = $("#projectList").val();
-	var resources = $("#resourceList").val();
-	
-	if(!projects){
-		showMessage('Please select a project');
+function saveData(){
+	if(isObjEmpty(activeMatrix) && isObjEmpty(defaultArray)){
+		showMessage("No changes were made");
 		return;
 	}
-	
-	if(!resources){
-		showMessage('Please select at least one resource');
-		return;
-	}
-
-	var project = projects[projects.length - 1];
 
 	$.post(
-		"projAssign.php"
-		, {project: project, "resources[]": resources}
-		, function(serverData){
+		'projAssign.php'
+		,{'activeMatrix': JSON.stringify(activeMatrix), 'defaultArray': defaultArray}
+		,function(serverData){
 			showMessage(serverData.message, serverData.isError);
 		}
-		, 'json'
-	/*)
+		,'json'
+	)
 	.error(
 		function(error){
 			showMessage(error.responseText, true);
-		}*/
+		}
 	);
 }

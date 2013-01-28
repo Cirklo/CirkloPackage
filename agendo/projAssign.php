@@ -5,9 +5,31 @@
 	$isAdmin = isAdmin($_SESSION['user_id']);
 	initSession();
 	
-	// fazer check da info enviada, ver se o user logged pode realmente fazer estas operações
-	if($_POST['project'] && $_POST['resources']){
+	if($isPI === false && $isAdmin === false){
+		throw new Exception("You are not allowed to make changes on this page");
+	}
+	
+	if(isAjax()){
+		if($_POST['activeMatrix']){
+			$activeMatrix = json_decode($_POST['activeMatrix'], true);
+			$sql = "update proj_dep_assoc set proj_dep_assoc_active = :0 where proj_dep_assoc_department = :1 and proj_dep_assoc_project = :2";
+			foreach($activeMatrix as $department=>$projectArray){
+				foreach($projectArray as $project=>$value){
+					dbHelp::query($sql, array((int)$value, $department, $project));
+				}
+			}
+		}
+
+		if($_POST['defaultArray']){
+			$defaultArray = $_POST['defaultArray'];
+			$sql = "update department set department_default_project = :0 where department_id = :1";
+			foreach($defaultArray as $department=>$project){
+				dbHelp::query($sql, array($project, $department));
+			}
+		}
 		
+		$json->message = "Changes were saved";
+		echo json_encode($json);
 		exit;
 	}
 	
@@ -16,104 +38,134 @@
 			<a class='link' name='back' href='../datumo/'>Back to Admin Area</a>
 		</div>
 	";
+	
 	echo "<html>";
 		importJs();
-		echo "<script type='text/javascript' src='../agendo/js/jquery-ui-1.8.14.custom.min.js'></script>";
 		echo "<link href='../agendo/css/base.css' rel='stylesheet' type='text/css'>";
-		echo "<link href='../agendo/css/jquery-ui-1.9.2.custom.css' rel='stylesheet' type='text/css'>";
-		echo "<link href='../agendo/css/jquery.multiselect.css' rel='stylesheet' type='text/css'>";
-		echo "<script type='text/javascript' src='../agendo/js/jquery.multiselect.js'></script>";
-		echo "<link href='../agendo/css/jquery.multiselect.filter.css' rel='stylesheet' type='text/css'>";
-		echo "<script type='text/javascript' src='../agendo/js/jquery.multiselect.filter.js'></script>";
 		echo "<script type='text/javascript' src='../agendo/js/projAssign.js'></script>";
+		echo "<link href='../agendo/css/projAssign.css' rel='stylesheet' type='text/css'>";
 		
 		echo "<body>";
 			echo "<br>";
-			echo "<h1>Project Assign</h1>";
+			echo "<h1>Project Settings</h1>";
+			echo "<br>";
 			
-			echo "<div style='width:800px;margin:auto;display:table;text-align:center;'>";
+			echo "<div id='container' style='margin:auto;display:table;'>";
 				$dataArray = array();
-				$sqlRes = "
-					select 
-						resourcetype_name, resource_name, resource_id, resource_type 
-					from
-						resource join resourcetype on resource_type = resourcetype_id ";
-				$sqlRes2 = " order by resourcetype_name, resource_name";
-
-				$sqlDep = "
+				$sqlDep1 = "
 					select
-						project_id, project_name, department_id, department_name
+						department_id, department_name, project_id, project_name, proj_dep_assoc_active, department_default_project
 					from
-						project join department on project_department = department_id ";
-				$sqlDep2 = " order by department_name, project_name";
-				
-				if(!$isAdmin && $isPI === false){
-					$dataArray[] = $_SESSION['user_id'];
-					$sqlRes .= "join permissions on permissions_user = :0 and resource_id = permissions_resource".$sqlRes2;
-					$sqlDep = "select project_id, project_name from project join user on project_department = user_dep where user_id = :0";
+						department
+						join proj_dep_assoc on department_id = proj_dep_assoc_department
+						join project on project_id = proj_dep_assoc_project
+				";
+				$sqlDep2 = "order by department_name, project_name";
+				if($isAdmin === false){
+					$sqlDep1 .= "department_manager = :0 ";
+					$dataArray[] = $_SESSION['user_id']; 
 				}
-				else{
-					$sqlRes .= $sqlRes2;
-					$sqlDepPart2 = "";
-					if($isPI !== false){
-						$inData = dbHelp::inDataFromArray($isPI);
-						$sqlDepPart2 = "where project_department in ".$inData['inData'];
-						$dataArray = $isPI;
+				$sqlDep1 .= $sqlDep2;
+				
+				$prep = dbHelp::query($sqlDep1, $dataArray);
+				$previousDepartment = "";
+				// get the first row
+				$row = dbHelp::fetchRowByName($prep);
+				echo "<table id='header'>";
+					echo "<tr>";
+						echo "<td>";
+							echo "<label>";
+								echo "Department name";
+							echo "</label>";
+						echo "</td>";
+
+						echo "<td class='defaultColumn'>";
+							echo "<label>";
+								echo "Default";
+							echo "</label>";
+						echo "</td>";
+
+						echo "<td class='activeColumn'>";
+							echo "<label>";
+								echo "Active";
+							echo "</label>";
+						echo "</td>";
+					echo "</tr>";
+				echo "</table>";
+				
+				while($row){
+					if($previousDepartment != $row['department_id']){
+						echo "<table id='dep-".$row['department_id']."' class='department' >";
+							echo "<tr>";
+								echo "<td>";
+									echo "<label>";
+										echo $row['department_name'];
+									echo "</label>";
+								echo "</td>";
+								
+								echo "<td colspan='2' class='all'>";
+									echo "<label>";
+										echo "All ";
+										echo "<input class='checkBox' type='checkbox' onchange='selectAllFromDep(".$row['department_id'].", this.checked);'/>";
+									echo "</label>";
+								echo "</td>";
+							echo "</tr>";
+							
+								// first project
+								echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default_project']);
+								// rest of them
+								$previousDepartment = $row['department_id'];
+								while(($row = dbHelp::fetchRowByName($prep)) && $previousDepartment == $row['department_id']){
+									echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default_project']);
+								}
+						echo "</table>";
 					}
-				}
-				$sqlDep .= $sqlDepPart2;
-				
-				$prep = dbHelp::query($sqlRes, $dataArray);
-				$resourceType = false;
-				echo "<div style='float:right;display:table-cell;'>";
-					echo "<select id='resourceList' multiple='multiple' style='width:350px;' size='10'>";
-						while($row = dbHelp::fetchRowByName($prep)){
-							if($row['resource_type'] != $resourceType){
-								if($resourceType !== false){
-									echo "</optgroup>";
-								}
-								echo "<optgroup label='".$row['resourcetype_name']."'>";
-							}
-							$resourceType = $row['resource_type'];
-							echo "<option value='".$row['resource_id']."'>".$row['resource_name']."</option>";
-						}
-						if($resourceType !== false){
-							echo "</optgroup>";
-						}
-					echo "</select>";
-				echo "</div>";
-				
-				$prep = dbHelp::query($sqlDep, $dataArray);
-				$projDepartment = false;
-				echo "<div style='float:left;display:table-cell;'>";
-					echo "<select id='projectList' style='width:350px;' size='10'>";
-						while($row = dbHelp::fetchRowByName($prep)){
-							if($row['department_id'] != $projDepartment){
-								if($projDepartment !== false){
-									echo "</optgroup>";
-								}
-								echo "<optgroup label='".$row['department_name']."'>";
-							}
-							$projDepartment = $row['department_id'];
-							echo "<option value='".$row['project_id']."'>".$row['project_name']."</option>";
-						}
-						if($projDepartment !== false){
-							echo "</optgroup>";
-						}
-					echo "</select>";
-				echo "</div>";
-				
-				echo "<br>";
-				echo "<br>";
-				
-				if($isAdmin || $isPI){
-					echo "<input type='button' value='Assign projects' onclick='assignProjs();' />";
 				}
 				
 			echo "</div>";
 
 			echo "<br>";
+
+			echo "<div style='margin:auto;width:200px;text-align:center;'>";
+				echo "<input type='button' title='Saves all the projects active state and their default states' value='Save changes' onclick='saveData();' />";
+			echo "</div>";
+
+			echo "<br>";
+			echo "<br>";
+			
 			echo $backLink;
 		echo "</body>";
 	echo "</html>";
+	
+	function projElement($name, $dep_id, $proj_id, $projIsActive, $projIsDefault){
+		$default = "";
+		if($projIsDefault && $projIsDefault == $proj_id){
+			$default = "checked='checked'";
+		}
+		
+		$active = "";
+		if($projIsActive == 1){
+			$active = "checked='checked'";
+		}
+
+		echo  "<tr class='listElement'>";
+			echo "<td style='text-align:left;'>";
+				echo "<label>";
+					echo $name;
+				echo "</label>";
+			echo "</td>";
+
+			echo "<td class='defaultColumn'>";
+				echo "<label>";
+					echo "<input id='".$dep_id."-".$proj_id."-radio' name='".$dep_id."' value='' type='radio' onclick='changeDefault(".$dep_id.", ".$proj_id.");' ".$default." />";
+				echo "</label>";
+			echo "</td>";
+				
+			echo "<td class='activeColumn'>";
+				echo "<label>";
+				echo "<input id='".$dep_id."-".$proj_id."-check' type='checkbox' value='".$proj_id."' onchange='sendCheckedToArray(".$dep_id.", this.value, this.checked);'/>";
+				echo "</label>";
+			echo "</td>";
+		echo "</tr>";
+	}
 ?>

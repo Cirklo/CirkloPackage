@@ -1,0 +1,73 @@
+#container{
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	padding: 10px;
+	background: white;
+	border: 2px solid #F7C439;
+	min-width: 300px;
+}
+
+.department, #header{
+	background: white;
+	width: 100%;
+	margin: auto;
+	border-collapse: collapse;
+}
+
+#header{
+	font-weight: bold;
+	color: #1e4F54;
+}
+
+.department{
+	font-weight:600;
+	color: black;
+}
+
+.projectList{
+	list-style-type: none;
+	background: white;
+	padding: 0px;
+}
+
+.activeColumn{
+	width: 50px;
+	text-align: right;
+	padding-right: 5px;
+}
+
+.defaultColumn{
+	width: 60px;
+	text-align: right;
+	padding-right: 5px;
+}
+
+.all{
+	width: 110px;
+	text-align: right;
+	padding-right: 5px;
+}
+
+.listElement{
+	padding: 5px 0px 5px 15px;
+	font-weight: normal;
+}
+
+#departmentList :hover{
+	text-decoration:underline;
+}
+
+.checkBox{
+	float: right;
+}
+
+tr, td{
+	padding: 0px;
+	margin: 0px;
+	border: 1px solid black;
+}
+
+.clear{
+	clear: both;
+}

@@ -171,7 +171,7 @@ function submitUser(phpFilePath,resource,user,pass,loginToDatumo) {
 
 function logOff(phpFilePath, resource){
 	$.post(phpFilePath, {functionName:'logOff'},"json")
-		.error(function(error){showMessage(error);})
+		.error(function(error){showMessage(error, true);})
 		.complete(function(){
 				if(resource != null){
 					window.location = phpFilePath + "?resource="+resource;
@@ -287,4 +287,11 @@ function getOrPost(url, mainFunction, argsToSend, type, completedFunction, compl
 			}
 		}
 	);
+}
+
+function isObjEmpty(obj){
+	for(var i in obj){
+		return false; 
+	}
+	return true;
 }
