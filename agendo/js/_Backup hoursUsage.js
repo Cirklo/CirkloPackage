@@ -1,74 +1,7 @@
 $(function() {
 	$('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
-	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
-	var oTable;
-	if(oTable = document.getElementById('teste')){
-		oTable = $('#teste').dataTable({
-			"bJQueryUI": true
-			,"sPaginationType": "full_numbers"
-			,'aLengthMenu': [[10, 20, 50, -1], [10, 20, 50, "All"]]
-			,"iDisplayLength": -1
-			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
-				var columns_to_change={7: '', 8: '', 9: '', 10: ''};
-				var functionName;
-				var total;
-				for(var j in columns_to_change) {                                   
-					// var selected_column= columns_to_change[j];
-					endResult=0;
-					functionName = columns_to_change[j];
-					if(functionName == ''){
-						functionName = 'regularSum';
-					}
-					
-					for(var i=iStart;i<iEnd;i++){ 
-						// total=total+parseInt(aData[aiDisplay[i]][selected_column]);
-						
-						endResult = window[functionName](aData[aiDisplay[i]][j], endResult);
-					}
-					$($(nFoot).children().get(j)).html(endResult);
-				}
-				// nFoot.getEtlementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
-			}
-			// ,"aoColumns":[
-				// { "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-				// ,{ "sType": "string" }
-			// ]
-			
-			// ,"aoColumns": [
-				// { "sTitle": "Date"}
-				// ,{ "sTitle": "ID" }
-				// ,{ "sTitle": "Department"}
-				// ,{ "sTitle": "User"}
-				// ,{ "sTitle": "Resource" }
-				// ,{ "sTitle": "ID2"}
-				// ,{ "sTitle": "Project" }
-				// ,{ "sTitle": "Value"}
-				// ,{ "sTitle": "bla"}
-				// ,{ "sTitle": "bla2" }
-				// ,{ "sTitle": "bla3"}
-			// ]
-		});
-	}
-	
+	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
 });
-
-function regularSum(value, total){
-	return parseFloat(value) + total;
-}
-
-function replaceSpecialCharacters(pattern) {
-	var specials = new RegExp("[$+?|()\\[\\]{}\\\\]", "g"); // .*+?|()[]{}\$
-	return pattern.replace(specials, "\\$&");
-}
 
 // Sends the checkBoxes states to the server and gets the appropriate table data
 function sendChecksAndDate(action, departments, changeLocation){

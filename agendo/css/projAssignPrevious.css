@@ -1,0 +1,41 @@
+#container{
+	min-height: 100px;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	padding: 10px;
+	background: white;
+	border: 2px solid #F7C439;
+}
+
+#departmentList{
+	list-style-type: none;
+	background: white;
+	margin: auto;
+	color: black;
+	padding: 0px 15px 0px 5px;
+	font-weight: bold;
+}
+
+.projectList{
+	list-style-type: none;
+	background: white;
+	padding: 0px;
+}
+
+.listElement{
+	padding: 5px 0px 5px 15px;
+	font-weight: normal;
+}
+
+#departmentList :hover{
+	text-decoration:underline;
+}
+
+.checkBox{
+	float: right;
+}
+
+.clear{
+	clear: both;
+}

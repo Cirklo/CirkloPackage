@@ -70,6 +70,8 @@ $imResstatus6 = ($arr['resource_status'] == 6); // sequencing
 // *************************** applet for mac address *********************
 if($imResstatus3){ // user confirmation
 	echo "<object type='application/x-java-applet' WIDTH='1' HEIGHT='1' id='zeeApplet'>";
+	// echo "<object type='application/x-java-applet;version=1.5.0' WIDTH='1' HEIGHT='1' id='zeeApplet'>";
+	// echo "<object classid='clsid:CAFEEFAC-0015-0000-0000-ABCDEFFEDCBA' type='application/x-java-applet;version=1.5.0' WIDTH='1' HEIGHT='1' id='zeeApplet'>";
 		echo "<param name='codebase' value = '../agendo' />";
 		echo "<param name='archive' value='macApp.jar'/>";
 		echo "<param name='code' value='MacAddressApplet'/>";
@@ -322,6 +324,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 								$resResources=dbHelp::query($sql);
 								$nextDetected = false;
 								$currentDetected = false;
+								$arrprev = array();
 								// Loop that finds the previous and next "line" composed of resourceStatus and resourceId of the $calendar->getResource() id
 								while($resArray = dbHelp::fetchRowByIndex($resResources)){
 									$currentId = $resArray[1];
@@ -391,33 +394,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 					//***********************************************
 					//************* Weekly hours left ***************
-					// if(isset($_SESSION['user_id']) && $calendar->getRespId() != $_SESSION['user_id']){
-						// $day=substr($calendar->getStartDate(),6,2);
-						// $month=substr($calendar->getStartDate(),4,2);
-						// $year=substr($calendar->getStartDate(),0,4);
-						// $slotDate = date('Ymd', mktime(0, 0, 0, $month, (int)$day + 1, $year));
-						// $day=substr($slotDate,6,2);
-						// $month=substr($slotDate,4,2);
-						// $year=substr($slotDate,0,4);
-						
-						// $arrSRM = getSlotsResolutionMaxHours($day, $month, $year, $_SESSION['user_id'], $calendar->getResource());
-						// $totalSlots = $arrSRM[0];
-						// $resolution = $arrSRM[1];
-						// $maxHours 	= $arrSRM[2];
-
-						// if($arrSRM[3] != $user_id && $maxHours != 0){
-							// $timeUsed = $totalSlots * $resolution/60;
-							// $maxSlots = $maxHours * 60 / $resolution;
-							// $slotsLeft = $maxSlots - $totalSlots;
-							
-							// if($slotsLeft < 0){
-								// $slotsLeft = 0;
-							// }
-							
-							// $timeLeft = $maxHours - $timeUsed;
-							// if($timeLeft < 0){
-								// $timeLeft = 0;
-							// }
 						$timeSlotsText = getTimeAndSlotsLeft();
 						if($timeSlotsText !== false){
 							echo "<tr>";
@@ -433,7 +409,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 								echo "</td>";
 							echo "</tr>";
 						}
-					// }
 					//************* Weekly hours left ***************
 					//***********************************************
 	
@@ -441,38 +416,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "<tr><td colspan=2 align=center><a href=ekrano target='blank'>Monitored resource</a></td></tr>";
 						echo "<tr><td colspan=2><hr></td></tr>";
 					}
-					
-					// similar stuff
-					// $sqlSimilar = "select similarresources_similar, resource_name from resource, (select similarresources_similar from similarresources where similarresources_resource = ".$resource.") as similars where resource_id = similarresources_similar";
-					// $resSimilar = dbHelp::query($sqlSimilar);
-					// if(dbHelp::numberOfRows($resSimilar)>0){
-						// echo "<tr>";
-							// $extraGet = "";
-							// if(isset($_GET['date'])){
-								// $extraGet = "&date=".$_GET['date'];
-							// }
-							// echo "<td colspan=2>Similar Resources</td>";
-						// echo "</tr>";
-					
-						// echo "<tr>";
-							// echo "<td colspan=2>";
-							// echo "<select id='similarResources' class='similar' onChange=window.location='./weekview.php?resource='+this.value>";
-							// echo "<option value='".$resource."' >This Resource</option>";
-
-							// while($arrSimilar = dbHelp::fetchRowByIndex($resSimilar)){
-								// echo "<option value='".$arrSimilar[0]."' >".$arrSimilar[1]."</option>";
-							// }
-							// echo "</select>";
-							// echo "</td>";
-						// echo "</tr>";
-
-						// echo "<tr>";
-							// echo "<td colspan=2>";
-							// echo "<hr>";
-							// echo "</td>";
-						// echo "</tr>";
-					// }
-					// /similar stuff
 					
 				
 					$buttonDisplay1 = $buttonDisplay2 = $buttonDisplay3 = $buttonDisplay4 = $buttonDisplay5 = 'inline-table';
@@ -604,9 +547,24 @@ echo "<table id='master' style='margin:auto' width=750>";
 							// }
 							// **************************
 						
+						
+						
 						// project listing goes here
 						// if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){
-							$sql = "select distinct project_name, project_id from project, proj_dep_assoc, ".dbHelp::getSchemaName().".user where project_id = proj_dep_assoc_project and proj_dep_assoc_department = user_dep and user_id = :0 or project_id = 1";
+							// $sql = "select distinct project_name, project_id from project, proj_dep_assoc, ".dbHelp::getSchemaName().".user where project_id = proj_dep_assoc_project and proj_dep_assoc_department = user_dep and user_id = :0 or project_id = 1";
+							$sql = "
+								select
+									project_name, project_id, department_default_project
+								from
+									project join proj_dep_assoc on project_id = proj_dep_assoc_project
+									join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+									join department on department_id = user_dep
+								where
+									user_id = :0
+									and proj_dep_assoc_active = 1
+								order by
+									project_name
+							";
 							$prep = dbHelp::query($sql, array($_SESSION['user_id']));
 							if(dbHelp::numberOfRows($prep) > 0){
 								// echo "<tr><td colspan=2 style='display:".$showIfUserLogged."'><hr></td></tr>";
@@ -615,25 +573,29 @@ echo "<table id='master' style='margin:auto' width=750>";
 								echo "<tr>";
 									// echo "<td colspan=2 style='text-align:center;display:".$showIfUserLogged.";'>";
 									echo "<td colspan=2 style='text-align:center;'>";
-										$sqlSelected = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
-										$prepSelected = dbHelp::query($sqlSelected, array($_SESSION['user_id'], $resource));
-										$resSelected = dbHelp::fetchRowByIndex($prepSelected);
-										$selectedProj = $resSelected[0];
+										// $sqlSelected = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
+										// $sqlSelected = "select department_default_project from department where department_id = :0";
+										// $prepSelected = dbHelp::query($sqlSelected, array($_SESSION['user_id'], $resource));
+										// $resSelected = dbHelp::fetchRowByIndex($prepSelected);
+										// $selectedProj = $resSelected[0];
+										// $selectedProj = $res;
 										
+										echo "Project: ";
 										echo "<select id='projectList' style='width:100px;'>";
-											echo "<option value='-1'>No project</option>";
+											// echo "<option value='-1'>No project</option>";
 											while($res = dbHelp::fetchRowByIndex($prep)){
 												$isSelected = "";
-												if($res[1] == $selectedProj){
+												// if($res[1] == $selectedProj){
+												if($res[1] == $res[2]){
 													$isSelected = "selected='selected'";
 												}
-												echo "<option value='".$res[1]."' ".$isSelected.">".$res[0]."</option>";
+												echo "<option value='".$res[1]."' ".$isSelected." title='".$res[0]."'>".$res[0]."</option>";
 											}
 										echo "</select>";
 										
-										echo "&nbsp";
+										// echo "&nbsp";
 										
-										echo "<input type='button' value='Set' onclick='setProjectAsDefault(".$resource.")' title='Set the selected project as default'/>";
+										// echo "<input type='button' value='Set' onclick='setProjectAsDefault(".$resource.")' title='Set the selected project as default'/>";
 									echo "</td>";
 								echo "</tr>";
 							}

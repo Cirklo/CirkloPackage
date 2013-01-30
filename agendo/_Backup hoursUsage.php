@@ -3,22 +3,13 @@
 	require_once("hoursUsageAux.php");
 	
 	htmlEncoding();
-	// importJs();
+	importJs();
 	
-	// echo "<link href='css/reset-min.css' rel='stylesheet' type='text/css' />";
-	echo "<link href='css/jquery.dataTables_themeroller.css' rel='stylesheet' type='text/css' />";
-	echo "<link href='css/demo_table_jui.css' rel='stylesheet' type='text/css' />";
-	echo "<script type='text/javascript' src='js/jquery-1.8.2.min.js'></script>";
 	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/hourUsage.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/demo_table.css' rel='stylesheet' type='text/css' />";
-	echo "<link href='css/jquery-ui-1.9.1.custom.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/base.css' rel='stylesheet' type='text/css' />";
 	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
 	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
-	echo "<script type='text/javascript' src='js/jquery-ui-1.9.1.custom.js'></script>";
-	echo "<script type='text/javascript' src='js/jquery-ui.js'></script>";
-	echo "<script type='text/javascript' src='js/jquery.dataTables.min.js'></script>";
 	
 	$backLink = "
 		<div style='margin:auto;width:200px;text-align:center;'>
@@ -69,64 +60,6 @@
 					$json->success = true;
 					$json->message = "Report sent";
 					echo json_encode($json);
-				break;
-				
-				case "data":
-					$isAdmin = true;
-					$userCheck = $resourceCheck = $entryCheck = $projectCheck = true;
-		
-					$beginDate = "01/01/2001";
-					$endDate = "31/03/2013";
-					
-					$userLevel = "admin";
-					
-					generateResults();
-					
-					echo "<div style='width: 1024px;margin: auto;'>";
-						echo "<table id='teste' style='color: black;'>";
-							$firstRow = current($results);
-							echo "<thead>";
-								foreach($firstRow as $keyLine=>$line){
-									echo "<td>";
-										echo $keyLine;
-									echo "</td>";
-								}
-							echo "</thead>";
-							foreach($results as $keyLine=>$line){
-								echo "<tr>";
-								foreach($line as $keyRow=>$row){
-									echo "<td>";
-										echo $row;
-									echo "</td>";
-								}
-								echo "</tr>";
-							}
-						
-							echo "<tfoot style='background: white;'>";
-								echo "<td>";
-									echo "Total:";
-								echo "</td>";
-								
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								// echo "<td colspan='7'>";
-								// echo "</td>";
-								
-								// echo "<td colspan='3' style='text-align: right;border: 1px solid red;'>";
-									// echo "9001";
-								// echo "</td>";
-							echo "</tfoot>";
-						echo "</table>";
-					echo "</div>";
-					
 				break;
 			}
 			exit;
