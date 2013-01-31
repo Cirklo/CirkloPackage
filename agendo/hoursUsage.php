@@ -3,12 +3,12 @@
 	require_once("hoursUsageAux.php");
 	
 	htmlEncoding();
-	// importJs();
+	importJs();
 	
 	// echo "<link href='css/reset-min.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/jquery.dataTables_themeroller.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/demo_table_jui.css' rel='stylesheet' type='text/css' />";
-	echo "<script type='text/javascript' src='js/jquery-1.8.2.min.js'></script>";
+	// echo "<script type='text/javascript' src='js/jquery-1.8.2.min.js'></script>";
 	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/hourUsage.css' rel='stylesheet' type='text/css' />";
 	// echo "<link href='css/demo_table.css' rel='stylesheet' type='text/css' />";
@@ -16,7 +16,7 @@
 	echo "<link href='css/base.css' rel='stylesheet' type='text/css' />";
 	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
 	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
-	echo "<script type='text/javascript' src='js/jquery-ui-1.9.1.custom.js'></script>";
+	// echo "<script type='text/javascript' src='js/jquery-ui-1.9.1.custom.js'></script>";
 	echo "<script type='text/javascript' src='js/jquery-ui.js'></script>";
 	echo "<script type='text/javascript' src='js/jquery.dataTables.min.js'></script>";
 	
@@ -82,7 +82,7 @@
 					
 					generateResults();
 					
-					echo "<div style='width: 1024px;margin: auto;'>";
+					echo "<div style='margin: auto;'>";
 						echo "<table id='teste' style='color: black;'>";
 							$firstRow = current($results);
 							echo "<thead>";

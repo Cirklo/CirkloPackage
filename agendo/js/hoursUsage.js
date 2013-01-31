@@ -1,6 +1,7 @@
 $(function() {
 	$('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
 	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
+	
 	var oTable;
 	if(oTable = document.getElementById('teste')){
 		oTable = $('#teste').dataTable({
@@ -9,23 +10,20 @@ $(function() {
 			,'aLengthMenu': [[10, 20, 50, -1], [10, 20, 50, "All"]]
 			,"iDisplayLength": -1
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
-				var columns_to_change={7: '', 8: '', 9: '', 10: ''};
+				// column to change, iteration function, end result presentation function
+				var columns_to_change={7: ['regularSum', 'regularEndResult'], 8: ['regularSum', 'regularEndResult'], 9: ['regularSum', 'regularEndResult'], 10: ['regularSum', 'regularEndResult']};
 				var functionName;
 				var total;
 				for(var j in columns_to_change) {                                   
 					// var selected_column= columns_to_change[j];
-					endResult=0;
-					functionName = columns_to_change[j];
-					if(functionName == ''){
-						functionName = 'regularSum';
+					end_result = 0;
+					functionName = columns_to_change[j][0];
+					for(var i=iStart; i<iEnd; i++){ 
+						end_result = window[functionName](aData[aiDisplay[i]][j], end_result);
 					}
-					
-					for(var i=iStart;i<iEnd;i++){ 
-						// total=total+parseInt(aData[aiDisplay[i]][selected_column]);
-						
-						endResult = window[functionName](aData[aiDisplay[i]][j], endResult);
-					}
-					$($(nFoot).children().get(j)).html(endResult);
+
+					functionName = columns_to_change[j][1];
+					$($(nFoot).children().get(j)).html(window[functionName](end_result));
 				}
 				// nFoot.getEtlementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
 			}
@@ -65,9 +63,8 @@ function regularSum(value, total){
 	return parseFloat(value) + total;
 }
 
-function replaceSpecialCharacters(pattern) {
-	var specials = new RegExp("[$+?|()\\[\\]{}\\\\]", "g"); // .*+?|()[]{}\$
-	return pattern.replace(specials, "\\$&");
+function regularEndResult(end_result){
+	return end_result;
 }
 
 // Sends the checkBoxes states to the server and gets the appropriate table data

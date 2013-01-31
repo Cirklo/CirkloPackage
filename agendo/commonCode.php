@@ -185,7 +185,8 @@
 
 	$jsWereImported = false;
 	function importJs($path = "../agendo"){
-		echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
+		// echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
+		echo "<script type='text/javascript' src='".$path."/js/jquery-1.8.2.min.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/commonCode.js'></script>";
 		// echo "<link type='text/css' href='".$path."/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
 		// echo "<script type='text/javascript' src='".$path."/js/jquery.jnotify.js'></script>";
@@ -194,7 +195,8 @@
 		echo "<link href='".$path."/css/tipTip.css' rel='stylesheet' type='text/css'>";
 		echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
 		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
-		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
+		// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
+		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
 		global $jsWereImported;
 		$jsWereImported = true;
