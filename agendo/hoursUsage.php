@@ -2,6 +2,41 @@
 	require_once("commonCode.php");
 	require_once("hoursUsageAux.php");
 	
+	$htmlDisplayArray = array(
+		"Department" => null
+		, "Username" => null
+		, "Resource" => null
+		, "Entry date" => null
+		, "Duration" => 'usageHtml'
+		, "Price per hour" => null
+		, "Subtotal" => 'costFormat'
+		, "Discount" => 'costFormat'
+		, "Project" => null
+		, "Total" => 'costFormat'
+	);
+	
+	$lowerLimit = $_POST['iDisplayStart'];
+	$upperLimit = $_POST['iDisplayLength'];
+	$resultsFound = 0;
+
+	if(isset($_POST['action']) && $_POST['action'] == 'generateJson'){
+		$isResp = isResp($_SESSION['user_id']);
+		$isAdmin = isAdmin($_SESSION['user_id']);
+		$isPI = isPI($_SESSION['user_id']);
+		
+		$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
+		
+		$isAdmin = true;
+		$userCheck = $resourceCheck = $entryCheck = $projectCheck = true;
+
+		$beginDate = "01/01/2001";
+		$endDate = "31/03/2013";
+		
+		$userLevel = "admin";
+		echo json_encode(generateJson());
+		exit;
+	}
+	
 	htmlEncoding();
 	importJs();
 	
@@ -44,6 +79,7 @@
 		$happyHourArray = array();
 		$resources = array();
 		$results = array();
+		$resultsLength = 0;
 		$lineKey = "";
 		$argumentsArray = array();
 		
@@ -315,21 +351,32 @@
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1150;text-align:center;'>";
 		echo $backLink;
-		$html = generateHtml();
-		if(!empty($html)){
+		
+		echo "<table id='datatable' style='color: black;'>";
+			echo "<thead>";
+			foreach($htmlDisplayArray as $key=>$value){
+				echo "<td>";
+					echo $key;
+				echo "</td>";
+			}
+			echo "</thead>";
+		echo "</table>";
+		
+		// $html = generateHtml();
+		// if(!empty($html)){
 	
-			$extraOptions = "<div style='display:table;text-align:center;width:100%;'>";
-				$extraOptions .= "<label style='float:left;margin-left:3px;'>Select all";
-					$extraOptions .= "<input type='checkBox' class='allCheck' onclick='selectUnselectAll(this);'/>";
-				$extraOptions .= "</label>";
+			// $extraOptions = "<div style='display:table;text-align:center;width:100%;'>";
+				// $extraOptions .= "<label style='float:left;margin-left:3px;'>Select all";
+					// $extraOptions .= "<input type='checkBox' class='allCheck' onclick='selectUnselectAll(this);'/>";
+				// $extraOptions .= "</label>";
 
-				$extraOptions .= "<input style='float:right;' type='button' value='Email Departments' onclick='emailDepartments();'/>";
-				$extraOptions .= "<input style='float:right;' type='button' value='Export to Excel' onclick='downloadFile();'/>";
-			$extraOptions .= "</div>";
+				// $extraOptions .= "<input style='float:right;' type='button' value='Email Departments' onclick='emailDepartments();'/>";
+				// $extraOptions .= "<input style='float:right;' type='button' value='Export to Excel' onclick='downloadFile();'/>";
+			// $extraOptions .= "</div>";
 			
-			echo $extraOptions;
-			echo $html;
-			echo $extraOptions;
+			// echo $extraOptions;
+			// echo $html;
+			// echo $extraOptions;
 			
 			echo "<div style='position:fixed;right:0px;bottom:0px;'>";
 				echo "<a class='link' href='#top'>Top</a>";
@@ -342,7 +389,7 @@
 			echo $backLink;
 	
 			showMsg('Report generated');
-		}
+		// }
 	echo "</div>";
 	
 	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
@@ -592,8 +639,10 @@
 	}
 	
 	function generateResults($selectedDepartmentsArray = null){
-		global $results, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate;
+		global $results, $resultsLength, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate, $lowerLimit, $upperLimit, $resultsFound;
 		$results = array();
+		$resultsLength = 0;
+		$resultsFound = 0;
 
 		if(empty($beginDate) || empty($endDate)){
 			return;
@@ -679,6 +728,9 @@
 				".$selectedDepartmentsSql."
 			order by 
 				".$orderBy."
+			limit
+				".$lowerLimit."
+				, ".$upperLimit."
 		";
 
 		$prep = dbHelp::query($sql, $selectedDepartmentsArray);
@@ -708,7 +760,10 @@
 			}
 
 			$results[$lineKey] = $lineValue;
+			$resultsLength++;
+			$resultsFound++;
 		}
+		$resultsFound += $upperLimit;
 
 		return $results;
 	}
@@ -797,6 +852,7 @@
 		if(isset($res[$args[0]])){
 			$formatedValue = $res[$args[0]];
 		}
+		
 		return array(
 			'Project' => array('value' => $formatedValue, 'lineKey' => 'project_id')
 		);
@@ -865,7 +921,6 @@
 				foreach($subTotalArray as $subTotalKey => $subTotalValue){
 					$subTotalArray[$subTotalKey] = 0;
 				}
-				
 			}
 			
 			// fields *********************************
@@ -912,6 +967,40 @@
 		$formatedValue = $hoursFloored."h : ".$minutes."m";
 		return $formatedValue;
 	}
+	
+	function generateJson($selectedDepartmentsArray = null){
+		global $results, $resultsLength, $resultsFound, $htmlDisplayArray;
+		generateResults($selectedDepartmentsArray);
+		
+		$output = array(
+			"sEcho" => intval($_POST['sEcho']),
+			"iTotalRecords" => $resultsLength,
+			"iTotalDisplayRecords" => $resultsFound,
+			"aaData" => array()
+		);
+		
+		$row = array();
+		// data ********************
+		foreach($results as $line){
+			// fields *********************************
+			foreach($htmlDisplayArray as $label => $function){
+				$value = $line[$label];
+				if(isset($function)){
+					$value = $function($line[$label]);
+				}
+				
+				$row[] = $value;
+				// if(isset($value)){
+					// $jsonData .= "\"".$value."\"".$columnSeparator;
+				// }
+			}
+			$output['aaData'][] = $row;
+		}
+		
+		
+		return $output;
+	}
+	
 	
 	function generateCsv($selectedDepartmentsArray){
 		global $results;

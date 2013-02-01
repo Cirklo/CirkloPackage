@@ -3,12 +3,30 @@ $(function() {
 	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
 	
 	var oTable;
-	if(oTable = document.getElementById('teste')){
-		oTable = $('#teste').dataTable({
+	if(oTable = $('#datatable')){
+		oTable.dataTable({
 			"bJQueryUI": true
 			,"sPaginationType": "full_numbers"
-			,'aLengthMenu': [[10, 20, 50, -1], [10, 20, 50, "All"]]
+			,'aLengthMenu': [[10, 20, 50, 200], [10, 20, 50, 200]]
 			,"iDisplayLength": -1
+			,"bProcessing": true
+			,"bServerSide": true
+			,"sServerMethod": "POST"
+			,"sAjaxSource": "hoursUsage.php"
+			,"fnServerData": function ( sSource, aoData, fnCallback ) {
+				aoData.push( { "name": "action", "value": 'generateJson' } );
+				$.post(
+					sSource
+					,aoData
+					,function(serverData){
+						showMessage(serverData.message, serverData.isError);
+					}
+					,'json'
+				)
+				.success(
+					fnCallback
+				);
+			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				// column to change, iteration function, end result presentation function
 				var columns_to_change={7: ['regularSum', 'regularEndResult'], 8: ['regularSum', 'regularEndResult'], 9: ['regularSum', 'regularEndResult'], 10: ['regularSum', 'regularEndResult']};

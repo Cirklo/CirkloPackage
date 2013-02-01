@@ -22,7 +22,7 @@
 
 		if($_POST['defaultArray']){
 			$defaultArray = $_POST['defaultArray'];
-			$sql = "update department set department_default_project = :0 where department_id = :1";
+			$sql = "update department set department_default = :0 where department_id = :1";
 			foreach($defaultArray as $department=>$project){
 				dbHelp::query($sql, array($project, $department));
 			}
@@ -54,7 +54,7 @@
 				$dataArray = array();
 				$sqlDep1 = "
 					select
-						department_id, department_name, project_id, project_name, proj_dep_assoc_active, department_default_project
+						department_id, department_name, project_id, project_name, proj_dep_assoc_active, department_default
 					from
 						department
 						join proj_dep_assoc on department_id = proj_dep_assoc_department
@@ -112,11 +112,11 @@
 							echo "</tr>";
 							
 								// first project
-								echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default_project']);
+								echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default']);
 								// rest of them
 								$previousDepartment = $row['department_id'];
 								while(($row = dbHelp::fetchRowByName($prep)) && $previousDepartment == $row['department_id']){
-									echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default_project']);
+									echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default']);
 								}
 						echo "</table>";
 					}
