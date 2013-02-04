@@ -396,12 +396,13 @@
 			echo "<div style='position:fixed;right:0px;bottom:0px;'>";
 				echo "<a class='link' href='#top'>Top</a>";
 				echo "&nbsp";
-				echo "<a class='link' href='#back'>Bottom</a>";
+				echo "<a class='link' href='#bottom'>Bottom</a>";
 			echo "</div>";
 			
 			echo "<br>";
 			// echo "<a class='link' name='back' href='".$_SESSION['path']."/'>Back to reservations</a>";
 			echo $backLink;
+			echo "<a name='bottom'></a>";
 	
 			showMsg('Report generated');
 		// }
@@ -1002,13 +1003,19 @@
 		);
 		
 		$row = array();
+		$value = null;
 		// data ********************
+		wtf('------');
 		foreach($results as $line){
+			wtf($line['Entry date'], 'a');
 			// fields *********************************
 			foreach($htmlDisplayArray as $label => $function){
-				$value = $line[$label];
 				if(isset($function)){
 					$value = $function($line[$label]);
+				}
+				else{
+					$value = $line[$label];
+				
 				}
 				
 				$row[] = $value;

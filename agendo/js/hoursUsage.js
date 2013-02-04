@@ -12,7 +12,7 @@ $(function() {
 			"bJQueryUI": true
 			,"sPaginationType": "full_numbers"
 			,'aLengthMenu': [[10, 20, 50, 200], [10, 20, 50, 200]]
-			,"iDisplayLength": 200
+			,"iDisplayLength": 100
 			,"bProcessing": true
 			,"bServerSide": true
 			,"sServerMethod": "POST"
@@ -34,24 +34,24 @@ $(function() {
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				// column to change, iteration function, end result presentation function
 				var columns_to_change={
-					4: ['usageSum', 'regularEndResult']
+					4: ['usageSum', 'usageEndResult']
 					,6: ['regularSum','regularEndResult']
 					,7: ['regularSum', 'regularEndResult']
 					,9: ['regularSum', 'regularEndResult']
 				};
 				var functionName;
 				var total;
-				for(var j in columns_to_change) {                                   
-					// var selected_column= columns_to_change[j];
-					end_result = 0;
-					functionName = columns_to_change[j][0];
-					for(var i=iStart; i<iEnd; i++){ 
-						end_result = window[functionName](aData[aiDisplay[i]][j], end_result);
-					}
+				console.log(aData[1]);
+				// for(var j in columns_to_change) {                                   
+					// end_result = 0;
+					// functionName = columns_to_change[j][0];
+					// for(var i=iStart; i<iEnd; i++){ 
+						// end_result = window[functionName](aData[aiDisplay[i]][j], end_result);
+					// }
 
-					functionName = columns_to_change[j][1];
-					$($(nFoot).children().get(j)).html(window[functionName](end_result));
-				}
+					// functionName = columns_to_change[j][1];
+					// $($(nFoot).children().get(j)).html(window[functionName](end_result));
+				// }
 				// nFoot.getEtlementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
 			}
 			// ,"aoColumns":[
@@ -87,18 +87,17 @@ $(function() {
 });
 
 function usageSum(value, total){
-	if(total = 0){
-		total = [0, 0];
+	if(total == 0){
+		total = new Array(0, 0);
 	}
 	var valueArray = value.match(/(\d+)\s*h :\,?\s*(\d+)\s*m?/);
-	total[0] += valueArray[1];
-	console.log(total[0] + " " + valueArray[1]);
-	total[1] += valueArray[2];
+	total[0] += parseInt(valueArray[1]);
+	total[1] += parseInt(valueArray[2]);
 	return total;
 }
 
 function usageEndResult(end_result){
-	return end_result[0] + "h : " + end_result[1] + "m";
+	return parseInt(end_result[0] + end_result[1]/60) + "h : " + end_result[1]%60 + "m";
 }
 
 function regularSum(value, total){
