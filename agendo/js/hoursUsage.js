@@ -2,13 +2,17 @@ $(function() {
 	$('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
 	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
 	
+	// alert(("2 Days, 3 hours, 5 minutes").match(/(\d+)\s*days?\,?\s*(\d+)\s*hours?\,?\s*(\d+)\s*minutes?/i));
+	// alert(("3h : 30m").match(/(\d+)\s*h :\,?\s*(\d+)\s*m?/));
+	// alert(("20h 30m").match(/\d+, ?\s*\d+/));
+	
 	var oTable;
 	if(oTable = $('#datatable')){
 		oTable.dataTable({
 			"bJQueryUI": true
 			,"sPaginationType": "full_numbers"
 			,'aLengthMenu': [[10, 20, 50, 200], [10, 20, 50, 200]]
-			,"iDisplayLength": -1
+			,"iDisplayLength": 200
 			,"bProcessing": true
 			,"bServerSide": true
 			,"sServerMethod": "POST"
@@ -29,7 +33,12 @@ $(function() {
 			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				// column to change, iteration function, end result presentation function
-				var columns_to_change={7: ['regularSum', 'regularEndResult'], 8: ['regularSum', 'regularEndResult'], 9: ['regularSum', 'regularEndResult'], 10: ['regularSum', 'regularEndResult']};
+				var columns_to_change={
+					4: ['usageSum', 'regularEndResult']
+					,6: ['regularSum','regularEndResult']
+					,7: ['regularSum', 'regularEndResult']
+					,9: ['regularSum', 'regularEndResult']
+				};
 				var functionName;
 				var total;
 				for(var j in columns_to_change) {                                   
@@ -76,6 +85,21 @@ $(function() {
 	}
 	
 });
+
+function usageSum(value, total){
+	if(total = 0){
+		total = [0, 0];
+	}
+	var valueArray = value.match(/(\d+)\s*h :\,?\s*(\d+)\s*m?/);
+	total[0] += valueArray[1];
+	console.log(total[0] + " " + valueArray[1]);
+	total[1] += valueArray[2];
+	return total;
+}
+
+function usageEndResult(end_result){
+	return end_result[0] + "h : " + end_result[1] + "m";
+}
 
 function regularSum(value, total){
 	return parseFloat(value) + total;

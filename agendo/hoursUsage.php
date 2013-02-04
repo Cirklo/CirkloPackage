@@ -17,7 +17,7 @@
 	
 	$lowerLimit = $_POST['iDisplayStart'];
 	$upperLimit = $_POST['iDisplayLength'];
-	$resultsFound = 0;
+	$iTotalRecords = 0;
 
 	if(isset($_POST['action']) && $_POST['action'] == 'generateJson'){
 		$isResp = isResp($_SESSION['user_id']);
@@ -79,7 +79,7 @@
 		$happyHourArray = array();
 		$resources = array();
 		$results = array();
-		$resultsLength = 0;
+		$iTotalDisplayRecords = 0;
 		$lineKey = "";
 		$argumentsArray = array();
 		
@@ -360,6 +360,21 @@
 				echo "</td>";
 			}
 			echo "</thead>";
+			
+			echo "<tfoot style='background: white;border: 1px solid red;'>";
+				echo "<tr>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td></td>";
+				echo "</tr>";
+			echo "</tfoot>";
 		echo "</table>";
 		
 		// $html = generateHtml();
@@ -639,10 +654,10 @@
 	}
 	
 	function generateResults($selectedDepartmentsArray = null){
-		global $results, $resultsLength, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate, $lowerLimit, $upperLimit, $resultsFound;
+		global $results, $iTotalDisplayRecords, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate, $lowerLimit, $upperLimit, $iTotalRecords;
 		$results = array();
-		$resultsLength = 0;
-		$resultsFound = 0;
+		$iTotalDisplayRecords = 0;
+		$iTotalRecords = 0;
 
 		if(empty($beginDate) || empty($endDate)){
 			return;
@@ -713,7 +728,8 @@
 		$orderBy = implode(",", $argumentsArray['orderBy']);
 		
 		$sql = "
-			select 
+			select
+				SQL_CALC_FOUND_ROWS
 				".$select."
 			from 
 				".dbHelp::getSchemaName().".user inner join entry on user_id = entry_user
@@ -734,6 +750,13 @@
 		";
 
 		$prep = dbHelp::query($sql, $selectedDepartmentsArray);
+		
+		// returns a number indicating how many rows the first SELECT would have returned had it been written without the LIMIT clause
+		$sqlTotalRows = "select FOUND_ROWS()";
+		$prepTR = dbHelp::query($sqlTotalRows);
+		$resTR = dbHelp::fetchRowByIndex($prepTR);
+		$iTotalDisplayRecords = $resTR[0];
+
 		while($res = dbHelp::fetchRowByName($prep)){
 			$lineValue = array();
 			$lineKey = "";
@@ -760,10 +783,9 @@
 			}
 
 			$results[$lineKey] = $lineValue;
-			$resultsLength++;
-			$resultsFound++;
+			$iTotalRecords++;
 		}
-		$resultsFound += $upperLimit;
+		
 
 		return $results;
 	}
@@ -969,13 +991,13 @@
 	}
 	
 	function generateJson($selectedDepartmentsArray = null){
-		global $results, $resultsLength, $resultsFound, $htmlDisplayArray;
+		global $results, $iTotalDisplayRecords, $iTotalRecords, $htmlDisplayArray;
 		generateResults($selectedDepartmentsArray);
 		
 		$output = array(
 			"sEcho" => intval($_POST['sEcho']),
-			"iTotalRecords" => $resultsLength,
-			"iTotalDisplayRecords" => $resultsFound,
+			"iTotalRecords" => $iTotalRecords,
+			"iTotalDisplayRecords" => $iTotalDisplayRecords,
 			"aaData" => array()
 		);
 		
