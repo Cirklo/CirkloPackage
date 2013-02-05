@@ -1,7 +1,7 @@
 <?php
 	require_once("commonCode.php");
 	
-	class HappyHour{ 
+	class HappyHour{
 	
 		private $discount;
 		private $startHour;

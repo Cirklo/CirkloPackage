@@ -1,24 +1,75 @@
+var oTable;
+
 $(function() {
 	$('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
 	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
 	
-	// alert(("2 Days, 3 hours, 5 minutes").match(/(\d+)\s*days?\,?\s*(\d+)\s*hours?\,?\s*(\d+)\s*minutes?/i));
-	// alert(("3h : 30m").match(/(\d+)\s*h :\,?\s*(\d+)\s*m?/));
-	// alert(("20h 30m").match(/\d+, ?\s*\d+/));
-	
-	var oTable;
 	if(oTable = $('#datatable')){
+		$.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw ){
+			if ( typeof sNewSource != 'undefined' && sNewSource != null ) {
+				oSettings.sAjaxSource = sNewSource;
+			}
+		 
+			// Server-side processing should just call fnDraw
+			if ( oSettings.oFeatures.bServerSide ) {
+				this.fnDraw();
+				return;
+			}
+		 
+			this.oApi._fnProcessingDisplay(oSettings, true);
+			var that = this;
+			var iStart = oSettings._iDisplayStart;
+			var aData = [];
+		  
+			this.oApi._fnServerParams( oSettings, aData );
+			  
+			oSettings.fnServerData.call( oSettings.oInstance, oSettings.sAjaxSource, aData, function(json) {
+				/* Clear the old information from the table */
+				that.oApi._fnClearTable( oSettings );
+				  
+				/* Got the data - add it to the table */
+				var aData =  (oSettings.sAjaxDataProp !== "") ?
+					that.oApi._fnGetObjectDataFn( oSettings.sAjaxDataProp )( json ) : json;
+				  
+				for ( var i=0 ; i<aData.length ; i++ ){
+					that.oApi._fnAddData( oSettings, aData[i] );
+				}
+				  
+				oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+				  
+				if ( typeof bStandingRedraw != 'undefined' && bStandingRedraw === true ){
+					oSettings._iDisplayStart = iStart;
+					that.fnDraw( false );
+				}
+				else{
+					that.fnDraw();
+				}
+				  
+				that.oApi._fnProcessingDisplay( oSettings, false );
+				  
+				/* Callback user function - for event handlers etc */
+				if ( typeof fnCallback == 'function' && fnCallback != null ){
+					fnCallback( oSettings );
+				}
+			}, oSettings );
+		};		
+	
 		oTable.dataTable({
 			"bJQueryUI": true
+			,"bFilter": false
 			,"sPaginationType": "full_numbers"
-			,'aLengthMenu': [[10, 20, 50, 200], [10, 20, 50, 200]]
-			,"iDisplayLength": 100
+			,'aLengthMenu': [[10, 20, 50, 100, 200, -1], [10, 20, 50, 100, 200, 'All']]
+			// ,"iDisplayLength": 100
+			,"iDisplayStart": 0
 			,"bProcessing": true
 			,"bServerSide": true
 			,"sServerMethod": "POST"
 			,"sAjaxSource": "hoursUsage.php"
 			,"fnServerData": function ( sSource, aoData, fnCallback ) {
-				aoData.push( { "name": "action", "value": 'generateJson' } );
+				aoData.push( { "name": "action", "value": 'generateJson' });
+				aoData.push( { "name": "searchField", "value": $('#searchField').val() });
+				aoData.push( { "name": "beginDate", "value": $('#beginDateText').val() });
+				aoData.push( { "name": "endDate", "value": $('#endDateText').val() });
 				$.post(
 					sSource
 					,aoData
@@ -33,7 +84,7 @@ $(function() {
 			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				// column to change, iteration function, end result presentation function
-				var columns_to_change={
+				var columns_to_change = {
 					4: ['usageSum', 'usageEndResult']
 					,6: ['regularSum','regularEndResult']
 					,7: ['regularSum', 'regularEndResult']
@@ -41,17 +92,16 @@ $(function() {
 				};
 				var functionName;
 				var total;
-				console.log(aData[1]);
-				// for(var j in columns_to_change) {                                   
-					// end_result = 0;
-					// functionName = columns_to_change[j][0];
-					// for(var i=iStart; i<iEnd; i++){ 
-						// end_result = window[functionName](aData[aiDisplay[i]][j], end_result);
-					// }
+				for(var j in columns_to_change){                                   
+					end_result = 0;
+					functionName = columns_to_change[j][0];
+					for(var i in aData){
+						end_result = window[functionName](aData[i][j], end_result);
+					}
 
-					// functionName = columns_to_change[j][1];
-					// $($(nFoot).children().get(j)).html(window[functionName](end_result));
-				// }
+					functionName = columns_to_change[j][1];
+					$($(nFoot).children().get(j)).html(window[functionName](end_result));
+				}
 				// nFoot.getEtlementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
 			}
 			// ,"aoColumns":[
@@ -70,7 +120,7 @@ $(function() {
 			
 			// ,"aoColumns": [
 				// { "sTitle": "Date"}
-				// ,{ "sTitle": "ID" }
+				// ,{ "sTitle": "ID"}
 				// ,{ "sTitle": "Department"}
 				// ,{ "sTitle": "User"}
 				// ,{ "sTitle": "Resource" }
@@ -78,12 +128,14 @@ $(function() {
 				// ,{ "sTitle": "Project" }
 				// ,{ "sTitle": "Value"}
 				// ,{ "sTitle": "bla"}
-				// ,{ "sTitle": "bla2" }
+				// ,{ "sTitle": "bla2"}
 				// ,{ "sTitle": "bla3"}
 			// ]
 		});
+		
+			
 	}
-	
+
 });
 
 function usageSum(value, total){
@@ -108,10 +160,18 @@ function regularEndResult(end_result){
 	return end_result;
 }
 
+function synchInfo(e){
+	if (e.keyCode == 13) {
+		oTable.fnReloadAjax();
+		return false;
+	}
+	return true;
+}
+		
 // Sends the checkBoxes states to the server and gets the appropriate table data
 function sendChecksAndDate(action, departments, changeLocation){
 	changeLocation = typeof changeLocation !== 'undefined' ? changeLocation : true; // default value for this parameter, javascript....sheesh
-	if($('#beginDateText').val() != '' && $('#endDateText').val() != ''){
+	// if($('#beginDateText').val() != '' && $('#endDateText').val() != ''){
 		// var dateFrom = new Date($('#beginDateText').val());
 		// var dateTo = new Date($('#endDateText').val());
 		// if(dateTo < dateFrom){
@@ -170,10 +230,10 @@ function sendChecksAndDate(action, departments, changeLocation){
 				)
 			;
 		}
-	}
-	else{
-		showMessage('Please pick both dates');
-	}
+	// }
+	// else{
+		// showMessage('Please pick both dates');
+	// }
 }
 
 // Selects/unselects all email check boxes

@@ -2,19 +2,53 @@
 	require_once("commonCode.php");
 	require_once("hoursUsageAux.php");
 	
+	if(!isset($_SESSION['user_id'])){
+		throw new Exception('You need to be logged in');
+	}
+
+	$isResp = isResp($_SESSION['user_id']);
+	$isAdmin = isAdmin($_SESSION['user_id']);
+	$isPI = isPI($_SESSION['user_id']);
+	$userLevel = $_GET['userLevel'];
+	
+	$userCheck = isset($_GET['userCheck']);
+	$resourceCheck = isset($_GET['resourceCheck']);
+	$entryCheck = isset($_GET['entryCheck']);
+	$projectCheck = isset($_GET['projectCheck']);
+	
+	$beginDate = $_POST['beginDate'];
+	$endDate = $_POST['endDate'];
+	
+	$order_by = $_POST['iSortCol_0'];
+	$order_by_direction = $_POST['sSortDir_0'];
+	
+	$happyHourArray = array();
+	$resources = array();
+	$results = array();
+	$iTotalDisplayRecords = 0;
+	$lineKey = "";
+	$argumentsArray = array();
+	
+	$selectedDepartmentsArray = null;
+	if(isset($_GET['departments'])){
+		$selectedDepartmentsArray = json_decode($_GET['departments'], true);
+	}
+	$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
+
 	$htmlDisplayArray = array(
-		"Department" => null
-		, "Username" => null
-		, "Resource" => null
-		, "Entry date" => null
-		, "Duration" => 'usageHtml'
-		, "Price per hour" => null
-		, "Subtotal" => 'costFormat'
-		, "Discount" => 'costFormat'
-		, "Project" => null
-		, "Total" => 'costFormat'
+		"Department" => array('order_by' => array('department_name'))
+		, "Username" => array('order_by' => array('user_firstname', 'user_lastname'))
+		, "Resource" => array('order_by' => array('resource_name'))
+		, "Entry date" => array('order_by' => array('entry_datetime'))
+		, "Duration" => array('function' => 'usageHtml')
+		, "Price per hour" => array('order_by' => array('price_value'))
+		, "Subtotal" => array('function' => 'costFormat')
+		, "Discount" => array('function' => 'costFormat')
+		, "Project" => array('order_by' => array('project_name'))
+		, "Total" => array('function' => 'costFormat')
 	);
 	
+	wtf($htmlDisplayArray["Department"]);
 	$lowerLimit = $_POST['iDisplayStart'];
 	$upperLimit = $_POST['iDisplayLength'];
 	$iTotalRecords = 0;
@@ -29,8 +63,8 @@
 		$isAdmin = true;
 		$userCheck = $resourceCheck = $entryCheck = $projectCheck = true;
 
-		$beginDate = "01/01/2001";
-		$endDate = "31/03/2013";
+		// $beginDate = "01/01/2001";
+		// $endDate = "31/03/2013";
 		
 		$userLevel = "admin";
 		echo json_encode(generateJson());
@@ -61,136 +95,27 @@
 		</div>
 	";
 
-	// If user not logged shows error message
-	if(isset($_SESSION['user_id'])){
-		$isResp = isResp($_SESSION['user_id']);
-		$isAdmin = isAdmin($_SESSION['user_id']);
-		$isPI = isPI($_SESSION['user_id']);
-		$userLevel = $_GET['userLevel'];
-		
-		$userCheck = isset($_GET['userCheck']);
-		$resourceCheck = isset($_GET['resourceCheck']);
-		$entryCheck = isset($_GET['entryCheck']);
-		$projectCheck = isset($_GET['projectCheck']);
-		
-		$beginDate = $_GET['beginDate'];
-		$endDate = $_GET['endDate'];
-		
-		$happyHourArray = array();
-		$resources = array();
-		$results = array();
-		$iTotalDisplayRecords = 0;
-		$lineKey = "";
-		$argumentsArray = array();
-		
-		// show the selected departs as selected when refreshing the page? wont be trivial... make usercheck and other vars as global?
-		$selectedDepartmentsArray = null;
-		if(isset($_GET['departments'])){
-			$selectedDepartmentsArray = json_decode($_GET['departments'], true);
+	if(isset($_GET['action']) && $_GET['action'] != 'generateReport'){
+		switch($_GET['action']){
+			// Opens a file dialog to download a csv with all the selected info (select all and select none will generate the same csv file)
+			case "downloadFile":
+				header('Content-Type: application/force-download');
+				header('Content-disposition: attachment; filename=report.xls');
+				echo generateCsv($selectedDepartmentsArray);
+			break;
+			
+			// Emails the department managers 
+			case "emailDepartments":
+				emailDepartments();
+				$json->success = true;
+				$json->message = "Report sent";
+				echo json_encode($json);
+			break;
+			
 		}
-		$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
-		
-		if(isset($_GET['action']) && $_GET['action'] != 'generateReport'){
-			switch($_GET['action']){
-				// Opens a file dialog to download a csv with all the selected info (select all and select none will generate the same csv file)
-				case "downloadFile":
-					header('Content-Type: application/force-download');
-					header('Content-disposition: attachment; filename=report.xls');
-					echo generateCsv($selectedDepartmentsArray);
-				break;
-				
-				// Emails the department managers 
-				case "emailDepartments":
-					emailDepartments();
-					$json->success = true;
-					$json->message = "Report sent";
-					echo json_encode($json);
-				break;
-				
-				case "data":
-					$isAdmin = true;
-					$userCheck = $resourceCheck = $entryCheck = $projectCheck = true;
-		
-					$beginDate = "01/01/2001";
-					$endDate = "31/03/2013";
-					
-					$userLevel = "admin";
-					
-					generateResults();
-					
-					echo "<div style='margin: auto;'>";
-						echo "<table id='teste' style='color: black;'>";
-							$firstRow = current($results);
-							echo "<thead>";
-								foreach($firstRow as $keyLine=>$line){
-									echo "<td>";
-										echo $keyLine;
-									echo "</td>";
-								}
-							echo "</thead>";
-							foreach($results as $keyLine=>$line){
-								echo "<tr>";
-								foreach($line as $keyRow=>$row){
-									echo "<td>";
-										echo $row;
-									echo "</td>";
-								}
-								echo "</tr>";
-							}
-						
-							echo "<tfoot style='background: white;'>";
-								echo "<td>";
-									echo "Total:";
-								echo "</td>";
-								
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								echo "<td></td>";
-								// echo "<td colspan='7'>";
-								// echo "</td>";
-								
-								// echo "<td colspan='3' style='text-align: right;border: 1px solid red;'>";
-									// echo "9001";
-								// echo "</td>";
-							echo "</tfoot>";
-						echo "</table>";
-					echo "</div>";
-					
-				break;
-			}
-			exit;
-		}
-	}
-	else{
-		// htmlEncoding();
-		// importJs();
-		// echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
-		
-		showMsg("You need to be logged in", true);
-		echo "<br>";
-
-		echo $backLink;
-		// echo "<div style='margin:auto;width:200px;text-align:center;'>";
-			// echo "<a class='link' href='../datumo/'>Back to Admin Area</a>";
-		// echo "</div>";
 		exit;
 	}
 
-	// htmlEncoding();
-	// importJs();
-	
-	// echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='../agendo/css/hourUsage.css' rel='stylesheet' type='text/css' />";
-	// echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
-	// echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
-	
 	echo "<a name='top'></a>";
 	
 	echo "<br>";
@@ -198,7 +123,7 @@
 	echo "<br>";
 	
 	
-	echo "<table style='margin:auto;width:450px;text-align:right;'>";
+	echo "<table style='margin:auto;width:500px;'>";
 		// ******* User priviledges checkboxes ********
 		$numberOfPrivileges = 0;
 		$privilegeHtml = "";
@@ -258,7 +183,7 @@
 		
 		if($numberOfPrivileges > 1){
 			echo "<tr>";
-				echo "<td colspan='4' style='text-align:center;color:#F7C439;font-size:14px;' title='Pick the user level you wish to view the information as'>";
+				echo "<td colspan='2' style='text-align:center;color:#F7C439;font-size:14px;' title='Pick the user level you wish to view the information as'>";
 					echo "<fieldset style='width:200px;margin:auto;'>";
 					echo "<legend>User level:</legend>";
 					echo $privilegeHtml;
@@ -267,7 +192,7 @@
 			echo "</tr>";
 			
 			echo "<tr>";
-				echo "<td>";
+				echo "<td colspan='2'>";
 					echo "<br>";
 				echo "</td>";
 			echo "</tr>";
@@ -275,13 +200,13 @@
 		// *********************************************
 		
 		echo "<tr>";
-			echo "<td colspan='2' style='text-align:left;'>";
+			echo "<td style='text-align:left;'>";
 				echo "<a>From date:</a>";
 				echo "&nbsp";
 				echo "<input type='text' id='beginDateText' style='text-align:center;' value='".$beginDate."'/>";
 			echo "</td>";
 
-			echo "<td colspan='2' style='text-align:right;'>";
+			echo "<td style='text-align:right;'>";
 				echo "<a>To date:</a>";
 				echo "&nbsp";
 				echo "<input type='text' id='endDateText' style='text-align:center;' value='".$endDate."'/>";
@@ -289,223 +214,62 @@
 		echo "</tr>";
 
 		echo "<tr>";
-			echo "<td>";
-				echo "<br>";
-			echo "</td>";
-		echo "</tr>";
-		
-		$checked = "";
-		echo "<tr>";
-			// echo "<td style='text-align:center;'>";
-			echo "<td style='text-align:center;'>";
-				echo "<label style='float:left;'>User";
-					$checked = ($userCheck) ? "checked" : "";
-					echo "<input type='checkBox' id='userCheck' ".$checked."/>";
-				echo "</label>";
-			echo "</td>";
-
-			echo "<td style='text-align:center;'>";
-				echo "<label>Resource";
-					$checked = ($resourceCheck) ? "checked" : "";
-					echo "<input type='checkBox' id='resourceCheck' ".$checked."/>";
-				echo "</label>";
-			echo "</td>";
-
-			echo "<td style='text-align:center;'>";
-				echo "<label style='float:right;'>Entry";
-					$checked = ($entryCheck) ? "checked" : "";
-					echo "<input type='checkBox' id='entryCheck' ".$checked."/>";
-				echo "</label>";
-			echo "</td>";
-
-			echo "<td style='text-align:center;'>";
-				echo "<label style='float:right;'>Project";
-					$checked = ($projectCheck) ? "checked" : "";
-					echo "<input type='checkBox' id='projectCheck' ".$checked."/>";
-				echo "</label>";
-			echo "</td>";
-		echo "</tr>";
-			
-		echo "<tr>";
-			echo "<td colspan='4' style='text-align:center;color:#F7C439;font-size:14px;'>";
-				echo "Check the boxes above for additional information";
-			echo "</td>";
-		echo "</tr>";
-		
-		echo "<tr>";
-			echo "<td>";
+			echo "<td colspan='2'>";
 				echo "<br>";
 			echo "</td>";
 		echo "</tr>";
 		
 		echo "<tr>";
-			echo "<td colspan='4' style='text-align:center;'>";
-				echo "<input type='button' id='searchButton' value='Generate Report' onclick='generateReport();'/>";
+			echo "<td colspan='2' style='text-align:center;'>";
+				echo "<input type='text' id='searchField' style='width:300px;' onkeypress='return synchInfo(event);'/>";
+
+				echo "&nbsp";
+
+				echo "<input type='button' id='searchButton' value='Generate Report' onclick='oTable.fnReloadAjax();'/>";
 			echo "</td>";
 		echo "</tr>";
 		
 	echo "</table>";
-	
+
 	echo "<br>";
-	
+
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1150;text-align:center;'>";
 		echo $backLink;
 		
+		// to be removed, usefull for now to make sure the number of tds in the footer is the same as the header
+		$footer_tds = "";
 		echo "<table id='datatable' style='color: black;'>";
 			echo "<thead>";
 			foreach($htmlDisplayArray as $key=>$value){
+				$number_of_tds++;
 				echo "<td>";
 					echo $key;
 				echo "</td>";
+				
+				$footer_tds .= "<td></td>";
 			}
 			echo "</thead>";
 			
 			echo "<tfoot style='background: white;border: 1px solid red;'>";
 				echo "<tr>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
-					echo "<td></td>";
+					echo $footer_tds;
 				echo "</tr>";
 			echo "</tfoot>";
 		echo "</table>";
+					
+		echo "<div style='position:fixed;right:0px;bottom:0px;'>";
+			echo "<a class='link' href='#top'>Top</a>";
+			echo "&nbsp";
+			echo "<a class='link' href='#bottom'>Bottom</a>";
+		echo "</div>";
 		
-		// $html = generateHtml();
-		// if(!empty($html)){
-	
-			// $extraOptions = "<div style='display:table;text-align:center;width:100%;'>";
-				// $extraOptions .= "<label style='float:left;margin-left:3px;'>Select all";
-					// $extraOptions .= "<input type='checkBox' class='allCheck' onclick='selectUnselectAll(this);'/>";
-				// $extraOptions .= "</label>";
-
-				// $extraOptions .= "<input style='float:right;' type='button' value='Email Departments' onclick='emailDepartments();'/>";
-				// $extraOptions .= "<input style='float:right;' type='button' value='Export to Excel' onclick='downloadFile();'/>";
-			// $extraOptions .= "</div>";
-			
-			// echo $extraOptions;
-			// echo $html;
-			// echo $extraOptions;
-			
-			echo "<div style='position:fixed;right:0px;bottom:0px;'>";
-				echo "<a class='link' href='#top'>Top</a>";
-				echo "&nbsp";
-				echo "<a class='link' href='#bottom'>Bottom</a>";
-			echo "</div>";
-			
-			echo "<br>";
-			// echo "<a class='link' name='back' href='".$_SESSION['path']."/'>Back to reservations</a>";
-			echo $backLink;
-			echo "<a name='bottom'></a>";
-	
-			showMsg('Report generated');
-		// }
+		echo "<br>";
+		echo $backLink;
+		echo "<a name='bottom'></a>";
 	echo "</div>";
 	
-	// "Opens" a table (<table>) and adds the subHeader, subTotal function "closes" the table
-	function startTable($departmentId, $deparmentName, $headerArray, $colspan){
-		$formatedString = "\n<table id='".$departmentId."Table' style='width:100%;text-align:center;'>";
-		$style = "
-			color: black;
-			font-size: 16px;
-			background-color: white;
-		";
-		
-		$formatedString .= "<tr>";
-		$formatedString .= " 
-			\n<td style='".$style."' colspan='".$colspan."'>
-				Department: ".$deparmentName."
-			</td>\n
-		";
-		$formatedString .= "</tr>";
-		
-		$formatedString .= "<tr>";
-		foreach($headerArray as $header){
-			$formatedString .= " 
-				\n<td style='".$style."'>
-					".$header."
-				</td>\n
-			";
-		}
-		$formatedString .= "</tr>";
-		
-		return $formatedString;
-	}
-	
-	// Returns a string with what the subtotal line should look for each department
-	function showSubTotal($departmentId, $departmentName, &$subTotalArray, $subTotalColspan, $colspan, &$displayArray, $showSelects){
-		$style = "
-			color: black;
-			font-size: 16px;
-			background-color: white;
-		";
 
-		$formatedString = "\n<tr style='".$style."'>";
-			$formatedString .= "\n<td colspan='".$colspan."'>";
-				if($showSelects){
-					$formatedString .=  "<label class='emailLabels' style='margin-left:10px;float:left'>Select";
-						$formatedString .=  "<input type='checkBox' class='departmentChecks' id='".$departmentId."-EmailCheck' value='".$departmentId."'/>";
-					$formatedString .=  "</label>";
-				
-					$formatedString .=  "&nbsp";
-				}	
-
-				$tempColspan = $colspan - $subTotalColspan;
-			$tempHtml = "</td>";
-		$tempHtml .= "</tr>";
-		
-		if($tempColspan > 0){
-			$tempHtml = "<label style='float:right;margin-right:10px;'>";
-				$tempHtml .= "Total for department ".$departmentName;
-			$tempHtml .= "</label>";
-			$tempHtml .= "</td></tr>";
-
-			$keyHtml = "\n<tr style='".$style.";'>";
-			$keyHtml .= "<td rowspan='2' style='".$style."' colspan='".$tempColspan."'></td>";
-			$valueHtml = "";
-			foreach($subTotalArray as $key => $value){
-				$keyHtml .= "<td style='".$style."'>".$key."</td>";
-				if(isset($displayArray[$key]['function'])){
-					$value = $displayArray[$key]['function']($value);
-				}
-				$valueHtml .= "<td style='".$style.";min-width:".$displayArray[$key]['width'].";'>".$value."</td>";
-			}
-			
-			$keyHtml .= "</tr>";
-			$valueHtml .= "</tr>";
-			$tempHtml .= $keyHtml.$valueHtml;
-		}
-		$formatedString .= $tempHtml;
-
-		return $formatedString;
-	}
-	
-	function showTotal(&$totalArray, $colspan, &$displayArray){
-		$style = "
-			color: #bb3322;
-			font-size: 16px;
-			background-color: white;
-			text-align: center;
-		";
-		$headerLine = "<tr>";
-		$valueLine = "<tr>";
-		foreach($totalArray as $label => $value){
-				$headerLine .= "<td style='".$style."'>".$label."</td>";
-				$valueLine .= "<td style='".$style."min-width:".$displayArray[$label]['width']."px'>".$displayArray[$label]['function']($value)."</td>";
-		}
-		$valueLine .= "</tr>";
-		$headerLine .= "</tr>";
-		
-		$formatedString = "\n<table style='width:100%;'>".$headerLine.$valueLine."</table>";
-		return $formatedString;
-	}
-	
 	function emailDepartments(){
 		global $selectedDepartmentsArray;
 		
@@ -584,55 +348,46 @@
 		// static group by
 		$orderByArray[] = "department_name";
 	
-		// checks
-		if($entryCheck == 1){
-			// label to field association
-			$regularSelectArray["Entry date"] = array("select" => "entry_datetime", 'lineKey' => 'entry_id');
-			$size++;
+		// label to field association
+		$regularSelectArray["Entry date"] = array("select" => "entry_datetime", 'lineKey' => 'entry_id');
+		$size++;
 
-			// extra fields on the select section of the query
-			$selectArray[] = "entry_id";
-			
-			// extra group by on the select section of the query
-			$orderByArray[] = "entry_datetime";
-		}
+		// extra fields on the select section of the query
+		$selectArray[] = "entry_id";
 		
-		if($userCheck == 1){
-			// field function association
-			$functionSelectArray['formatUserName'] = array("args" => array("user_firstname", "user_lastname"));
-			$size++;
-			
-			// extra fields on the select section of the query
-			$selectArray[] = "user_firstname";
-			$selectArray[] = "user_lastname";
-			$selectArray[] = "entry_user";
-			
-			// extra group by on the select section of the query
-			$orderByArray[] = "user_firstname";
-			$orderByArray[] = "user_lastname";
-		}
+		// extra group by on the select section of the query
+		$orderByArray[] = "entry_datetime";
 		
-		if($resourceCheck == 1){
-			// field function association
-			$functionSelectArray['getResource'] = array("args" => array("entry_resource"));
-			$size++;
-			$functionSelectArray['getPrice'] = array("args" => array("price_value"));
-			$size++;
-			
-			// extra fields on the select section of the query
-			$selectArray[] = "price_id";
-			$selectArray[] = "entry_resource";
-		}
+		// field function association
+		$functionSelectArray['formatUserName'] = array("args" => array("user_firstname", "user_lastname"));
+		$size++;
+		
+		// extra fields on the select section of the query
+		$selectArray[] = "user_firstname";
+		$selectArray[] = "user_lastname";
+		$selectArray[] = "entry_user";
+		
+		// extra group by on the select section of the query
+		$orderByArray[] = "user_firstname";
+		$orderByArray[] = "user_lastname";
+		
+		// field function association
+		$functionSelectArray['getResource'] = array("args" => array("entry_resource"));
+		$size++;
+		$functionSelectArray['getPrice'] = array("args" => array("price_value"));
+		$size++;
+		
+		// extra fields on the select section of the query
+		$selectArray[] = "price_id";
+		$selectArray[] = "entry_resource";
 
-		if($projectCheck == 1){
-			// label to field association
-			$functionSelectArray['projectFormat'] = array("args" => array("project_name"));
-			$size++;
+		// label to field association
+		$functionSelectArray['projectFormat'] = array("args" => array("project_name"));
+		$size++;
 
-			// extra fields on the select section of the query
-			$selectArray[] = "project_name";
-			$selectArray[] = "project_id";
-		}
+		// extra fields on the select section of the query
+		$selectArray[] = "project_name";
+		$selectArray[] = "project_id";
 
 		// static function field association
 		$functionSelectArray['usageCost'] = array("args" => array("entry_resource", "entry_datetime", "entry_slots", "price_value", "project_discount"));
@@ -655,33 +410,47 @@
 	}
 	
 	function generateResults($selectedDepartmentsArray = null){
-		global $results, $iTotalDisplayRecords, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate, $lowerLimit, $upperLimit, $iTotalRecords;
+		global $results, $iTotalDisplayRecords, $lineKey, $argumentsArray, $userLevels, $beginDate, $endDate, $lowerLimit, $upperLimit, $iTotalRecords, $order_by, $order_by_direction, $htmlDisplayArray;
 		$results = array();
 		$iTotalDisplayRecords = 0;
 		$iTotalRecords = 0;
 
-		if(empty($beginDate) || empty($endDate)){
-			return;
+		$date_sql = "";
+		if(
+			empty($beginDate) && !empty($endDate)
+			|| !empty($beginDate) && empty($endDate)
+		){
+			throw new Exception("Date fields need to be both empty or both filled");
 		}
-
-		$formatedBeginDate = str_replace("/", "-", $beginDate);
-		$formatedEndDate = str_replace("/", "-", $endDate);
-		if(!strtotime($formatedBeginDate) || !strtotime($formatedEndDate)){
-			throw new Exception("Not a valid date");
-		}
-		elseif(strtotime($formatedBeginDate) > strtotime($formatedEndDate)){
-			throw new Exception("\'From date\' is after \'To date\'");
+		elseif(!empty($beginDate) && !empty($endDate)){
+			// this way php knows its the european date format
+			$formatedBeginDate = str_replace("/", "-", $beginDate);
+			$formatedEndDate = str_replace("/", "-", $endDate);
+			if(!strtotime($formatedBeginDate) || !strtotime($formatedEndDate)){
+				throw new Exception("Not a valid date");
+			}
+			elseif(strtotime($formatedBeginDate) > strtotime($formatedEndDate)){
+				throw new Exception("\'From date\' is after \'To date\'");
+			}
+			
+			$formatedBeginDate = dbHelp::convertToDate($formatedBeginDate);
+			$formatedEndDate = dbHelp::convertToDate($formatedEndDate);
+			$date_sql = "and entry_datetime between '".$formatedBeginDate."' and '".$formatedEndDate."'";
 		}
 		
-		$formatedBeginDate = dbHelp::convertToDate($formatedBeginDate);
-		$formatedEndDate = dbHelp::convertToDate($formatedEndDate);
-			
 		$isAdmin = $userLevels['isAdmin'];
 		$isPI = $userLevels['isPI'];
 		$isResp = $userLevels['isResp'];
 
 		$argumentsArray = fieldLabelFunctionAssoc();
 
+		// sql injection danger here
+		$direction = array('asc' => 'asc', 'desc' => 'desc');
+		if($htmlDisplayArray[$order_by]['order_by'] && $direction[$order_by_direction]){
+			$order_by_sql = "order by ".implode(',', $htmlDisplayArray[$order_by]['order_by'])." ".$direction[$order_by_direction];
+		}
+
+		
 		// Just a precautionary measure to prevent sql injection
 		$selectedDepartmentsSql = "";
 		$inDepartmentData = dbHelp::inDataFromArray($selectedDepartmentsArray);
@@ -717,7 +486,7 @@
 
 		$staticWhere = "
 			entry_status = 1
-			and entry_datetime between '".$formatedBeginDate."' and '".$formatedEndDate."'
+			".$date_sql."
 		";
 
 		$resourcesManagerWhere = "";
@@ -726,7 +495,14 @@
 		}
 
 		$select = implode(",", $argumentsArray['select']);
-		$orderBy = implode(",", $argumentsArray['orderBy']);
+		// $orderBy = implode(",", $argumentsArray['orderBy']);
+		
+		// sql injection danger here
+		$limit = "";
+		if($upperLimit != -1){
+			// $limit = "limit ".$lowerLimit.", ".$upperLimit;
+			$limit = "limit ".$lowerLimit.", ".$upperLimit;
+		}
 		
 		$sql = "
 			select
@@ -743,11 +519,8 @@
 				".$whereDepartment."
 				".$resourcesManagerWhere."
 				".$selectedDepartmentsSql."
-			order by 
-				".$orderBy."
-			limit
-				".$lowerLimit."
-				, ".$upperLimit."
+			".$order_by_sql."
+			".$limit."
 		";
 
 		$prep = dbHelp::query($sql, $selectedDepartmentsArray);
@@ -994,38 +767,33 @@
 	function generateJson($selectedDepartmentsArray = null){
 		global $results, $iTotalDisplayRecords, $iTotalRecords, $htmlDisplayArray;
 		generateResults($selectedDepartmentsArray);
-		
+		$aaData = array();
 		$output = array(
 			"sEcho" => intval($_POST['sEcho']),
 			"iTotalRecords" => $iTotalRecords,
 			"iTotalDisplayRecords" => $iTotalDisplayRecords,
-			"aaData" => array()
 		);
 		
 		$row = array();
 		$value = null;
 		// data ********************
-		wtf('------');
 		foreach($results as $line){
-			wtf($line['Entry date'], 'a');
+			$row = array();
 			// fields *********************************
-			foreach($htmlDisplayArray as $label => $function){
+			foreach($htmlDisplayArray as $label => $data){
+				$function = $data['function'];
 				if(isset($function)){
 					$value = $function($line[$label]);
 				}
 				else{
 					$value = $line[$label];
-				
 				}
 				
 				$row[] = $value;
-				// if(isset($value)){
-					// $jsonData .= "\"".$value."\"".$columnSeparator;
-				// }
 			}
-			$output['aaData'][] = $row;
+			$aaData[] = $row;
 		}
-		
+		$output['aaData'] = $aaData;
 		
 		return $output;
 	}
