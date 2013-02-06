@@ -48,7 +48,6 @@
 		, "Total" => array('function' => 'costFormat')
 	);
 	
-	wtf($htmlDisplayArray["Department"]);
 	$lowerLimit = $_POST['iDisplayStart'];
 	$upperLimit = $_POST['iDisplayLength'];
 	$iTotalRecords = 0;

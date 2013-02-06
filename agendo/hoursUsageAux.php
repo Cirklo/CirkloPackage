@@ -33,14 +33,15 @@
 			$entryEnd = $entryStart + $entryLength;
 			$discountStart = $this->startHour * 60;
 			$discountEnd = $this->endHour * 60;
-			$diff1 = $discountEnd - $entryStart;
-			$diff2 = $entryEnd - $discountStart;
+			// $diff1 = $discountEnd - $entryStart;
+			// $diff2 = $entryEnd - $discountStart;
 			if(
 				(($diff1 = $discountEnd - $entryStart) > 0 
 				|| ($diff2 = $entryEnd - $discountStart) > 0)
 				&& ($time = min($diff1, $diff2, $entryLength)) > 0
 			){
-				$time = min($diff1, $diff2, $entryLength);
+				// this is redundant
+				// $time = min($diff1, $diff2, $entryLength);
 				return array('cost' => ($time / 60 * $price * (100 - $this->discount) * 0.01), 'time' => $time);
 			}
 			
