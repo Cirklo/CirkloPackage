@@ -172,12 +172,12 @@ CREATE TRIGGER `hhIns` BEFORE INSERT ON `happyhour`
 		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
 		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
 		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
-		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 1, 7);
+		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 0, 6);
 		
 		if NEW.happyhour_endday is null then
 			set NEW.happyhour_endday = NEW.happyhour_startday;
 		end if;
-		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 1, 7);
+		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 0, 6);
 		
 		if NEW.happyhour_endhour <= NEW.happyhour_starthour then
 			set NEW.happyhour_endhour = null;
@@ -192,12 +192,12 @@ CREATE TRIGGER `hhUpd` BEFORE UPDATE ON `happyhour`
 		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
 		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
 		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
-		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 1, 7);
+		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 0, 6);
 		
 		if NEW.happyhour_endday is null then
 			set NEW.happyhour_endday = NEW.happyhour_startday;
 		end if;
-		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 1, 7);
+		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 0, 6);
 		
 		if NEW.happyhour_endhour <= NEW.happyhour_starthour then
 			set NEW.happyhour_endhour = null;

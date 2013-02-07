@@ -1,12 +1,18 @@
+-- department default
+-- project
+
+
 DELIMITER //
-create function entry_cost_aux(entry_start_date varchar(100), duration int, happyhour_starthour int, happyhour_endhour int) returns int deterministic
+create function happy_hour_duration(entry_start_date varchar(100), duration int, happyhour_starthour int, happyhour_endhour int) returns int deterministic
 	BEGIN
-		declare entry_start_minutes, diff1, diff2, discounted_duration int;
+		declare entry_start_minutes, startInterval, endInterval, discounted_duration int;
 		
-		select hour(entry_start_date) * 60 + minute(entry_start_date) into entry_start_minutes;
-		set diff1 = (happyhour_endhour * 60) - entry_start_minutes;
-		set diff2 = entry_start_minutes + duration - (happyhour_starthour * 60);
-		set discounted_duration = least(diff1, diff2, duration);
+		set entry_start_minutes = hour(entry_start_date) * 60 + minute(entry_start_date);
+		
+		set startInterval = greatest(entry_start_minutes, (happyhour_starthour * 60));
+		set endInterval = least(entry_start_minutes + duration, (happyhour_endhour * 60));
+		set discounted_duration = endInterval - startInterval;
+		
 		if discounted_duration > 0 then
 			return discounted_duration;
 		end if;
@@ -18,19 +24,18 @@ DELIMITER ;
 
 
 DELIMITER //
-create function entry_cost(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int) returns int deterministic
+create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int) returns int deterministic
 	BEGIN
 		declare cost int;
-		set cost = 0;
 		
 		select
 			sum(
-				entry_cost_aux(
+				happy_hour_duration(
 					entrydatetime
 					,entryslots * resource_resolution
 					,happyhour_starthour
 					,happyhour_endhour
-				) * happyhour_discount * 0.01 * price_value
+				) * happyhour_discount * 0.01 * ifnull(price_value, 0)
 			) into cost
 		from
 			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
@@ -42,9 +47,9 @@ create function entry_cost(entrydatetime varchar(100), entryslots int, resourcei
 		where
 			resource_id = resourceid
 			and department_id = departmentid
-			and dayofweek(entrydatetime) between happyhour_startday and happyhour_endday;
-		
-		return cost;
+			and weekday(entrydatetime) between happyhour_startday and happyhour_endday;
+				
+		return ifnull(cost, 0);
 	END
 //
 DELIMITER ;
