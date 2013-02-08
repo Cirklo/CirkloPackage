@@ -31,7 +31,7 @@
  */
 
 .dataTables_wrapper {
-	position: absolute;
+	position: relative;
 	clear: both;
 	zoom: 1; /* Feeling sorry for IE */
 }
@@ -53,25 +53,19 @@
 }
 
 .dataTables_length {
-	padding: 2px;
 	width: 40%;
 	float: left;
-	margin-left: 5px;
 }
 
 .dataTables_filter {
-	padding: 2px;
 	width: 50%;
 	float: right;
 	text-align: right;
-	margin-right: 5px;
 }
 
 .dataTables_info {
-	padding: 2px;
 	width: 60%;
 	float: left;
-	margin-left: 5px;
 }
 
 .dataTables_paginate {
@@ -156,9 +150,9 @@ table.display {
 }
 
 table.display thead th {
-	text-align:center;
-	padding: 3px 3px 3px 3px;
+	padding: 3px 18px 3px 10px;
 	border-bottom: 1px solid black;
+	font-weight: bold;
 	cursor: pointer;
 	* cursor: hand;
 }
@@ -166,6 +160,7 @@ table.display thead th {
 table.display tfoot th {
 	padding: 3px 18px 3px 10px;
 	border-top: 1px solid black;
+	font-weight: bold;
 }
 
 table.display tr.heading2 td {
@@ -320,15 +315,12 @@ td.details {
 
 .paging_full_numbers {
 	width: 400px;
+	height: 22px;
 	line-height: 22px;
 }
 
 .paging_full_numbers a:active {
-	outline: none;
-}
-
-.paging_full_numbers a {
-	padding:0px 10px;
+	outline: none
 }
 
 .paging_full_numbers a:hover {
@@ -582,10 +574,4 @@ div.box {
 	overflow: auto;
 	border: 1px solid #8080FF;
 	background-color: #E5E5FF;
-}
-
-.selectBox{
-	width:25px;
-	text-align:center;
-	margin: auto;
 }

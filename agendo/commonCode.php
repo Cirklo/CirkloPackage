@@ -196,7 +196,7 @@
 		echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
 		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
 		// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
-		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
+		// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
 		global $jsWereImported;
 		$jsWereImported = true;

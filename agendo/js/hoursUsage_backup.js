@@ -64,7 +64,7 @@ $(function() {
 			,"bProcessing": true
 			,"bServerSide": true
 			,"sServerMethod": "POST"
-			,"sAjaxSource": "hourUsageSQL.php"
+			,"sAjaxSource": "hoursUsage.php"
 			,"fnServerData": function ( sSource, aoData, fnCallback ) {
 				aoData.push( { "name": "action", "value": 'generateJson' });
 				aoData.push( { "name": "searchField", "value": $('#searchField').val() });
@@ -82,26 +82,28 @@ $(function() {
 					fnCallback
 				);
 			}
-			// ,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
-				// var columns_to_change = {
-					// 4: ['usageSum', 'usageEndResult']
-					// ,6: ['regularSum','regularEndResult']
-					// ,7: ['regularSum', 'regularEndResult']
-					// ,9: ['regularSum', 'regularEndResult']
-				// };
-				// var functionName;
-				// var total;
-				// for(var j in columns_to_change){                                   
-					// end_result = 0;
-					// functionName = columns_to_change[j][0];
-					// for(var i in aData){
-						// end_result = window[functionName](aData[i][j], end_result);
-					// }
+			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
+				// column to change, iteration function, end result presentation function
+				var columns_to_change = {
+					4: ['usageSum', 'usageEndResult']
+					,6: ['regularSum','regularEndResult']
+					,7: ['regularSum', 'regularEndResult']
+					,9: ['regularSum', 'regularEndResult']
+				};
+				var functionName;
+				var total;
+				for(var j in columns_to_change){                                   
+					end_result = 0;
+					functionName = columns_to_change[j][0];
+					for(var i in aData){
+						end_result = window[functionName](aData[i][j], end_result);
+					}
 
-					// functionName = columns_to_change[j][1];
-					// $($(nFoot).children().get(j)).html(window[functionName](end_result));
-				// }
-			// }
+					functionName = columns_to_change[j][1];
+					$($(nFoot).children().get(j)).html(window[functionName](end_result));
+				}
+				// nFoot.getEtlementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
+			}
 			// ,"aoColumns":[
 				// { "sType": "string" }
 				// ,{ "sType": "string" }

@@ -1,8 +1,10 @@
 var oTable;
 
 $(function() {
-	$('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
-	$('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
+	// $('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
+	// $('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
+	$('#beginDateText').datepicker({dateFormat: 'dd/mm/yy'}); 
+	$('#endDateText').datepicker({dateFormat: 'dd/mm/yy'});
 	
 	if(oTable = $('#datatable')){
 		$.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw ){
@@ -83,11 +85,10 @@ $(function() {
 				);
 			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
-				// column to change, iteration function, end result presentation function
 				var columns_to_change = {
-					4: ['usageSum', 'usageEndResult']
-					,6: ['regularSum','regularEndResult']
+					5: ['usageSum', 'usageEndResult']
 					,7: ['regularSum', 'regularEndResult']
+					,8: ['regularSum','regularEndResult']
 					,9: ['regularSum', 'regularEndResult']
 				};
 				var functionName;
@@ -102,7 +103,6 @@ $(function() {
 					functionName = columns_to_change[j][1];
 					$($(nFoot).children().get(j)).html(window[functionName](end_result));
 				}
-				// nFoot.getEtlementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
 			}
 			// ,"aoColumns":[
 				// { "sType": "string" }
@@ -149,7 +149,10 @@ function usageSum(value, total){
 }
 
 function usageEndResult(end_result){
-	return parseInt(end_result[0] + end_result[1]/60) + "h : " + end_result[1]%60 + "m";
+	var hours = end_result[0] || 0;
+	var minutes = end_result[1] || 0;
+	
+	return parseInt(hours + minutes/60) + "h : " + minutes%60 + "m";
 }
 
 function regularSum(value, total){
