@@ -27,6 +27,26 @@ body{
 	background-color: #cccccc;
 }
 
+#datatable td, #userLevelTable td{
+	font-size: 11px;
+}
+
+#datatable th, #userLevelTable th{
+	font-size: 14px;
+}
+
+.datatableLink{
+	color: #07155A;
+	text-decoration:underline;
+}
+
+.datatableLink:hover{
+	text-decoration:none;
+	cursor: hand; cursor: pointer;
+}
+
+
+
 /*
 #resultsTable {
 	border-collapse: collapse;

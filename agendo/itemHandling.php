@@ -181,7 +181,7 @@
 							value='Remove Item' 
 							onclick='itemInsertOrRemove(true)' 
 							title='Removes the selected item(s)'
-							style='margin-top:20px;'
+							style='margin-top:10px;'
 						/>
 					";
 
@@ -193,7 +193,7 @@
 							id='uploadButton'
 							value='Import Items' 
 							title='Import items from file and send it as attachment to the resource manager'
-							style='margin-top:20px;'
+							style='margin-top:10px;'
 							onclick='upload();'
 						/>
 					";

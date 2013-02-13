@@ -17,18 +17,17 @@
 		$selectedDepartmentsArray = json_decode($_GET['departments'], true);
 	}
 
-	$htmlDisplayArray = array(
-		array('name' => "Department", 'select' => 'department_name')
-		, array('name' => "Username", 'select' => 'fullname')
-		, array('name' => "Resource", 'select' => 'resource_name')
-		, array('name' => "Project", 'select' => 'project_name')
-		, array('name' => "Entry date", 'select' => 'entry_datetime')
-		, array('name' => "Duration", 'select' => 'duration', 'function' => 'htmlDuration', 'args' => 'duration')
-		, array('name' => "Price per hour", 'select' => 'price_value')
-		, array('name' => "Subtotal", 'select' => 'subtotal')
-		, array('name' => "Discount", 'select' => 'discount')
-		, array('name' => "Total", 'select' => 'total')
-	);
+	$htmlDisplayArray = array();
+	$htmlDisplayArray[] = array('name' => "Department", 'select' => 'department_name', 'where' => 'department_id', 'function' => 'htmlFilterLink', 'args' => array('department_id', 'department_name', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Username", 'select' => 'fullname', 'where' => 'user_id', 'function' => 'htmlFilterLink', 'args' => array('user_id', 'fullname', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Resource", 'select' => 'resource_name', 'where' => 'resource_id', 'function' => 'htmlFilterLink', 'args' => array('resource_id', 'resource_name', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Project", 'select' => 'project_name', 'where' => 'project_id', 'function' => 'htmlFilterLink', 'args' => array('project_id', 'project_name', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'entry_datetime');
+	$htmlDisplayArray[] = array('name' => "Duration", 'select' => 'duration', 'function' => 'htmlDuration', 'args' => 'duration');
+	$htmlDisplayArray[] = array('name' => "Price/unit", 'select' => 'price_value');
+	$htmlDisplayArray[] = array('name' => "Subtotal", 'select' => 'subtotal');
+	$htmlDisplayArray[] = array('name' => "Discount", 'select' => 'discount');
+	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total');
 	
 	if(isset($_POST['action']) && $_POST['action'] == 'generateJson'){
 		$isResp = isResp($_SESSION['user_id']);
@@ -75,7 +74,7 @@
 	echo "<br>";
 	
 	
-	echo "<table style='margin:auto;width:450px;'>";
+	echo "<table id='userLevelTable' style='margin:auto;width:450px;'>";
 		// ******* User priviledges checkboxes ********
 		$numberOfPrivileges = 0;
 		$privilegeHtml = "";
@@ -135,26 +134,23 @@
 		
 		// if($numberOfPrivileges > 1){
 			echo "<tr style='text-align:center;color:#F7C439;'>";
-				echo "<td title='Pick the user level you wish to view the information as'>";
+				echo "<th title='Pick the user level you wish to view the information as'>";
 					echo "<label>";
 						echo "User level";
 					echo "</label>";
-				echo "</td>";
+				echo "</th>";
 				
 					
-				echo "<td>";
+				echo "<th>";
 					echo "<label>";
 						echo "Period of time";
 					echo "</label>";
-				echo "</td>";
+				echo "</th>";
 			echo "</tr>";
 			
 			echo "<tr>";
 				echo "<td rowspan='2' style='text-align:center;color:#F7C439;' title='Pick the user level you wish to view the information as'>";
-					// echo "<fieldset style='width:200px;margin:auto;'>";
-					// echo "<legend>User level:</legend>";
 					echo $privilegeHtml;
-					// echo "</fieldset>";
 				echo "</td>";
 
 				echo "<td style='text-align:right;'>";
@@ -192,21 +188,35 @@
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1150;text-align:center;'>";
 		echo $backLink;
+		echo "<br>";
 		
-		echo "<div style='float:right;'>";
-			echo "<input type='text' id='searchField' style='width:300px;' onkeypress='return synchInfo(event);'/>";
-			echo "&nbsp";
-			echo "<input type='button' id='searchButton' value='Generate Report' onclick='oTable.fnReloadAjax();'/>";
+		// echo "<div style='margin-top: 10px;' >";
+		// echo "</div>";
+		
+		echo "<div style='width: 100%;margin-top: 10px;'>";
+			echo "<div style='float:left;'>";
+				// echo "<label id='filterText' style='margin-left: 10px;'>";
+				echo "<label id='filterText'>";
+				echo "</label>";
+				
+				// echo "<a class='link' onclick='resetFilter();' style='text-decoration:underline; margin-left: 10px;'>X Reset filter</a>";
+			echo "</div>";
+			
+			echo "<div style='float:right;'>";
+				echo "<input type='text' id='searchField' style='width:300px;' onkeypress='return synchInfo(event);'/>";
+				echo "&nbsp";
+				echo "<input type='button' id='searchButton' value='Generate Report' onclick='oTable.fnReloadAjax();'/>";
+			echo "</div>";
+		
 		echo "</div>";
 		
 		echo "<div style='clear:both;'></div>";
 		
 		// to be removed, usefull for now to make sure the number of tds in the footer is the same as the header
 		$footer_tds = "";
-		echo "<table id='datatable' style='color: black;'>";
+		echo "<table id='datatable' style='color: black;width:100%';>";
 			echo "<thead>";
 			foreach($htmlDisplayArray as $data){
-				// $number_of_tds++;
 				echo "<th>";
 					echo $data['name'];
 				echo "</th>";
@@ -268,7 +278,7 @@
 		
 		$iTotalDisplayRecords = 0;
 		$iTotalRecords = 0;
-
+		
 		$date_sql = "";
 		if(
 			empty($beginDate) && !empty($endDate)
@@ -296,7 +306,6 @@
 		$aaData = array();
 		$output = array(
 			"sEcho" => intval($_POST['sEcho']),
-			"iTotalRecords" => $iTotalRecords,
 		);
 		
 		$order_by = intval($_POST['iSortCol_0']);
@@ -312,31 +321,53 @@
 		}
 		
 		$sql_array = array();
+		$sql_array_length = 0;
 		if(isset($_POST['searchField']) && $_POST['searchField'] != ''){
 			$sql_array[] = $_POST['searchField'];
-			// $search_SQL = "and department_name like '%:0%' || @fullname like '%:0%' || resource_name like '%:0%' || project_name like '%:0%'";
-			$search_SQL = "
+			$sql_array_length++;
+			// $search_sql = "and department_name like '%:0%' || @fullname like '%:0%' || resource_name like '%:0%' || project_name like '%:0%'";
+			$search_sql = "
 				and (
-				lower(department_name) like lower(concat('%',:0,'%')) 
-				|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:0,'%'))
-				|| lower(resource_name) like lower(concat('%',:0,'%'))
-				|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:0,'%'))
+				lower(department_name) like lower(concat('%',:".($sql_array_length - 1).",'%')) 
+				|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".($sql_array_length - 1).",'%'))
+				|| lower(resource_name) like lower(concat('%',:".($sql_array_length - 1).",'%'))
+				|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".($sql_array_length - 1).",'%'))
 			)";
 			
 		}
 		
+		$filters = json_decode($_POST['filters']);
+		$filter_sql = "";
+		if($filters){
+			foreach($filters as $key => $filter){
+				if($filter === null){
+					$filter_sql .= " and ".$htmlDisplayArray[$key]['where']." is null";
+				}
+				else{
+					$sql_array[] = $filter;
+					$sql_array_length++;
+					$filter_sql .= " and ".$htmlDisplayArray[$key]['where']." = :".($sql_array_length - 1);
+				}
+			}
+		}
+
+		
 		$sql = "
 			select
 				SQL_CALC_FOUND_ROWS
+				department_id,
 				department_name,
+				user_id,
 				@fullname := concat(user_firstname, ' ', user_lastname) as fullname,
+				resource_id,
 				resource_name,
+				project_id,
 				ifnull(project_name, 'No project') as project_name,
 				entry_datetime,
 				@duration := entry_slots * resource_resolution as duration,
-				ifnull(price_value, 0) as price_value,
-				@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep) as discount,
-				@subtotal := @duration * ifnull(price_value, 0) as subtotal,
+				@pricevalue := ifnull(price_value, 0) as price_value,
+				@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) as discount,
+				@subtotal := @duration * @pricevalue as subtotal,
 				@subtotal - @discount as total
 			from 
 				".dbHelp::getSchemaName().".user join entry on user_id = entry_user
@@ -348,11 +379,11 @@
 			where
 				entry_status in (1,2)
 				".$date_sql."
-				".$search_SQL."
+				".$search_sql."
+				".$filter_sql."
 			".$order_by_sql."
 			".$limit."
 		";
-
 		$prep = dbHelp::query($sql, $sql_array);
 		
 		// returns a number indicating how many rows the first SELECT would have returned had it been written without the LIMIT clause
@@ -368,7 +399,7 @@
 			// fields *********************************
 			foreach($htmlDisplayArray as $data){
 				if(isset($data['function'])){
-					$value = $data['function']($row[$data['select']]);
+					$value = $data['function']($row, $data['args']);
 				}
 				else{
 					$value = $row[$data['select']];
@@ -377,7 +408,7 @@
 			}
 			$aaData[] = $line;
 		}
-
+		$output['iTotalRecords'] = $iTotalDisplayRecords;
 		$output['iTotalDisplayRecords'] = $iTotalDisplayRecords;
 		$output['aaData'] = $aaData;
 		
@@ -385,11 +416,20 @@
 	}
 	
 
-	function htmlDuration($value){
+	function htmlDuration($row, $arg){
+		$value = $row[$arg];
 		$hoursFloored = floor($value / 60);
 		$minutes = $value % 60;
 		
 		$formatedValue = $hoursFloored."h : ".$minutes."m";
 		return $formatedValue;
+	}
+	
+	function htmlFilterLink($row, $argsArray){ // argsArray: id, value, column index
+		$id = $row[$argsArray[0]];
+		if($id === null){
+			$id = 'null';
+		}
+		return "<a class='datatableLink' onclick='filter(".$id.", this.text,".$argsArray[2].");'>".$row[$argsArray[1]]."</a>";
 	}
 ?>

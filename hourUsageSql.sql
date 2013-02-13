@@ -24,30 +24,25 @@ DELIMITER ;
 
 
 DELIMITER //
-create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int) returns int deterministic
+create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int, pricevalue int, resourceres int) returns int deterministic
 	BEGIN
-		declare cost int;
+		declare cost, weekdaynumber int;
+		set weekdaynumber := weekday(entrydatetime);
 		
 		select
 			sum(
 				happy_hour_duration(
 					entrydatetime
-					,entryslots * resource_resolution
+					,entryslots * resourceres
 					,happyhour_starthour
 					,happyhour_endhour
-				) * happyhour_discount * 0.01 * ifnull(price_value, 0)
+				) * happyhour_discount * 0.01 * pricevalue
 			) into cost
 		from
 			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
-			join resource on happyhour_assoc_resource = resource_id
-			join price on price_resource = resource_id
-			join institute on price_type = institute_pricetype
-			join department on institute_id = department_inst
-			
 		where
-			resource_id = resourceid
-			and department_id = departmentid
-			and weekday(entrydatetime) between happyhour_startday and happyhour_endday;
+			happyhour_assoc_resource = resourceid
+			and weekdaynumber between happyhour_startday and happyhour_endday;
 				
 		return ifnull(cost, 0);
 	END

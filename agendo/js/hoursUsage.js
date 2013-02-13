@@ -1,10 +1,14 @@
 var oTable;
+var filter_reset_text = 'Filtered by: Nothing';
+var filter_display_array = {};
+var filter_post_array = {};
 
 $(function() {
 	// $('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
 	// $('#endDateText').datepick({dateFormat: 'dd/mm/yyyy'});
 	$('#beginDateText').datepicker({dateFormat: 'dd/mm/yy'}); 
 	$('#endDateText').datepicker({dateFormat: 'dd/mm/yy'});
+	$('#filterText').text(filter_reset_text);
 	
 	if(oTable = $('#datatable')){
 		$.fn.dataTableExt.oApi.fnReloadAjax = function ( oSettings, sNewSource, fnCallback, bStandingRedraw ){
@@ -72,6 +76,8 @@ $(function() {
 				aoData.push( { "name": "searchField", "value": $('#searchField').val() });
 				aoData.push( { "name": "beginDate", "value": $('#beginDateText').val() });
 				aoData.push( { "name": "endDate", "value": $('#endDateText').val() });
+				aoData.push( { "name": "filters", "value": JSON.stringify(filter_post_array) });
+				
 				$.post(
 					sSource
 					,aoData
@@ -117,26 +123,26 @@ $(function() {
 				// ,{ "sType": "string" }
 				// ,{ "sType": "string" }
 			// ]
-			
-			// ,"aoColumns": [
-				// { "sTitle": "Date"}
-				// ,{ "sTitle": "ID"}
-				// ,{ "sTitle": "Department"}
-				// ,{ "sTitle": "User"}
-				// ,{ "sTitle": "Resource" }
-				// ,{ "sTitle": "ID2"}
-				// ,{ "sTitle": "Project" }
-				// ,{ "sTitle": "Value"}
-				// ,{ "sTitle": "bla"}
-				// ,{ "sTitle": "bla2"}
-				// ,{ "sTitle": "bla3"}
-			// ]
+			,"aoColumns": [
+				{ "sWidth": "20%"}
+				,{ "sWidth": "10%"}
+				,{ "sWidth": "15%"}
+				,{ "sWidth": "10%"}
+				,{ "sWidth": "15%"}
+				,{ "sWidth": "6%"}
+				,{ "sWidth": "6%"}
+				,{ "sWidth": "6%"}
+				,{ "sWidth": "6%"}
+				,{ "sWidth": "6%"}
+			]
 		});
 		
 			
 	}
 
 });
+
+// column footer functions *****************************************************
 
 function usageSum(value, total){
 	if(total == 0){
@@ -163,12 +169,59 @@ function regularEndResult(end_result){
 	return end_result;
 }
 
+// *****************************************************************************
+
 function synchInfo(e){
 	if (e.keyCode == 13) {
 		oTable.fnReloadAjax();
 		return false;
 	}
 	return true;
+}
+
+
+function filterRefresh(){
+	var element = document.getElementById('filterText');
+	
+	if(isObjEmpty(filter_display_array)){
+		element.innerHTML = filter_reset_text;
+	}
+	else{
+		element.innerHTML = "Remove filter: ";
+			
+		// element.innerHTML += filterArray.join(', ');
+		var separator = ', ';
+		var text_to_add = "";
+		for(var i in filter_display_array){
+			text_to_add += "<a class='link' onclick='removeFromFilter(" + i + ");'>" + filter_display_array[i] + "</a>, ";
+		}
+		text_to_add = text_to_add.substring(0, text_to_add.length - separator.length);
+		element.innerHTML += text_to_add;
+	}
+}
+
+function filter(data_id, value, column_index){
+	var element = document.getElementById('filterText');
+	filter_post_array[column_index] = data_id;
+	filter_display_array[column_index] = value;
+	filterRefresh();
+	showMessage('Filter added');
+	oTable.fnReloadAjax();
+}
+
+function resetFilter(){
+	filter_post_array = {};
+	filter_display_array = {};
+	$('#filterText').text(filter_reset_text);
+	showMessage('Filter has been reset');
+}
+
+function removeFromFilter(column_index){
+	delete filter_post_array[column_index];
+	delete filter_display_array[column_index];
+	filterRefresh();
+	showMessage('Filter has been removed');
+	oTable.fnReloadAjax();
 }
 		
 // Sends the checkBoxes states to the server and gets the appropriate table data
