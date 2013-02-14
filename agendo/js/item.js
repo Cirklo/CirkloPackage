@@ -318,6 +318,10 @@ function newItem(){
 	itemInsertShowDivAndCheckUser(currentResource, 'itemInsertHtml');	
 }
 
+function refreshProjects(projects, default_project){
+	
+}
+
 function fillSubmittedListFromUser(){
 	if(document.getElementById('asUserList') != null){
 		var asUser = document.getElementById('asUserList').options[document.getElementById('asUserList').selectedIndex].value;
@@ -330,6 +334,7 @@ function fillSubmittedListFromUser(){
 				}
 				else{
 					fillItemsListOptions(serverData.selectOptions);
+					refreshProjects(serverData.projects, serverData.default_project);
 				}
 			}
 			, "json"

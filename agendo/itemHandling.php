@@ -197,20 +197,37 @@
 							onclick='upload();'
 						/>
 					";
-						
-					if($isResp !== false){
+					
+					$sql = "
+						select
+							project_name, project_id, department_default
+						from
+							project join proj_dep_assoc on project_id = proj_dep_assoc_project
+							join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+							join department on department_id = user_dep
+						where
+							user_id = :0
+							and proj_dep_assoc_active = 1
+						order by
+							project_name
+					";
+					$prep = dbHelp::query($sql, array($_SESSION['user_id']));
+					if(dbHelp::numberOfRows($prep) > 0){
 						$html .= "<br>";
-						
-						$html .= "
-							<input type='button' 
-								class='buttons'
-								id='backButton' 
-								value='Back' 
-								onclick='back();' 
-								title='Return to the entry association screen'
-								style='margin-top:20px;'
-							/>
-						";
+						$html .= "<div class='projects' style='margin-top: 10px;'>";
+							$html .= "Project: ";
+							
+							$html .= "<br>";
+							$html .= "<select id='projectList' style='width:100%;'>";
+								while($res = dbHelp::fetchRowByIndex($prep)){
+									$isSelected = "";
+									if($res[1] == $res[2]){
+										$isSelected = "selected='selected'";
+									}
+									$html .= "<option value='".$res[1]."' ".$isSelected." title='".$res[0]."'>".$res[0]."</option>";
+								}
+							$html .= "</select>";
+						$html .= "</div>";
 					}
 					
 				$html .= "</td>";
@@ -219,6 +236,21 @@
 			$html .= "<tr>";
 				// Shows the possible states
 				$html .= "<td style='vertical-align:bottom;text-align:right;color:".$color.";'>";
+					if($isResp !== false){
+						$html .= "
+							<input type='button' 
+								class='buttons'
+								id='backButton' 
+								value='Back' 
+								onclick='back();' 
+								title='Return to the entry association screen'
+								style='margin-bottom: 10px;'
+							/>
+						";
+						
+						$html .= "<br>";
+					}
+					
 					$heightAndWidth = 14;
 					$topMargin = 5;
 					$rightMargin = 5;

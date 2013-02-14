@@ -18,9 +18,17 @@
 	background: #FBE3E4;
 }
 
-.buttons{
+.buttons, .projects{
 	width:120px;
+}
+
+.buttons{
 	height: 23px;
+}
+
+.projects{
+	float: right;
+	text-align: left;
 }
 
 #itemInterfaceDiv{
