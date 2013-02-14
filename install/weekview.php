@@ -530,31 +530,11 @@ echo "<table id='master' style='margin:auto' width=750>";
 							echo "</td>";
 						echo "</tr>";
 
-						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!=''){
-							// user assiduity goes here
-							// $sql = "select configParams_value from configParams where configParams_name = 'showAssiduity'";
-							// $prep = dbHelp::query($sql);
-							// $row = dbHelp::fetchRowByIndex($prep);
-							
-							// if($row[0] == 1){
-								// echo "<tr><td colspan=2><hr></td></tr>";
-
-								// echo "<tr>";
-									// echo "<td colspan=2 style='text-align:center;'>";
-										// require_once("../agendo/assiduity.php");
-									// echo "</td>";
-								// echo "</tr>";
-							// }
-							// **************************
-						
-						
-						
 						// project listing goes here
-						// if(isset($_SESSION['user_id']) && $_SESSION['user_id'] != ''){
-							// $sql = "select distinct project_name, project_id from project, proj_dep_assoc, ".dbHelp::getSchemaName().".user where project_id = proj_dep_assoc_project and proj_dep_assoc_department = user_dep and user_id = :0 or project_id = 1";
+						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!='' && !$imResstatus6){
 							$sql = "
 								select
-									project_name, project_id, department_default_project
+									project_name, project_id, department_default
 								from
 									project join proj_dep_assoc on project_id = proj_dep_assoc_project
 									join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
@@ -567,35 +547,20 @@ echo "<table id='master' style='margin:auto' width=750>";
 							";
 							$prep = dbHelp::query($sql, array($_SESSION['user_id']));
 							if(dbHelp::numberOfRows($prep) > 0){
-								// echo "<tr><td colspan=2 style='display:".$showIfUserLogged."'><hr></td></tr>";
 								echo "<tr><td colspan=2><hr></td></tr>";
 
 								echo "<tr>";
-									// echo "<td colspan=2 style='text-align:center;display:".$showIfUserLogged.";'>";
 									echo "<td colspan=2 style='text-align:center;'>";
-										// $sqlSelected = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
-										// $sqlSelected = "select department_default_project from department where department_id = :0";
-										// $prepSelected = dbHelp::query($sqlSelected, array($_SESSION['user_id'], $resource));
-										// $resSelected = dbHelp::fetchRowByIndex($prepSelected);
-										// $selectedProj = $resSelected[0];
-										// $selectedProj = $res;
-										
 										echo "Project: ";
 										echo "<select id='projectList' style='width:100px;'>";
-											// echo "<option value='-1'>No project</option>";
 											while($res = dbHelp::fetchRowByIndex($prep)){
 												$isSelected = "";
-												// if($res[1] == $selectedProj){
 												if($res[1] == $res[2]){
 													$isSelected = "selected='selected'";
 												}
 												echo "<option value='".$res[1]."' ".$isSelected." title='".$res[0]."'>".$res[0]."</option>";
 											}
 										echo "</select>";
-										
-										// echo "&nbsp";
-										
-										// echo "<input type='button' value='Set' onclick='setProjectAsDefault(".$resource.")' title='Set the selected project as default'/>";
 									echo "</td>";
 								echo "</tr>";
 							}

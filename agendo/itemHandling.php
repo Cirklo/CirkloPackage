@@ -9,7 +9,7 @@
 	$action = (isset($_POST['action'])) ? $_POST['action'] : $_GET['action'];
 	if(isset($action)){
 		$resource = (isset($_POST['resource'])) ? $_POST['resource'] : $_GET['resource'];
-		if(!isset($resource)){
+		if(!isset($resource) && $action != 'getProject'){
 			throw new Exception('Resource not specified');
 		}
 		
@@ -43,6 +43,29 @@
 				$json->message = associateEntriesAndItems($userId, $resource, $_POST['entries'], json_decode($_POST['items'], true));
 			break;
 			
+			case "getProject":
+				// $sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
+				// $prep = dbHelp::query($sql);
+				// $row = dbHelp::fetchRowByIndex($prep);
+				$needProj = needProject();
+				
+				$asUser = $_POST['asUser'];
+				if($asUser === null){
+					$asUser = $userId;
+				}
+				
+				$stateAndProject = getProjectFromItem($_POST['item'], $asUser);
+				// only nag the user, in case the project is null, if the flag 'useProjects' exists and is true
+				if($needProj === true && $json->project === null){
+					throw new Exception('No project was associated to this item');
+				}
+				
+				if($stateAndProject['isActive'] !== null && $stateAndProject['isActive'] == 0){
+					throw new Exception('The project associated to this item has become inactive');
+				}
+				$json->project = $stateAndProject['project'];
+			break;
+			
 			case "itemInsertOrRemove":
 				if(isset($_POST['items']) && isset($_POST['remove'])){
 					$json->message = itemInsertOrRemove($_POST['items'], $userId, $resource, json_decode($_POST['remove']), $isResp, $_GET['asUser']);
@@ -59,6 +82,9 @@
 					throw new Exception("User does not have permission for this action");
 				}
 				$json->selectOptions = updateSubmittedList($_POST['asUser'], $resource);
+				$projects_and_default = getProjectsAndDefault($_POST['asUser']);
+				$json->projects = $projects_and_default['projects'];
+				$json->default_project = $projects_and_default['default'];
 			break;
 
 			case "done":
@@ -130,7 +156,7 @@
 					}
 
 					$html .= "<label>";
-						$html .= "New item for ".$row[0].": ";
+						$html .= "New item:";
 					$html .= "</label>";
 					
 					$html .= "<br>";
@@ -147,7 +173,7 @@
 					$html .= "<br>";
 					
 					// List where the submitted items will show
-					$html .= "<select class='selectList' id='submittedItems' multiple='multiple' style='float:left;'>";
+					$html .= "<select class='selectList' id='submittedItems' multiple='multiple' style='float:left;' onclick='showProject(this.value);'>";
 					$html .= "</select>";
 					
 					// Fills the list with items submitted by the user, not used in a sequencing session
@@ -198,36 +224,42 @@
 						/>
 					";
 					
-					$sql = "
-						select
-							project_name, project_id, department_default
-						from
-							project join proj_dep_assoc on project_id = proj_dep_assoc_project
-							join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
-							join department on department_id = user_dep
-						where
-							user_id = :0
-							and proj_dep_assoc_active = 1
-						order by
-							project_name
-					";
-					$prep = dbHelp::query($sql, array($_SESSION['user_id']));
-					if(dbHelp::numberOfRows($prep) > 0){
+					
+					// $projects_and_default = getProjectsAndDefault($_SESSION['user_id']);
+					$projects_and_default = getProjectsAndDefault($userId);
+					$projects = $projects_and_default['projects'];
+					$default_project = $projects_and_default['default'];
+					if(isset($projects[0])){
 						$html .= "<br>";
 						$html .= "<div class='projects' style='margin-top: 10px;'>";
 							$html .= "Project: ";
 							
 							$html .= "<br>";
 							$html .= "<select id='projectList' style='width:100%;'>";
-								while($res = dbHelp::fetchRowByIndex($prep)){
-									$isSelected = "";
-									if($res[1] == $res[2]){
-										$isSelected = "selected='selected'";
-									}
-									$html .= "<option value='".$res[1]."' ".$isSelected." title='".$res[0]."'>".$res[0]."</option>";
+							foreach($projects as $project){
+								$isSelected = "";
+								if($project['id'] == $default_project){
+									$isSelected = "selected='selected'";
 								}
+								$html .= "<option value='".$project['id']."' ".$isSelected." title='".$project['name']."'>".$project['name']."</option>";
+							}
 							$html .= "</select>";
 						$html .= "</div>";
+							
+						
+						// to be implemented later?
+						// $html .= "<br>";
+						// $html .= "
+							// <input type='button'
+								// class='buttons'
+								// id='backButton'
+								// value='Save'
+								// onclick='associateItemToProj();'
+								// title='Associates a project to the selected item'
+								// style='margin-top: 10px;'
+							// />
+						// ";
+						
 					}
 					
 				$html .= "</td>";
@@ -403,11 +435,26 @@
 					throw new Exception("Empty item name");
 				}
 				
-				$sql = "insert into item values(null, :0, :1, 1, :2)";
-				$sqlArray = array($items[0], $userId, $resource);
+				$user = $userId;
 				if($isResp !== false && isset($asUser)){
-					$sqlArray[1] = $asUser;
+					$user = $asUser;
 				}
+				
+				$project = $_POST['project'];
+				// $needProj = needProject();
+				$projects_and_default = getProjectsAndDefault($user);
+				
+				$sql = "insert into item values(null, :0, :1, 1, :2, null)";
+				$sqlArray = array($items[0], $user, $resource);
+				if($projects_and_default['projects'] !== null){
+					$project_ok = inProjects($project, $projects_and_default['projects']);
+					if($project_ok === false){
+						throw new Exception('User not allowed to use this project');
+					}
+					$sqlArray[] = $project;
+					$sql = "insert into item() values(null, :0, :1, 1, :2, :3)";
+				}
+				
 				
 				$prep = dbHelp::query($sql, $sqlArray);
 				return "Item Inserted";
@@ -821,5 +868,23 @@
 		}
 
 		return $json;
+	}
+	
+	function getProjectFromItem($item, $user_id){
+		$project = null;
+		$sql = "
+			select
+				proj_dep_assoc_active, project_id
+			from
+				item join project on project_id = item_project
+				join proj_dep_assoc on proj_dep_assoc_project = project_id
+				join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+			where
+				item_id = :0
+				and user_id = :1
+		";
+		$prep = dbHelp::query($sql, array($item, $user_id));
+		$row = dbHelp::fetchRowByIndex($prep);
+		return array('isActive' => $row[0], 'project' => $row[1]);
 	}
 ?>

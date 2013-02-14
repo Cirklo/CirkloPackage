@@ -90,6 +90,7 @@ function itemInsertOrRemove(remove){
 	remove = remove || false;
 	var items = new Array();
 	var jsonValue = {};
+	var project = null;
 	if(remove){
 		var list = document.getElementById('submittedItems');
 		for(var i=list.options.length-1; i>=0; i--){
@@ -106,6 +107,11 @@ function itemInsertOrRemove(remove){
 		}
 	}
 	else{
+		var proj_list = document.getElementById('projectList');
+		if(proj_list && proj_list.length > 0){
+			project = document.getElementById('projectList').options[document.getElementById('projectList').selectedIndex].value;
+		}
+		
 		var itemName = document.getElementById('itemName').value;
 		if(itemName != ''){
 			// items will store the name of the item, just one item in this case
@@ -127,7 +133,7 @@ function itemInsertOrRemove(remove){
 	
 	$.post(
 		url
-		,{action: 'itemInsertOrRemove', 'items[]': items, userLogin: userLogin, userPass: userPass, resource: currentResource, remove: remove}
+		,{action: 'itemInsertOrRemove', 'items[]': items, userLogin: userLogin, userPass: userPass, resource: currentResource, remove: remove, project: project}
 		,function(serverData){
 			if(!serverData.isError){
 				if(asUser != null){
@@ -319,7 +325,16 @@ function newItem(){
 }
 
 function refreshProjects(projects, default_project){
+	var select_list = document.getElementById('projectList');
+	var temp_option;
+	var selected;
+	select_list.options.length = 0;
 	
+	$.each(projects, function(){
+		selected = this.id == default_project;
+		temp_option = new Option(this.name, this.id, selected, selected);
+		select_list.options[select_list.options.length] = temp_option;
+	});	
 }
 
 function fillSubmittedListFromUser(){
@@ -471,3 +486,41 @@ function getItems(){
 		)
 	;
 }
+
+function showProject(value){
+		if(value){
+		var asUser = null;
+		if(document.getElementById('asUserList') != null){
+			asUser = document.getElementById('asUserList').options[document.getElementById('asUserList').selectedIndex].value;
+		}
+		var id = JSON.parse(value).id;
+		$.post(
+			"../agendo/itemHandling.php"
+			,{action: "getProject", item: id, userLogin: userLogin, userPass: userPass, asUser: asUser}
+			,function(serverData){
+				if(!serverData.isError){
+					$("#projectList option[value='" + serverData.project + "']").attr("selected","selected");
+				}
+				else{
+					showMessage(serverData.message, true);
+				}
+			}
+			,"json")
+			.error(
+				function(errorData){
+					showMessage(errorData.responseText, true);
+				}
+			)
+		;
+	}
+}
+
+// to be implemented later?
+// function associateItemToProj(){
+	// var projectList = document.getElementById('projectList');
+	// var itemList = document.getElementById('submittedItems');
+	
+	// if(){
+	
+	// }
+// }

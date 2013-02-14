@@ -557,6 +557,18 @@
 		fclose($fh);
 	}
 	
+	function needProject(){
+		$sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
+		$prep = dbHelp::query($sql);
+		$row = dbHelp::fetchRowByIndex($prep);
+		
+		if($row[0] == 1){
+			return true;
+		}
+		
+		return false;
+	}
+	
 	// Gets all the data after a certain string($afterString) and before a string ($beforeString)
 	//	$array = getTablesFromScript($sql, 'CREATE TABLE IF NOT EXISTS', '('); returns an array of table names
 	function getBetweenArray($all, $afterString, $beforeString, $separator = ';'){
@@ -753,10 +765,57 @@
 		return date($toFormat, strtotime($date));
 	}
 	
+	function inProjects($project, $projects){
+		foreach($projects as $projectData){
+			if($project == $projectData['id']){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	function getProjectsAndDefault($user){
+		$projects = array();
+		$default = null;
+		
+		$sql = "
+			select
+				project_id, project_name, department_default
+			from
+				project join proj_dep_assoc on project_id = proj_dep_assoc_project
+				join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+				join department on department_id = user_dep
+			where
+				user_id = :0
+				and proj_dep_assoc_active = 1
+			order by
+				project_name
+		";
+		$prep = dbHelp::query($sql, array($user));
+		while($row = dbHelp::fetchRowByIndex($prep)){
+			$default = $row[2];
+			$projects[] = array('id' => $row[0], 'name' => $row[1]);
+		}
+		
+		$results = array('default' => $default);
+		if($projects[0] === null){
+			$projects = null;
+		}
+		$results = array('projects' => $projects);
+		
+		return $results;
+	}
+	
 	// Checks if the current php file is being viewed due to a ajax request
 	function isAjax(){
 		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 	}
+	
+	function convertSmartQuotes($string){ 
+		// return str_replace($search, $replace, $string); 
+		return str_replace("'", '"', $string); 
+	} 
 	
 	// Detects if there was a get or post with ajax headers
 	function visualExceptionHandling($exception){
@@ -796,7 +855,7 @@
 			// $json->isError = true;
 			// echo json_encode($json);
 			// showMsg("File: ".str_replace("\\", "/", $error['file'])." | ln: ".$error['line']." | msg: ".$error['message'].PHP_EOL);
-			showMsg("File: ".str_replace("\\", "/", $error['file'])." | ln: ".$error['line']." | msg: ".$error['message'], true);
+			showMsg("File: ".str_replace("\\", "/", $error['file'])." | ln: ".$error['line']." | msg: \"".convertSmartQuotes($error['message'])."\"", true);
 			// throw new Exception("File:".$error['file']." | ln:".$error['line']." | msg:".$error['message'] .PHP_EOL);
 		}
 	}
