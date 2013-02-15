@@ -49,8 +49,12 @@
 				// $row = dbHelp::fetchRowByIndex($prep);
 				$needProj = needProject();
 				
-				$asUser = $_POST['asUser'];
-				if($asUser === null){
+				// $asUser = $_POST['asUser'];
+				if(
+					(($asUser = $_POST['asUser']) === null || $asUser == '')
+					&&
+					(($asUser = $_GET['asUser']) === null || $asUser == '')
+				){
 					$asUser = $userId;
 				}
 				
@@ -441,6 +445,10 @@
 				}
 				
 				$project = $_POST['project'];
+				if(!isset($project) || $project == ''){
+					$project = $_GET['project'];
+				}
+				
 				// $needProj = needProject();
 				$projects_and_default = getProjectsAndDefault($user);
 				
@@ -837,12 +845,19 @@
 				}
 			
 				$json->message = "Items imported successfully";
+				$i = 0;
 				while($line = fgetss($fileData)){
 					$lineArray = explode($delimiter, trim($line));
 					$item = str_replace("\"", "", $lineArray[$column]); // remove possible "
-					itemInsertOrRemove(array($item), $userId, $resource, false, $isResp, $_GET['asUser']);
+					// itemInsertOrRemove(array($item), $userId, $resource, false, $isResp, $_GET['asUser']);
+					itemInsertOrRemove(array($item), $userId, $resource, false, $isResp, $asUser);
+					$i++;
 				}
 				fclose($fileData);
+				
+				if($i == 0){
+					throw new Exception('Could not find any items');
+				}
 				
 				if($emailRespCheck){
 					$sql = "select user_email, user_firstname, user_lastname, user_login from ".dbHelp::getSchemaName().".user where user_id = :0";

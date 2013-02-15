@@ -423,6 +423,20 @@ function upload(){
 			action += "&userLogin=" + userLogin + "&userPass=" + userPass;
 		}
 		
+		var project_list = document.getElementById('projectList');
+		var project = "";
+		if(project_list){
+			project = project_list.options[project_list.selectedIndex].value;
+		}
+		action += "&project=" + project;
+		
+		var user_list = document.getElementById('asUserList');
+		var as_user = ""
+		if(user_list){
+			as_user = user_list.options[user_list.selectedIndex].value;
+		}
+		action += "&asUser=" + as_user;
+		
 		document.forms["uploadFileForm"].action = action;
 		document.forms["uploadFileForm"].submit();
 		if(loadFunctionExists === false){
@@ -490,8 +504,9 @@ function getItems(){
 function showProject(value){
 		if(value){
 		var asUser = null;
-		if(document.getElementById('asUserList') != null){
-			asUser = document.getElementById('asUserList').options[document.getElementById('asUserList').selectedIndex].value;
+		var as_user_list = document.getElementById('asUserList');
+		if(as_user_list != null){
+			asUser = as_user_list.options[as_user_list.selectedIndex].value;
 		}
 		var id = JSON.parse(value).id;
 		$.post(

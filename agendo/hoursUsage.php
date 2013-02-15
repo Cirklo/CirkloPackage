@@ -23,7 +23,8 @@
 	$htmlDisplayArray[] = array('name' => "Resource", 'select' => 'resource_name', 'where' => 'resource_id', 'function' => 'htmlFilterLink', 'args' => array('resource_id', 'resource_name', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Project", 'select' => 'project_name', 'where' => 'project_id', 'function' => 'htmlFilterLink', 'args' => array('project_id', 'project_name', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'entry_datetime');
-	$htmlDisplayArray[] = array('name' => "Duration", 'select' => 'duration', 'function' => 'htmlDuration', 'args' => 'duration');
+	$htmlDisplayArray[] = array('name' => "Units", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
+	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'unit_type', 'function' => 'htmlUnitType', 'args' => 'resource_status');
 	$htmlDisplayArray[] = array('name' => "Price/unit", 'select' => 'price_value');
 	$htmlDisplayArray[] = array('name' => "Subtotal", 'select' => 'subtotal');
 	$htmlDisplayArray[] = array('name' => "Discount", 'select' => 'discount');
@@ -355,27 +356,84 @@
 		$sql = "
 			select
 				SQL_CALC_FOUND_ROWS
-				department_id,
-				department_name,
-				user_id,
-				@fullname := concat(user_firstname, ' ', user_lastname) as fullname,
-				resource_id,
-				resource_name,
-				project_id,
-				ifnull(project_name, 'No project') as project_name,
-				entry_datetime,
-				@duration := entry_slots * resource_resolution as duration,
-				@pricevalue := ifnull(price_value, 0) as price_value,
-				@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) as discount,
-				@subtotal := @duration * @pricevalue as subtotal,
-				@subtotal - @discount as total
-			from 
-				".dbHelp::getSchemaName().".user join entry on user_id = entry_user
-				join department on department_id = user_dep
-				join institute on institute_id = department_inst
-				join resource on resource_id = entry_resource
-				left join price on (price_resource = entry_resource and price_type = institute_pricetype)
-				left join project on project_id = entry_project
+				*
+			from
+				((
+					select 
+						department_id,
+						department_name,
+						user_id,
+						fullname,
+						resource_id,
+						resource_name,
+						resource_status,
+						project_id,
+						project_name,
+						entry_datetime,
+						entry_status,
+						price_value,
+						units,
+						@discount := sequencingDiscount() as discount,
+						@subtotal := units * price_value as subtotal,
+						@subtotal - @discount as total
+					from (
+						select
+							department_id,
+							department_name,
+							user_id,
+							concat(user_firstname, ' ', user_lastname) as fullname,
+							resource_id,
+							resource_name,
+							resource_status,
+							project_id,
+							ifnull(project_name, 'No project') as project_name,
+							entry_datetime,
+							entry_status,
+							ifnull(price_value, 0) as price_value,
+							count(item_id) as units
+						from 
+							entry join item_assoc on item_assoc_entry = entry_id
+							join resource on resource_id = entry_resource
+							join item on item_id = item_assoc_item
+							join user on user_id = item_user
+							join department on department_id = user_dep
+							join institute on institute_id = department_inst
+							left join project on project_id = item_project
+							left join price on (price_resource = resource_id and price_type = institute_pricetype)
+						where
+							item_state = 3
+						group by
+							entry_datetime, user_id
+								) as AuxSelect
+						)
+				UNION
+					(
+					select
+						department_id,
+						department_name,
+						user_id,
+						@fullname := concat(user_firstname, ' ', user_lastname) as fullname,
+						resource_id,
+						resource_name,
+						resource_status,
+						project_id,
+						ifnull(project_name, 'No project') as project_name,
+						entry_datetime,
+						entry_status,
+						@pricevalue := ifnull(price_value, 0) as price_value,
+						@units := entry_slots * resource_resolution as units,
+						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) as discount,
+						@subtotal := @units * @pricevalue as subtotal,
+						@subtotal - @discount as total
+					from 
+						".dbHelp::getSchemaName().".user join entry on user_id = entry_user
+						join department on department_id = user_dep
+						join institute on institute_id = department_inst
+						join resource on resource_id = entry_resource
+						left join price on (price_resource = entry_resource and price_type = institute_pricetype)
+						left join project on project_id = entry_project
+				)
+			) as allData
 			where
 				entry_status in (1,2)
 				".$date_sql."
@@ -416,13 +474,25 @@
 	}
 	
 
-	function htmlDuration($row, $arg){
-		$value = $row[$arg];
-		$hoursFloored = floor($value / 60);
-		$minutes = $value % 60;
+	function htmlUnits($row, $args){
+		if($row[$args[0]] == 6){
+			return $row[$args[1]];
+		}
 		
-		$formatedValue = $hoursFloored."h : ".$minutes."m";
-		return $formatedValue;
+		// $hoursFloored = floor($value / 60);
+		// $minutes = $value % 60;
+		
+		// $formatedValue = $hoursFloored."h : ".$minutes."m";
+		$value = $row[$args[1]];
+		return round($value / 60, 2);
+	}
+	
+	function htmlUnitType($row, $arg){
+		if($row[$arg] == 6){
+			return "Items";
+		}
+		
+		return "Hours";
 	}
 	
 	function htmlFilterLink($row, $argsArray){ // argsArray: id, value, column index

@@ -1,5 +1,5 @@
 var oTable;
-var filter_reset_text = 'Filtered by: Nothing';
+var filter_reset_text = 'Click on the links below to filter';
 var filter_display_array = {};
 var filter_post_array = {};
 
@@ -92,10 +92,11 @@ $(function() {
 			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				var columns_to_change = {
-					5: ['usageSum', 'usageEndResult']
-					,7: ['regularSum', 'regularEndResult']
-					,8: ['regularSum','regularEndResult']
+					// 5: ['usageSum', 'usageEndResult']
+					5: ['regularSum', 'regularEndResult']
+					,8: ['regularSum', 'regularEndResult']
 					,9: ['regularSum', 'regularEndResult']
+					,10: ['regularSum', 'regularEndResult']
 				};
 				var functionName;
 				var total;
@@ -129,11 +130,12 @@ $(function() {
 				,{ "sWidth": "15%"}
 				,{ "sWidth": "10%"}
 				,{ "sWidth": "15%"}
-				,{ "sWidth": "6%"}
-				,{ "sWidth": "6%"}
-				,{ "sWidth": "6%"}
-				,{ "sWidth": "6%"}
-				,{ "sWidth": "6%"}
+				,{ "sWidth": "5%"}
+				,{ "sWidth": "5%"}
+				,{ "sWidth": "5%"}
+				,{ "sWidth": "5%"}
+				,{ "sWidth": "5%"}
+				,{ "sWidth": "5%"}
 			]
 		});
 		
