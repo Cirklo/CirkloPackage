@@ -284,6 +284,13 @@
 			
 			return $results;
 		}
+		
+		public static function getRealQuery($query, $query_array){
+			foreach($query_array as $key => $value){
+				$query = str_replace(":".$key, $value, $query);
+			}
+			return $query;
+		}
 	}
 	// Fix for the lack of static contructors
 	dbHelp::getConnect();

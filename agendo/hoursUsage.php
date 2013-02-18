@@ -22,12 +22,13 @@
 	$htmlDisplayArray[] = array('name' => "Username", 'select' => 'fullname', 'where' => 'user_id', 'function' => 'htmlFilterLink', 'args' => array('user_id', 'fullname', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Resource", 'select' => 'resource_name', 'where' => 'resource_id', 'function' => 'htmlFilterLink', 'args' => array('resource_id', 'resource_name', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Project", 'select' => 'project_name', 'where' => 'project_id', 'function' => 'htmlFilterLink', 'args' => array('project_id', 'project_name', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Status", 'select' => 'entry_status', 'where' => 'entry_status', 'function' => 'htmlFilterLink', 'args' => array('entry_status', 'entrystatus', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'entry_datetime');
-	$htmlDisplayArray[] = array('name' => "Units", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
-	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'unit_type', 'function' => 'htmlUnitType', 'args' => 'resource_status');
-	$htmlDisplayArray[] = array('name' => "Price/unit", 'select' => 'price_value');
-	$htmlDisplayArray[] = array('name' => "Subtotal", 'select' => 'subtotal');
-	$htmlDisplayArray[] = array('name' => "Discount", 'select' => 'discount');
+	$htmlDisplayArray[] = array('name' => "Unit", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
+	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'resource_status', 'function' => 'htmlUnitType', 'args' => 'resource_status');
+	$htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value');
+	$htmlDisplayArray[] = array('name' => "Sub", 'select' => 'subtotal');
+	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount');
 	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total');
 	
 	if(isset($_POST['action']) && $_POST['action'] == 'generateJson'){
@@ -72,113 +73,13 @@
 	
 	echo "<br>";
 	echo "<h1>Resource Usage</h1>";
-	echo "<br>";
+	// echo "<br>";
 	
 	
-	echo "<table id='userLevelTable' style='margin:auto;width:450px;'>";
-		// ******* User priviledges checkboxes ********
-		$numberOfPrivileges = 0;
-		$privilegeHtml = "";
 
-		if($isAdmin !== false){
-			$checkedPrivilege = "";
-			if($userLevels['isAdmin'] !== false){
-				$checkedPrivilege = 'checked';
-			}
-			
-			$numberOfPrivileges++;
-			$privilegeHtml .= "
-				<label style='color:white;float:left;'>
-					<input type='radio' name='privilegesRadio' id='adminRadio' ".$checkedPrivilege."/>
-					Administrator
-				</label>
-			";
-		}
-		
-		if($isPI !== false){
-			$checkedPrivilege = "";
-			if($userLevels['isPI'] !== false){
-				$checkedPrivilege = 'checked';
-			}
-			
-			$numberOfPrivileges++;
-			if($numberOfPrivileges > 1){
-				$privilegeHtml .= "<br>";
-			}
-			
-			$privilegeHtml .= "
-				<label style='color:white;float:left;'>
-					<input type='radio' name='privilegesRadio' id='piRadio' ".$checkedPrivilege."/>
-					Department Manager
-				</label>
-			";
-		}
 
-		if($isResp !== false){
-			$checkedPrivilege = "";
-			if($userLevels['isResp'] !== false){
-				$checkedPrivilege = 'checked';
-			}
-		
-			$numberOfPrivileges++;
-			if($numberOfPrivileges > 1){
-				$privilegeHtml .= "<br>";
-			}
-			
-			$privilegeHtml .= "
-				<label style='color:white;float:left;'>
-					<input type='radio' name='privilegesRadio' id='respRadio' ".$checkedPrivilege."/>
-					Resource Manager
-				</label>
-			";
-		}
-		
-		// if($numberOfPrivileges > 1){
-			echo "<tr style='text-align:center;color:#F7C439;'>";
-				echo "<th title='Pick the user level you wish to view the information as'>";
-					echo "<label>";
-						echo "User level";
-					echo "</label>";
-				echo "</th>";
-				
-					
-				echo "<th>";
-					echo "<label>";
-						echo "Period of time";
-					echo "</label>";
-				echo "</th>";
-			echo "</tr>";
-			
-			echo "<tr>";
-				echo "<td rowspan='2' style='text-align:center;color:#F7C439;' title='Pick the user level you wish to view the information as'>";
-					echo $privilegeHtml;
-				echo "</td>";
-
-				echo "<td style='text-align:right;'>";
-					echo "<a>From date:</a>";
-					echo "&nbsp";
-					echo "<input type='text' id='beginDateText' style='text-align:center;' value='".$beginDate."'/>";
-				echo "</td>";
-			echo "</tr>";
-			
-			// echo "<tr>";
-				// echo "<td colspan='2'>";
-					// echo "<br>";
-				// echo "</td>";
-			// echo "</tr>";
-		// }
-		// *********************************************
-		echo "<tr>";
-			echo "<td style='text-align:right;'>";
-				echo "<a>To date:</a>";
-				echo "&nbsp";
-				echo "<input type='text' id='endDateText' style='text-align:center;' value='".$endDate."'/>";
-			echo "</td>";
-		echo "</tr>";
-	echo "</table>";
-
-	echo "<br>";
-	echo "<br>";
+	// echo "<br>";
+	// echo "<br>";
 	
 	$backLink = "
 		<div style='float:left;'>
@@ -187,15 +88,15 @@
 	";
 	
 	// Table where the results will appear
-	echo "<div id='resultsDiv' style='margin:auto;width:1150;text-align:center;'>";
-		echo $backLink;
-		echo "<br>";
-		
+	echo "<div id='resultsDiv' style='margin:auto;width:1280;text-align:center;'>";
 		// echo "<div style='margin-top: 10px;' >";
 		// echo "</div>";
 		
 		echo "<div style='width: 100%;margin-top: 10px;'>";
-			echo "<div style='float:left;'>";
+			echo "<div style='float:left;margin-top: 80px;'>";
+				echo $backLink;
+				echo "<br>";
+				
 				// echo "<label id='filterText' style='margin-left: 10px;'>";
 				echo "<label id='filterText'>";
 				echo "</label>";
@@ -203,15 +104,129 @@
 				// echo "<a class='link' onclick='resetFilter();' style='text-decoration:underline; margin-left: 10px;'>X Reset filter</a>";
 			echo "</div>";
 			
-			echo "<div style='float:right;'>";
-				echo "<input type='text' id='searchField' style='width:300px;' onkeypress='return synchInfo(event);'/>";
-				echo "&nbsp";
-				echo "<input type='button' id='searchButton' value='Generate Report' onclick='oTable.fnReloadAjax();'/>";
+			echo "<div style='float:right;margin-bottom: 0px;padding:0px;'>";
+				echo "<table id='userLevelTable' style='margin:auto;width:380px;'>";
+					// ******* User priviledges checkboxes ********
+					$numberOfPrivileges = 0;
+					$privilegeHtml = "";
+
+					if($isAdmin !== false){
+						$checkedPrivilege = "";
+						if($userLevels['isAdmin'] !== false){
+							$checkedPrivilege = 'checked';
+						}
+						
+						$numberOfPrivileges++;
+						$privilegeHtml .= "
+							<label style='color:white;float:left;'>
+								<input type='radio' name='privilegesRadio' id='adminRadio' ".$checkedPrivilege."/>
+								Administrator
+							</label>
+						";
+					}
+					
+					if($isPI !== false){
+						$checkedPrivilege = "";
+						if($userLevels['isPI'] !== false){
+							$checkedPrivilege = 'checked';
+						}
+						
+						$numberOfPrivileges++;
+						if($numberOfPrivileges > 1){
+							$privilegeHtml .= "<br>";
+						}
+						
+						$privilegeHtml .= "
+							<label style='color:white;float:left;'>
+								<input type='radio' name='privilegesRadio' id='piRadio' ".$checkedPrivilege."/>
+								Department Manager
+							</label>
+						";
+					}
+
+					if($isResp !== false){
+						$checkedPrivilege = "";
+						if($userLevels['isResp'] !== false){
+							$checkedPrivilege = 'checked';
+						}
+					
+						$numberOfPrivileges++;
+						if($numberOfPrivileges > 1){
+							$privilegeHtml .= "<br>";
+						}
+						
+						$privilegeHtml .= "
+							<label style='color:white;float:left;'>
+								<input type='radio' name='privilegesRadio' id='respRadio' ".$checkedPrivilege."/>
+								Resource Manager
+							</label>
+						";
+					}
+					
+					// if($numberOfPrivileges > 1){
+						echo "<tr style='text-align:center;color:#F7C439;'>";
+							echo "<th title='Pick the user level you wish to view the information as'>";
+								echo "<label>";
+									echo "User level";
+								echo "</label>";
+							echo "</th>";
+							
+								
+							echo "<th>";
+								echo "<label>";
+									echo "Period of time";
+								echo "</label>";
+							echo "</th>";
+						echo "</tr>";
+						
+						echo "<tr>";
+							echo "<td rowspan='2' style='text-align:center;color:#F7C439;' title='Pick the user level you wish to view the information as'>";
+								echo $privilegeHtml;
+							echo "</td>";
+
+							echo "<td style='text-align:right;'>";
+								echo "<a>From date:</a>";
+								echo "&nbsp";
+								echo "<input type='text' id='beginDateText' style='text-align:center;' value='".$beginDate."'/>";
+							echo "</td>";
+						echo "</tr>";
+						
+						// echo "<tr>";
+							// echo "<td colspan='2'>";
+								// echo "<br>";
+							// echo "</td>";
+						// echo "</tr>";
+					// }
+					// *********************************************
+					echo "<tr>";
+						echo "<td style='text-align:right;'>";
+							echo "<a>To date:</a>";
+							echo "&nbsp";
+							echo "<input type='text' id='endDateText' style='text-align:center;' value='".$endDate."'/>";
+						echo "</td>";
+					echo "</tr>";
+					
+					// echo "<tr>";
+						// echo "<td colspan='2'>";
+							// echo "<br>";
+						// echo "</td>";
+					// echo "</tr>";
+					
+					echo "<tr>";
+						echo "<td colspan='2' style='text-align:right;'>";
+							echo "<input class='searchMessageFont' type='text' id='searchField' style='width:325px;' onkeypress='return synchInfo(event);' onfocus='clearField();' onblur='putDefaultMessage();'/>";
+							echo "&nbsp";
+							echo "<input type='button' id='searchButton' value='Go' onclick='oTable.fnReloadAjax();'/>";
+						echo "</td>";
+					echo "</tr>";
+				echo "</table>";
+			// echo "<br>";	
+			
 			echo "</div>";
 		
 		echo "</div>";
 		
-		echo "<div style='clear:both;'></div>";
+		// echo "<div style='clear:both;'></div>";
 		
 		// to be removed, usefull for now to make sure the number of tds in the footer is the same as the header
 		$footer_tds = "";
@@ -322,17 +337,19 @@
 		}
 		
 		$sql_array = array();
-		$sql_array_length = 0;
+		// $sql_array_length = 0;
 		if(isset($_POST['searchField']) && $_POST['searchField'] != ''){
 			$sql_array[] = $_POST['searchField'];
-			$sql_array_length++;
+			// $sql_array_length++;
+			$position = 0;
 			// $search_sql = "and department_name like '%:0%' || @fullname like '%:0%' || resource_name like '%:0%' || project_name like '%:0%'";
 			$search_sql = "
 				and (
-				lower(department_name) like lower(concat('%',:".($sql_array_length - 1).",'%')) 
-				|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".($sql_array_length - 1).",'%'))
-				|| lower(resource_name) like lower(concat('%',:".($sql_array_length - 1).",'%'))
-				|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".($sql_array_length - 1).",'%'))
+				lower(department_name) like lower(concat('%',:".$position.",'%')) 
+				|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".$position.",'%'))
+				|| lower(resource_name) like lower(concat('%',:".$position.",'%'))
+				|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".$position.",'%'))
+				|| lower(if(entry_status = 1, 'Confirmed', 'Unconfirmed')) like lower(concat('%',:".$position.",'%'))
 			)";
 			
 		}
@@ -371,6 +388,7 @@
 						project_name,
 						entry_datetime,
 						entry_status,
+						entrystatus,
 						price_value,
 						units,
 						@discount := sequencingDiscount() as discount,
@@ -389,6 +407,7 @@
 							ifnull(project_name, 'No project') as project_name,
 							entry_datetime,
 							entry_status,
+							if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
 							ifnull(price_value, 0) as price_value,
 							count(item_id) as units
 						from 
@@ -402,6 +421,11 @@
 							left join price on (price_resource = resource_id and price_type = institute_pricetype)
 						where
 							item_state = 3
+							and entry_status in (1,2)
+							and resource_status = 6
+							".$search_sql."
+							".$filter_sql."
+							".$date_sql."
 						group by
 							entry_datetime, user_id
 								) as AuxSelect
@@ -420,6 +444,7 @@
 						ifnull(project_name, 'No project') as project_name,
 						entry_datetime,
 						entry_status,
+						if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
 						@pricevalue := ifnull(price_value, 0) as price_value,
 						@units := entry_slots * resource_resolution as units,
 						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) as discount,
@@ -432,13 +457,14 @@
 						join resource on resource_id = entry_resource
 						left join price on (price_resource = entry_resource and price_type = institute_pricetype)
 						left join project on project_id = entry_project
+					where
+						entry_status in (1,2)
+						and resource_status in (1,3,4,5)
+						".$search_sql."
+						".$filter_sql."
+						".$date_sql."
 				)
 			) as allData
-			where
-				entry_status in (1,2)
-				".$date_sql."
-				".$search_sql."
-				".$filter_sql."
 			".$order_by_sql."
 			".$limit."
 		";
@@ -500,6 +526,11 @@
 		if($id === null){
 			$id = 'null';
 		}
-		return "<a class='datatableLink' onclick='filter(".$id.", this.text,".$argsArray[2].");'>".$row[$argsArray[1]]."</a>";
+
+		return auxGenerateLink($id, $argsArray[2], $row[$argsArray[1]]);
+	}
+	
+	function auxGenerateLink($id, $columnIndex, $value){
+		return "<a class='datatableLink' onclick='filter(".$id.", this.text,".$columnIndex.");'>".$value."</a>";
 	}
 ?>

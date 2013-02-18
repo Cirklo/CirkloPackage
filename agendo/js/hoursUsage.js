@@ -2,6 +2,7 @@ var oTable;
 var filter_reset_text = 'Click on the links below to filter';
 var filter_display_array = {};
 var filter_post_array = {};
+var defaultSearchText = 'Search...';
 
 $(function() {
 	// $('#beginDateText').datepick({dateFormat: 'dd/mm/yyyy'}); 
@@ -73,11 +74,18 @@ $(function() {
 			,"sAjaxSource": "hoursUsage.php"
 			,"fnServerData": function ( sSource, aoData, fnCallback ) {
 				aoData.push( { "name": "action", "value": 'generateJson' });
-				aoData.push( { "name": "searchField", "value": $('#searchField').val() });
 				aoData.push( { "name": "beginDate", "value": $('#beginDateText').val() });
 				aoData.push( { "name": "endDate", "value": $('#endDateText').val() });
 				aoData.push( { "name": "filters", "value": JSON.stringify(filter_post_array) });
+
+				var search_data = $('#searchField').val();
+				if(search_data == defaultSearchText){
+					search_data = "";
+				}
+				aoData.push( { "name": "searchField", "value": search_data });
 				
+				document.body.style.cursor = 'wait';
+				document.getElementById('searchButton').disabled = true;
 				$.post(
 					sSource
 					,aoData
@@ -88,15 +96,21 @@ $(function() {
 				)
 				.success(
 					fnCallback
+				)
+				.complete(
+					function(){
+						document.body.style.cursor = 'default';
+						document.getElementById('searchButton').disabled = false;
+					}
 				);
 			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				var columns_to_change = {
 					// 5: ['usageSum', 'usageEndResult']
-					5: ['regularSum', 'regularEndResult']
-					,8: ['regularSum', 'regularEndResult']
+					6: ['regularSum', 'regularEndResult']
 					,9: ['regularSum', 'regularEndResult']
 					,10: ['regularSum', 'regularEndResult']
+					,11: ['regularSum', 'regularEndResult']
 				};
 				var functionName;
 				var total;
@@ -125,21 +139,22 @@ $(function() {
 				// ,{ "sType": "string" }
 			// ]
 			,"aoColumns": [
-				{ "sWidth": "20%"}
-				,{ "sWidth": "10%"}
-				,{ "sWidth": "15%"}
-				,{ "sWidth": "10%"}
-				,{ "sWidth": "15%"}
-				,{ "sWidth": "5%"}
-				,{ "sWidth": "5%"}
-				,{ "sWidth": "5%"}
-				,{ "sWidth": "5%"}
-				,{ "sWidth": "5%"}
-				,{ "sWidth": "5%"}
+				{}
+				,{}
+				,{}
+				,{"sWidth": "100px"}
+				,{"sWidth": "70px"}
+				,{"sWidth": "120px"}
+				,{"sWidth": "60px"}
+				,{"sWidth": "60px"}
+				,{"sWidth": "60px"}
+				,{"sWidth": "60px"}
+				,{"sWidth": "60px"}
+				,{"sWidth": "60px"}
 			]
 		});
 		
-			
+		putDefaultMessage();
 	}
 
 });
@@ -354,3 +369,20 @@ function downloadFile(){
 	
 	sendChecksAndDate('downloadFile', departments);
 }
+
+function clearField(){
+	var element = $('#searchField');
+	if(element.val() == defaultSearchText){
+		element.attr('class', 'searchFont');
+		element.val('');
+	}
+}
+
+function putDefaultMessage(){
+	var element = $('#searchField');
+	if(element.val() == ''){
+		element.attr('class', 'searchMessageFont');
+		element.val(defaultSearchText);
+	}
+}
+	
