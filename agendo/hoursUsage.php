@@ -5,17 +5,22 @@
 		throw new Exception('You need to be logged in');
 	}
 
-	$isResp = isResp($_SESSION['user_id']);
 	$isAdmin = isAdmin($_SESSION['user_id']);
 	$isPI = isPI($_SESSION['user_id']);
-
-	$userLevel = $_POST['userLevel'];
-	$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
+	$isResp = isResp($_SESSION['user_id']);
 	
-	$selectedDepartmentsArray = null;
-	if(isset($_GET['departments'])){
-		$selectedDepartmentsArray = json_decode($_GET['departments'], true);
+	$userLevel = $_GET['userLevel'];
+	if(!isset($userLevel) || $userLevel == ''){
+		$userLevel = 'user';
 	}
+	$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
+	$userLevelArray = array(
+		'admin' => ""
+		,'pi' => "and department_id in (".implode(',', $isPI).")"
+		,'resp' => 'and resource_id in ('.implode(',', $isResp).')'
+		,'user' => 'and user_id = '.intval($_SESSION['user_id'])
+	);
+	$userLevelSql = $userLevelArray[$userLevel];
 
 	$htmlDisplayArray = array();
 	$htmlDisplayArray[] = array('name' => "Department", 'select' => 'department_name', 'where' => 'department_id', 'function' => 'htmlFilterLink', 'args' => array('department_id', 'department_name', sizeof($htmlDisplayArray)));
@@ -31,41 +36,21 @@
 	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount');
 	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total');
 	
-	if(isset($_POST['action']) && $_POST['action'] == 'generateJson'){
-		$isResp = isResp($_SESSION['user_id']);
-		$isAdmin = isAdmin($_SESSION['user_id']);
-		$isPI = isPI($_SESSION['user_id']);
-		
-		$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
-		
-		$isAdmin = true;
-		$userCheck = $resourceCheck = $entryCheck = $projectCheck = true;
-
-		$userLevel = "admin";
+	if(isset($_GET['action']) && ($_GET['action'] == 'generateJson' || $_GET['action'] == 'downloadCsv')){
 		echo json_encode(generateJson());
 		exit;
 	}
 	
 	htmlEncoding();
 	importJs();
-	
-	// echo "<link href='css/reset-min.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/demo_page.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/demo_table_jui.css' rel='stylesheet' type='text/css' />";
+
 	echo "<link href='css/jquery.dataTables_themeroller.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/jquery-ui-1.10.0.custom.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/jquery-ui-1.10.0.custom.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/demo_table.css' rel='stylesheet' type='text/css' />";
-	// echo "<script type='text/javascript' src='js/jquery-1.8.2.min.js'></script>";
 	echo "<link href='css/jquery.datepick.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/hourUsage.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/demo_table.css' rel='stylesheet' type='text/css' />";
-	// echo "<link href='css/jquery-ui-1.9.1.custom.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/base.css' rel='stylesheet' type='text/css' />";
 	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
 	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
-	// echo "<script type='text/javascript' src='js/jquery-ui-1.9.1.custom.js'></script>";
-	// echo "<script type='text/javascript' src='js/jquery-ui-1.10.1.custom.js'></script>";
 	echo "<script type='text/javascript' src='js/jquery-ui.js'></script>";
 	echo "<script type='text/javascript' src='js/jquery.dataTables.min.js'></script>";
 	
@@ -73,13 +58,6 @@
 	
 	echo "<br>";
 	echo "<h1>Resource Usage</h1>";
-	// echo "<br>";
-	
-	
-
-
-	// echo "<br>";
-	// echo "<br>";
 	
 	$backLink = "
 		<div style='float:left;'>
@@ -89,19 +67,13 @@
 	
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1280;text-align:center;'>";
-		// echo "<div style='margin-top: 10px;' >";
-		// echo "</div>";
-		
 		echo "<div style='width: 100%;margin-top: 10px;'>";
 			echo "<div style='float:left;margin-top: 80px;'>";
 				echo $backLink;
 				echo "<br>";
 				
-				// echo "<label id='filterText' style='margin-left: 10px;'>";
 				echo "<label id='filterText'>";
 				echo "</label>";
-				
-				// echo "<a class='link' onclick='resetFilter();' style='text-decoration:underline; margin-left: 10px;'>X Reset filter</a>";
 			echo "</div>";
 			
 			echo "<div style='float:right;margin-bottom: 0px;padding:0px;'>";
@@ -119,7 +91,7 @@
 						$numberOfPrivileges++;
 						$privilegeHtml .= "
 							<label style='color:white;float:left;'>
-								<input type='radio' name='privilegesRadio' id='adminRadio' ".$checkedPrivilege."/>
+								<input type='radio' name='privilegesRadio' id='adminRadio' value='admin' ".$checkedPrivilege."/>
 								Administrator
 							</label>
 						";
@@ -138,7 +110,7 @@
 						
 						$privilegeHtml .= "
 							<label style='color:white;float:left;'>
-								<input type='radio' name='privilegesRadio' id='piRadio' ".$checkedPrivilege."/>
+								<input type='radio' name='privilegesRadio' id='piRadio' value='pi' ".$checkedPrivilege."/>
 								Department Manager
 							</label>
 						";
@@ -157,10 +129,14 @@
 						
 						$privilegeHtml .= "
 							<label style='color:white;float:left;'>
-								<input type='radio' name='privilegesRadio' id='respRadio' ".$checkedPrivilege."/>
+								<input type='radio' name='privilegesRadio' id='respRadio' value='resp' ".$checkedPrivilege."/>
 								Resource Manager
 							</label>
 						";
+					}
+					
+					if($privilegeHtml == ""){
+						$privilegeHtml = "<label>Regular users can only see their own entries</label>";
 					}
 					
 					// if($numberOfPrivileges > 1){
@@ -216,7 +192,7 @@
 						echo "<td colspan='2' style='text-align:right;'>";
 							echo "<input class='searchMessageFont' type='text' id='searchField' style='width:325px;' onkeypress='return synchInfo(event);' onfocus='clearField();' onblur='putDefaultMessage();'/>";
 							echo "&nbsp";
-							echo "<input type='button' id='searchButton' value='Go' onclick='oTable.fnReloadAjax();'/>";
+							echo "<input type='button' id='searchButton' value='Go' onclick='refresh_table();'/>";
 						echo "</td>";
 					echo "</tr>";
 				echo "</table>";
@@ -256,6 +232,11 @@
 		
 		// echo "<br>";
 		echo $backLink;
+		
+		echo "<div style='float:right;'>";
+			echo "<input type='button' value='Download' title='Downloads the information on screen to CSV format' onclick='download_csv();' />";
+		echo "</div>";
+		
 		echo "<a name='bottom'></a>";
 		
 		echo "<br>";
@@ -280,22 +261,19 @@
 	}
 	
 	
-	function generateJson($selectedDepartmentsArray = null){
-		global $htmlDisplayArray;
+	function generateJson(){
+		global $htmlDisplayArray, $userLevelSql;
 		
-		$beginDate = $_POST['beginDate'];
-		$endDate = $_POST['endDate'];
-		
-		$order_by = $_POST['iSortCol_0'];
-		$order_by_direction = $_POST['sSortDir_0'];
-		
-		$lowerLimit = $_POST['iDisplayStart'];
-		$upperLimit = $_POST['iDisplayLength'];
+		$beginDate = $_GET['beginDate'];
+		$endDate = $_GET['endDate'];
 		
 		$iTotalDisplayRecords = 0;
 		$iTotalRecords = 0;
 		
 		$date_sql = "";
+		$sql_array = array();
+		$position = -1;
+		
 		if(
 			empty($beginDate) && !empty($endDate)
 			|| !empty($beginDate) && empty($endDate)
@@ -319,42 +297,35 @@
 		}
 		
 		
-		$aaData = array();
-		$output = array(
-			"sEcho" => intval($_POST['sEcho']),
-		);
-		
-		$order_by = intval($_POST['iSortCol_0']);
-		$order_by_direction = $_POST['sSortDir_0'];
-		$direction = array('asc' => 'asc', 'desc' => 'desc');
+		$order_by = $_GET['iSortCol_0'];
+		$order_by_direction = $_GET['sSortDir_0'];
+		$direction = array('asc' => 'asc', 'desc' => 'desc'); // cant prepare this values in PDO, it will turn out 'asc' instead of asc
 		if($htmlDisplayArray[$order_by]['select'] && $direction[$order_by_direction]){
 			$order_by_sql = "order by ".$htmlDisplayArray[$order_by]['select']." ".$direction[$order_by_direction];
 		}
-		
+
+		$lowerLimit = $_GET['iDisplayStart'];
+		$upperLimit = $_GET['iDisplayLength'];
 		$limit = "";
 		if($upperLimit != -1){
-			$limit = "limit ".intval($lowerLimit).", ".intval($upperLimit);
+			$limit = "limit ".intval($lowerLimit).", ".intval($upperLimit); // cant prepare this values in PDO, it will turn out '10' instead of 10
 		}
-		
-		$sql_array = array();
-		// $sql_array_length = 0;
-		if(isset($_POST['searchField']) && $_POST['searchField'] != ''){
-			$sql_array[] = $_POST['searchField'];
-			// $sql_array_length++;
-			$position = 0;
-			// $search_sql = "and department_name like '%:0%' || @fullname like '%:0%' || resource_name like '%:0%' || project_name like '%:0%'";
+		if(isset($_GET['searchField']) && $_GET['searchField'] != ''){
+			$sql_array[] = $_GET['searchField'];
+			$position++;
 			$search_sql = "
 				and (
-				lower(department_name) like lower(concat('%',:".$position.",'%')) 
-				|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".$position.",'%'))
-				|| lower(resource_name) like lower(concat('%',:".$position.",'%'))
-				|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".$position.",'%'))
-				|| lower(if(entry_status = 1, 'Confirmed', 'Unconfirmed')) like lower(concat('%',:".$position.",'%'))
-			)";
+					lower(department_name) like lower(concat('%',:".$position.",'%'))
+					|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".$position.",'%'))
+					|| lower(resource_name) like lower(concat('%',:".$position.",'%'))
+					|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".$position.",'%'))
+					|| lower(if(entry_status = 1, 'Confirmed', 'Unconfirmed')) like lower(concat('%',:".$position.",'%'))
+				)
+			";
 			
 		}
 		
-		$filters = json_decode($_POST['filters']);
+		$filters = json_decode($_GET['filters']);
 		$filter_sql = "";
 		if($filters){
 			foreach($filters as $key => $filter){
@@ -363,8 +334,8 @@
 				}
 				else{
 					$sql_array[] = $filter;
-					$sql_array_length++;
-					$filter_sql .= " and ".$htmlDisplayArray[$key]['where']." = :".($sql_array_length - 1);
+					$position++;
+					$filter_sql .= " and ".$htmlDisplayArray[$key]['where']." = :".$position;
 				}
 			}
 		}
@@ -426,6 +397,7 @@
 							".$search_sql."
 							".$filter_sql."
 							".$date_sql."
+							".$userLevelSql."
 						group by
 							entry_datetime, user_id
 								) as AuxSelect
@@ -463,18 +435,31 @@
 						".$search_sql."
 						".$filter_sql."
 						".$date_sql."
+						".$userLevelSql."
 				)
 			) as allData
 			".$order_by_sql."
 			".$limit."
 		";
 		$prep = dbHelp::query($sql, $sql_array);
+
+		// csv generation
+		if($_GET['action'] == 'downloadCsv'){
+			download_csv($prep);
+			exit;
+		}
 		
 		// returns a number indicating how many rows the first SELECT would have returned had it been written without the LIMIT clause
 		$sqlTotalRows = "select FOUND_ROWS()";
 		$prepTR = dbHelp::query($sqlTotalRows);
 		$resTR = dbHelp::fetchRowByIndex($prepTR);
-		$iTotalDisplayRecords = $resTR[0];		
+		$iTotalDisplayRecords = $resTR[0];
+		
+		// html display
+		$aaData = array();
+		$output = array(
+			"sEcho" => intval($_GET['sEcho']),
+		);
 		
 		$value = null;
 		// data ********************
@@ -532,5 +517,53 @@
 	
 	function auxGenerateLink($id, $columnIndex, $value){
 		return "<a class='datatableLink' onclick='filter(".$id.", this.text,".$columnIndex.");'>".$value."</a>";
+	}
+	
+	function download_csv(&$prep){
+		global $htmlDisplayArray;
+		
+		$lineSeparator = "\n";
+		$columnSeparator = "\t";
+		$valueWrapper = "\"";
+	
+		unset($htmlDisplayArray[0]['function']);
+		unset($htmlDisplayArray[0]['args']);
+		
+		unset($htmlDisplayArray[1]['function']);
+		unset($htmlDisplayArray[1]['args']);
+		
+		unset($htmlDisplayArray[2]['function']);
+		unset($htmlDisplayArray[2]['args']);
+		
+		unset($htmlDisplayArray[3]['function']);
+		unset($htmlDisplayArray[3]['args']);
+		
+		unset($htmlDisplayArray[4]['function']);
+		unset($htmlDisplayArray[4]['args']);
+		
+		foreach($htmlDisplayArray as $display){
+			echo $valueWrapper.$display['name'].$valueWrapper.$columnSeparator;
+		}
+		echo $lineSeparator;
+		
+		header('Content-Type: application/force-download');
+		header('Content-disposition: attachment; filename=report.csv');
+
+		$value = null;
+		// data ********************
+		while($row = dbHelp::fetchRowByName($prep)){
+			$line = array();
+			// fields *********************************
+			foreach($htmlDisplayArray as $data){
+				if(isset($data['function'])){
+					$value = $data['function']($row, $data['args']);
+				}
+				else{
+					$value = $row[$data['select']];
+				}
+				echo $valueWrapper.$value.$valueWrapper.$columnSeparator;
+			}
+			echo $lineSeparator;
+		}
 	}
 ?>

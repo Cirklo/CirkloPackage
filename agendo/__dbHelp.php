@@ -91,11 +91,12 @@
 				$prepSql->execute();
 			}
 			catch(Exception $e){
-				$argsText = "";
-				if($argsArray != null){
-					$argsText = "\nUsing the data array [".implode("; ", $argsArray)."]";
-				}
-				self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", $sql))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
+				// $argsText = "";
+				// if($argsArray != null){
+					// $argsText = "\nUsing the data array [".implode("; ", $argsArray)."]";
+				// }
+				// self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", $sql))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
+				self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", self::getRealQuery($sql, $argsArray)))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
 				throw new Exception("Database error, error logged.");
 			}
 			return $prepSql;
