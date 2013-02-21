@@ -20,3 +20,7 @@ h1{
 	color: white;
 	cursor: hand; cursor: pointer;
 }
+
+.clear{
+	clear: both;
+}

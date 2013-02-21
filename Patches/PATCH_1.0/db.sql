@@ -521,3 +521,17 @@ INSERT INTO `media` (`media_id`, `media_name`, `media_description`, `media_link`
 (NULL, 'Blacklist users', 'Shows how to blacklist users preventing them from doing anything on agendo', 'http://www.youtube.com/embed/tyTB_CfE4kM');
 
 
+
+---------------------------------------------------------------------------------------------------------
+
+ALTER TABLE `department` ADD `department_default` INT NULL ,ADD INDEX ( `department_default` ) 
+ALTER TABLE `department` ADD FOREIGN KEY ( `department_default` ) REFERENCES `production`.`project` (`project_id`);
+
+ALTER TABLE `item` ADD `item_project` INT NULL ,ADD INDEX ( `item_project` )
+ALTER TABLE `item` ADD FOREIGN KEY ( `item_project` ) REFERENCES `production`.`project` (`project_id`);
+
+ALTER TABLE `proj_dep_assoc` ADD `proj_dep_assoc_active` INT NOT NULL ,ADD INDEX ( `proj_dep_assoc_active` ) 
+ALTER TABLE `proj_dep_assoc` ADD FOREIGN KEY ( `proj_dep_assoc_active` ) REFERENCES `production`.`bool` (`bool_id`);
+
+
+

@@ -1,6 +1,11 @@
 <?php
 	require_once("commonCode.php");
 
+	if(isset($_POST['functionName'])){
+		call_user_func($_POST['functionName']);
+		exit;
+	}
+	
 	$backLink = "
 		<div style='margin:auto;width:200px;text-align:center;'>
 			<a class='link' name='back' href='../datumo/'>Back to Admin Area</a>
@@ -8,74 +13,75 @@
 	";
 	echo "<html>";
 		importJs();
+		echo "<link href='../agendo/css/base.css' rel='stylesheet' type='text/css'>";
 		echo "<script type='text/javascript' src='../agendo/js/mailListAssign.js'></script>";
 		
 		echo "<body>";
 			echo "<br>";
 			echo "<h1>Mailing list assign</h1>";
+			echo "<br>";
 			
-			echo "<div style='width:800px;margin:auto;display:table;text-align:center;'>";
+			echo "<div style='width:300px;margin:auto;text-align:left;border: 1px solid white;height:250px;'>";
 				$dataArray = array();
 				$sql = "
 					select 
-						permissions_sendmail, permissions_resource 
+						permissions_sendmail, resource_id, resource_name 
 					from
-						permissions
+						permissions	join resource on resource_id = permissions_resource
 					where
 						permissions_user = :0
+					order by
+						resource_name
 				";
 				
 				$prep = dbHelp::query($sql, array($_SESSION['user_id']));
 				$resourceType = false;
-				echo "<div style='float:right;display:table-cell;'>";
-					echo "<select id='resourceList' multiple='multiple' style='width:350px;' size='10'>";
-						while($row = dbHelp::fetchRowByName($prep)){
-							if($row['resource_type'] != $resourceType){
-								if($resourceType !== false){
-									echo "</optgroup>";
-								}
-								echo "<optgroup label='".$row['resourcetype_name']."'>";
-							}
-							$resourceType = $row['resource_type'];
-							echo "<option value='".$row['resource_id']."'>".$row['resource_name']."</option>";
-						}
-						if($resourceType !== false){
-							echo "</optgroup>";
-						}
-					echo "</select>";
-				echo "</div>";
 				
-				$prep = dbHelp::query($sqlDep, $dataArray);
-				$projDepartment = false;
-				echo "<div style='float:left;display:table-cell;'>";
-					echo "<select id='projectList' style='width:350px;' size='10'>";
-						while($row = dbHelp::fetchRowByName($prep)){
-							if($row['department_id'] != $projDepartment){
-								if($projDepartment !== false){
-									echo "</optgroup>";
-								}
-								echo "<optgroup label='".$row['department_name']."'>";
-							}
-							$projDepartment = $row['department_id'];
-							echo "<option value='".$row['project_id']."'>".$row['project_name']."</option>";
+				echo "<ul id='resourceList' style='width:100%;height: 100%;overflow:auto;list-style:none;margin:0px;padding:0px;'>";
+					while($row = dbHelp::fetchRowByName($prep)){
+						$checked = "";
+						if($row['permissions_sendmail'] == 1){
+							$checked = "checked";
 						}
-						if($projDepartment !== false){
-							echo "</optgroup>";
-						}
-					echo "</select>";
-				echo "</div>";
+						echo "<li style='padding: 5px;'>";
+							echo "<label>";
+								echo "<input type='checkbox' value='".$row['resource_id']."' ".$checked." onclick='mailListCheck(this);'/>";
+								echo $row['resource_name'];
+							echo "</label>";
+						echo "</li>";
+					}
+				echo "</ul>";
 				
-				echo "<br>";
-				echo "<br>";
-				
-				if($isAdmin || $isPI){
-					echo "<input type='button' value='Assign projects' onclick='assignProjs();' />";
-				}
-				
+				// echo "<div class='clear'></div>";
 			echo "</div>";
 
 			echo "<br>";
 			echo $backLink;
 		echo "</body>";
 	echo "</html>";
+	
+	
+	// functions **************************************************
+	function mailListCheck(){
+		if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['check'])){
+			if($_POST['check'] == 'false'){
+				$value = 0;
+				$message = 'User removed from mailing list';
+				$check = false;
+			}
+			else{
+				$value = 1;
+				$message = 'User inserted to mailing list';
+				$check = true;
+			}
+			$sql = "update permissions set permissions_sendmail = ".$value." where permissions_user = :0 and permissions_resource = :1";
+			$prep = dbHelp::query($sql, array($_SESSION['user_id'], $_POST['resource']));
+			$json = new stdClass();
+			$json->message = $message;
+			$json->check = $value;
+			echo json_encode($json);
+		}
+	}
+	
+
 ?>

@@ -117,15 +117,16 @@
 			}
 		}
 		else{
-			$sql = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
-			$prep = dbHelp::query($sql, array($tempUser, $resource));
-			$res = dbHelp::fetchRowByIndex($prep);
+			// $sql = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
+			// $prep = dbHelp::query($sql, array($tempUser, $resource));
+			// $res = dbHelp::fetchRowByIndex($prep);
 			// if(!isset($res[0])){
 				// $projectValue = null;
 			// }
 			// else{
-				$projectValue = $res[0];
+				// $projectValue = $res[0];
 			// }
+			$projectValue = null;
 		}
 
 		$entriesIdArray = array();

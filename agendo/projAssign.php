@@ -163,7 +163,7 @@
 				
 			echo "<td class='activeColumn'>";
 				echo "<label>";
-				echo "<input id='".$dep_id."-".$proj_id."-check' type='checkbox' value='".$proj_id."' onchange='sendCheckedToArray(".$dep_id.", this.value, this.checked);'/>";
+				echo "<input id='".$dep_id."-".$proj_id."-check' type='checkbox' value='".$proj_id."' onchange='sendCheckedToArray(".$dep_id.", this.value, this.checked);' ".$active." />";
 				echo "</label>";
 			echo "</td>";
 		echo "</tr>";
