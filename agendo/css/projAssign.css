@@ -18,19 +18,20 @@
 #header{
 	font-weight: bold;
 	color: #1e4F54;
-	font-size:16px;
+	font-size:15px;
 }
 
 .department{
 	font-weight:600;
 	color: black;
-	font-size:14px;
+	font-size:13px;
 }
 
 .projectList{
 	list-style-type: none;
 	background: white;
 	padding: 0px;
+	font-size:12px;
 }
 
 .activeColumn{

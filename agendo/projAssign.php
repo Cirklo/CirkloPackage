@@ -95,6 +95,7 @@
 				
 				while($row){
 					if($previousDepartment != $row['department_id']){
+						echo "<hr>";
 						echo "<table id='dep-".$row['department_id']."' class='department' >";
 							echo "<tr>";
 								echo "<td>";

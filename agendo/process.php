@@ -1,7 +1,6 @@
 <?php
 	// This class was altered by Pedro Pires (The chosen two)
 	require_once("commonCode.php");
-	// initSession(); // dont think its necessary here, only on the weekview and index page
 	require_once("permClass.php");
 	require_once("alertClass.php");
 	require_once("functions.php");
@@ -109,25 +108,26 @@
 		}
 		
 		// assigning project to entry section
-		$projectValue = "";
+		$projectValue = null;
 		if(isset($_GET['selectedProject'])){
 			$projectValue = $_GET['selectedProject'];
-			if($projectValue == '-1'){
+			if($projectValue === null || $projectValue == ''){
 				$projectValue = null;
 			}
 		}
-		else{
-			// $sql = "select permissions_project_default from permissions where permissions_user = :0 and permissions_resource = :1";
-			// $prep = dbHelp::query($sql, array($tempUser, $resource));
-			// $res = dbHelp::fetchRowByIndex($prep);
-			// if(!isset($res[0])){
-				// $projectValue = null;
-			// }
-			// else{
-				// $projectValue = $res[0];
-			// }
-			$projectValue = null;
+		$sql = "select department_default from department join ".dbHelp::getSchemaName().".user on department_id = user_dep where user_id = :0";
+		$prep = dbHelp::query($sql, array($tempUser));
+		$res = dbHelp::fetchRowByIndex($prep);
+		if(isset($res) && $res[0] !== null){
+			$projectValue = $res[0];
 		}
+		$sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
+		$prep = dbHelp::query($sql);
+		$res = dbHelp::fetchRowByIndex($prep);
+		if(isset($res) && $res[0] !== null  && $res[0] == 1 && $projectValue === null){
+			throw new Exception("There is no default project, one must be chosen by the department manager");
+		}
+		// ***********************************
 
 		$entriesIdArray = array();
 		//building the repetition pattern
@@ -309,6 +309,7 @@
 		} else {
 			$sql="update entry set entry_status=3 where entry_id = ".$seekentry;
 		}
+		$entryDatetime = $arr[1];
 		
 		$resPDO = dbHelp::query($sql);
 		if (dbHelp::numberOfRows($resPDO)==0) {
@@ -374,6 +375,11 @@
 		
 		$json->message = "Entry(ies) deleted!";
 		mailingList($entry);
+		
+		if(required_assistance($entry)){
+		   $notify->toAdmin($entryDatetime,'','canceled assistance');
+		}
+		
 		echo json_encode($json);
 	}
 
@@ -395,6 +401,8 @@
 		$totalSlots = $arr[0];
 		$resolution = $arr[1];
 		$maxHours = $arr[2];
+		
+		$assistWasRequired = required_assistance($entry);
 
 		if($arr[3] != $user_id && $maxHours != 0){
 			$sql="select entry_slots from entry where entry_id= :0";
@@ -466,8 +474,8 @@
 		if(isset($_GET['selectedProject'])){
 			$projectUpdateSql = ",entry_project=:1";
 			$projectValue = $_GET['selectedProject'];
-			if($projectValue == '-1'){
-				$projectValue = NULL;
+			if($projectValue == ''){
+				$projectValue = null;
 			}
 			$extraDataArray[] = $projectValue;
 		}
@@ -584,6 +592,15 @@
 		
 		$json->message = "Entry info updated!";
 		mailingList($entry, $oldDate, $oldSlots);
+		
+		// if(required_assistance($entry) && isResp($user_id) === false){
+		if(!$assistWasRequired && $assistance == 1){
+		   $notify->toAdmin($datetime,'','assistance');
+		}
+		elseif($assistWasRequired && $assistance == 0){
+		   $notify->toAdmin($datetime,'','canceled assistance');
+		}
+		
 		echo json_encode($json);
 	}
 
@@ -862,5 +879,17 @@
 		}
 		
 		return 1; // partially the same
+	}
+	
+	function required_assistance($entry){
+		$sql = "select entry_assistance from entry where entry_id = :0";
+		$prep = dbHelp::query($sql, array($entry));
+		$row = dbHelp::fetchRowByIndex($prep);
+		
+		if($row[0] == 1){
+			return true;
+		}
+		
+		return false;
 	}
 ?>

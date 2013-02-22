@@ -96,7 +96,12 @@
 					// $argsText = "\nUsing the data array [".implode("; ", $argsArray)."]";
 				// }
 				// self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", $sql))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
-				self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", self::getRealQuery($sql, $argsArray)))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
+				$backTrace = debug_backtrace();
+				wtf('-----');
+				foreach($backTrace[0] as $back){
+					wtf($back, 'a');
+				}
+				self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", self::getRealQuery($sql, $argsArray)))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError was generated on file: '".$backTrace[0]['file']."' on line: '".$backTrace[0]['line']."' \nError happened on: ".date("d/m/Y H:i:s")."\n");
 				throw new Exception("Database error, error logged.");
 			}
 			return $prepSql;
@@ -287,8 +292,10 @@
 		}
 		
 		public static function getRealQuery($query, $query_array){
-			foreach($query_array as $key => $value){
-				$query = str_replace(":".$key, $value, $query);
+			if($query_array !== null){
+				foreach($query_array as $key => $value){
+					$query = str_replace(":".$key, $value, $query);
+				}
 			}
 			return $query;
 		}

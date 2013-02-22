@@ -179,8 +179,8 @@ function DisplayEntryInfo() {
 		$sql = "select entry_project from entry where entry_id = :0 and entry_user = :1";
 		$prep = dbHelp::query($sql, array($entry, $_SESSION['user_id']));
 		// $proj = 1;
-		if(dbHelp::numberOfRows($prep) > 0){
-			$res = dbHelp::fetchRowByIndex($prep);
+		$res = dbHelp::fetchRowByIndex($prep);
+		if($res !== null && $res[0] != ''){
 			$proj = $res[0];
 
 			// if($res[0] == null){
@@ -188,14 +188,15 @@ function DisplayEntryInfo() {
 			// }
 			// else{
 			// }
+			echo "changeProjectListIndexTo(".$proj.");";
 		}
 		else{
-			$sql = "select permissions_project_default from permissions where permissions_resource = :0 and permissions_user = :1";
-			$prep = dbHelp::query($sql, array($_GET['resource'], $_SESSION['user_id']));
-			$res = dbHelp::fetchRowByIndex($prep);
-			$proj = $res[0];
+			// $sql = "select permissions_project_default from permissions where permissions_resource = :0 and permissions_user = :1";
+			// $prep = dbHelp::query($sql, array($_GET['resource'], $_SESSION['user_id']));
+			// $res = dbHelp::fetchRowByIndex($prep);
+			// $proj = $res[0];
+			echo "showMessage('There is no project assigned to this entry');";
 		}
-		echo "changeProjectListIndexTo(".$proj.");";
 	}
 	//*************************
 	

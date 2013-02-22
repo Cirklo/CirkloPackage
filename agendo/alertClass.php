@@ -200,6 +200,11 @@ END:VCALENDAR";
             $msg="Assistance requested for " . $this->ResourceName  . " at $hour:$min on the $year-$month-$day";
             break;
 			
+        case 'canceled assistance':
+            $this->AddStringAttachment($att,'agendo.ics');
+            $msg="Assistance canceled for " . $this->ResourceName  . " at $hour:$min on the $year-$month-$day";
+            break;
+			
         case 'update':
 			// $sql="select xfields_label, xfieldsval_value from xfields, xfieldsval where xfieldsval_entry = ".$this->LastEntry." and xfieldsval_field = xfields_id";
 			// $res=dbHelp::query($sql);
@@ -239,11 +244,13 @@ END:VCALENDAR";
 			$this->AddAddress($this->RespEmail, "");
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\nEmail: ". $this->UserEmail ."\nMobile: ".$this->UserMobile ."\n".$mobileStr;
+			// sendMailObject(getMailObject($this->Subject, $this->RespEmail, $msg, $this->UserFullName, $this->UserEmail));
+			wtfArray(array($this->Subject, $this->RespEmail, $msg, $this->UserFullName, $this->UserEmail));
             if(!$this->Send()){
                 // echo "Mailer Error: " . $this->ErrorInfo;
                echo "Unable to send email: " . $this->ErrorInfo;
                // throw new Exception ("Unable to send email: " . $this->ErrorInfo);
-            } 
+            }
 			// else {
                 // echo "Message sent!";
             // }

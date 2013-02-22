@@ -15,7 +15,11 @@ $(document).ready(
 						select: function(event, ui) {
 									window.location = "weekview.php?resource=" + ui.item.id;
 								},
-						dataType: "json"
+						dataType: "json",
+						messages: {
+							noResults: '',
+							results: function() {}
+						}
 					});
 				// }
 			}
@@ -214,7 +218,7 @@ function showMessage(msg, isError){
 	// }
 	if(typeof msg !== "undefined" && msg != null && msg !== ''){ // wont do anything if the message isnt set or is empty
 		if(isError){ // what should happen is its an error message
-			msg = msg + "<br>--<br>(Click here to hide the message)";
+			msg = msg + "<br><br><label style='font-size: 12px'>Close X</label>";
 			$(document).ready(
 				function(){
 					jError(msg,

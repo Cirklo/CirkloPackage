@@ -196,7 +196,7 @@
 		echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
 		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
 		// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
-		// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
+		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
 		echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
 		global $jsWereImported;
 		$jsWereImported = true;
@@ -557,6 +557,14 @@
 		fclose($fh);
 	}
 	
+	function wtfArray($array, $mode = "w", $path = "c:/a.txt"){
+		wtf('----', $mode, $path);
+		foreach($array as $line){
+			wtf($line, 'a', $path);
+		}
+		wtf('----', 'a', $path);
+	}
+	
 	function needProject(){
 		$sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
 		$prep = dbHelp::query($sql);
@@ -676,8 +684,8 @@
 		ob_end_clean();
 
 		if($result === false){
-			$exceptionMessage = "Unable to send the email.";
-			throw new Exception($exceptionMessage."\n".strip_tags($echoStr));
+			$exceptionMessage = "Unable to send the email:";
+			throw new Exception($exceptionMessage." ".strip_tags($echoStr));
 		}
 	}
 	

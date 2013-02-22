@@ -49,7 +49,11 @@ var interval;
 						select: function(event, ui) {
 									impersonateUser = ui.item.id;
 								},
-						dataType: "json"
+						dataType: "json",
+						messages: {
+							noResults: '',
+							results: function() {}
+						}
 					});
 				});
 			}
@@ -899,44 +903,42 @@ function showfade(element,count){
 	}
 } 
 
-function mailListCheck(element, resource){
-	$.post(
-		'weekview.php'
-		,{functionName: 'mailListCheck', resource: resource, check: element.checked}
-		,function(serverData){
-			if(!serverData.isError){
-				element.checked = serverData.check;
-			}
-			showMessage(serverData.message, serverData.isError);
-		}
-		,'json'
-	)
-	.error(
-		function(error){
-			showMessage(error.responseText, true);
-		}
-	);
-}
-
-function setProjectAsDefault(resource){
-	var projSelected = document.getElementById('projectList')[document.getElementById('projectList').selectedIndex];
-	
-	$.post(
-		'weekview.php'
-		,{functionName: 'setProjectAsDefault', project: projSelected.value, resource: resource}
-		,function(serverData){
+// function mailListCheck(element, resource){
+	// $.post(
+		// 'weekview.php'
+		// ,{functionName: 'mailListCheck', resource: resource, check: element.checked}
+		// ,function(serverData){
 			// if(!serverData.isError){
+				// element.checked = serverData.check;
 			// }
-			showMessage(serverData.message, serverData.isError);
-		}
-		,'json'
-	)
-	.error(
-		function(error){
-			showMessage(error.responseText, true);
-		}
-	);
-}
+			// showMessage(serverData.message, serverData.isError);
+		// }
+		// ,'json'
+	// )
+	// .error(
+		// function(error){
+			// showMessage(error.responseText, true);
+		// }
+	// );
+// }
+
+// function setProjectAsDefault(resource){
+	// var projSelected = document.getElementById('projectList')[document.getElementById('projectList').selectedIndex];
+	
+	// $.post(
+		// 'weekview.php'
+		// ,{functionName: 'setProjectAsDefault', project: projSelected.value, resource: resource}
+		// ,function(serverData){
+			// showMessage(serverData.message, serverData.isError);
+		// }
+		// ,'json'
+	// )
+	// .error(
+		// function(error){
+			// showMessage(error.responseText, true);
+		// }
+	// );
+// }
 
 function changeProjectListIndexTo(valueToSearchFor){
 	if(document.getElementById('projectList')){
