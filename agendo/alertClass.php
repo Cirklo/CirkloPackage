@@ -244,8 +244,6 @@ END:VCALENDAR";
 			$this->AddAddress($this->RespEmail, "");
 			$mobileStr = str_replace("\\n", "\n", $extrainfo);
             $this->Body=$msg . "\nEmail: ". $this->UserEmail ."\nMobile: ".$this->UserMobile ."\n".$mobileStr;
-			// sendMailObject(getMailObject($this->Subject, $this->RespEmail, $msg, $this->UserFullName, $this->UserEmail));
-			wtfArray(array($this->Subject, $this->RespEmail, $msg, $this->UserFullName, $this->UserEmail));
             if(!$this->Send()){
                 // echo "Mailer Error: " . $this->ErrorInfo;
                echo "Unable to send email: " . $this->ErrorInfo;

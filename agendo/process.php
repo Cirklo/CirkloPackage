@@ -793,7 +793,11 @@
 		$replyToPersonMail = "";
 		if(!isset($oldDate)){
 			$subject = 'Entry removed';
-			$message = "Resource is now available from ".$res[0]." to ".$finalDate." on resource ".$res[3];
+			$message = "This is an automatic message, don't reply.";
+			$message .= "\nDue to a schedule change on ".$res[3].", it is now available from  ".$res[0]." to ".$finalDate;
+			// $message .= "\n".getProtocol()."://".$_SERVER['SERVER_NAME']."/".$_SESSION['path']."/weekview.php?resource=".$resource;
+			// we dont have a login and redirection screen, can't make one to redirect to 'Resource alerts configuration' without wasting a good amount of time
+			$message .= "\nIf you don't want to receive more of these messages, go to your admin area and on tools->Resource alerts configuration uncheck the resource";
 		}
 		else{
 			$oldFinalDate = date('Y-m-d H:i:00',(strtotime($oldDate) + $oldSlots * $res[2] * 60));

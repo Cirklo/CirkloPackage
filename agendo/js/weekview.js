@@ -940,17 +940,40 @@ function showfade(element,count){
 	// );
 // }
 
-function changeProjectListIndexTo(valueToSearchFor){
+
+
+// function changeProjectListIndexTo(valueToSearchFor){
+	// if(document.getElementById('projectList')){
+		// var projectList = document.getElementById('projectList');
+		// for(index in projectList.options){
+			// if(projectList.options[index].value == valueToSearchFor){
+				// projectList.selectedIndex = index;
+				// break;
+			// }
+		// }
+	// }
+// }
+
+
+function changeProjectListIndexTo(valueToSearchFor, projects){
 	if(document.getElementById('projectList')){
-		var projectList = document.getElementById('projectList');
-		for(index in projectList.options){
-			if(projectList.options[index].value == valueToSearchFor){
-				projectList.selectedIndex = index;
-				break;
+		projects = projects || false;
+		if(projects){
+			
+		}
+		else{
+			var projectList = document.getElementById('projectList');
+			for(index in projectList.options){
+				if(projectList.options[index].value == valueToSearchFor){
+					projectList.selectedIndex = index;
+					break;
+				}
 			}
 		}
 	}
 }
+
+
 // not being used
 // function showFadeAux(element, count){
 	// if(fadeCount > 0){

@@ -557,7 +557,7 @@
 		fclose($fh);
 	}
 	
-	function wtfArray($array, $mode = "w", $path = "c:/a.txt"){
+	function wtf_array($array, $mode = "w", $path = "c:/a.txt"){
 		wtf('----', $mode, $path);
 		foreach($array as $line){
 			wtf($line, 'a', $path);
@@ -818,6 +818,14 @@
 	// Checks if the current php file is being viewed due to a ajax request
 	function isAjax(){
 		return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+	}
+	
+	function getProtocol(){
+		$protocol = "http";
+		if(!empty($_SERVER['HTTPS'])){
+			$protocol = "https";
+		}
+		return $protocol;
 	}
 	
 	function convertSmartQuotes($string){ 
