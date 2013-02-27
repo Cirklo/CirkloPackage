@@ -48,11 +48,14 @@ var interval;
 						minLength: 2,
 						select: function(event, ui) {
 									impersonateUser = ui.item.id;
+									console.log('got a user');
 								},
 						dataType: "json",
 						messages: {
 							noResults: '',
-							results: function() {}
+							results: function() {
+								//console.log('asked for users');
+							}
 						}
 					});
 				});
@@ -250,7 +253,8 @@ function swapColor(obj,tag,action){
 				}
 			}
         // } else {
-        } else if(document.getElementById('addButton') != null){
+        }
+		else if(document.getElementById('addButton') != null){
 			selectedEntry = null;
             document.getElementById('addButton').value='Add';
 			for (i=1;i<tablesize;i++)
@@ -270,7 +274,9 @@ function swapColor(obj,tag,action){
 					);
 				}
 			}
-        }
+			
+			reset_projects_list();
+		}
         objStyle.backgroundColor='#aaaaaa';
         bgcolor1=objStyle.backgroundColor;
         bgcolor2=bgcolor1;
@@ -956,14 +962,22 @@ function showfade(element,count){
 
 
 function changeProjectListIndexTo(valueToSearchFor, projects){
-	if(document.getElementById('projectList')){
+	var projectList = document.getElementById('projectList');
+	
+	if(projectList){
 		projects = projects || false;
 		if(projects){
-			
+			var projectsObject = JSON.parse(projects);
+			var selected = false;
+			projectList.options.length = 0;
+			for(var i in projectsObject){
+				selected = valueToSearchFor == i;
+				projectList.options[projectList.options.length] = new Option(projectsObject[i], i, selected, selected);
+			}
 		}
-		else{
-			var projectList = document.getElementById('projectList');
-			for(index in projectList.options){
+		else if(valueToSearchFor){
+			// var projectList = document.getElementById('projectList');
+			for(var index in projectList.options){
 				if(projectList.options[index].value == valueToSearchFor){
 					projectList.selectedIndex = index;
 					break;
@@ -1051,3 +1065,15 @@ function updateAssiduityDivs(serverData){
 	// unconfirmedDiv.style.display = 'table-row';
 	// deletedDiv.style.display = 'table-row';
 }
+
+// resets the project list when clicked outside an entry
+function reset_projects_list(){
+	var projectListElement = document.getElementById('projectList');
+	if(typeof originalProjects != 'undefined' && projectListElement){
+		projectListElement.options.length = 0;
+		for(var i in originalProjects){
+			projectListElement.options[i] = originalProjects[i];
+		}
+	}
+}
+	

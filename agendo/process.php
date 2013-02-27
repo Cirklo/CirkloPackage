@@ -119,12 +119,12 @@
 		$prep = dbHelp::query($sql, array($tempUser));
 		$res = dbHelp::fetchRowByIndex($prep);
 		if(isset($res) && $res[0] !== null){
-			$projectValue = $res[0];
+			$defaultProj = $res[0];
 		}
 		$sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
 		$prep = dbHelp::query($sql);
 		$res = dbHelp::fetchRowByIndex($prep);
-		if(isset($res) && $res[0] !== null  && $res[0] == 1 && $projectValue === null){
+		if(isset($res) && $res[0] !== null  && $res[0] == 1 && !isset($defaultProj)){
 			throw new Exception("There is no default project, one must be chosen by the department manager");
 		}
 		// ***********************************
@@ -162,7 +162,7 @@
 					,:4
 					,'".date('Y-m-d H:i:s',time())."'
 					,NULL
-					".(isset($projectValue) ? ",:5" : "")."
+					".(isset($projectValue) ? ",:5" : "NULL")."
 				)
 			";
 			$sqlDataArray = array($tempUser, $slots, $assistance, $EntryStatus, $resource);

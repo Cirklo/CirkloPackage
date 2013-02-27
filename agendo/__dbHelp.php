@@ -97,10 +97,6 @@
 				// }
 				// self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", $sql))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError happened on: ".date("d/m/Y H:i:s")."\n");
 				$backTrace = debug_backtrace();
-				wtf('-----');
-				foreach($backTrace[0] as $back){
-					wtf($back, 'a');
-				}
 				self::errorLog("Full sql query is: '".trim(preg_replace("/\s\s+/", " ", self::getRealQuery($sql, $argsArray)))."'".$argsText."\nError is: '".$e->getMessage()."'.\nError was generated on file: '".$backTrace[0]['file']."' on line: '".$backTrace[0]['line']."' \nError happened on: ".date("d/m/Y H:i:s")."\n");
 				throw new Exception("Database error, error logged.");
 			}
@@ -298,6 +294,30 @@
 				}
 			}
 			return $query;
+		}
+		
+		public static function get_projs_and_default_prep($user){
+			$dataArray = array();
+			$sql = "
+				select 
+					project_id, project_name, department_default 
+				from 
+					project join proj_dep_assoc on project_id = proj_dep_assoc_project
+					join department on proj_dep_assoc_department = department_id
+					join ".dbHelp::getSchemaName().".user on department_id = user_dep
+				where
+					user_id = :0
+			";
+			
+			return dbHelp::query($sql, array($user));
+		}
+
+		public static function get_department($user){
+			$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
+			$prep = dbHelp::query($sql, array($user));
+			$res = dbHelp::fetchRowByIndex($prep);
+			
+			return $res[0];
 		}
 	}
 	// Fix for the lack of static contructors

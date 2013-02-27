@@ -172,33 +172,49 @@ function DisplayUserInfo() {
 }
 
 function DisplayEntryInfo() {
-    $entry=cleanValue($_GET['entry']);
+    $entry = cleanValue($_GET['entry']);
 	
 	// project javascript update here
 	if(isset($_SESSION['user_id'])){
-		$sql = "select entry_project from entry where entry_id = :0 and entry_user = :1";
-		$prep = dbHelp::query($sql, array($entry, $_SESSION['user_id']));
-		// $proj = 1;
+		$sql = "
+			select 
+				entry_project, entry_user, user_dep, department_default
+			from 
+				entry join ".dbHelp::getSchemaName().".user on user_id = entry_user 
+				join department on department_id = user_dep 
+			where 
+				entry_id = :0
+		";
+		$prep = dbHelp::query($sql, array($entry));
 		$res = dbHelp::fetchRowByIndex($prep);
-		if($res !== null && $res[0] != ''){
-			$proj = $res[0];
-
-			// if($res[0] == null){
-				// echo "changeProjectListIndexTo(-1);";
-			// }
-			// else{
-			// }
-			echo "changeProjectListIndexTo(".$proj.");";
-		}
-		else{
-			// $sql = "select permissions_project_default from permissions where permissions_resource = :0 and permissions_user = :1";
-			// $prep = dbHelp::query($sql, array($_GET['resource'], $_SESSION['user_id']));
-			// $res = dbHelp::fetchRowByIndex($prep);
-			// $proj = $res[0];
+		$entryProj = $res[0];
+		$entryUser = $res[1];
+		$entryUserDep = $res[2];
+		$entryUserDefaultProj = $res[3];
+		
+		// send projects in case the logged user is a manager and has different departments
+		$projects = "";
+		$sessionUserDepartment = dbHelp::get_department($_SESSION['user_id']);
+		// if($sessionUserDepartment != $entryUserDep){
+			if(isResp($_SESSION['user_id']) !== false){
+				$prep = dbHelp::get_projs_and_default_prep($entryUser);
+				$projectsArray = array();
+				while($row = dbHelp::fetchRowByName($prep)){
+					$projectsArray[$row['project_id']] = $row['project_name'];
+				}
+				$projects = json_encode($projectsArray);
+			}
+		// }
+		
+	
+		$selectProj = $entryProj;
+		if(!isset($entryProj)){
+			$selectProj = $entryUserDefaultProj;
 			echo "showMessage('There is no project assigned to this entry');";
 		}
+		echo "changeProjectListIndexTo(".$selectProj.", '".$projects."');";
 	}
-	//*************************
+	//**********************************
 	
     // $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=".$entry." and xfields_placement = 1 group by xfields_id, xfields_type";
     // $res=dbHelp::query($sql) or die ($sql);

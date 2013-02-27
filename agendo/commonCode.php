@@ -577,6 +577,17 @@
 		return false;
 	}
 	
+	function same_department($user1, $user2){
+		$sql = "select department_id from department join ".dbHelp::getSchemaName().".user on department_id = user_dep where user_id = :0 or user_id = :1";
+		$prep = dbHelp::query($sql, array($user1, $user2));
+		$row = dbHelp::fetchRowByIndex($prep);
+		$depart1 = $row[0];
+		$row = dbHelp::fetchRowByIndex($prep);
+		
+		return $row[0] == $depart1;
+	}
+	
+	
 	// Gets all the data after a certain string($afterString) and before a string ($beforeString)
 	//	$array = getTablesFromScript($sql, 'CREATE TABLE IF NOT EXISTS', '('); returns an array of table names
 	function getBetweenArray($all, $afterString, $beforeString, $separator = ';'){
