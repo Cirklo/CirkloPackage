@@ -48,9 +48,10 @@
 
 
 <?php
+	echo "<link href='../agendo/css/base.css' rel='stylesheet' type='text/css'>";
 //*************Check for view without logging in********************
 if(!secureIpSessionLogin()){
-	echo "<a href='index.php' style='color:#F7C439;'>Back to index</a>";
+	echo "<br><br><div style='margin:auto;width:100px;text-align:center;'><a href='index.php' style='color:#F7C439;'>Back to index</a></div>";
 	showMsg('Please sign in to be able to view resources', true);
 	exit;
 }
@@ -58,7 +59,6 @@ if(!secureIpSessionLogin()){
 
 //disable warning displays
 error_reporting(0);
-
 // $resource=clean_input($_GET['resource']);
 // $ressql = "select resource_status, resource_mac from resource where resource_id = ".$resource;
 
@@ -102,20 +102,20 @@ if (isset($_GET['msg'])) {$msg = cleanValue($_GET['msg']);} else {$msg ='';} ;
 //##############################################
 echo "<body onload=init(" . $calendar->getStatus() . "," . $calendar->getMaxSlots() . ")>";
 
-$showCheckBoxMailList = false;
-if(isset($_SESSION['user_id'])){
-	$showCheckBoxMailList = true;
-	$sql = 'select permissions_sendmail, permissions_id from permissions where permissions_user = :0 and permissions_resource = :1';
-	$prep = dbHelp::query($sql, array($_SESSION['user_id'], $resource));
-	$res = dbHelp::fetchRowByIndex($prep);
-	$mailListCheck = '';
-	if(dbHelp::numberOfRows($prep) > 0 && $res[0] == 1){
-		$mailListCheck = 'checked';
-	}
-}
+// $showCheckBoxMailList = false;
+// if(isset($_SESSION['user_id'])){
+	// $showCheckBoxMailList = true;
+	// $sql = 'select permissions_sendmail, permissions_id from permissions where permissions_user = :0 and permissions_resource = :1';
+	// $prep = dbHelp::query($sql, array($_SESSION['user_id'], $resource));
+	// $res = dbHelp::fetchRowByIndex($prep);
+	// $mailListCheck = '';
+	// if(dbHelp::numberOfRows($prep) > 0 && $res[0] == 1){
+		// $mailListCheck = 'checked';
+	// }
+// }
 
 //for displaying help
-echo "<div id=help style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;'>";
+echo "<div id=help style='display:none;position:absolute;border-style:solid;border-width:1px;background-color: white;z-index:99;padding:3px;color: #567E73;'>";
 echo "<p style='text-align:center'>Equipment status: " . $calendar->getStatusName()."</p>";
 echo "<p style='text-align:center'>Equipment Responsible: <a href=mailto:" . $calendar->getRespEmail() . ">". $calendar->getRespName() . "</a>"."</p>";
 echo "<p style='text-align:center'>Delete Tolerance: " . $calendar->getDelTolerance(). " hour(s)"."</p>";
@@ -124,12 +124,12 @@ echo "<p style='text-align:center'><a target=_new href=../agendo/prices.php>Clic
 if ($calendar->getStatus()==3) echo "<p style='text-align:center'>Tolerance for confirmation " . $calendar->getConfTolerance()*$calendar->getResolution()/60 . " hours(s) before or after entry"."</p>";
 echo "<p style='text-align:center'>Further info: <a href=".$calendar->getLink().">".$calendar->getLink()."</a></p>" ;
 
-if($showCheckBoxMailList){
-	echo "<hr/>";
-	echo "<p style='text-align:center' title='Click to receive emails when entries are updated or deleted'>";
-		echo "<label>Automatic delete and update warning <input type='checkbox' id='weekviewMailingList' ".$mailListCheck." onclick='mailListCheck(this, ".$resource.");' /></label>";
-	echo "</p>";
-}
+// if($showCheckBoxMailList){
+	// echo "<hr/>";
+	// echo "<p style='text-align:center' title='Click to receive emails when entries are updated or deleted'>";
+		// echo "<label>Automatic delete and update warning <input type='checkbox' id='weekviewMailingList' ".$mailListCheck." onclick='mailListCheck(this, ".$resource.");' /></label>";
+	// echo "</p>";
+// }
 
 echo "<hr />";
 
@@ -412,7 +412,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 					//************* Weekly hours left ***************
 					//***********************************************
 	
-					if($calendar->monitor($calendar->getResourceName())){ // ...this doesnt make a whole lot of sense
+				if($calendar->monitor($calendar->getResourceName())){ // ...this doesnt make a whole lot of sense
 						echo "<tr><td colspan=2 align=center><a href=ekrano target='blank'>Monitored resource</a></td></tr>";
 						echo "<tr><td colspan=2><hr></td></tr>";
 					}
@@ -445,7 +445,6 @@ echo "<table id='master' style='margin:auto' width=750>";
 						echo "</tr>";
 							
 						echo "<script type='text/javascript'>Calendar.setup({inputField	 : 'enddate',baseField    : 'element_2',button: 'enddate',ifFormat: '%Y %e, %D',onSelect: selectDate});	</script>";
-
 						// ********************************** Xfields echoing *****************************
 						if($nxfields > 0){
 							echo "<tr><td colspan=2><hr></td></tr>";
@@ -560,6 +559,15 @@ echo "<table id='master' style='margin:auto' width=750>";
 												}
 												echo "<option value='".$res[1]."' ".$isSelected." title='".$res[0]."'>".$res[0]."</option>";
 											}
+											echo "
+												<script>
+													var projectList = document.getElementById('projectList').options;
+													var originalProjects = new Array();
+													for(var i in projectList){
+														originalProjects[i] = projectList[i];
+													}
+												</script>
+											";
 										echo "</select>";
 									echo "</td>";
 								echo "</tr>";
@@ -807,36 +815,51 @@ echo "</html>";
 		return false;
 	}
 	
-	function mailListCheck(){
-		if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['check'])){
-			if($_POST['check'] == 'false'){
-				$value = 0;
-				$message = 'User removed from mailing list';
-				$check = false;
-			}
-			else{
-				$value = 1;
-				$message = 'User inserted to mailing list';
-				$check = true;
-			}
-			$sql = "update permissions set permissions_sendmail = ".$value." where permissions_user = :0 and permissions_resource = :1";
-			$prep = dbHelp::query($sql, array($_SESSION['user_id'], $_POST['resource']));
-			$json = new stdClass();
-			$json->message = $message;
-			$json->check = $value;
-			echo json_encode($json);
+
+	function get_json_projects(){
+		$json = new stdClass();
+		$projects = array();
+		$projectDefault = null;
+		$prep = dbHelp::get_projs_and_default_prep($_POST['user']);
+		while($row = dbHelp::fetchRowByName($prep)){
+			$projects[$row['project_id']] = $row['project_name'];
+			$projectDefault = $row['department_default'];
 		}
+		$json->defaultProject = $projectDefault;
+		$json->projects = $projects;
+		echo json_encode($json);
+		// return array('default' => , 'projects' => $projects);
 	}
 	
-	function setProjectAsDefault(){
-		if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['project'])){
-			// $project = ($_POST['project'] == '-1') ? null : $_POST['project'];
-			$project = $_POST['project'];
-			$sql = "update permissions set permissions_project_default = :0 where permissions_user = :1 and permissions_resource = :2";
-			$prep = dbHelp::query($sql, array($project, $_SESSION['user_id'], $_POST['resource']));
-			$json = new stdClass();
-			$json->message = "Default project changed";
-			echo json_encode($json);
-		}
-	}
+	// function mailListCheck(){
+		// if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['check'])){
+			// if($_POST['check'] == 'false'){
+				// $value = 0;
+				// $message = 'User removed from mailing list';
+				// $check = false;
+			// }
+			// else{
+				// $value = 1;
+				// $message = 'User inserted to mailing list';
+				// $check = true;
+			// }
+			// $sql = "update permissions set permissions_sendmail = ".$value." where permissions_user = :0 and permissions_resource = :1";
+			// $prep = dbHelp::query($sql, array($_SESSION['user_id'], $_POST['resource']));
+			// $json = new stdClass();
+			// $json->message = $message;
+			// $json->check = $value;
+			// echo json_encode($json);
+		// }
+	// }
+	
+	// function setProjectAsDefault(){
+		// if(isset($_SESSION['user_id']) && isset($_POST['resource']) && isset($_POST['project'])){
+			// $project = $_POST['project'];
+			// $sql = "update permissions set permissions_project_default = :0 where permissions_user = :1 and permissions_resource = :2";
+			// $prep = dbHelp::query($sql, array($project, $_SESSION['user_id'], $_POST['resource']));
+			// $json = new stdClass();
+			// $json->message = "Default project changed";
+			// echo json_encode($json);
+		// }
+	// }
 ?>

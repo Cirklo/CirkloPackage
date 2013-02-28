@@ -110,7 +110,33 @@ function DisplayUserInfo() {
 		-webkit-box-shadow: 3px 3px 4px #000;
 		box-shadow: 3px 3px 4px #000;
 	";
-    $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=:0";
+    $sql="
+		select 
+			user_firstname
+			,user_lastname
+			,user_email
+			,user_mobile
+			,user_phone
+			,user_phonext
+			,department_name
+			,institute_name
+			,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s
+			,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e
+			,entry_project
+			,department_id
+			,entry_resource
+		from 
+			".dbHelp::getSchemaName().".user
+			,entry,department
+			,institute
+			,resource 
+		where 
+			user_dep=department_id 
+			and department_inst=institute_id 
+			and entry_user=user_id 
+			and entry_resource=resource_id 
+			and entry_id=:0
+		";
     $res=dbHelp::query($sql, array($value)) or die ($sql);
     $arr=dbHelp::fetchRowByIndex($res);
     echo "<table id='popUpDisplayTable' style='".$style."'>";
@@ -125,6 +151,19 @@ function DisplayUserInfo() {
 		echo "<tr><td>Phone ext: </td><td>" . $arr[5] . "</td></tr>";
 		echo "<tr><td>Department: </td><td>" . $arr[6] . "</td></tr>";
 		echo "<tr><td>Institute: </td><td>" . $arr[7] . "</td></tr>";
+		
+		// Project Display
+		if(isResp($_SESSION['user_id'], $arr[12]) !== false || dbHelp::get_department($_SESSION['user_id']) == $arr[11]){
+			$project = "No project";
+			if(isset($arr[10])){
+				$sql = "select project_name from project where project_id = ".$arr[10];
+				$prep = dbHelp::query($sql);
+				$row = dbHelp::fetchRowByIndex($prep);
+				$project = $row[0];
+			}
+			echo "<tr><td>Project: </td><td>".$project."</td></tr>";
+		}
+		//******************
 		
 		// user assiduity goes here
 		$sql = "select configParams_value from configParams where configParams_name = 'showAssiduity'";
@@ -141,6 +180,7 @@ function DisplayUserInfo() {
 			// echo "</tr>";
 		}
 		// **************************
+		
 	}
 	
 	$sql = "
@@ -174,6 +214,7 @@ function DisplayUserInfo() {
 function DisplayEntryInfo() {
     $entry = cleanValue($_GET['entry']);
 	
+	/*
 	// project javascript update here
 	if(isset($_SESSION['user_id'])){
 		$sql = "
@@ -195,17 +236,14 @@ function DisplayEntryInfo() {
 		// send projects in case the logged user is a manager and has different departments
 		$projects = "";
 		$sessionUserDepartment = dbHelp::get_department($_SESSION['user_id']);
-		// if($sessionUserDepartment != $entryUserDep){
-			if(isResp($_SESSION['user_id']) !== false){
-				$prep = dbHelp::get_projs_and_default_prep($entryUser);
-				$projectsArray = array();
-				while($row = dbHelp::fetchRowByName($prep)){
-					$projectsArray[$row['project_id']] = $row['project_name'];
-				}
-				$projects = json_encode($projectsArray);
+		if(isResp($_SESSION['user_id']) !== false){
+			$prep = dbHelp::get_projs_and_default_prep($entryUser);
+			$projectsArray = array();
+			while($row = dbHelp::fetchRowByName($prep)){
+				$projectsArray[$row['project_id']] = $row['project_name'];
 			}
-		// }
-		
+			$projects = json_encode($projectsArray);
+		}
 	
 		$selectProj = $entryProj;
 		if(!isset($entryProj)){
@@ -215,6 +253,7 @@ function DisplayEntryInfo() {
 		echo "changeProjectListIndexTo(".$selectProj.", '".$projects."');";
 	}
 	//**********************************
+	*/
 	
     // $sql ="select xfields_name, xfieldsval_value, xfields_type, xfields_id from xfieldsval,xfields where xfieldsval_field=xfields_id and xfieldsval_entry=".$entry." and xfields_placement = 1 group by xfields_id, xfields_type";
     // $res=dbHelp::query($sql) or die ($sql);

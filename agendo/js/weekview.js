@@ -48,13 +48,27 @@ var interval;
 						minLength: 2,
 						select: function(event, ui) {
 									impersonateUser = ui.item.id;
-									console.log('got a user');
+									$.post(
+										'weekview.php'
+										, {functionName: 'get_json_projects', user: ui.item.id}
+										, function(serverData){
+											if(!serverData.isError){
+												changeProjectListIndexTo(serverData.defaultProject, serverData.projects, true);
+											}
+											showMessage(serverData.message, serverData.isError);
+										}
+										,'json'
+									)
+									.error(
+										function(error){
+											showMessage(error.responseText, true);
+										}
+									);
 								},
 						dataType: "json",
 						messages: {
 							noResults: '',
 							results: function() {
-								//console.log('asked for users');
 							}
 						}
 					});
@@ -145,6 +159,7 @@ var interval;
 		if(!element.checked){
 			impersonateUser = '';
 			document.getElementById('usersList').value = "";
+			reset_projects_list();
 		}
 	}
   
@@ -961,13 +976,20 @@ function showfade(element,count){
 // }
 
 
-function changeProjectListIndexTo(valueToSearchFor, projects){
+function changeProjectListIndexTo(valueToSearchFor, projects, dontJsonParse){
 	var projectList = document.getElementById('projectList');
 	
 	if(projectList){
+		dontJsonParse = dontJsonParse || false;
 		projects = projects || false;
 		if(projects){
-			var projectsObject = JSON.parse(projects);
+			var projectsObject = null;
+			if(!dontJsonParse){
+				projectsObject = JSON.parse(projects);
+			}
+			else{
+				projectsObject = projects;
+			}
 			var selected = false;
 			projectList.options.length = 0;
 			for(var i in projectsObject){

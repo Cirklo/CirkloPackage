@@ -14,14 +14,17 @@
 	echo "<html>";
 		importJs();
 		echo "<link href='../agendo/css/base.css' rel='stylesheet' type='text/css'>";
+		echo "<link href='../agendo/css/mailListAssign.css' rel='stylesheet' type='text/css'>";
 		echo "<script type='text/javascript' src='../agendo/js/mailListAssign.js'></script>";
 		
 		echo "<body>";
 			echo "<br>";
 			echo "<h1>Mailing list assign</h1>";
 			echo "<br>";
-			
-			echo "<div style='width:300px;margin:auto;text-align:left;border: 1px solid white;height:250px;'>";
+			echo "<h3>Check each resource box to receive email notifications of deleted or updated entries on the corresponding resource</h3>";
+			echo "<br>";
+			// echo "<div id='container' style='width:300px;margin:auto;text-align:left;border: 1px solid white;height:250px;'>";
+			echo "<div id='container'>";
 				$dataArray = array();
 				$sql = "
 					select 
