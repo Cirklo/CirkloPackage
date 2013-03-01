@@ -75,7 +75,7 @@
 					echo "<tr>";
 						echo "<td>";
 							echo "<label>";
-								echo "Department name";
+								echo "Project name";
 							echo "</label>";
 						echo "</td>";
 
