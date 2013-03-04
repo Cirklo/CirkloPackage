@@ -12,7 +12,7 @@
 	if(isAjax()){
 		if($_POST['activeMatrix']){
 			$activeMatrix = json_decode($_POST['activeMatrix'], true);
-			$sql = "update proj_dep_assoc set proj_dep_assoc_active = :0 where proj_dep_assoc_department = :1 and proj_dep_assoc_project = :2";
+			$sql = "update proj_dep_assoc set proj_dep_assoc_visible = :0 where proj_dep_assoc_department = :1 and proj_dep_assoc_project = :2";
 			foreach($activeMatrix as $department=>$projectArray){
 				foreach($projectArray as $project=>$value){
 					dbHelp::query($sql, array((int)$value, $department, $project));
@@ -54,11 +54,13 @@
 				$dataArray = array();
 				$sqlDep1 = "
 					select
-						department_id, department_name, project_id, project_name, proj_dep_assoc_active, department_default
+						department_id, department_name, project_id, project_name, proj_dep_assoc_visible, department_default
 					from
 						department
 						join proj_dep_assoc on department_id = proj_dep_assoc_department
 						join project on project_id = proj_dep_assoc_project
+					where
+						proj_dep_assoc_active = 1
 				";
 				$sqlDep2 = "order by department_name, project_name";
 				if($isAdmin === false){
@@ -87,7 +89,7 @@
 
 						echo "<td class='activeColumn'>";
 							echo "<label>";
-								echo "Active";
+								echo "Visible";
 							echo "</label>";
 						echo "</td>";
 					echo "</tr>";
@@ -113,11 +115,11 @@
 							echo "</tr>";
 							
 								// first project
-								echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default']);
+								echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_visible'], $row['department_default']);
 								// rest of them
 								$previousDepartment = $row['department_id'];
 								while(($row = dbHelp::fetchRowByName($prep)) && $previousDepartment == $row['department_id']){
-									echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_active'], $row['department_default']);
+									echo projElement($row['project_name'], $row['department_id'], $row['project_id'], $row['proj_dep_assoc_visible'], $row['department_default']);
 								}
 						echo "</table>";
 					}
@@ -138,14 +140,14 @@
 		echo "</body>";
 	echo "</html>";
 	
-	function projElement($name, $dep_id, $proj_id, $projIsActive, $projIsDefault){
+	function projElement($name, $dep_id, $proj_id, $projIsVisible, $projIsDefault){
 		$default = "";
 		if($projIsDefault && $projIsDefault == $proj_id){
 			$default = "checked='checked'";
 		}
 		
 		$active = "";
-		if($projIsActive == 1){
+		if($projIsVisible == 1){
 			$active = "checked='checked'";
 		}
 

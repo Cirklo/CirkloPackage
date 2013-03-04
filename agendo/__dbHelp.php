@@ -296,21 +296,21 @@
 			return $query;
 		}
 		
-		public static function get_projs_and_default_prep($user){
-			$dataArray = array();
-			$sql = "
-				select 
-					project_id, project_name, department_default 
-				from 
-					project join proj_dep_assoc on project_id = proj_dep_assoc_project
-					join department on proj_dep_assoc_department = department_id
-					join ".dbHelp::getSchemaName().".user on department_id = user_dep
-				where
-					user_id = :0
-			";
+		// public static function get_projs_and_default_prep($user){
+			// $dataArray = array();
+			// $sql = "
+				// select 
+					// project_id, project_name, department_default 
+				// from 
+					// project join proj_dep_assoc on project_id = proj_dep_assoc_project
+					// join department on proj_dep_assoc_department = department_id
+					// join ".dbHelp::getSchemaName().".user on department_id = user_dep
+				// where
+					// user_id = :0
+			// ";
 			
-			return dbHelp::query($sql, array($user));
-		}
+			// return dbHelp::query($sql, array($user));
+		// }
 
 		public static function get_department($user){
 			$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
