@@ -218,7 +218,7 @@ function showMessage(msg, isError){
 	// }
 	if(typeof msg !== "undefined" && msg != null && msg !== ''){ // wont do anything if the message isnt set or is empty
 		if(isError){ // what should happen is its an error message
-			msg = msg + "<br><br><label style='font-size: 12px'>Close X</label>";
+			msg = msg + "<br><br><a style='font-size: 12px'>Close X</a>";
 			$(document).ready(
 				function(){
 					jError(msg,

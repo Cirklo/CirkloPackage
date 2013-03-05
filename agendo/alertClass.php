@@ -117,6 +117,7 @@ function toWaitList($type){
 			
             case 'update':
                   $msg="Due to an entry update, your monitored entry was removed from ". $this->ResourceName . " at " . $arrStatus['t']  . " on the " .  $arrStatus['d'] . ". Check the calendar, there might be available spots.";
+                  // $msg="Booking for resource ".$this->ResourceName." from 2013-03-07 04:30:00 to 2013-03-07 07:00:00 has changed to start at 2013-03-08 08:00:00 and to end at 2013-03-08 10:30:00";
             break;
         }
         switch($arrStatus['user_alert']){

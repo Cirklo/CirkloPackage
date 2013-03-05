@@ -794,36 +794,83 @@
 		return false;
 	}
 	
-	function getProjectsAndDefault($user){
-		$projects = array();
-		$default = null;
-		
+	function get_default_project($user){
 		$sql = "
 			select
-				project_id, project_name, department_default
+				project_id, project_name
 			from
 				project join proj_dep_assoc on project_id = proj_dep_assoc_project
 				join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
-				join department on department_id = user_dep
+				join department on department_id = user_dep and proj_dep_assoc_project = department_default
 			where
 				user_id = :0
 				and proj_dep_assoc_active = 1
+				and proj_dep_assoc_visible = 1
+		";
+		$prep = dbHelp::query($sql, array($user));
+		$row = dbHelp::fetchRowByIndex($prep);
+		if(isset($row[0])){
+			return array('id' => $row[0], 'name' => $row[1]);
+		}
+		
+		return false;
+	}
+	
+	function get_projects($user){
+		$projects = array();
+		// $default = null;
+		
+		$sql = "
+			select
+				project_id, project_name
+			from
+				project join proj_dep_assoc on project_id = proj_dep_assoc_project
+				join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+			where
+				user_id = :0
+				and proj_dep_assoc_active = 1
+				and proj_dep_assoc_visible = 1
 			order by
 				project_name
 		";
 		$prep = dbHelp::query($sql, array($user));
 		while($row = dbHelp::fetchRowByIndex($prep)){
-			$default = $row[2];
+			// $default = $row[2];
 			$projects[] = array('id' => $row[0], 'name' => $row[1]);
 		}
 		
-		$results = array('default' => $default);
-		if($projects[0] === null){
-			$projects = null;
-		}
-		$results = array('projects' => $projects);
+		// $results = array('default' => $default);
+		// if($projects[0] === null){
+			// $projects = null;
+		// }
+		// $results = array('projects' => $projects);
 		
-		return $results;
+		return (current($projects) === null) ? false : $projects;
+	}
+	
+	function valid_project($user, $project){
+		if(isset($user) && $user != '' && isset($project) && $project != ''){
+			$sql = "
+				select
+					project_id
+				from
+					project join proj_dep_assoc on project_id = proj_dep_assoc_project
+					join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+					join department on department_id = user_dep and proj_dep_assoc_project = department_default
+				where
+					user_id = :0
+					and proj_dep_assoc_project = :1
+					and proj_dep_assoc_active = 1
+					and proj_dep_assoc_visible = 1
+			";
+			$prep = dbHelp::query($sql, array($user, $project));
+			$row = dbHelp::fetchRowByIndex($prep);
+			if(isset($row) && isset($row[0])){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	// Checks if the current php file is being viewed due to a ajax request
@@ -838,6 +885,19 @@
 		}
 		return $protocol;
 	}
+	
+	
+	// config params functions ****************
+	function use_projects(){
+		$sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
+		$prep = dbHelp::query($sql);
+		$res = dbHelp::fetchRowByIndex($prep);
+		
+		return (isset($res[0]) && $res[0] == 1) ? true : false;
+	}
+	
+	// ****************************************
+	
 	
 	function convertSmartQuotes($string){ 
 		// return str_replace($search, $replace, $string); 

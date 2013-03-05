@@ -312,14 +312,16 @@
 			// return dbHelp::query($sql, array($user));
 		// }
 
-		public static function get_department($user){
-			$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
-			$prep = dbHelp::query($sql, array($user));
-			$res = dbHelp::fetchRowByIndex($prep);
+		// public static function get_department($user){
+			// $sql = "select user_dep from ".self::getSchemaName().".user where user_id = :0";
+			// $prep = self::query($sql, array($user));
+			// $res = self::fetchRowByIndex($prep);
 			
-			return $res[0];
-		}
+			// return $res[0];
+		// }
+		
 	}
-	// Fix for the lack of static contructors
+	
+	// Creates the static connection when importing this file
 	dbHelp::getConnect();
 ?>

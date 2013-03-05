@@ -48,22 +48,24 @@ var interval;
 						minLength: 2,
 						select: function(event, ui) {
 									impersonateUser = ui.item.id;
-									$.post(
-										'weekview.php'
-										, {functionName: 'get_json_projects', user: ui.item.id}
-										, function(serverData){
-											if(!serverData.isError){
-												changeProjectListIndexTo(serverData.defaultProject, serverData.projects, true);
+									if(document.getElementById('projectList')){
+										$.post(
+											'weekview.php'
+											, {functionName: 'get_json_projects', user: ui.item.id}
+											, function(serverData){
+												if(!serverData.isError){
+													changeProjectListIndexTo(serverData.defaultProject, serverData.projects, true);
+												}
+												showMessage(serverData.message, serverData.isError);
 											}
-											showMessage(serverData.message, serverData.isError);
-										}
-										,'json'
-									)
-									.error(
-										function(error){
-											showMessage(error.responseText, true);
-										}
-									);
+											,'json'
+										)
+										.error(
+											function(error){
+												showMessage(error.responseText, true);
+											}
+										);
+									}
 								},
 						dataType: "json",
 						messages: {

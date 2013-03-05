@@ -97,11 +97,11 @@
 				}
 				$json->message = done($_POST['entries']);
 			break;
-			
+
 			case "upload":
 				$json = upload($_POST['lineValue'], $_POST['columnValue'], $delimiterOptions[$_POST['selectDelimeter']], $userId, $resource, isset($_POST['emailRespCheck']), $isResp, $_GET['asUser']);
 			break;
-			
+
 			case "getItems":
 				$json->items = getItems($userId, $resource);
 			break;

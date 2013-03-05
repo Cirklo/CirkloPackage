@@ -107,31 +107,25 @@
 			$tempUser = (int)$_GET['impersonate'];
 		}
 		
+		$sqlDataArray = array($tempUser, $slots, $assistance, $EntryStatus, $resource);
+		
 		// assigning project to entry section
 		$projectValue = null;
-		if(isset($_GET['selectedProject'])){
+		$projectSqlValue = "NULL";
+		if(valid_project($_GET['selectedProject'])){
 			$projectValue = $_GET['selectedProject'];
-			if($projectValue === null || $projectValue == ''){
-				$projectValue = null;
-			}
+			$sqlDataArray[] = $projectValue;
+			$projectSqlValue = ":5";
 		}
-		$sql = "select department_default from department join ".dbHelp::getSchemaName().".user on department_id = user_dep where user_id = :0";
-		$prep = dbHelp::query($sql, array($tempUser));
-		$res = dbHelp::fetchRowByIndex($prep);
-		if(isset($res) && $res[0] !== null){
-			$defaultProj = $res[0];
-		}
-		$sql = "select configParams_value from configParams where configParams_name = 'useProjects'";
-		$prep = dbHelp::query($sql);
-		$res = dbHelp::fetchRowByIndex($prep);
-		if(isset($res) && isset($res[0]) && $res[0] == 1 && !isset($defaultProj)){
-			throw new Exception("There is no default project, one must be chosen by the department manager");
+
+		if(use_projects() && get_default_project($tempUser) !== false){
+			throw new Exception("There is no default project for this user's department or it is either inactive or invisible");
 		}
 		// ***********************************
 
 		$entriesIdArray = array();
 		//building the repetition pattern
-		while((substr($weekahead,0,8)<=$enddate) && ($w<53)){
+		while((substr($weekahead,0,8) <= $enddate) && $w < 53){
 			if (!$perm->addAhead($weekahead, $slots)){
 				throw new Exception($perm->getWarning());
 			}
@@ -151,7 +145,7 @@
 					,entry_resource
 					,entry_action
 					,entry_comments
-					".(isset($projectValue) ? ",entry_project" : "")."
+					,entry_project
 				) 
 				values(
 					:0
@@ -162,13 +156,9 @@
 					,:4
 					,'".date('Y-m-d H:i:s',time())."'
 					,NULL
-					".(isset($projectValue) ? ",:5" : ",NULL")."
+					,".$projectSqlValue."
 				)
 			";
-			$sqlDataArray = array($tempUser, $slots, $assistance, $EntryStatus, $resource);
-			if(isset($projectValue)){
-				$sqlDataArray[] = $projectValue;
-			}
 			dbHelp::query($sql, $sqlDataArray);
 
 			$sql="
@@ -179,7 +169,7 @@
 				where 
 					entry_user = :0 
 					and entry_datetime = ".dbHelp::convertDateStringToTimeStamp($weekahead, '%Y%m%d%H%i')." 
-					and entry_repeat = ".$arrrep[0] ." 
+					and entry_repeat = ".$arrrep[0]." 
 					and entry_resource = :1
 			";
 			$res=dbHelp::query($sql, array($tempUser, $resource));

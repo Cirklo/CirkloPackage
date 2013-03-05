@@ -153,7 +153,10 @@ function DisplayUserInfo() {
 		echo "<tr><td>Institute: </td><td>" . $arr[7] . "</td></tr>";
 		
 		// Project Display
-		if(isResp($_SESSION['user_id'], $arr[12]) !== false || dbHelp::get_department($_SESSION['user_id']) == $arr[11]){
+		$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
+		$prep = dbHelp::query($sql, array($_SESSION['user_id']));
+		$res = dbHelp::fetchRowByIndex($prep);
+		if(isResp($_SESSION['user_id'], $arr[12]) !== false || $res[0] == $arr[11]){
 			$project = "No project";
 			if(isset($arr[10])){
 				$sql = "select project_name from project where project_id = ".$arr[10];
@@ -234,6 +237,10 @@ function DisplayEntryInfo() {
 		$entryUserDefaultProj = $res[3];
 		
 		// send projects in case the logged user is a manager and has different departments
+		
+			$sql = "select user_dep from ".self::getSchemaName().".user where user_id = :0";
+			$prep = self::query($sql, array($_SESSION['user_id']));
+			$res = self::fetchRowByIndex($prep);
 		$projects = "";
 		$sessionUserDepartment = dbHelp::get_department($_SESSION['user_id']);
 		if(isResp($_SESSION['user_id']) !== false){
