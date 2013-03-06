@@ -15,10 +15,12 @@ var usingSession;
 var detectedUser;
 var path = '';
 var numericXfield = 'numericXfield';// if changing this, change the style.css class name as well
+
 // var associated to the getCalendar function
 var interval;
 
-	var impersonateUser = '';
+var impersonateUser = '';
+
 	$(document).ready(
 		function(){
 			document.body.style.cursor='default';
@@ -54,7 +56,7 @@ var interval;
 											, {functionName: 'get_json_projects', user: ui.item.id}
 											, function(serverData){
 												if(!serverData.isError){
-													changeProjectListIndexTo(serverData.defaultProject, serverData.projects, true);
+													changeProjectListIndexTo(serverData.defaultProject['id'], serverData.projects, true);
 												}
 												showMessage(serverData.message, serverData.isError);
 											}
@@ -292,7 +294,9 @@ function swapColor(obj,tag,action){
 				}
 			}
 			
-			reset_projects_list();
+			if(impersonateUser == ''){
+				reset_projects_list();
+			}
 		}
         objStyle.backgroundColor='#aaaaaa';
         bgcolor1=objStyle.backgroundColor;
@@ -995,8 +999,10 @@ function changeProjectListIndexTo(valueToSearchFor, projects, dontJsonParse){
 			var selected = false;
 			projectList.options.length = 0;
 			for(var i in projectsObject){
-				selected = valueToSearchFor == i;
-				projectList.options[projectList.options.length] = new Option(projectsObject[i], i, selected, selected);
+				// selected = valueToSearchFor == i;
+				selected = valueToSearchFor == projectsObject[i]['id'];
+				// projectList.options[projectList.options.length] = new Option(projectsObject[i], i, selected, selected);
+				projectList.options[projectList.options.length] = new Option(projectsObject[i]['name'], projectsObject[i]['id'], selected, selected);
 			}
 		}
 		else if(valueToSearchFor){

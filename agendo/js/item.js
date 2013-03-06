@@ -326,15 +326,17 @@ function newItem(){
 
 function refreshProjects(projects, default_project){
 	var select_list = document.getElementById('projectList');
-	var temp_option;
-	var selected;
-	select_list.options.length = 0;
 	
-	$.each(projects, function(){
-		selected = this.id == default_project;
-		temp_option = new Option(this.name, this.id, selected, selected);
-		select_list.options[select_list.options.length] = temp_option;
-	});	
+	if(select_list && select_list.options){
+		var temp_option;
+		var selected;
+		select_list.options.length = 0;
+		$.each(projects, function(){
+			selected = this.id == default_project;
+			temp_option = new Option(this.name, this.id, selected, selected);
+			select_list.options[select_list.options.length] = temp_option;
+		});	
+	}
 }
 
 function fillSubmittedListFromUser(){

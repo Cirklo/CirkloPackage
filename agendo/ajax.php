@@ -125,6 +125,7 @@ function DisplayUserInfo() {
 			,entry_project
 			,department_id
 			,entry_resource
+			,resource_status
 		from 
 			".dbHelp::getSchemaName().".user
 			,entry,department
@@ -156,7 +157,8 @@ function DisplayUserInfo() {
 		$sql = "select user_dep from ".dbHelp::getSchemaName().".user where user_id = :0";
 		$prep = dbHelp::query($sql, array($_SESSION['user_id']));
 		$res = dbHelp::fetchRowByIndex($prep);
-		if(isResp($_SESSION['user_id'], $arr[12]) !== false || $res[0] == $arr[11]){
+		// doesnt show the project i the resource type is sequencing
+		if($arr[13] != 6 && (isResp($_SESSION['user_id'], $arr[12]) !== false || $res[0] == $arr[11])){
 			$project = "No project";
 			if(isset($arr[10])){
 				$sql = "select project_name from project where project_id = ".$arr[10];

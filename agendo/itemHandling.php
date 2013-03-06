@@ -86,9 +86,11 @@
 					throw new Exception("User does not have permission for this action");
 				}
 				$json->selectOptions = updateSubmittedList($_POST['asUser'], $resource);
-				$projects_and_default = getProjectsAndDefault($_POST['asUser']);
-				$json->projects = $projects_and_default['projects'];
-				$json->default_project = $projects_and_default['default'];
+				// $projects_and_default = getProjectsAndDefault($_POST['asUser']);
+				// $json->projects = $projects_and_default['projects'];
+				// $json->default_project = $projects_and_default['default'];
+				$json->default_project = get_default_project($_POST['asUser']);
+				$json->projects = get_projects($_POST['asUser']);
 			break;
 
 			case "done":
@@ -229,11 +231,18 @@
 					";
 					
 					
-					// $projects_and_default = getProjectsAndDefault($_SESSION['user_id']);
-					$projects_and_default = getProjectsAndDefault($userId);
-					$projects = $projects_and_default['projects'];
-					$default_project = $projects_and_default['default'];
-					if(isset($projects[0])){
+					// $projects_and_default = getProjectsAndDefault($userId);
+					$default_project = get_default_project($userId);
+					$projects = get_projects($userId);
+					// if(isset($projects[0])){
+					if(use_projects()){
+						if($default_project === false){ // should not be necessary, this check is also made in process.php when adding an entry
+							$html .= "
+								<script>
+									showMessage('No projects or no default project associated to the current user department, adding items will not be possible', true);
+								</script>
+							";
+						}
 						$html .= "<br>";
 						$html .= "<div class='projects' style='margin-top: 10px;'>";
 							$html .= "Project: ";
@@ -242,7 +251,8 @@
 							$html .= "<select id='projectList' style='width:100%;'>";
 							foreach($projects as $project){
 								$isSelected = "";
-								if($project['id'] == $default_project){
+								// if($project['id'] == $default_project){
+								if($project['id'] == $default_project['id']){
 									$isSelected = "selected='selected'";
 								}
 								$html .= "<option value='".$project['id']."' ".$isSelected." title='".$project['name']."'>".$project['name']."</option>";
@@ -449,18 +459,19 @@
 					$project = $_GET['project'];
 				}
 				
-				// $needProj = needProject();
-				$projects_and_default = getProjectsAndDefault($user);
+				// $projects_and_default = getProjectsAndDefault($user);
 				
 				$sql = "insert into item values(null, :0, :1, 1, :2, null)";
 				$sqlArray = array($items[0], $user, $resource);
-				if($projects_and_default['projects'] !== null){
-					$project_ok = inProjects($project, $projects_and_default['projects']);
-					if($project_ok === false){
-						throw new Exception('User not allowed to use this project');
+				// if($projects_and_default['projects'] !== null){
+				if(use_projects()){
+					// $project_ok = inProjects($project, $projects_and_default['projects']);
+					// if($project_ok === false){
+					if(!valid_project($user, $project)){
+						throw new Exception('User not allowed to use this project or project not defined');
 					}
 					$sqlArray[] = $project;
-					$sql = "insert into item() values(null, :0, :1, 1, :2, :3)";
+					$sql = "insert into item values(null, :0, :1, 1, :2, :3)";
 				}
 				
 				
