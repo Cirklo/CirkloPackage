@@ -787,7 +787,7 @@
 		if(!isset($oldDate)){
 			$subject = 'Entry removed';
 			$message = "This is an automatic message, don't reply.";
-			$message .= "\nDue to a schedule change on ".$res[3].", it is now available from  ".$res[0]." to ".$finalDate;
+			$message .= "\nBooking for resource ".$res[3]." is now available from  ".$res[0]." to ".$finalDate;
 			// $message .= "\n".getProtocol()."://".$_SERVER['SERVER_NAME']."/".$_SESSION['path']."/weekview.php?resource=".$resource;
 			// we dont have a login and redirection screen, can't make one to redirect to 'Resource alerts configuration' without wasting a good amount of time
 			$message .= "\nIf you don't want to receive more of these messages, go to your admin area and on tools->Resource alerts configuration uncheck the resource";
@@ -795,7 +795,9 @@
 		else{
 			$oldFinalDate = date('Y-m-d H:i:00',(strtotime($oldDate) + $oldSlots * $res[2] * 60));
 			$subject = 'Entry updated';
-			$message = "Booking for resource ".$res[3]." from ".$oldDate." to ".$oldFinalDate." has changed to start at ".$res[0]." and to end at ".$finalDate;
+			$message = "This is an automatic message, don't reply.";
+			$message .= "\nBooking for resource ".$res[3]." from ".$oldDate." to ".$oldFinalDate." has changed to start at ".$res[0]." and to end at ".$finalDate;
+			$message .= "\nIf you don't want to receive more of these messages, go to your admin area and on tools->Resource alerts configuration uncheck the resource";
 		}
 
 		$sql = "select user_email, user_firstname from permissions, user where permissions_resource = ".$resource." and permissions_sendmail = 1 and user_id = permissions_user and permissions_user != ".$user;

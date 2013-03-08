@@ -138,33 +138,35 @@ window.onload = function()
 <?php
 // require_once(".htconnect.php");
 // require_once("__dbHelp.php");
-require_once("errorHandler.php");
+// require_once("errorHandler.php");
+// $error = new errorHandler;
 importJs();
 
-$error = new errorHandler;
 // echo " <input type=text name='asd' id='asd' value='asdqwe'/> ";
 
 $newUser = isset($_GET['makeUser']);
-echo "<form method=post name='application' id='application'>";
+$action = "makeNewUser();";
+echo "<form method=post name='application' id='application' style='width: 600px;'>";
 	echo "<table>";
 		echo "<tr>";
-			echo "<td><font size=5px>Personal information</font></td>";
+			echo "<td colspan=2><font size=5px>Personal information</font></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
-			echo "<td><font size=2px>All fields are mandatory</font></td>";
+			echo "<td colspan=2><font size=2px>All fields are mandatory</font></td>";
 		echo "</tr>";
-	echo "</table>";
 
-	echo "<table border=0>";
 		echo "<tr><td colspan=2><br></td></tr>";
 		echo "<tr>";
 			echo "<td width=100px>First name</td>";
 			echo "<td><input type=text name='First name' id='First name'></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>Last name</td>";
 			echo "<td><input type=text name='Last name' id='Last name'></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>Department</td>";
 			echo "<td>";
@@ -181,11 +183,12 @@ echo "<form method=post name='application' id='application'>";
 				}
 				else{
 					$extra = "type='text'";
-					echo "\tOther ";
+					echo " Other ";
 				}
 				echo "<input ".$extra." name='GEDepartment' id='GEDepartment' value='' />";
 			echo "</td>";
 		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>Institute</td>";
 			echo "<td><input type=text name=Institute id=Institute size=35></td>";
@@ -194,29 +197,32 @@ echo "<form method=post name='application' id='application'>";
 			echo "<td>Work phone</td>";
 			echo "<td><input type=text name=Phone id='Phone'></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>Phone extension</td>";
 			echo "<td><input type=text name='Phone extension' id='Phone extension'></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>Mobile</td>";
 			echo "<td><input type=text name='Mobile' id='Mobile'></td>";
 		echo "</tr>";
+		
 		echo "<tr>";
 			echo "<td>Email</td>";
 			echo "<td><input type=text name='Email' id='Email'></td>";
 		echo "</tr>";
-		echo "<tr><td><br></td><td></td></tr>";
 	echo "</table>";
 
+	echo "<br>";
+	
 	if(!$newUser){
-		echo "<table><tr><td><font size=5px>Select the resource you want to use</font></td></tr>";
+		$action = "validate_form();";
+		echo "<table><tr><td colspan=2><font size=5px>Select the resource you want to use</font></td></tr>";
 			echo "<tr>";
-				echo "<td><font size=2px>If you don't know how to use the equipment ask for assistance</font></td>";
+				echo "<td colspan=2><font size=2px>If you don't know how to use the equipment ask for assistance</font></td>";
 			echo "</tr>";
-		echo "</table>";
-		
-		echo "<table border=0>";
+
 			echo "<tr>";
 				echo "<td colspan=2><br></td>";
 			echo "</tr>";
@@ -227,7 +233,7 @@ echo "<form method=post name='application' id='application'>";
 					// $sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
 					$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id";
 					echo "<option id=0>Select Resource...</option>";
-					$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
+					$res = dbHelp::query($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
 					while($row = dbHelp::fetchRowByIndex($res)){
 						echo "<option value='".$row[0]."'>".$row[1]."</option>";
 					}
@@ -238,19 +244,17 @@ echo "<form method=post name='application' id='application'>";
 				echo "<td>Resource</td>";
 				echo "<td><select name=Resource id=Resource></select></td>";
 			echo "</tr>";
-			echo "<tr><td><br></td><td></td></tr>";
 		echo "</table>";
 
-		echo "<table border=0>";
-			echo "<tr><td><input type=button value=Submit onclick=\"javascript:validate_form();\"></td></tr>";
-		echo "</table>";
-	}
-	else{
-		echo "<table border=0>";
-			echo "<tr><td><input type=button value=Submit onclick='makeNewUser()'></td></tr>";
-		echo "</table>";
+		echo "<br>";
+		// echo "<table border=0>";
+			// echo "<tr><td><input type=button value=Submit onclick=\"javascript:validate_form();\"></td></tr>";
+		// echo "</table>";
 	}
 
+	echo "<table border=0>";
+		echo "<tr><td><input type=button value=Submit onclick='".$action."'></td></tr>";
+	echo "</table>";
 echo "</form>";
 
 ?>
