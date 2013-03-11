@@ -64,7 +64,7 @@
 				";
 				$sqlDep2 = "order by department_name, project_name";
 				if($isAdmin === false){
-					$sqlDep1 .= "department_manager = :0 ";
+					$sqlDep1 .= "and department_manager = :0 ";
 					$dataArray[] = $_SESSION['user_id']; 
 				}
 				$sqlDep1 .= $sqlDep2;
@@ -94,6 +94,10 @@
 						echo "</td>";
 					echo "</tr>";
 				echo "</table>";
+				
+				if(dbHelp::numberOfRows($prep) == 0){
+					showMsg('There are no projects associated to the department(s) you are manager of');
+				}
 				
 				while($row){
 					if($previousDepartment != $row['department_id']){

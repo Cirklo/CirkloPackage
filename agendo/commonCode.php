@@ -696,8 +696,13 @@
 
 		if($result === false){
 			$exceptionMessage = "Unable to send the email:";
-			throw new Exception($exceptionMessage." ".strip_tags($echoStr));
+			if($throwException){
+				throw new Exception($exceptionMessage." ".strip_tags($echoStr));
+			}
+			return $echoStr;
 		}
+		
+		return true;
 	}
 	
 	function getHappyHoursFromResource($resource){
@@ -886,6 +891,10 @@
 		return $protocol;
 	}
 	
+	// gets the current file path
+	function get_server_address(){
+		return getProtocol()."://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+	}
 	
 	// config params functions ****************
 	function use_projects(){
