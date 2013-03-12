@@ -705,6 +705,40 @@
 		return true;
 	}
 	
+	function generate_password(){
+		$vowels="aeiyou";
+		$consonants="bcdfghjklmnpqrstvwxz";
+		$pwd='';
+		for ($i = 0; $i < 8; $i++) {
+			if ($i%2==0) {
+				$pwd.=$consonants[rand(0,strlen($consonants)-1)];
+			} else {
+				$pwd.=$vowels[rand(0,strlen($vowels)-1)];
+			}
+		}
+		
+		return $pwd;
+	}
+	
+	// generates non existing code
+	function generate_random_code($insertNewCodeInDb = true){
+		$sql = "select pending_code from pending where pending_code = :0";
+		$dontExit = true;
+		while(isset($dontExit)){
+			$code = generate_password();
+			$prep = dbHelp::query($sql, array($code));
+			$row = dbHelp::fetchRowByIndex($prep);
+			$dontExit = $row[0];
+		}
+		
+		if($insertNewCodeInDb){
+			$sql = "insert into pending values (null, '".$code."')";
+			dbHelp::query($sql);
+		}
+		
+		return $code;
+	}
+	
 	function getHappyHoursFromResource($resource){
 		$hhArray = array();
 		

@@ -6,16 +6,64 @@ if(isset($_POST['makeUser']) && $_POST['makeUser'] == true){
 	exit;
 }
 
+if(isset($_GET['code']) && $_GET['code'] != ''){
+	// a check is made in ajaxdpt.php to make sure the login and email dont exist already in the database
+	$login = generate_login($_GET['first'], $_GET['last'], $_GET['mail']);
+	$pass = generate_password();
+	insert_user(array($login, cryptPassword($pass), $_GET['first'], $_GET['last'], $_GET['dep'], $_GET['phone'], $_GET['ext'], $_GET['mobile'], $_GET['mail']));
+	
+	// get the user id
+	$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_email = :0";
+	$prep = dbHelp::query($sql, array($_GET['mail']));
+	$row = dbHelp::fetchRowByIndex($prep);
+	$userId = $row[0];
+	
+	// get the resource name
+	$sql = "select resource_name, user_email, user_firstname, user_lastname from resource join ".dbHelp::getSchemaName().".user on user_id = resource_resp where resource_id = :0";
+	$prep = dbHelp::query($sql, array($_GET['res']));
+	$row = dbHelp::fetchRowByIndex($prep);
+	$resName = $row[0];
+	$managerMail = $row[1];
+	$managerName = $row[2]." ".$row[2]
+	
+	// give user access to the requested resource
+	$sql = "insert into permissions values(NULL, ".$userId.", :0, 1, 0, NULL)";
+	$prep = dbHelp::query($sql, array($_GET['res']));
+	
+	// mail user with is login data
+	$subject = "Agendo: You have been added";
+	$message = "You have been added to agendo and have permission to use the resource '".$resName."'";
+	$message .= "\nYour login data is:";
+	$message .= "\nlogin: ".$login;
+	$message .= "\npassword: ".$pass;
+	$mail = getMailObject($subject, $_GET['mail'], $message, $replyToPerson, $managerMail);
+	sendMailObject($mail);
+	
+	echo "User has been added, access to the resource has been given and an email has been sent to the user with the login data";
+	exit;
+}
+
+function insert_user($dataArray){
+	$sql = "
+		insert into ".dbHelp::getSchemaName().".user
+			(user_login, user_passwd, user_firstname, user_lastname, user_dep, user_phone, user_phonext, user_mobile, user_email, user_alert, user_level)
+		values
+			(:0, :1, :2, :3, :4, :5, :6, :7, :8, '1', '2')
+	";
+	dbHelp::query($sql, $dataArray);
+}
+
 function makeUser(){
 	try{
-		$dataArray = $_POST['dataArray'];
-		$sql = "
-			insert into ".dbHelp::getSchemaName().".user
-				(user_login, user_passwd, user_firstname, user_lastname, user_dep, user_phone, user_phonext, user_mobile, user_email, user_alert, user_level)
-			values
-				(:0, :1, :2, :3, :4, :5, :6, :7, :8, '1', '2')
-		";
-		dbHelp::query($sql, $dataArray);
+		// $dataArray = $_POST['dataArray'];
+		// $sql = "
+			// insert into ".dbHelp::getSchemaName().".user
+				// (user_login, user_passwd, user_firstname, user_lastname, user_dep, user_phone, user_phonext, user_mobile, user_email, user_alert, user_level)
+			// values
+				// (:0, :1, :2, :3, :4, :5, :6, :7, :8, '1', '2')
+		// ";
+		// dbHelp::query($sql, $dataArray);
+		insert_user($_POST['dataArray']);
 		$json->success = true;
 		$json->message = "User inserted";
 	}
@@ -26,6 +74,46 @@ function makeUser(){
 	// wtf($json->success."--".$json->message);
 	echo json_encode($json);
 }
+
+function generate_login($firstName, $lastName, $mail){
+	$sql = "select user_login from ".dbHelp::getSchemaName().".user where pending_code = :0";
+	
+	// check if mail can be used to generate the login
+	$login = strtolower(strtok($mail,"@"));
+	$prep = dbHelp::query($sql, array($login));
+	if(dbHelp::numberOfRows($prep) == 0){
+		return $login;
+	}
+	
+	// check if mail can be used to generate the login
+	$login = strtolower(substr($firstName, 1, 1).$lastname));
+	$prep = dbHelp::query($sql, array($login));
+	
+	$length = sizeOf($firstName);
+	for($i = 0; $i < $length; $i++){
+		$login = strtolower(substr($firstName, 0, $i).$lastname));
+		$prep = dbHelp::query($sql, array($login));
+		if(dbHelp::numberOfRows($prep) == 0){
+			return $login;
+		}
+	}
+	
+	// this will get a new login fo sure, even if it takes decades
+	$i = 0;
+	$login = substr($firstName, 0, 1).$lastname;
+	while(true){
+		$i++;
+		$loginTemp = $login.$i;
+		$prep = dbHelp::query($sql, array($loginTemp));
+		if(dbHelp::numberOfRows($prep) == 0){
+			return $loginTemp;
+		}
+	}
+	
+	// this will never happen
+	return false;
+}
+	
 
 ?>
 

@@ -266,24 +266,13 @@ END:VCALENDAR";
 
 */
 function recover($user_id, $passRenewalResp = null){
-    // $sql="select user_email,user_mobile, concat(user_firstname,' ',user_lastname) name,user_alert from ".dbHelp::getSchemaName().".user where user_id=". $user_id;
-    // $sql="select user_email,user_mobile,user_alert from ".dbHelp::getSchemaName().".user where user_login='". $user_id."'";
     $sql="select user_email,user_mobile,user_alert, user_login from ".dbHelp::getSchemaName().".user where user_login=:0";
-    // $res=dbHelp::query($sql);
     $res=dbHelp::query($sql, array($user_id));
     $arr=dbHelp::fetchRowByName($res);
 	$user_id = $arr['user_login'];
-    $vowels="aeiyou";
-    $consonants="bcdfghjklmnpqrstvwxz";
-    $pwd='';
-    for ($i = 0; $i < 8; $i++) {
-        if ($i%2==0) {
-            $pwd.=$consonants[rand(0,strlen($consonants)-1)];
-        } else {
-            $pwd.=$vowels[rand(0,strlen($vowels)-1)];
-        }
-    }
-    // $sql="update user set user_passwd = password('$pwd') where user_id=". $user_id;
+	
+	require_once("../agendo/commonCode.php");
+	$pwd = generate_password();
 	$sql="update ".dbHelp::getSchemaName().".user set user_passwd = '".cryptPassword($pwd)."' where user_login='".$user_id."'";
 	$res=dbHelp::query($sql) or die('Password not updated');
 	if(dbHelp::numberOfRows($res) < 1){
@@ -330,7 +319,7 @@ function recover($user_id, $passRenewalResp = null){
 			break;
 		}
 	}
-// echo "Password updated";
+	
 	return true;
 }
 

@@ -5,13 +5,6 @@ echo "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>";
 echo "<link href='css/admin.css' rel='stylesheet' type='text/css'>";
 
 importJs();
-// require_once(".htconnect.php");
-// require_once("__dbHelp.php");
-// require_once("errorHandler.php");
-// require_once("alert/class.phpmailer.php");
-
-// $error = new errorHandler;
-// $mail = new PHPMailer;
 $address = array();
 $req = array();
 
@@ -19,41 +12,20 @@ $msg = "Reservation system new user request:\n\n";
 
 $resource = $_GET['resource'];
 $userMail = $_POST['Email'];
-$firstName = $_POST['First name'];
-$lastName = $_POST['Last name'];
+$firstName = $_POST['First_name'];
+$lastName = $_POST['Last_name'];
 $replyToPerson = $firstName." ".$lastName;
-// $sql = "SELECT configParams_name, configParams_value from configParams where configParams_name='host' or configParams_name='port' or configParams_name='password' or configParams_name='email' or configParams_name='smtpsecure' or configParams_name='smtpauth'";
-// $res = dbHelp::query($sql);
-// $configArray = array();
-// for($i=0;$arr=dbHelp::fetchRowByIndex($res);$i++){
-	// $configArray[$arr[0]] = $arr[1];
-// }
-
-// $mail->SMTPAuth   = $configArray['smtpauth'];
-// $mail->SMTPSecure = $configArray['smtpsecure'];
-// $mail->Port       = $configArray['port'];
-// $mail->Host       = $configArray['host'];
-// $mail->Username   = $configArray['email'];
-// $mail->Password   = $configArray['password'];
-// $mail->IsSMTP(); // telling the class to use SMTP
-// $mail->SMTPDebug  = 1;                     // enables SMTP debug information (for testing)
-// $mail->SetFrom($configArray['email'], "Calendar administration");
 
 // Would only send an email to the person responsible for the equipment
-// $sql = "SELECT user_email from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_name LIKE :0";
 $sql = "SELECT user_email from ".dbHelp::getSchemaName().".user, resource WHERE user_id = resource_resp AND resource_id = :0";
 // Sends to all users with admin level (Bugworkers)
 // $sql = "SELECT user_email from ".dbHelp::getSchemaName().".user WHERE user_level = 0";
-// $mail->ClearReplyTos();	//clear replys before receiving any email
 $res = dbHelp::query($sql, array($resource));
 $row = dbHelp::fetchRowByIndex($res);
 $address = $row[0];
 // while ($row = dbHelp::fetchRowByIndex($res)){
 	// $mail->AddAddress($row[0], "");
 // }
-// $mail->Subject = "Calendar administration: new user";
-// $mail->Body = $msg;
-// $mail->AddReplyTo($userMail, "User");
 $department = null;
 $isHtml = false;
 $msg = "";
@@ -61,18 +33,45 @@ if(isset($_GET['department']) && $_GET['department'] != ''){
 	$department = $_GET['department'];
 	$mobile = $_POST['Mobile'];
 	$phone = $_POST['Phone'];
-	$extension = $_POST['Phone extension'];
+	$extension = $_POST['Phone_extension'];
 	$isHtml = true;
 	
-	$msg = "Create user by clicking the link:";
+	$msg = "The user with the following data has requested to be added and permissions to use the resource '".$_POST['Resource']."':";
 	$msg .= "<br>";
-	$getLink = getProtocol()."://".$_SERVER['SERVER_NAME']."/agendo/application.php?path=".$_SESSION['path']."&db=".dbHelp::getSchemaName()."&first=".$firstName."&last=".$lastName."&mail=".$userMail."&phone=".$phone."&ext=".$extension."&department=".$department."&mobile=".$mobile."";
-	
-	$msg .= "<a href='".htmlentities($getLink)."'>Add user</a>";
+	$msg .= "First name: ".$firstName;
 	$msg .= "<br>";
-	$msg .= "You may mail the user by clicking below";
+	$msg .= "Last name: ".$lastName;
 	$msg .= "<br>";
-	$msg .= "<a href='mailto:".$userMail."?Subject=New%20user'>Mail user</a>";
+	$msg .= "Mail: ".$userMail;
+	$msg .= "<br>";
+	$msg .= "Phone number: ".$phone;
+	$msg .= "<br>";
+	$msg .= "Extension: ".$extension;
+	$msg .= "<br>";
+	$msg .= "Institute: ".$_POST['Institute'];
+	$msg .= "<br>";
+	$msg .= "Department: ".$_POST['Department'];
+	$msg .= "<br>";
+	$msg .= "Mobile: ".$mobile;
+	$msg .= "<br>";
+	$msg .= "Resource: ".$_POST['Resource'];
+	$msg .= "<br>";
+	$msg .= "<br>";
+	$getLink = getProtocol()."://".$_SERVER['SERVER_NAME']."/agendo/application.php";
+	$getLink .= "?path=".$_SESSION['path'];
+	// $getLink .= "&db=".dbHelp::getSchemaName();
+	$getLink .= "&first=".$firstName;
+	$getLink .= "&last=".$lastName;
+	$getLink .= "&mail=".$userMail;
+	$getLink .= "&phone=".$phone;
+	$getLink .= "&ext=".$extension;
+	$getLink .= "&dep=".$department;
+	$getLink .= "&mobile=".$mobile;
+	$getLink .= "&res=".$resource;
+	$getLink .= "&code=".generate_random_code();
+	$msg .= "If everything is correct you may add the user by clicking this <a href='".htmlentities($getLink)."'>link</a>";
+	$msg .= "<br>";
+	$msg .= "You may mail the user by clicking this <a href='mailto:".$userMail."?Subject=New%20user'>link</a>";
 }
 else{
 	//PERSONAL INFORMATION LOOP
@@ -84,7 +83,6 @@ else{
 	}
 }
 
-// wtf_array(array("Calendar administration: new user", $address, $replyToPerson, $userMail));
 $mail = getMailObject("Calendar administration: new user", $address, $msg, $replyToPerson, $userMail);
 $mail->isHtml($isHtml);
 
