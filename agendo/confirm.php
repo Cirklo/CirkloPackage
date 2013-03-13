@@ -36,7 +36,7 @@ if(isset($_GET['department']) && $_GET['department'] != ''){
 	$extension = $_POST['Phone_extension'];
 	$isHtml = true;
 	
-	$msg = "The user with the following data has requested to be added and permissions to use the resource '".$_POST['Resource']."':";
+	$msg = "The user with the following data has requested to be added as well as getting permission to use the resource '".$_POST['Resource']."':";
 	$msg .= "<br>";
 	$msg .= "First name: ".$firstName;
 	$msg .= "<br>";
