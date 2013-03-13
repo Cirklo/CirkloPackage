@@ -19,7 +19,7 @@ $specialFieldsArray = array(
 
 // $idArray = array();
 $departmentId = "";
-$getData = "";
+$getData = "?resource=".$_POST['Resource'];
 if(
 	isset($_POST['Department']) && $_POST['Department'] != '' && $_POST['Department'] != '0'
 	&& isset($_POST['Resource']) && $_POST['Resource'] != '' && $_POST['Resource'] != '0'
@@ -38,8 +38,6 @@ echo "<form method=post name=application action='confirm.php".$getData."'>";
 			if(isset($value) && $value != '0' && $value != ''){
 				if($key == 'GEDepartment'){
 					$key = 'Department';
-					echo "<tr style='display:none;'><td>sendEmail</td><td><input type=text class=reg name='sendEmail' id='sendEmail' value='' readonly=readonly size=35></td></tr>";
-					// send email
 				}
 				elseif(isset($specialFieldsArray[$key])){
 					// this is terrible, but it was either to work around the original code or redo everything, so terrible it stays

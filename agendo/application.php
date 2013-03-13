@@ -24,11 +24,15 @@ if(isset($_GET['code']) && $_GET['code'] != ''){
 	$row = dbHelp::fetchRowByIndex($prep);
 	$resName = $row[0];
 	$managerMail = $row[1];
-	$managerName = $row[2]." ".$row[2]
+	$managerName = $row[2]." ".$row[2];
 	
 	// give user access to the requested resource
 	$sql = "insert into permissions values(NULL, ".$userId.", :0, 1, 0, NULL)";
 	$prep = dbHelp::query($sql, array($_GET['res']));
+	
+	// remove code from db
+	$sql = "delete from pending where pending_code = :0";
+	$prep = dbHelp::query($sql, array($_GET['code']));
 	
 	// mail user with is login data
 	$subject = "Agendo: You have been added";
@@ -76,7 +80,7 @@ function makeUser(){
 }
 
 function generate_login($firstName, $lastName, $mail){
-	$sql = "select user_login from ".dbHelp::getSchemaName().".user where pending_code = :0";
+	$sql = "select user_login from ".dbHelp::getSchemaName().".user where user_login = :0";
 	
 	// check if mail can be used to generate the login
 	$login = strtolower(strtok($mail,"@"));
@@ -86,12 +90,12 @@ function generate_login($firstName, $lastName, $mail){
 	}
 	
 	// check if mail can be used to generate the login
-	$login = strtolower(substr($firstName, 1, 1).$lastname));
+	$login = strtolower(substr($firstName, 1, 1).$lastname);
 	$prep = dbHelp::query($sql, array($login));
 	
 	$length = sizeOf($firstName);
 	for($i = 0; $i < $length; $i++){
-		$login = strtolower(substr($firstName, 0, $i).$lastname));
+		$login = strtolower(substr($firstName, 0, $i).$lastname);
 		$prep = dbHelp::query($sql, array($login));
 		if(dbHelp::numberOfRows($prep) == 0){
 			return $login;
