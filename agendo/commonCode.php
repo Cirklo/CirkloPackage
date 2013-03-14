@@ -698,7 +698,7 @@
 			$exceptionMessage = "Unable to send the email:";
 			if($throwException){
 				// throw new Exception($exceptionMessage." ".nl2br(strip_tags($echoStr)));
-				throw new Exception($exceptionMessage." ".str_replace(array("\r\n", "\n"), "<br />", strip_tags($echoStr)));
+				throw new Exception($exceptionMessage." ".str_replace(array("\r\n", "\r", "\n"), "<br />", strip_tags($echoStr)));
 			}
 			return $echoStr;
 		}

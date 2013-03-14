@@ -347,7 +347,7 @@
 				*
 			from
 				((
-					select 
+					select
 						department_id,
 						department_name,
 						user_id,
@@ -362,8 +362,8 @@
 						entrystatus,
 						price_value,
 						units,
-						@discount := sequencingDiscount() as discount,
 						@subtotal := units * price_value as subtotal,
+						@discount := @subtotal * sequencingDiscount(entry_resource, entry_datetime) / 100 as discount,
 						@subtotal - @discount as total
 					from (
 						select
@@ -378,6 +378,7 @@
 							ifnull(project_name, 'No project') as project_name,
 							entry_datetime,
 							entry_status,
+							entry_resource,
 							if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
 							ifnull(price_value, 0) as price_value,
 							count(item_id) as units

@@ -313,7 +313,7 @@ function swapColor(obj,tag,action){
 }
 
 // this function enables and disables end date for repetitions
-function activate_date(objInp){ objInp.disabled=(objInp.disabled^ true );} // exclusive or? (disabled=true)^true=> false, (disabled=false)^true=> true ?? how about objInp.disabled = !objInp.disabled ? :P 
+function activate_date(objInp){ objInp.disabled=(objInp.disabled^ true );} // exclusive or? (disabled=true)^true=> false, (disabled=false)^true=> true ?? kept for being awesome :P 
 
 function clear_table(table,cleartitle){
     var i,j,bg;
