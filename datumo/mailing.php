@@ -79,6 +79,9 @@ function sendMail(){
 			function (data){
 				$.jnotify(data);
 				document.body.style.cursor = 'default';
+				$("#subject").val("");
+				$("#mailMessage").val("");
+				$("#mailList")[0].selectedIndex = -1;
 			});
 	}
 }
@@ -163,7 +166,7 @@ echo "</select>";
 echo "<div lang=exp style='border:0px solid;position:relative;float:left;overflow:auto;margin-top:20px' id=mailDiv>";
 echo "</div>";
 echo "</div>";
-echo "<divlang=exp  style='position:relative;float:right;padding-left:10px;margin-top:10px;margin-right:20px;'>";
+echo "<div lang=exp  style='position:relative;float:right;padding-left:10px;margin-top:10px;margin-right:20px;'>";
 echo "Message<br>";
 echo "<textarea name=mailMessage id=mailMessage rows=10 cols=30></textarea>";
 echo "</div>";

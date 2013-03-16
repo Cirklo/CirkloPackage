@@ -38,6 +38,7 @@ function header_nav($user_id){
 			echo "<li><a>Reports</a>";
 				echo "<ul class=dropdown>"; 
 					echo "<li><a href=../agendo/hoursUsage.php>Usage report</a></li>";
+					/*
 					$plots=$menu->getPlots();
 					echo "<li class='rtarrow'><a>Plots</a>";
 						echo "<ul>";
@@ -47,6 +48,7 @@ function header_nav($user_id){
 						}
 						echo "</ul>";
 					echo "</li>";
+					*/
 					//display export to Excel option if the current table is a view
 					if(isset($table) and ($display->checkTableType($table) or $level==0))
 						echo "<li><a href=excel.php?table=$table title='Export data to xls file'>Export to Excel</a></li>";
@@ -54,20 +56,24 @@ function header_nav($user_id){
 			echo "</li>";
 			echo "<li><a>Tools</a>";
 				echo "<ul class=dropdown>";
-					echo "<li title='Set resource for local confirmation'><a href=../agendo/makeConfirmRes.php>In site confirmation</a></li>";
+					echo "<li title='Set resource for local confirmation'><a href=../agendo/makeConfirmRes.php>Onsite confirmation</a></li>";
 					echo "<li title='Give resource permissions to user'><a href=../agendo/givePermission.php>Resource permission</a></li>";
+					echo "<li title='Project managements'><a href=../agendo/projAssign.php>Project management</a></li>";
+					echo "<li title='Resource alerts settings'><a href=../agendo/mailListAssign.php>Resource alerts configuration</a></li>";
 					echo "<li title='Send a message to other Agendo user'><a href=mailing.php>Send message</a></li>";
 					echo "<li><a href=resupload.php>Resource image upload</a></li>";
-					echo "<li title='Generate random passwords for multiple users'><a href=../agendo/massPassRenewal.php>Password generator</a></li>";
+					echo "<li title='Generate random passwords for multiple users'><a href=../agendo/massPassRenewal.php>Reset passwords</a></li>";
 				echo "</ul>"; 
 			echo "</li>";
 			echo "<li><a>Help</a>";
 				echo "<ul class=dropdown>";
-					echo "<li><a href=http://www.cirklo.org/datumo_help.php target=_blank>Help</a></li>";
-					echo "<li><a href=http://www.youtube.com/user/agendocirklo target=_blank>Tutorials</a></li>";
+					echo "<li><a href=http://wiki.cirklo.org target=_blank>Wiki</a></li>";
+					echo "<li><a href=http://www.youtube.com/user/agendocirklo target=_blank>Video tutorials</a></li>";
+					echo "<li><a href='http://www.cirklo.org/support' target=_blank>Helpdesk</a></li>";
 				echo "</ul>"; 
 			echo "</li>";
-			echo "<li><a href=javascript:void(0) onclick=window.open('helpdesk.php','_blank','height=400px,width=365px,resizable=no,menubar=no')>Helpdesk</a>";
+//			echo "<li><a href='http://www.cirklo.org/support' target=_blank>Support</a></li>";
+//			echo "<li><a href=javascript:void(0) onclick=window.open('helpdesk.php','_blank','height=400px,width=365px,resizable=no,menubar=no')>Helpdesk</a>";
 			echo "<li><a>About</a>";
 				echo "<ul class=dropdown>";
 					echo "<li><a href=http://www.cirklo.org/datumo.php target=_blank>Datumo</a></li>";
@@ -348,11 +354,16 @@ function sendMail(){
 					IN (SELECT resource_resp FROM resource WHERE resource_id=$row[0])";
 					$sql_=$conn->query($query_);
 					for($j=0;$row_=$sql_->fetch();$j++){
-						$address[]=$row[0];
+						$address[] = $row_[0];
 					}
 				}
 			}	
 			break;
+	}
+	
+	// remove duplicated values
+	if (is_array($address)){
+		$address = array_unique($address);
 	}
 	
 	//send output
