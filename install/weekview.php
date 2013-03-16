@@ -531,46 +531,63 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						// project listing goes here
 						if(isset($_SESSION['user_id']) && $_SESSION['user_id']!='' && !$imResstatus6){
-							$sql = "
-								select
-									project_name, project_id, department_default
-								from
-									project join proj_dep_assoc on project_id = proj_dep_assoc_project
-									join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
-									join department on department_id = user_dep
-								where
-									user_id = :0
-									and proj_dep_assoc_active = 1
-								order by
-									project_name
-							";
-							$prep = dbHelp::query($sql, array($_SESSION['user_id']));
-							if(dbHelp::numberOfRows($prep) > 0){
-								echo "<tr><td colspan=2><hr></td></tr>";
+							// $sql = "
+								// select
+									// project_name, project_id, department_default
+								// from
+									// project join proj_dep_assoc on project_id = proj_dep_assoc_project
+									// join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
+									// join department on department_id = user_dep
+								// where
+									// user_id = :0
+									// and proj_dep_assoc_active = 1
+									// and proj_dep_assoc_visible = 1
+								// order by
+									// project_name
+							// ";
+							// $prep = dbHelp::query($sql, array($_SESSION['user_id']));
+							// if(dbHelp::numberOfRows($prep) > 0){
+							if(use_projects()){
+								if(($default_project = get_default_project($_SESSION['user_id'])) === false){
+									showMsg('There is no valid default project, it will not be possible to add entries', true);
+								}
+								elseif(($projects = get_projects($_SESSION['user_id'])) === false){ // not really needed, if there's a default then there's at least on valid project
+									showMsg('There are no projects for this department, it will not be possible to add entries', true);
+								}
+								else{
+									echo "<tr><td colspan=2><hr></td></tr>";
 
-								echo "<tr>";
-									echo "<td colspan=2 style='text-align:center;'>";
-										echo "Project: ";
-										echo "<select id='projectList' style='width:100px;'>";
-											while($res = dbHelp::fetchRowByIndex($prep)){
-												$isSelected = "";
-												if($res[1] == $res[2]){
-													$isSelected = "selected='selected'";
-												}
-												echo "<option value='".$res[1]."' ".$isSelected." title='".$res[0]."'>".$res[0]."</option>";
-											}
-											echo "
-												<script>
-													var projectList = document.getElementById('projectList').options;
-													var originalProjects = new Array();
-													for(var i in projectList){
-														originalProjects[i] = projectList[i];
+									echo "<tr>";
+										echo "<td colspan=2 style='text-align:center;'>";
+											echo "Project: ";
+											echo "<select id='projectList' style='width:100px;'>";
+												// while($res = dbHelp::fetchRowByIndex($prep)){
+												foreach($projects as $project){
+													$isSelected = "";
+													// if($res[1] == $res[2]){
+													if($project['id'] === $default_project['id']){
+														$isSelected = "selected='selected'";
 													}
-												</script>
-											";
-										echo "</select>";
-									echo "</td>";
-								echo "</tr>";
+													echo "<option value='".$project['id']."' ".$isSelected." title='".$project['name']."'>".$project['name']."</option>";
+												}
+												
+												// $extraScript = "";
+												// if($default_project === false){
+													// $extraScript = "showMessage('There is no default department, it will not be possible to add/update entries', true);";
+												// }
+												echo "
+													<script>
+														var projectList = document.getElementById('projectList').options;
+														var originalProjects = new Array();
+														for(var i in projectList){
+															originalProjects[i] = projectList[i];
+														}
+													</script>
+												";
+											echo "</select>";
+										echo "</td>";
+									echo "</tr>";
+								}
 							}
 						}
 						// ***************************************************
@@ -621,10 +638,10 @@ echo "<table id='master' style='margin:auto' width=750>";
 				echo "<input name=action lang=send style='visibility:hidden;font-size:0px' value='' id=action>";
 				//echo "<input name=maxslots  style='visibility:hidden;font-size:0px' value='' id=maxslots>";
 				echo "<input name=code lang=send style='visibility:hidden;font-size:0px' value='' id=code>";
-				echo "<input name=resource lang=send style='visibility:hidden;font-size:0px' value=". $calendar->getResource() . " id=resource>";
-				echo "<input name=entry lang=send style='visibility:hidden;font-size:0px' value=". $calendar->getEntry(). " id=entry>";
-				echo "<input name=update lang=send style='visibility:hidden;font-size:0px' value=". $update. " id=update>";
-				echo "<input name=tdate style='visibility:hidden;font-size:0px' value=". $calendar->getStartDate() . " id=tdate>";
+				echo "<input name=resource lang=send style='visibility:hidden;font-size:0px' value=".$calendar->getResource()." id=resource>";
+				echo "<input name=entry lang=send style='visibility:hidden;font-size:0px' value=".$calendar->getEntry()." id=entry>";
+				echo "<input name=update lang=send style='visibility:hidden;font-size:0px' value=".$update." id=update>";
+				echo "<input name=tdate style='visibility:hidden;font-size:0px' value=".$calendar->getStartDate()." id=tdate>";
 				echo "</form>";
 				//GET announcements
 
@@ -820,13 +837,35 @@ echo "</html>";
 		$json = new stdClass();
 		$projects = array();
 		$projectDefault = null;
-		$prep = dbHelp::get_projs_and_default_prep($_POST['user']);
-		while($row = dbHelp::fetchRowByName($prep)){
-			$projects[$row['project_id']] = $row['project_name'];
-			$projectDefault = $row['department_default'];
+		$user = $_POST['user'];
+		// $sql = "
+			// select 
+				// project_id, project_name, department_default 
+			// from 
+				// project join proj_dep_assoc on project_id = proj_dep_assoc_project
+				// join department on proj_dep_assoc_department = department_id
+				// join ".dbHelp::getSchemaName().".user on department_id = user_dep
+			// where
+				// user_id = :0
+				// and proj_dep_assoc_visible = 1
+				// and proj_dep_assoc_active = 1
+		// ";
+			
+		// $prep = dbHelp::query($sql, array($user));
+
+		// $prep = dbHelp::get_projs_and_default_prep($_POST['user']);
+		// while($row = dbHelp::fetchRowByName($prep)){
+			// $projects[$row['project_id']] = $row['project_name'];
+			// $projectDefault = $row['department_default'];
+		// }
+		
+		// $json->defaultProject = $projectDefault;
+		// $json->projects = $projects;
+		if(use_projects() && ($projectDefault = get_default_project($user)) === false){
+			throw new Exception("There is no default project or it is either inactive or invisible");
 		}
 		$json->defaultProject = $projectDefault;
-		$json->projects = $projects;
+		$json->projects = get_projects($user);
 		echo json_encode($json);
 		// return array('default' => , 'projects' => $projects);
 	}

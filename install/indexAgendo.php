@@ -189,9 +189,9 @@ if (isset($_GET['class'])) {
 					echo "<span ><a href='http://www.facebook.com/pages/Cirklo/152674671417637' target=_blank><img src=pics/fb.png width=45px  border=0 title='Visit our Facebook page'></a></span>";
 					echo "&nbsp;";
 					//twitter -> Why the hell do we need this?
-					echo "<span ><a href='http://www.twitter.com/cirklo2010' target=_blank><img src=pics/twitter.png width=45px border=0 title='Follow us at Twitter'></a></span>";
-					echo "&nbsp;";
-					echo "&nbsp;";
+					// echo "<span ><a href='http://www.twitter.com/cirklo2010' target=_blank><img src=pics/twitter.png width=45px border=0 title='Follow us at Twitter'></a></span>";
+					// echo "&nbsp;";
+					// echo "&nbsp;";
 					//You tube feature videos
 					echo "<span ><a href='http://www.youtube.com/user/agendocirklo' target=_blank><img src=pics/youtube.png width=45px border=0 title='Feature videos'></a></span>";
 				echo "</div>"; 			
