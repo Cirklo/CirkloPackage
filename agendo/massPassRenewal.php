@@ -36,8 +36,8 @@ require_once("commonCode.php");
 			}
 		}
 		catch(Exception $e){
-			$error = true;
-			$msg = "Error: ".$e->getMessage();
+			$json->error = true;
+			$json->msg = "Error: ".$e->getMessage();
 		}
 		
 		echo json_encode($json);
