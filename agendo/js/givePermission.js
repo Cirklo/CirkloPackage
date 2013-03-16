@@ -46,9 +46,8 @@ function sendUserAndResourceList(){
 	
 	if(!resourcesSelectedFlag){
 		showMessage('Please select at least one resource');
-	}
-			
-	if(toList.length > 0){
+	}		
+	else if(toList.length > 0){
 		var sendMails = document.getElementById('emailCheck').checked;
 		var addedText = "";
 		if(sendMails){
