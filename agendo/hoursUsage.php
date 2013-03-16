@@ -16,10 +16,16 @@
 	$userLevels = getUserLevels($isAdmin, $isPI, $isResp, $userLevel);
 	$userLevelArray = array(
 		'admin' => ""
-		,'pi' => "and department_id in (".implode(',', $isPI).")"
-		,'resp' => 'and resource_id in ('.implode(',', $isResp).')'
 		,'user' => 'and user_id = '.intval($_SESSION['user_id'])
 	);
+	if($isPI !== false){
+		$userLevelArray['pi'] = "and department_id in (".implode(',', $isPI).")";
+	}
+	
+	if($isResp !== false){
+		$userLevelArray['resp'] = "and resource_id in (".implode(',', $isResp).")";
+	}
+	
 	$userLevelSql = $userLevelArray[$userLevel];
 
 	$htmlDisplayArray = array();
