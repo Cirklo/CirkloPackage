@@ -4,7 +4,7 @@ require_once("commonCode.php");
 	if(isset($_POST['userId']) && isset($_POST['userLogins'])){
 		$json = new stdClass();
 		try{
-			if(!isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) === false){
+			if(!isAdmin($_SESSION['user_id']) && isResp($_SESSION['user_id']) === false){
 				throw new Exception("You are not allowed to perform this action");
 			}
 			
@@ -36,8 +36,8 @@ require_once("commonCode.php");
 			}
 		}
 		catch(Exception $e){
-			$error = true;
-			$msg = "Error: ".$e->getMessage();
+			$json->error = true;
+			$json->msg = "Error: ".$e->getMessage();
 		}
 		
 		echo json_encode($json);
