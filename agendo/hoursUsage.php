@@ -424,9 +424,9 @@
 						entry_datetime,
 						entry_status,
 						if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
-						@pricevalue := ifnull(price_value, 0) as price_value,
+						price_value,
 						@units := entry_slots * resource_resolution as units,
-						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) as discount,
+						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, ifnull(price_value, 0), resource_resolution) as discount,
 						@subtotal := @units * @pricevalue as subtotal,
 						@subtotal - @discount as total
 					from 
