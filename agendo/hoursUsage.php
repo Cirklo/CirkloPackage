@@ -37,10 +37,10 @@
 	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'entry_datetime');
 	$htmlDisplayArray[] = array('name' => "Unit", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
 	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'resource_status', 'function' => 'htmlUnitType', 'args' => 'resource_status');
-	$htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value');
-	$htmlDisplayArray[] = array('name' => "Sub", 'select' => 'subtotal');
-	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount');
-	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total');
+	$htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value', 'function' => 'totals', 'args' => 'price_value');
+	$htmlDisplayArray[] = array('name' => "Sub", 'select' => 'subtotal', 'function' => 'totals', 'args' => 'subtotal');
+	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount', 'function' => 'totals', 'args' => 'discount');
+	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total', 'function' => 'totals', 'args' => 'total');
 	
 	if(isset($_GET['action']) && ($_GET['action'] == 'generateJson' || $_GET['action'] == 'downloadCsv')){
 		echo json_encode(generateJson());
@@ -502,7 +502,8 @@
 		
 		// $formatedValue = $hoursFloored."h : ".$minutes."m";
 		$value = $row[$args[1]];
-		return round($value / 60, 2);
+		// return round($value / 60, 2);
+		return roundFunction($value / 60);
 	}
 	
 	function htmlUnitType($row, $arg){
@@ -511,6 +512,14 @@
 		}
 		
 		return "Hours";
+	}
+	
+	function totals($row, $arg){
+		return roundFunction($row[$arg]);
+	}
+	
+	function roundFunction($value){
+		return round($value, 2);
 	}
 	
 	function htmlFilterLink($row, $argsArray){ // argsArray: id, value, column index
