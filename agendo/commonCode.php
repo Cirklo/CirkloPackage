@@ -27,13 +27,15 @@
 	}
 
 	function autocompleteAgendo(){
-		$json = new stdClass();
+		$json = array();
 		$value = strtolower($_GET['term']);
 		// $sql = "select resource_id, resource_name from resource where lower(resource_name) like '%".strtolower($value)."%' and resource_status not in (0,2)";
 		// $res = dbHelp::query($sql);
 		$sql = "select resource_id, resource_name from resource where lower(resource_name) like :0 and resource_status not in (0,2)";
 		$res = dbHelp::query($sql, array("%".$value."%"));
+		$i = -1;
 		while($arr = dbHelp::fetchRowByIndex($res)){
+			$i++;
 			$row_array['id'] = $arr[0];
 			$row_array['value'] = $arr[1];
 			$json[] = $row_array;
