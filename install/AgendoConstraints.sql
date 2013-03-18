@@ -16,30 +16,15 @@ ALTER TABLE `blacklist`
   ADD CONSTRAINT `blacklist_ibfk_1` FOREIGN KEY (`blacklist_user`) REFERENCES `user` (`user_id`);
   
   
---
--- Limitadores para a tabela `institute`
---
-ALTER TABLE `institute`
-  ADD CONSTRAINT `institute_ibfk_2` FOREIGN KEY (`institute_pricetype`) REFERENCES `pricetype` (`pricetype_id`);
+ALTER TABLE `department` ADD `department_default` INT NULL ,
+ADD INDEX ( `department_default` ) ;
 
-  
---
--- Constraints for table `item`
---
-ALTER TABLE `item`
-  ADD CONSTRAINT `item_ibfk_1` FOREIGN KEY (`item_user`) REFERENCES `user` (`user_id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `item_ibfk_2` FOREIGN KEY (`item_state`) REFERENCES `item_state` (`item_state_id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `item_ibfk_3` FOREIGN KEY (`item_resource`) REFERENCES `resource` (`resource_id`) ON UPDATE CASCADE;
 
-  
---
--- Constraints for table `item_assoc`
---
-ALTER TABLE `item_assoc`
-  ADD CONSTRAINT `item_assoc_ibfk_1` FOREIGN KEY (`item_assoc_item`) REFERENCES `item` (`item_id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `item_assoc_ibfk_2` FOREIGN KEY (`item_assoc_entry`) REFERENCES `entry` (`entry_id`) ON UPDATE CASCADE;
+ALTER TABLE `department` ADD FOREIGN KEY ( `department_default` ) REFERENCES `project` (
+`project_id`
+); 
 
-  
+
 --
 -- Constraints for table `entry`
 --
@@ -60,6 +45,31 @@ ALTER TABLE `equip`
   ADD CONSTRAINT `equip_ibfk_17` FOREIGN KEY (`equip_user`) REFERENCES `user` (`user_id`);
 
 --
+-- Limitadores para a tabela `institute`
+--
+ALTER TABLE `institute`
+  ADD CONSTRAINT `institute_ibfk_2` FOREIGN KEY (`institute_pricetype`) REFERENCES `pricetype` (`pricetype_id`);
+
+  
+--
+-- Constraints for table `item`
+--
+ALTER TABLE `item`
+  ADD CONSTRAINT `item_ibfk_1` FOREIGN KEY (`item_user`) REFERENCES `user` (`user_id`),
+  ADD CONSTRAINT `item_ibfk_2` FOREIGN KEY (`item_state`) REFERENCES `item_state` (`item_state_id`),
+  ADD CONSTRAINT `item_ibfk_3` FOREIGN KEY (`item_resource`) REFERENCES `resource` (`resource_id`),
+  ADD CONSTRAINT `item_ibfk_4` FOREIGN KEY (`item_project`) REFERENCES `project` (`project_id`);
+
+  
+--
+-- Constraints for table `item_assoc`
+--
+ALTER TABLE `item_assoc`
+  ADD CONSTRAINT `item_assoc_ibfk_1` FOREIGN KEY (`item_assoc_item`) REFERENCES `item` (`item_id`),
+  ADD CONSTRAINT `item_assoc_ibfk_2` FOREIGN KEY (`item_assoc_entry`) REFERENCES `entry` (`entry_id`);
+
+  
+--
 -- Constraints for table `measure`
 --
 ALTER TABLE `measure`
@@ -73,7 +83,7 @@ ALTER TABLE `permissions`
   ADD CONSTRAINT `permissions_ibfk_5` FOREIGN KEY (`permissions_resource`) REFERENCES `resource` (`resource_id`),
   ADD CONSTRAINT `permissions_ibfk_6` FOREIGN KEY (`permissions_level`) REFERENCES `permlevel` (`permlevel_id`),
   ADD CONSTRAINT `permissions_ibfk_7` FOREIGN KEY (`permissions_training`) REFERENCES `bool` (`bool_id`),
-  ADD CONSTRAINT `permissions_ibfk_8` FOREIGN KEY (`permissions_project_default`) REFERENCES `project` (`project_id`);
+  ADD CONSTRAINT `permissions_ibfk_8` FOREIGN KEY (`permissions_sendmail`) REFERENCES `bool` (`bool_id`);
   
 ALTER TABLE permissions add unique (`permissions_user`, `permissions_resource`);
 
@@ -95,9 +105,12 @@ ALTER TABLE `price`
 --
 -- Constraints for table `proj_dep_assoc`
 --
+  
 ALTER TABLE `proj_dep_assoc`
   ADD CONSTRAINT `proj_dep_assoc_ibfk_1` FOREIGN KEY (`proj_dep_assoc_project`) REFERENCES `project` (`project_id`),
-  ADD CONSTRAINT `proj_dep_assoc_ibfk_2` FOREIGN KEY (`proj_dep_assoc_department`) REFERENCES `department` (`department_id`);
+  ADD CONSTRAINT `proj_dep_assoc_ibfk_2` FOREIGN KEY (`proj_dep_assoc_department`) REFERENCES `department` (`department_id`),
+  ADD CONSTRAINT `proj_dep_assoc_ibfk_3` FOREIGN KEY (`proj_dep_assoc_active`) REFERENCES `bool` (`bool_id`),
+  ADD CONSTRAINT `proj_dep_assoc_ibfk_4` FOREIGN KEY (`proj_dep_assoc_visible`) REFERENCES `bool` (`bool_id`);
   
 ALTER TABLE proj_dep_assoc ADD UNIQUE (proj_dep_assoc_project, proj_dep_assoc_department);
 --
@@ -147,4 +160,11 @@ ALTER TABLE `xfields`
 ALTER TABLE `xfieldsval`
   ADD CONSTRAINT `xfieldsval_ibfk_2` FOREIGN KEY (`xfieldsval_field`) REFERENCES `xfields` (`xfields_id`),
   ADD CONSTRAINT `xfieldsval_ibfk_3` FOREIGN KEY (`xfieldsval_entry`) REFERENCES `entry` (`entry_id`) ON DELETE CASCADE;
+
+  
+ALTER TABLE `happyhour`
+  ADD CONSTRAINT `happyhour_ibfk_2` FOREIGN KEY (`happyhour_endday`) REFERENCES `weekday` (`weekday_id`),
+  ADD CONSTRAINT `happyhour_ibfk_1` FOREIGN KEY (`happyhour_startday`) REFERENCES `weekday` (`weekday_id`);
+
+
 

@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `blacklist` (
   PRIMARY KEY (`blacklist_id`),
   UNIQUE KEY `blacklist_user_2` (`blacklist_user`),
   KEY `blacklist_user` (`blacklist_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
 --
@@ -116,21 +116,21 @@ CREATE TABLE IF NOT EXISTS `equip` (
 --
 -- Table structure for table `happyhour`
 --
+
 CREATE TABLE IF NOT EXISTS `happyhour` (
   `happyhour_id` int(11) NOT NULL AUTO_INCREMENT,
   `happyhour_name` varchar(100) NOT NULL,
   `happyhour_discount` tinyint(3) NOT NULL,
   `happyhour_starthour` tinyint(2) NOT NULL,
   `happyhour_endhour` tinyint(2) NOT NULL,
-  `happyhour_startday` tinyint(1) NOT NULL,
-  `happyhour_endday` tinyint(1) DEFAULT NULL,
+  `happyhour_startday` int(1) NOT NULL,
+  `happyhour_endday` int(1) DEFAULT NULL,
   PRIMARY KEY (`happyhour_id`),
-  UNIQUE KEY `happyhour_name` (`happyhour_name`)
+  UNIQUE KEY `happyhour_name` (`happyhour_name`),
+  KEY `happyhour_startday` (`happyhour_startday`),
+  KEY `happyhour_endday` (`happyhour_endday`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
---
--- Table structure for table `happyhour_assoc`
---
 CREATE TABLE IF NOT EXISTS `happyhour_assoc` (
   `happyhour_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
   `happyhour_assoc_resource` int(11) NOT NULL,
@@ -138,8 +138,9 @@ CREATE TABLE IF NOT EXISTS `happyhour_assoc` (
   `happyhour_assoc_weekusage` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`happyhour_assoc_id`),
   KEY `happyhour_assoc_happyhour` (`happyhour_assoc_happyhour`),
-  KEY `happyhour_assoc_weekusage` (`happyhour_assoc_weekusage`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+  KEY `happyhour_assoc_weekusage` (`happyhour_assoc_weekusage`),
+  KEY `happyhour_assoc_resource` (`happyhour_assoc_resource`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
 --
@@ -152,11 +153,13 @@ CREATE TABLE IF NOT EXISTS `item` (
   `item_user` int(11) NOT NULL,
   `item_state` int(11) NOT NULL DEFAULT '0',
   `item_resource` int(11) NOT NULL,
+  `item_project` int(11) DEFAULT NULL,
   PRIMARY KEY (`item_id`),
   KEY `item_user` (`item_user`),
   KEY `item_state` (`item_state`),
-  KEY `item_resource` (`item_resource`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+  KEY `item_resource` (`item_resource`),
+  KEY `item_project` (`item_project`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
 --
@@ -262,7 +265,7 @@ CREATE TABLE IF NOT EXISTS `media` (
   `media_link` varchar(100) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`media_id`),
   UNIQUE KEY `media_name` (`media_name`,`media_description`,`media_link`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `media`
@@ -308,6 +311,12 @@ CREATE TABLE IF NOT EXISTS `parameter` (
 
 -- --------------------------------------------------------
 
+CREATE TABLE IF NOT EXISTS `pending` (
+  `pending_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pending_code` varchar(100) CHARACTER SET utf8 NOT NULL,
+  PRIMARY KEY (`pending_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
 --
 -- Table structure for table `permissions`
 --
@@ -317,16 +326,15 @@ CREATE TABLE IF NOT EXISTS `permissions` (
   `permissions_user` int(11) NOT NULL,
   `permissions_resource` int(11) NOT NULL,
   `permissions_level` tinyint(4) NOT NULL,
-  `permissions_training` int(11) NOT NULL,
-  `permissions_sendmail` tinyint(1) DEFAULT NULL,
-  `permissions_project_default` int(11) DEFAULT NULL,
+  `permissions_training` int(11) DEFAULT '0',
+  `permissions_sendmail` int(11) DEFAULT NULL,
   PRIMARY KEY (`permissions_id`),
   UNIQUE KEY `permissions_user_2` (`permissions_user`,`permissions_resource`),
   KEY `permissions_user` (`permissions_user`),
   KEY `permissions_resource` (`permissions_resource`),
   KEY `permissions_level` (`permissions_level`),
-  KEY `permissions_training` (`permissions_training`),
-  KEY `permissions_project_default` (`permissions_project_default`)
+  KEY `permissions_ibfk_7` (`permissions_training`),
+  KEY `permissions_sendmail` (`permissions_sendmail`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -416,28 +424,35 @@ INSERT INTO `pricetype` (`pricetype_id`, `pricetype_name`) VALUES
 
 
 --
+-- Table structure for table `proj_dep_assoc`
+--
+
+CREATE TABLE IF NOT EXISTS `proj_dep_assoc` (
+  `proj_dep_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
+  `proj_dep_assoc_project` int(11) NOT NULL,
+  `proj_dep_assoc_department` int(11) NOT NULL,
+  `proj_dep_assoc_visible` int(11) NOT NULL DEFAULT '1',
+  `proj_dep_assoc_active` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`proj_dep_assoc_id`),
+  KEY `proj_dep_assoc_project` (`proj_dep_assoc_project`),
+  KEY `proj_dep_assoc_department` (`proj_dep_assoc_department`),
+  KEY `proj_dep_assoc_active` (`proj_dep_assoc_active`),
+  KEY `proj_dep_assoc_visible` (`proj_dep_assoc_visible`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
+--
 -- Table structure for table `project`
 --
+
 CREATE TABLE IF NOT EXISTS `project` (
   `project_id` int(11) NOT NULL AUTO_INCREMENT,
   `project_name` varchar(100) NOT NULL,
-  `project_account` int(11) NOT NULL,
+  `project_account` varchar(100) DEFAULT NULL,
   `project_discount` tinyint(3) NOT NULL DEFAULT '0',
   PRIMARY KEY (`project_id`),
   UNIQUE KEY `project_account` (`project_account`,`project_name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
---
--- Table structure for table `proj_dep_assoc`
---
-CREATE TABLE IF NOT EXISTS `proj_dep_assoc` (
-  `proj_dep_assoc_id` int(11) NOT NULL,
-  `proj_dep_assoc_project` int(11) NOT NULL,
-  `proj_dep_assoc_department` int(11) NOT NULL,
-  PRIMARY KEY (`proj_dep_assoc_id`),
-  KEY `proj_dep_assoc_project` (`proj_dep_assoc_project`),
-  KEY `proj_dep_assoc_department` (`proj_dep_assoc_department`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
@@ -581,6 +596,22 @@ INSERT INTO `status` (`status_id`, `status_name`) VALUES
 
 -- --------------------------------------------------------
 
+CREATE TABLE IF NOT EXISTS `weekday` (
+  `weekday_id` int(11) NOT NULL,
+  `weekday_name` varchar(100) CHARACTER SET utf8 NOT NULL,
+  PRIMARY KEY (`weekday_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO `weekday` (`weekday_id`, `weekday_name`) VALUES
+(0, 'Monday'),
+(1, 'Tuesday'),
+(2, 'Wednesday'),
+(3, 'Thursday'),
+(4, 'Friday'),
+(5, 'Saturday'),
+(6, 'Sunday');
+
+
 --
 -- Table structure for table `xfields`
 --
@@ -610,7 +641,7 @@ CREATE TABLE IF NOT EXISTS `xfieldsinputtype` (
   `xfieldsinputtype_type` varchar(45) NOT NULL,
   PRIMARY KEY (`xfieldsinputtype_id`),
   UNIQUE KEY `xfieldsinputtype_type_UNIQUE` (`xfieldsinputtype_type`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `xfieldsinputtype`
@@ -663,6 +694,7 @@ CREATE TABLE IF NOT EXISTS `xfieldsval` (
   KEY `xfieldsval_field` (`xfieldsval_field`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
+-- ---------------
 
 -- views ------------------------------------------------
 

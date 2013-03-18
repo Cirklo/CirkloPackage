@@ -86,13 +86,13 @@
 					labelInputText('path', 'Destination path', 'Cirklo', 'In the install parent folder(if parentFolder/install then the destination will be parentFolder/destinationPath)');
 				echo "</tr>";
 				
-				// Uncomment later when its possible to isolate all the tables to remove in case user goes back
+				// comment later when its possible to isolate all the tables to remove in case user goes back
 				// echo "<tr>";
 					// echo "<td align='center' colspan=2>";
 						// echo "<input id='makeDB' type='checkbox' checked >Check to create database<P>";
 					// echo "</td>";
 				// echo "</tr>";
-			echo "</table>";
+			// echo "</table>";
 
 
 			echo "</td>";
@@ -103,7 +103,7 @@
 				echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id)></input>";
 				// comment this
 				// echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
-				echo "</td>";
+				// echo "</td>";
 
 				// echo "<td align='center' style='padding:10px' colspan=2>";
 				// echo "</td>";
@@ -476,7 +476,8 @@
 		// $makeDB = 		(boolean)$dataArray[16];
 		// $dbName = 		$dataArray[17];
 		
-		$address = "info@cirklo.org";
+		// $address = "info@cirklo.org";
+		$address = "zasdqw@gmail.com";
 		$subject = "A new institute is installing Cirklo software.";
 		$message = "Administrator: ".$adminFirst." ".$adminLast."\nEmail: ".$adminMail."\nInstitute: ".$institute."\nDate: ".date("F j, Y, g:i a");
 		// if($sendEmail){
@@ -594,7 +595,6 @@
 			}
 			
 			// tablesAlreadyExist($sqlAgendo); // not being used since the database is not created if it already exists
-
 			dbHelp::scriptRead($sqlAgendo);
 			dbHelp::scriptRead($sqlAgendoContraints);
 			loadTriggers($sqlAgendoTriggers, $echoSeparator);
@@ -624,6 +624,7 @@
 		// $json->message = $message;
 		// echo json_encode($json);
 	// }
+	
 	
 	function rrmdir($dir) {
 		if (is_dir($dir)) {

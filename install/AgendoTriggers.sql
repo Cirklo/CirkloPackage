@@ -26,26 +26,10 @@ create function overlappingHH(startDay int, endDay int, startHour int, endHour i
 				`happyhour` inner join `happyhour_assoc` on happyhour_id = happyhour_assoc_happyhour
 			WHERE 
 				happyhour_assoc_resource = resourceId
-				and (
-					startHour >= happyhour_starthour
-					and startHour < happyhour_endhour
-					or 
-					endHour <= happyhour_endhour
-					and endhour > happyhour_starthour
-					or
-					startHour <= happyhour_starthour
-					and endhour >= happyhour_endhour
-				)
-				and (
-					startDay >= happyhour_startday
-					and startDay < happyhour_endday
-					or 
-					endDay <= happyhour_endday
-					and endDay > happyhour_startday
-					or
-					startDay <= happyhour_startday
-					and endDay >= happyhour_endday
-				)
+				and startDay >= happyhour_startday
+				and endDay <= happyhour_endday
+				and startHour >= happyhour_starthour
+				and endHour <= happyhour_endhour
 		);
 	END
 //
@@ -92,7 +76,94 @@ create function validChangeToHHassoc(newRes int, newHH int) returns int determin
 //
 DELIMITER ;
 
+DELIMITER //
+create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int, pricevalue int, resourceres int) returns int deterministic
+	BEGIN
+		declare cost, weekdaynumber int;
+		set weekdaynumber := weekday(entrydatetime);
+		set cost := null;
+		
+		select
+			sum(
+				happy_hour_duration(
+					entrydatetime
+					,entryslots * resourceres
+					,happyhour_starthour
+					,happyhour_endhour
+				) * ifnull(happyhour_discount, 0) * 0.01 * pricevalue
+			) into cost
+		from
+			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
+		where
+			happyhour_assoc_resource = resourceid
+			and weekdaynumber between happyhour_startday and happyhour_endday;
+				
+		return ifnull(cost, 0);
+	END
+//
+DELIMITER ;
 
+DELIMITER //
+create function happy_hour_duration(entry_start_date varchar(100), duration int, happyhour_starthour int, happyhour_endhour int) returns int deterministic
+	BEGIN
+		declare entry_start_minutes, startInterval, endInterval, discounted_duration int;
+		
+		set entry_start_minutes = hour(entry_start_date) * 60 + minute(entry_start_date);
+		
+		set startInterval = greatest(entry_start_minutes, (happyhour_starthour * 60));
+		set endInterval = least(entry_start_minutes + duration, (happyhour_endhour * 60));
+		set discounted_duration = endInterval - startInterval;
+		
+		if discounted_duration > 0 then
+			return discounted_duration;
+		end if;
+		
+		return 0;
+	END
+//
+DELIMITER ;
+
+DELIMITER //
+create function countItems(entryid int, userid int) returns int deterministic
+	BEGIN
+		declare items int;
+		
+		select
+			count(item_id) into items
+		from 
+			item_assoc join item on item_id = item_assoc_item
+		where
+			item_assoc_entry = entryid
+			and item_user = userid;
+				
+		return items;
+	END
+//
+DELIMITER ;
+
+DELIMITER //
+create function sequencingDiscount(resourceid int, entrydatetime varchar(100)) returns int deterministic
+	BEGIN
+		declare discount, weekdaynumber, starthour int;
+		set weekdaynumber := weekday(entrydatetime);
+		set starthour := hour(entrydatetime);
+		
+		select
+			happyhour_discount into discount
+		from
+			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
+		where
+			happyhour_assoc_resource = resourceid
+			and weekdaynumber between happyhour_startday and happyhour_endday
+			and starthour between happyhour_starthour and happyhour_endhour
+		order by
+			happyhour_starthour
+		limit 1;
+		
+		return ifnull(discount, 0);
+	END
+//
+DELIMITER ;
 --
 -- Triggers `user`
 --
@@ -144,31 +215,10 @@ END
 //
 DELIMITER;
 
---
--- Triggers `project`
---
-DELIMITER //
-CREATE TRIGGER `projDiscPercIns` BEFORE INSERT ON `project`
-	FOR EACH ROW BEGIN
-		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
-	END
-//
-DELIMITER ;
-
-DELIMITER //
-CREATE TRIGGER `projDiscPercUpd` BEFORE UPDATE ON `project`
-	FOR EACH ROW BEGIN
-		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
-	END
-//
-DELIMITER ;
-
---
--- Triggers `happyhour`
---
+DROP TRIGGER IF EXISTS `hhIns`;
 DELIMITER //
 CREATE TRIGGER `hhIns` BEFORE INSERT ON `happyhour`
-	FOR EACH ROW BEGIN
+ FOR EACH ROW BEGIN
 		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
 		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
 		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
@@ -186,9 +236,10 @@ CREATE TRIGGER `hhIns` BEFORE INSERT ON `happyhour`
 //
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS `hhUpd`;
 DELIMITER //
 CREATE TRIGGER `hhUpd` BEFORE UPDATE ON `happyhour`
-	FOR EACH ROW BEGIN
+ FOR EACH ROW BEGIN
 		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
 		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
 		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
@@ -206,12 +257,10 @@ CREATE TRIGGER `hhUpd` BEFORE UPDATE ON `happyhour`
 //
 DELIMITER ;
 
---
--- Triggers `happyhour_assoc`
---
+DROP TRIGGER IF EXISTS `hh_assoc_ins`;
 DELIMITER //
 CREATE TRIGGER `hh_assoc_ins` BEFORE INSERT ON `happyhour_assoc`
-	FOR EACH ROW BEGIN
+ FOR EACH ROW BEGIN
 		declare validChange int;
 		select validChangeToHHassoc(NEW.happyhour_assoc_resource, NEW.happyhour_assoc_happyhour) into validChange;
 		if validChange != 1 then
@@ -221,14 +270,20 @@ CREATE TRIGGER `hh_assoc_ins` BEFORE INSERT ON `happyhour_assoc`
 //
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS `projDiscPercIns`;
 DELIMITER //
-CREATE TRIGGER `hh_assoc_upd` BEFORE UPDATE ON `happyhour_assoc`
-	FOR EACH ROW BEGIN
-		declare validChange int;
-		select validChangeToHHassoc(NEW.happyhour_assoc_resource, NEW.happyhour_assoc_happyhour) into validChange;
-		if validChange != 1 then
-			set NEW.happyhour_assoc_happyhour = OLD.happyhour_assoc_happyhour;
-		end if;
+CREATE TRIGGER `projDiscPercIns` BEFORE INSERT ON `project`
+ FOR EACH ROW BEGIN
+		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
+	END
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `projDiscPercUpd`;
+DELIMITER //
+CREATE TRIGGER `projDiscPercUpd` BEFORE UPDATE ON `project`
+ FOR EACH ROW BEGIN
+		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
 	END
 //
 DELIMITER ;

@@ -1,9 +1,0 @@
-Engine marker replaced successfully
-Database marker replaced successfully
-Username marker replaced successfully
-Password marker replaced successfully
-Schema marker replaced successfully
-Path marker replaced successfully
-Database connection successfully established.
-.htaccess path marker replaced successfully
-Successfully imported all database settings.
