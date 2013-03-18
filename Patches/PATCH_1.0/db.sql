@@ -176,9 +176,79 @@ DELIMITER;
 UPDATE configParams SET configParams_value='1.5.6' WHERE configParams_name='AgendoVersion';
 
 
---
--- Table structure for table `blacklist`
---
+drop trigger newuser;
+DELIMITER //
+CREATE TRIGGER `newuser` AFTER INSERT ON `user`
+ FOR EACH ROW BEGIN
+IF NEW.user_level=0 THEN
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'admin',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'department',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'institute',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'report',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'mask',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'treeview',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'restree',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'resaccess',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'happyhour',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'happyhour_assoc',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'project',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'proj_assoc',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'price',7);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'blacklist',7);
+END IF;
+IF new.user_level=1 THEN
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',5);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'department',5);
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'institute',5);
+END IF;
+IF new.user_level=2 THEN
+INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',1);
+INSERT INTO resaccess (resaccess_user, resaccess_table, resaccess_column, resaccess_value) VALUES (new.user_id, 'user', 'user_id', new.user_id);
+END IF;
+END
+//
+DELIMITER ;
+
+drop trigger userupd;
+DELIMITER //
+CREATE TRIGGER `userupd` BEFORE UPDATE ON `user`
+ FOR EACH ROW BEGIN
+IF OLD.user_level<>0 THEN
+SET NEW.user_level=OLD.user_level;
+END IF;
+END
+//
+DELIMITER ;
+
+INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'happyhour', 'Happy hour creation', NULL);
+INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'happyhour_assoc', 'Happy hour association', NULL);
+INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'project', 'Project creation', NULL);
+INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'proj_dep_assoc', 'Project association', NULL);
+INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'price', 'Price association', NULL);
+INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'blacklist', 'Blacklist users', NULL);
+
+INSERT INTO `configparams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
+(22, 'showAssiduity', '0');
+
+INSERT INTO `media` (`media_id`, `media_name`, `media_description`, `media_link`) VALUES 
+(NULL, 'Assiduity', 'Shows how to activate the feature and what info it displays', 'http://www.youtube.com/embed/xUYXSV9fPxU'),
+(NULL, 'Mailing list', 'Shows how to a user can receive mail notifications from a specific resource when entries are updated or deleted', 'http://www.youtube.com/embed/NbfxDicb_wI'),
+(NULL, 'Happy hour creation', 'Shows how to create a happy hour', 'http://www.youtube.com/embed/e6zNf4KlH-4'),
+(NULL, 'Happy hour association', 'Shows how to associate a resource to a happy hour', 'http://www.youtube.com/embed/wbl2vDif61U'),
+(NULL, 'Project creation', 'Shows how to create a project', 'http://www.youtube.com/embed/KAeaHu61jJ8'),
+(NULL, 'Project association', 'Shows how to associate a project to a department', 'http://www.youtube.com/embed/c5__HiA6sww'),
+(NULL, 'Project on weekview', 'Show how to use projects on the weekview screen', 'http://www.youtube.com/embed/wswWo0UC9Tw'),
+(NULL, 'Blacklist users', 'Shows how to blacklist users preventing them from doing anything on agendo', 'http://www.youtube.com/embed/tyTB_CfE4kM');
+
+
+
+---------------------------------------------------------------------------------------------------------
+
+-- 18/03/2013
+-- changed a lot, a lot of stuff, all in the github history
+
+-- tables --
 
 CREATE TABLE IF NOT EXISTS `blacklist` (
   `blacklist_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -186,27 +256,22 @@ CREATE TABLE IF NOT EXISTS `blacklist` (
   PRIMARY KEY (`blacklist_id`),
   UNIQUE KEY `blacklist_user_2` (`blacklist_user`),
   KEY `blacklist_user` (`blacklist_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-
---
--- Table structure for table `happyhour`
---
 CREATE TABLE IF NOT EXISTS `happyhour` (
   `happyhour_id` int(11) NOT NULL AUTO_INCREMENT,
   `happyhour_name` varchar(100) NOT NULL,
   `happyhour_discount` tinyint(3) NOT NULL,
   `happyhour_starthour` tinyint(2) NOT NULL,
   `happyhour_endhour` tinyint(2) NOT NULL,
-  `happyhour_startday` tinyint(1) NOT NULL,
-  `happyhour_endday` tinyint(1) DEFAULT NULL,
+  `happyhour_startday` int(1) NOT NULL,
+  `happyhour_endday` int(1) DEFAULT NULL,
   PRIMARY KEY (`happyhour_id`),
-  UNIQUE KEY `happyhour_name` (`happyhour_name`)
+  UNIQUE KEY `happyhour_name` (`happyhour_name`),
+  KEY `happyhour_startday` (`happyhour_startday`),
+  KEY `happyhour_endday` (`happyhour_endday`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
---
--- Table structure for table `happyhour_assoc`
---
 CREATE TABLE IF NOT EXISTS `happyhour_assoc` (
   `happyhour_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
   `happyhour_assoc_resource` int(11) NOT NULL,
@@ -214,39 +279,131 @@ CREATE TABLE IF NOT EXISTS `happyhour_assoc` (
   `happyhour_assoc_weekusage` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`happyhour_assoc_id`),
   KEY `happyhour_assoc_happyhour` (`happyhour_assoc_happyhour`),
-  KEY `happyhour_assoc_weekusage` (`happyhour_assoc_weekusage`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+  KEY `happyhour_assoc_weekusage` (`happyhour_assoc_weekusage`),
+  KEY `happyhour_assoc_ibfk_3` (`happyhour_assoc_resource`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
---
--- Table structure for table `project`
---
+CREATE TABLE IF NOT EXISTS `pending` (
+  `pending_id` int(11) NOT NULL AUTO_INCREMENT,
+  `pending_code` varchar(100) CHARACTER SET utf8 NOT NULL,
+  PRIMARY KEY (`pending_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+CREATE TABLE IF NOT EXISTS `proj_dep_assoc` (
+  `proj_dep_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
+  `proj_dep_assoc_project` int(11) NOT NULL,
+  `proj_dep_assoc_department` int(11) NOT NULL,
+  `proj_dep_assoc_visible` int(11) NOT NULL DEFAULT '1',
+  `proj_dep_assoc_active` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`proj_dep_assoc_id`),
+  KEY `proj_dep_assoc_project` (`proj_dep_assoc_project`),
+  KEY `proj_dep_assoc_department` (`proj_dep_assoc_department`),
+  KEY `proj_dep_assoc_active` (`proj_dep_assoc_active`),
+  KEY `proj_dep_assoc_visible` (`proj_dep_assoc_visible`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
 CREATE TABLE IF NOT EXISTS `project` (
   `project_id` int(11) NOT NULL AUTO_INCREMENT,
   `project_name` varchar(100) NOT NULL,
-  `project_account` int(11) NOT NULL,
+  `project_account` varchar(100) DEFAULT NULL,
   `project_discount` tinyint(3) NOT NULL DEFAULT '0',
   PRIMARY KEY (`project_id`),
   UNIQUE KEY `project_account` (`project_account`,`project_name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
---
--- Table structure for table `proj_dep_assoc`
---
-CREATE TABLE IF NOT EXISTS `proj_dep_assoc` (
-  `proj_dep_assoc_id` int(11) NOT NULL AUTO_INCREMENT,
-  `proj_dep_assoc_project` int(11) NOT NULL,
-  `proj_dep_assoc_department` int(11) NOT NULL,
-  PRIMARY KEY (`proj_dep_assoc_id`),
-  KEY `proj_dep_assoc_project` (`proj_dep_assoc_project`),
-  KEY `proj_dep_assoc_department` (`proj_dep_assoc_department`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+CREATE TABLE IF NOT EXISTS `weekday` (
+  `weekday_id` int(11) NOT NULL,
+  `weekday_name` varchar(100) CHARACTER SET utf8 NOT NULL,
+  PRIMARY KEY (`weekday_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `configParams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES (NULL, 'showAssiduity', '0');
+INSERT INTO `weekday` (`weekday_id`, `weekday_name`) VALUES
+(0, 'Monday'),
+(1, 'Tuesday'),
+(2, 'Wednesday'),
+(3, 'Thursday'),
+(4, 'Friday'),
+(5, 'Saturday'),
+(6, 'Sunday');
 
--- --------------------------------------------------------
---
--- Dumping data for functions
---
+
+-- triggers
+
+DROP TRIGGER IF EXISTS `hhIns`;
+DELIMITER //
+CREATE TRIGGER `hhIns` BEFORE INSERT ON `happyhour`
+ FOR EACH ROW BEGIN
+		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
+		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
+		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
+		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 0, 6);
+		
+		if NEW.happyhour_endday is null then
+			set NEW.happyhour_endday = NEW.happyhour_startday;
+		end if;
+		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 0, 6);
+		
+		if NEW.happyhour_endhour <= NEW.happyhour_starthour then
+			set NEW.happyhour_endhour = null;
+		end if;
+	END
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `hhUpd`;
+DELIMITER //
+CREATE TRIGGER `hhUpd` BEFORE UPDATE ON `happyhour`
+ FOR EACH ROW BEGIN
+		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
+		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
+		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
+		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 0, 6);
+		
+		if NEW.happyhour_endday is null then
+			set NEW.happyhour_endday = NEW.happyhour_startday;
+		end if;
+		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 0, 6);
+		
+		if NEW.happyhour_endhour <= NEW.happyhour_starthour then
+			set NEW.happyhour_endhour = null;
+		end if;
+	END
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `hh_assoc_ins`;
+DELIMITER //
+CREATE TRIGGER `hh_assoc_ins` BEFORE INSERT ON `happyhour_assoc`
+ FOR EACH ROW BEGIN
+		declare validChange int;
+		select validChangeToHHassoc(NEW.happyhour_assoc_resource, NEW.happyhour_assoc_happyhour) into validChange;
+		if validChange != 1 then
+			set NEW.happyhour_assoc_happyhour = null;
+		end if;
+	END
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `projDiscPercIns`;
+DELIMITER //
+CREATE TRIGGER `projDiscPercIns` BEFORE INSERT ON `project`
+ FOR EACH ROW BEGIN
+		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
+	END
+//
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS `projDiscPercUpd`;
+DELIMITER //
+CREATE TRIGGER `projDiscPercUpd` BEFORE UPDATE ON `project`
+ FOR EACH ROW BEGIN
+		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
+	END
+//
+DELIMITER ;
+
+
+-- functions
 DELIMITER //
 create function betweenXandY(myInt int, x int, y int) returns int deterministic
 	BEGIN
@@ -321,217 +478,125 @@ create function validChangeToHHassoc(newRes int, newHH int) returns int determin
 //
 DELIMITER ;
 
+DELIMITER //
+create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int, pricevalue int, resourceres int) returns int deterministic
+	BEGIN
+		declare cost, weekdaynumber int;
+		set weekdaynumber := weekday(entrydatetime);
+		set cost := null;
+		
+		select
+			sum(
+				happy_hour_duration(
+					entrydatetime
+					,entryslots * resourceres
+					,happyhour_starthour
+					,happyhour_endhour
+				) * ifnull(happyhour_discount, 0) * 0.01 * pricevalue
+			) into cost
+		from
+			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
+		where
+			happyhour_assoc_resource = resourceid
+			and weekdaynumber between happyhour_startday and happyhour_endday;
+				
+		return ifnull(cost, 0);
+	END
+//
+DELIMITER ;
 
--- --------------------------------------------------------
---
--- Constraints for table `blacklist`
---
-ALTER TABLE `blacklist`
-  ADD CONSTRAINT `blacklist_ibfk_1` FOREIGN KEY (`blacklist_user`) REFERENCES `user` (`user_id`);
-  
---
--- Constraints for table `proj_dep_assoc`
---
-ALTER TABLE `proj_dep_assoc`
-  ADD CONSTRAINT `proj_dep_assoc_ibfk_1` FOREIGN KEY (`proj_dep_assoc_project`) REFERENCES `project` (`project_id`),
-  ADD CONSTRAINT `proj_dep_assoc_ibfk_2` FOREIGN KEY (`proj_dep_assoc_department`) REFERENCES `department` (`department_id`);
+DELIMITER //
+create function happy_hour_duration(entry_start_date varchar(100), duration int, happyhour_starthour int, happyhour_endhour int) returns int deterministic
+	BEGIN
+		declare entry_start_minutes, startInterval, endInterval, discounted_duration int;
+		
+		set entry_start_minutes = hour(entry_start_date) * 60 + minute(entry_start_date);
+		
+		set startInterval = greatest(entry_start_minutes, (happyhour_starthour * 60));
+		set endInterval = least(entry_start_minutes + duration, (happyhour_endhour * 60));
+		set discounted_duration = endInterval - startInterval;
+		
+		if discounted_duration > 0 then
+			return discounted_duration;
+		end if;
+		
+		return 0;
+	END
+//
+DELIMITER ;
 
---
--- Constraints for table `happyhour_assoc`
---
-ALTER TABLE `happyhour_assoc`
-  ADD CONSTRAINT `happyhour_assoc_ibfk_2` FOREIGN KEY (`happyhour_assoc_happyhour`) REFERENCES `happyhour` (`happyhour_id`),
-  ADD CONSTRAINT `happyhour_assoc_ibfk_3` FOREIGN KEY (`happyhour_assoc_resource`) REFERENCES `resource` (`resource_id`),
-  ADD CONSTRAINT `happyhour_assoc_ibfk_4` FOREIGN KEY (`happyhour_assoc_weekusage`) REFERENCES `bool` (`bool_id`);
-  
-ALTER TABLE proj_dep_assoc ADD UNIQUE (proj_dep_assoc_project, proj_dep_assoc_department);
---
--- Constraints for table `entry`
---
-ALTER TABLE `entry` ADD `entry_project` INT,
-ADD INDEX ( `entry_project` );
+DELIMITER //
+create function countItems(entryid int, userid int) returns int deterministic
+	BEGIN
+		declare items int;
+		
+		select
+			count(item_id) into items
+		from 
+			item_assoc join item on item_id = item_assoc_item
+		where
+			item_assoc_entry = entryid
+			and item_user = userid;
+				
+		return items;
+	END
+//
+DELIMITER ;
+
+DELIMITER //
+create function sequencingDiscount(resourceid int, entrydatetime varchar(100)) returns int deterministic
+	BEGIN
+		declare discount, weekdaynumber, starthour int;
+		set weekdaynumber := weekday(entrydatetime);
+		set starthour := hour(entrydatetime);
+		
+		select
+			happyhour_discount into discount
+		from
+			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
+		where
+			happyhour_assoc_resource = resourceid
+			and weekdaynumber between happyhour_startday and happyhour_endday
+			and starthour between happyhour_starthour and happyhour_endhour
+		order by
+			happyhour_starthour
+		limit 1;
+		
+		return ifnull(discount, 0);
+	END
+//
+DELIMITER ;
+
+
+-- table alterations
+
+ALTER TABLE `department` ADD `department_default` INT NULL ,
+ADD INDEX ( `department_default` ) ;
+
+ALTER TABLE `department` ADD FOREIGN KEY ( `department_default` ) REFERENCES `project` (
+`project_id`
+);
+
+ALTER TABLE `entry` ADD `entry_project` INT NULL DEFAULT NULL ,
+ADD INDEX ( `entry_project` ) ;
 
 ALTER TABLE `entry` ADD FOREIGN KEY ( `entry_project` ) REFERENCES `project` (
 `project_id`
 );
 
---
--- Constraints for table `permissions`
---
-ALTER TABLE `permissions` ADD `permissions_project_default` INT,
-ADD INDEX ( `permissions_project_default` );
+ALTER TABLE `item` ADD `item_project` INT NULL DEFAULT NULL ,
+ADD INDEX ( `item_project` ) ;
 
-ALTER TABLE `permissions` ADD FOREIGN KEY ( `permissions_project_default` ) REFERENCES `project` (
+ALTER TABLE `item` ADD FOREIGN KEY ( `item_project` ) REFERENCES `project` (
 `project_id`
 );
 
--- --------------------------------------------------------
---
--- Triggers `project`
---
-DELIMITER //
-CREATE TRIGGER `projDiscPercIns` BEFORE INSERT ON `project`
- FOR EACH ROW BEGIN
-		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
-	END
-//
-DELIMITER ;
+ALTER TABLE `permissions` ADD `permissions_sendmail` INT NULL DEFAULT NULL ,
+ADD INDEX ( `permissions_sendmail` ) ;
 
-DELIMITER //
-CREATE TRIGGER `projDiscPercUpd` BEFORE UPDATE ON `project`
- FOR EACH ROW BEGIN
-		SET NEW.project_discount = betweenXandY(NEW.project_discount, 0, 100);
-	END
-//
-DELIMITER ;
+ALTER TABLE `permissions` ADD FOREIGN KEY ( `permissions_sendmail` ) REFERENCES `bool` (
+`bool_id`
+);
 
---
--- Triggers `happyhour`
---
-DELIMITER //
-CREATE TRIGGER `hhIns` BEFORE INSERT ON `happyhour`
-	FOR EACH ROW BEGIN
-		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
-		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
-		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
-		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 1, 7);
-		
-		if NEW.happyhour_endday is null then
-			set NEW.happyhour_endday = NEW.happyhour_startday;
-		end if;
-		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 1, 7);
-		
-		if NEW.happyhour_endhour <= NEW.happyhour_starthour then
-			set NEW.happyhour_endhour = null;
-		end if;
-	END
-//
-DELIMITER ;
-
-DELIMITER //
-CREATE TRIGGER `hhUpd` BEFORE UPDATE ON `happyhour`
-	FOR EACH ROW BEGIN
-		SET NEW.happyhour_discount = betweenXandY(NEW.happyhour_discount, 0, 100);
-		SET NEW.happyhour_starthour = betweenXandY(NEW.happyhour_starthour, 0, 23);
-		SET NEW.happyhour_endhour = betweenXandY(NEW.happyhour_endhour, 1, 24);
-		SET NEW.happyhour_startday = betweenXandY(NEW.happyhour_startday, 1, 7);
-		
-		if NEW.happyhour_endday is null then
-			set NEW.happyhour_endday = NEW.happyhour_startday;
-		end if;
-		SET NEW.happyhour_endday = betweenXandY(NEW.happyhour_endday, 1, 7);
-		
-		if NEW.happyhour_endhour <= NEW.happyhour_starthour then
-			set NEW.happyhour_endhour = null;
-		end if;
-	END
-//
-DELIMITER ;
-
---
--- Triggers `happyhour_assoc`
---
-DELIMITER //
-CREATE TRIGGER `hh_assoc_ins` BEFORE INSERT ON `happyhour_assoc`
- FOR EACH ROW BEGIN
-		declare validChange int;
-		select validChangeToHHassoc(NEW.happyhour_assoc_resource, NEW.happyhour_assoc_happyhour) into validChange;
-		if validChange != 1 then
-			set NEW.happyhour_assoc_happyhour = null;
-		end if;
-	END
-//
-DELIMITER ;
-
-DELIMITER //
-CREATE TRIGGER `hh_assoc_upd` BEFORE UPDATE ON `happyhour_assoc`
- FOR EACH ROW BEGIN
-		declare validChange int;
-		select validChangeToHHassoc(NEW.happyhour_assoc_resource, NEW.happyhour_assoc_happyhour) into validChange;
-		if validChange != 1 then
-			set NEW.happyhour_assoc_happyhour = OLD.happyhour_assoc_happyhour;
-		end if;
-	END
-//
-DELIMITER ;
-
-drop trigger newuser;
-DELIMITER //
-CREATE TRIGGER `newuser` AFTER INSERT ON `user`
- FOR EACH ROW BEGIN
-IF NEW.user_level=0 THEN
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'admin',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'department',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'institute',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'report',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'mask',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'treeview',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'restree',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'resaccess',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'happyhour',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'happyhour_assoc',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'project',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'proj_assoc',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'price',7);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'blacklist',7);
-END IF;
-IF new.user_level=1 THEN
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',5);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'department',5);
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'institute',5);
-END IF;
-IF new.user_level=2 THEN
-INSERT INTO admin (admin_user, admin_table, admin_permission) VALUES (new.user_id,'user',1);
-INSERT INTO resaccess (resaccess_user, resaccess_table, resaccess_column, resaccess_value) VALUES (new.user_id, 'user', 'user_id', new.user_id);
-END IF;
-END
-//
-DELIMITER ;
-
-drop trigger userupd;
-DELIMITER //
-CREATE TRIGGER `userupd` BEFORE UPDATE ON `user`
- FOR EACH ROW BEGIN
-IF OLD.user_level<>0 THEN
-SET NEW.user_level=OLD.user_level;
-END IF;
-END
-//
-DELIMITER ;
-
-INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'happyhour', 'Happy hour creation', NULL);
-INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'happyhour_assoc', 'Happy hour association', NULL);
-INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'project', 'Project creation', NULL);
-INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'proj_dep_assoc', 'Project association', NULL);
-INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'price', 'Price association', NULL);
-INSERT INTO `mask` (`mask_id`, `mask_table`, `mask_name`, `mask_pic`) VALUES (NULL, 'blacklist', 'Blacklist users', NULL);
-
-INSERT INTO `configparams` (`configParams_id`, `configParams_name`, `configParams_value`) VALUES
-(22, 'showAssiduity', '0');
-
-INSERT INTO `media` (`media_id`, `media_name`, `media_description`, `media_link`) VALUES 
-(NULL, 'Assiduity', 'Shows how to activate the feature and what info it displays', 'http://www.youtube.com/embed/xUYXSV9fPxU'),
-(NULL, 'Mailing list', 'Shows how to a user can receive mail notifications from a specific resource when entries are updated or deleted', 'http://www.youtube.com/embed/NbfxDicb_wI'),
-(NULL, 'Happy hour creation', 'Shows how to create a happy hour', 'http://www.youtube.com/embed/e6zNf4KlH-4'),
-(NULL, 'Happy hour association', 'Shows how to associate a resource to a happy hour', 'http://www.youtube.com/embed/wbl2vDif61U'),
-(NULL, 'Project creation', 'Shows how to create a project', 'http://www.youtube.com/embed/KAeaHu61jJ8'),
-(NULL, 'Project association', 'Shows how to associate a project to a department', 'http://www.youtube.com/embed/c5__HiA6sww'),
-(NULL, 'Project on weekview', 'Show how to use projects on the weekview screen', 'http://www.youtube.com/embed/wswWo0UC9Tw'),
-(NULL, 'Blacklist users', 'Shows how to blacklist users preventing them from doing anything on agendo', 'http://www.youtube.com/embed/tyTB_CfE4kM');
-
-
-
----------------------------------------------------------------------------------------------------------
-
-ALTER TABLE `department` ADD `department_default` INT NULL ,ADD INDEX ( `department_default` ) 
-ALTER TABLE `department` ADD FOREIGN KEY ( `department_default` ) REFERENCES `production`.`project` (`project_id`);
-
-ALTER TABLE `item` ADD `item_project` INT NULL ,ADD INDEX ( `item_project` )
-ALTER TABLE `item` ADD FOREIGN KEY ( `item_project` ) REFERENCES `production`.`project` (`project_id`);
-
-ALTER TABLE `proj_dep_assoc` ADD `proj_dep_assoc_active` INT NOT NULL ,ADD INDEX ( `proj_dep_assoc_active` ) 
-ALTER TABLE `proj_dep_assoc` ADD FOREIGN KEY ( `proj_dep_assoc_active` ) REFERENCES `production`.`bool` (`bool_id`);
-
-
+UPDATE configParams SET configParams_value='1.8' WHERE configParams_name='AgendoVersion';
 
