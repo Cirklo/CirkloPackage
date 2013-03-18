@@ -94,9 +94,9 @@ function DisplayUserInfo() {
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,date_format(entry_datetime,'%H:%i') s,date_format(date_add(entry_datetime,interval resource_resolution*entry_slots minute),'%H:%i') e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
 	// $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
 	// $res=dbHelp::query($sqlAux) or die ($sqlAux);
-    // $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id= :0";
-    // $res=dbHelp::query($sqlAux, array($value)) or die ($sqlAux);
-    // $arr=dbHelp::fetchRowByIndex($res);
+    $sqlAux = "select resource_resolution,entry_slots from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id= :0";
+    $res=dbHelp::query($sqlAux, array($value)) or die ($sqlAux);
+    $arr=dbHelp::fetchRowByIndex($res);
 	
     // $sql="select user_firstname,user_lastname,user_email,user_mobile,user_phone,user_phonext,department_name,institute_name,".dbHelp::getFromDate('entry_datetime','%H:%i')." as s,".dbHelp::getFromDate(dbHelp::date_add('entry_datetime',$arr[0]*$arr[1],'minute'),'%H:%i')." as e from ".dbHelp::getSchemaName().".user,entry,department,institute,resource where user_dep=department_id and department_inst=institute_id and entry_user=user_id and entry_resource=resource_id and entry_id=" . $value;
     // $res=dbHelp::query($sql) or die ($sql);
