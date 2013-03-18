@@ -476,8 +476,7 @@
 		// $makeDB = 		(boolean)$dataArray[16];
 		// $dbName = 		$dataArray[17];
 		
-		// $address = "info@cirklo.org";
-		$address = "zasdqw@gmail.com";
+		$address = "info@cirklo.org";
 		$subject = "A new institute is installing Cirklo software.";
 		$message = "Administrator: ".$adminFirst." ".$adminLast."\nEmail: ".$adminMail."\nInstitute: ".$institute."\nDate: ".date("F j, Y, g:i a");
 		// if($sendEmail){
