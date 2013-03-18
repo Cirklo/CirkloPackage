@@ -57,7 +57,7 @@ function header_nav($user_id){
 			echo "<li><a>Tools</a>";
 				echo "<ul class=dropdown>";
 					echo "<li title='Set resource for local confirmation'><a href=../agendo/makeConfirmRes.php>Onsite confirmation</a></li>";
-					//echo "<li title='Give resource permissions to user'><a href=../agendo/givePermission.php>Resource permission</a></li>";
+					echo "<li title='Give resource permissions to user'><a href=../agendo/givePermission.php>Resource permission</a></li>";
 					echo "<li title='Project managements'><a href=../agendo/projAssign.php>Project management</a></li>";
 					echo "<li title='Resource alerts settings'><a href=../agendo/mailListAssign.php>Resource alerts configuration</a></li>";
 					echo "<li title='Send a message to other Agendo user'><a href=mailing.php>Send message</a></li>";
