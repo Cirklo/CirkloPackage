@@ -513,7 +513,7 @@ function showProject(value){
 		var id = JSON.parse(value).id;
 		$.post(
 			"../agendo/itemHandling.php"
-			,{action: "getProject", item: id, userLogin: userLogin, userPass: userPass, asUser: asUser}
+			,{action: "getProject", item: id, userLogin: userLogin, userPass: userPass, asUser: asUser, resource: currentResource}
 			,function(serverData){
 				if(!serverData.isError){
 					$("#projectList option[value='" + serverData.project + "']").attr("selected","selected");
