@@ -3,7 +3,7 @@ require_once("commonCode.php");
 
 	if(isset($_POST['resources']) && isset($_POST['userLogins']) && (isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) !== false)){
 		$json = new stdClass();
-		if(!isAdmin($_SESSION['user_id']) || isResp($_SESSION['user_id']) === false){
+		if(!isAdmin($_SESSION['user_id']) && isResp($_SESSION['user_id']) === false){
 			throw new Exception("You are not allowed to perform this action");
 		}
 		
@@ -51,8 +51,8 @@ require_once("commonCode.php");
 			$msg = "Error: ".$e->getMessage();
 		}
 		
-		$json->error = $error;
-		$json->msg = $msg;
+		$json->isError = $error;
+		$json->message = $msg;
 
 		echo json_encode($json);
 		exit;

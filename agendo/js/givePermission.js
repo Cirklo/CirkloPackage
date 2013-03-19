@@ -63,7 +63,7 @@ function sendUserAndResourceList(){
 					"givePermission.php", 
 					{userLogins: userLogins, resources: resources, permLevel: permLevel, training: training, sendMails: sendMails},
 					function(serverData){
-						showMessage(serverData.msg, serverData.error);
+						showMessage(serverData.message, serverData.isError);
 					},
 					"json")
 				;
