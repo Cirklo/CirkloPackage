@@ -303,7 +303,6 @@
 			$sql="update entry set entry_status=3 where entry_id = ".$seekentry;
 		}
 		$entryDatetime = $arr[1];
-		
 		$resPDO = dbHelp::query($sql);
 		if (dbHelp::numberOfRows($resPDO)==0) {
 			throw new Exception("No permission to delete selected entry(ies)");
@@ -327,8 +326,8 @@
 					if($perm->getResourceStatus() == 3 || $perm->getResourceStatus() == 4){
 						$status = 2;
 					}
-					$sql = "update entry set entry_status = ".$status." where entry_id = :0";
-					$res = dbHelp::query($sql, array($waitListEntry));
+					$sql = "update entry set entry_status = ".$status." where entry_id = ".$waitListEntry;
+					$res = dbHelp::query($sql);
 				}
 			}
 			
@@ -855,8 +854,8 @@
 				}
 				return $waitingListArray;
 			}
-			$arr = dbHelp::fetchRowByIndex($res);
-			return $arr[0];
+			$arr = dbHelp::fetchRowByName($res);
+			return $arr['entry_id'];
 		}
 		
 		return false;
