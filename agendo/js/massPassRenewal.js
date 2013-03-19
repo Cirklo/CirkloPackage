@@ -34,7 +34,7 @@ function sendUserList(userId){
 					"massPassRenewal.php", 
 					{userId: userId, userLogins: userLogins},
 					function(serverData){
-						showMessage(serverData.msg, serverData.error);
+						showMessage(serverData.message, serverData.isError);
 					},
 					"json")
 				;

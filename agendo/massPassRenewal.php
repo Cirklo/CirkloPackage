@@ -29,15 +29,15 @@ require_once("commonCode.php");
 
 			$json->error = $error;
 			if($error){
-				$json->msg = "An error occurred while reseting the password for user: ".$user;
+				$json->message = "An error occurred while reseting the password for user: ".$user;
 			}
 			else{
-				$json->msg = "Emails sent";
+				$json->message = "Emails sent";
 			}
 		}
 		catch(Exception $e){
-			$json->error = true;
-			$json->msg = "Error: ".$e->getMessage();
+			$json->isError = true;
+			$json->message = "Error: ".$e->getMessage();
 		}
 		
 		echo json_encode($json);
