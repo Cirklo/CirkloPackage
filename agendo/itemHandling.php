@@ -23,7 +23,7 @@
 	
 		$isResp = isResp($userId, $resource);
 		if(!hasPermission($userId, $resource) && $isResp === false){
-			throw new Exception("User does not have permission for this action");
+			throw new Exception("User is not allowed to use this resource");
 		}
 	
 		switch($action){

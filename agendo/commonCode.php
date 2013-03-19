@@ -523,7 +523,7 @@
 		$prep = dbHelp::query($sql, array($userId, $resourceId));
 		$permissionsLevel = dbHelp::fetchRowByIndex($prep);
 		
-		return $permissionsLevel != null && $permissionsLevel[0] != 0;
+		return isset($permissionsLevel) && $permissionsLevel[0] != 0;
 	}
 	
 	// Checks if a user is a department manager(PI), returns the resource or false
