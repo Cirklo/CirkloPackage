@@ -327,7 +327,7 @@ CREATE TABLE IF NOT EXISTS `permissions` (
   `permissions_resource` int(11) NOT NULL,
   `permissions_level` tinyint(4) NOT NULL,
   `permissions_training` int(11) DEFAULT '0',
-  `permissions_sendmail` int(11) DEFAULT NULL,
+  `permissions_sendmail` int(11) DEFAULT '0',
   PRIMARY KEY (`permissions_id`),
   UNIQUE KEY `permissions_user_2` (`permissions_user`,`permissions_resource`),
   KEY `permissions_user` (`permissions_user`),

@@ -600,3 +600,5 @@ ALTER TABLE `permissions` ADD FOREIGN KEY ( `permissions_sendmail` ) REFERENCES 
 
 UPDATE configParams SET configParams_value='1.8' WHERE configParams_name='AgendoVersion';
 
+ALTER TABLE `permissions` CHANGE `permissions_sendmail` `permissions_sendmail` INT( 11 ) NULL DEFAULT '0'
+update permissions set permissions_sendmail = 0 where permissions_sendmail is null
