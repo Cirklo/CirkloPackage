@@ -5,8 +5,8 @@
 	}
 
 	$path = $_SESSION['path'];
-	if((!isset($_SESSION['path']) || $_SESSION['path'] == '')){}
-		if(isset($_GET['path']) && $_GET['path'] != '')){
+	if((!isset($_SESSION['path']) || $_SESSION['path'] == '')){
+		if(isset($_GET['path']) && $_GET['path'] != ''){
 			$_SESSION['path'] = $_GET['path'];
 		}
 		else{
