@@ -5,9 +5,14 @@
 	}
 
 	$path = $_SESSION['path'];
-	if((!isset($_SESSION['path']) || $_SESSION['path'] == '') && (!isset($_GET['path']) && $_GET['path'] == '')){
-		echo "No path defined in session";
-		exit;
+	if((!isset($_SESSION['path']) || $_SESSION['path'] == '')){}
+		if(isset($_GET['path']) && $_GET['path'] != '')){
+			$_SESSION['path'] = $_GET['path'];
+		}
+		else{
+			echo "No path defined in session";
+			exit;
+		}
 	}	// include_once($_SESSION['path']."/.htconnect.php");
 	
 	include_once($_SESSION['path']."/.htconnect.php");
