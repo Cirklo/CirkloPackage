@@ -709,7 +709,7 @@
 			$sql = $select." ".$from." ".$where." ".$orderBy;
 			$prep = dbHelp::query($sql, $sqlArray);
 			while($row = dbHelp::fetchRowByIndex($prep)){
-				$itemsArray[$row[0]] = array('name' => $row[1], 'state' => $row[2]);
+				$itemsArray[$row[0]] = array('name' => utf8_decode($row[1]), 'state' => $row[2]);
 			}
 		}
 
