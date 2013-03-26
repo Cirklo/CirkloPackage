@@ -604,7 +604,7 @@
 		// Fills the list with items submitted by the user, not used in a sequencing session
 		$html .= "
 			<script>
-				fillItemsListOptions(".json_encode(getItems($userId, $resource, $entries, true)).");
+				fillItemsListOptions(".json_encode(getItems($userId, $resource, $entries)).");
 			</script>
 		";
 		
@@ -697,7 +697,7 @@
 			$sql = $select." ".$from." ".$where." ".$orderBy;
 			$prep = dbHelp::query($sql, $sqlArray);
 			while($row = dbHelp::fetchRowByIndex($prep)){
-				$itemsArray[$row[0]] = array('name' => $row[1]." - ".$row[3]." ".$row[4], 'state' => $row[2]);
+				$itemsArray[$row[0]] = array('name' => utf8_decode($row[1])." - ".$row[3]." ".$row[4], 'state' => $row[2]);
 			}
 		}
 		else{ // regular user, needs sorting of the samples by user
