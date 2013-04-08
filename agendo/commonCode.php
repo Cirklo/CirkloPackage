@@ -399,13 +399,14 @@
 					echo "</table>";
 				}
 				
-				$sql = "select 1 from configParams where configParams_name = 'imapCheck' and configParams_value = 1";
-				$res = dbHelp::query($sql);
-				$arr = dbHelp::fetchRowByIndex($res);
-				$action = "onblur='ajaxUser(this)'";
-				if(dbHelp::numberOfRows($res) > 0){
+				// this is used to autocomplete de user login
+				//$sql = "select 1 from configParams where configParams_name = 'imapCheck' and configParams_value = 1";
+				//$res = dbHelp::query($sql);
+				//$arr = dbHelp::fetchRowByIndex($res);
+				//$action = "onblur='ajaxUser(this)'";
+				//if(dbHelp::numberOfRows($res) > 0){
 					$action = "";
-				}
+				//}
 				echo "<table style='display:".$display.";padding:6px;'>";
 					echo "<tr>";
 						echo "<td><label>User Name</label></td>";
