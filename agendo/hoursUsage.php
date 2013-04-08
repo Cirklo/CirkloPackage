@@ -427,7 +427,7 @@
 						@pricevalue := ifnull(price_value, 0) as price_value,
 						@units := entry_slots * resource_resolution as units,
 						@subtotal := @units * @pricevalue / 60 as subtotal,
-						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) as discount,
+						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) / 60 as discount,
 						@subtotal - @discount as total
 					from 
 						".dbHelp::getSchemaName().".user join entry on user_id = entry_user
@@ -448,6 +448,7 @@
 			".$order_by_sql."
 			".$limit."
 		";
+		wtf($sql);
 		$prep = dbHelp::query($sql, $sql_array);
 
 		// csv generation
