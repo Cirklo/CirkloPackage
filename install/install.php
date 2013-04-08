@@ -92,7 +92,7 @@
 						// echo "<input id='makeDB' type='checkbox' checked >Check to create database<P>";
 					// echo "</td>";
 				// echo "</tr>";
-			// echo "</table>";
+			echo "</table>";
 
 
 			echo "</td>";
@@ -100,10 +100,10 @@
 
 		echo "<tr>";
 				echo "<td align='center' style='padding:10px' colspan=2>";
-				echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id)></input>";
+				echo "<input id='makeHtConnect' type='button' 	value='Check DataBase Connection' onclick=postMe(this.id) />";
 				// comment this
 				// echo "<input id='back'				type='button'	value='Undo Changes' 		onclick=back()></input>";
-				// echo "</td>";
+				echo "</td>";
 
 				// echo "<td align='center' style='padding:10px' colspan=2>";
 				// echo "</td>";
