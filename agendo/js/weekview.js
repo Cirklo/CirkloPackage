@@ -97,7 +97,7 @@ var impersonateUser = '';
 		// hours and slots left feature ajax refresh
 		if(typeof document.getElementById('hoursLeftTd') != "undefined" && resourceToUseInGet != ''){
 			$.post(
-				"weekview.php?resource=" + resourceToUseInGet + "&date" + dateToUseInGet
+				"weekview.php?resource=" + resourceToUseInGet + "&date=" + dateToUseInGet
 				, {functionName: "getTimeAndSlotsLeft"}
 				, function(serverData){
 					document.getElementById('hoursLeftTd').innerHTML = serverData.timeSlotsText;

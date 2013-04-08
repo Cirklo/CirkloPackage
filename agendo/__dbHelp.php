@@ -10,14 +10,15 @@
 			$_SESSION['path'] = $_GET['path'];
 		}
 		else{
-			echo "No path defined in session";
+			// echo "No path defined in session";
+			throw new Exception("Session doesn't exist or was lost, please go to the main page");
 			exit;
 		}
 	}	// include_once($_SESSION['path']."/.htconnect.php");
 	
 	include_once($_SESSION['path']."/.htconnect.php");
 
-	class dbHelp{ 
+	class dbHelp{
 	
 		private static $connect;
 		private static $dateHash;

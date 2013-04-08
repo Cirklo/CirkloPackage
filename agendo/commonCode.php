@@ -14,8 +14,6 @@
 		session_start();
 	}
 	
-	require_once("__dbHelp.php");
-	
 	if(isset($_GET['autocomplete'])){
 		autocompleteAgendo();
 		exit;
@@ -187,32 +185,46 @@
 
 	$jsWereImported = false;
 	function importJs($path = "../agendo"){
-		// echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
-		echo "<script type='text/javascript' src='".$path."/js/jquery-1.8.2.min.js'></script>";
-		echo "<script type='text/javascript' src='".$path."/js/commonCode.js'></script>";
-		// echo "<link type='text/css' href='".$path."/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
-		// echo "<script type='text/javascript' src='".$path."/js/jquery.jnotify.js'></script>";
-		echo "<link type='text/css' href='".$path."/css/jNotify.jquery.css' rel='stylesheet' media='all' />";
-		echo "<script type='text/javascript' src='".$path."/js/jNotify.jquery.min.js'></script>";
-		echo "<link href='".$path."/css/tipTip.css' rel='stylesheet' type='text/css'>";
-		echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
-		echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
-		// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
-		echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
-		echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
 		global $jsWereImported;
-		$jsWereImported = true;
+		if(!$jsWereImported){
+			// echo "<script type='text/javascript' src='".$path."/js/jquery-1.5.2.min.js'></script>";
+			echo "<script type='text/javascript' src='".$path."/js/jquery-1.8.2.min.js'></script>";
+			echo "<script type='text/javascript' src='".$path."/js/commonCode.js'></script>";
+			// echo "<link type='text/css' href='".$path."/css/jquery.jnotify.css' rel='stylesheet' media='all' />";
+			// echo "<script type='text/javascript' src='".$path."/js/jquery.jnotify.js'></script>";
+			echo "<link type='text/css' href='".$path."/css/jNotify.jquery.css' rel='stylesheet' media='all' />";
+			echo "<script type='text/javascript' src='".$path."/js/jNotify.jquery.min.js'></script>";
+			echo "<link href='".$path."/css/tipTip.css' rel='stylesheet' type='text/css'>";
+			echo "<script type='text/javascript' src='".$path."/js/jquery.tipTip.js'></script>";
+			echo "<link rel='stylesheet' type='text/css' href='".$path."/css/autocomplete.css'>";
+			// echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.8.14.custom.min.js'></script>";
+			echo "<script type='text/javascript' src='".$path."/js/jquery-ui-1.9.1.custom.js'></script>";
+			echo "<script type='text/javascript' src='".$path."/js/browserData.js'></script>";
+
+			$jsWereImported = true;
+		}
 	}
 
 	function showMsg($message, $isError = false, $import = false){
-		if($import && !isAjax()){
+		global $jsWereImported;
+		$isAjax = isAjax();
+		if(($import || !$jsWereImported) && !$isAjax){
 			importJs();
 		}
-		$isError = (string)$isError;// needs this because javascript is as old as Elvis(well, almost) and cant handle booleans from PHP
-		echo "<script type='text/javascript'>";
-		echo "showMessage('".$message."', '".$isError."');";
-		// echo "alert('".$message."');";
-		echo "</script>";
+
+		if($isAjax){
+			$json = new stdClass();
+			$json->isError = $isError;
+			$json->message = $message;
+			echo json_encode($json);
+		}
+		else{
+			$isError = (string)$isError;// needs this because javascript is as old as Elvis(well, almost) and cant handle booleans from PHP
+			echo "<script type='text/javascript'>";
+			echo "showMessage('".$message."', '".$isError."');";
+			// echo "alert('".$message."');";
+			echo "</script>";
+		}
 	}
 
 	// Initializes the session, checks if it timesOut and if needsToBeLogged it doesnt allow the page where 
@@ -228,6 +240,8 @@
 			
 		if(isset($_SESSION['database']) && $_SESSION['database'] != dbHelp::getSchemaName()){
 			logOff();
+			showMsg("The previous session was lost", true);
+			// throw new Exception("The previous session was lost");
 		}
 		
 		if($needsToBeLogged && (!isset($_SESSION['user_id']) || $_SESSION['user_id'] == ''))
@@ -1040,4 +1054,6 @@
 	exceptionHandling();
 	set_error_handler('errorHandling');
 	register_shutdown_function('shutdownHandler');
+
+	require_once("__dbHelp.php");
 ?>
