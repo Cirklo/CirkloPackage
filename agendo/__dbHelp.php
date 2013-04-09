@@ -14,7 +14,7 @@
 			throw new Exception("Session doesn't exist or was lost, please go to the main page");
 			exit;
 		}
-	}	// include_once($_SESSION['path']."/.htconnect.php");
+	}
 	
 	include_once($_SESSION['path']."/.htconnect.php");
 

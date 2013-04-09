@@ -853,6 +853,7 @@ function init(s,m){ // s = res_status, m = res_maxslots
 	}
 }
 
+/*
 function submitUser(resource) {
     if((formObj = document.getElementById('edituser')) != null){
 		// if (checkfield(formObj.user_idm)) return;
@@ -865,7 +866,7 @@ function submitUser(resource) {
 		formObj.action = '../agendo/index.php?resource=' + resource;
 		formObj.submit();
 	}
-}
+}*/
 
 function addRadioOrCheck(tableName, id, label, type, checked){
 	beginHtml = "<tr><td colspan=2>";
