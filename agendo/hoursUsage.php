@@ -448,7 +448,6 @@
 			".$order_by_sql."
 			".$limit."
 		";
-		wtf($sql);
 		$prep = dbHelp::query($sql, $sql_array);
 
 		// csv generation
