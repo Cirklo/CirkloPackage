@@ -50,6 +50,7 @@ var impersonateUser = '';
 						minLength: 2,
 						select: function(event, ui) {
 									impersonateUser = ui.item.id;
+
 									if(document.getElementById('projectList')){
 										$.post(
 											'weekview.php'

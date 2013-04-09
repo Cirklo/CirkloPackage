@@ -14,16 +14,9 @@
 		session_start();
 	}
 	
-	if(isset($_GET['autocomplete'])){
-		autocompleteAgendo();
-		exit;
-	}
-	
-	if(isset($_GET['usersList'])){
-		getUsersList();
-		exit;
-	}
+	// calling functions here will ignore the rest of the php file
 
+	// ***********************************************************
 	function autocompleteAgendo(){
 		$json = array();
 		$value = strtolower($_GET['term']);
@@ -1056,4 +1049,16 @@
 	register_shutdown_function('shutdownHandler');
 
 	require_once("__dbHelp.php");
+
+	// these functions have to go here to make sure dbHelp is loaded
+	if(isset($_GET['autocomplete'])){
+		autocompleteAgendo();
+		exit;
+	}
+	
+	if(isset($_GET['usersList'])){
+		getUsersList();
+		exit;
+	}
+	// *************************************************************
 ?>

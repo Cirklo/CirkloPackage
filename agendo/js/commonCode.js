@@ -63,7 +63,6 @@ function go (objIMG) {
 		if(name == 'group'){
 			// objDIV.style.display = 'table';
 			getTableData();
-			// alert(bla);
 
 			// $('#weekdaysResources').width($('#weekdaysResources').width() + 5);
 			// $(".usageDataShow").tipTip({activation: 'click', fadeIn: 0, delay: 0});
