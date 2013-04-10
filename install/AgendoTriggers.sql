@@ -77,12 +77,16 @@ create function validChangeToHHassoc(newRes int, newHH int) returns int determin
 DELIMITER ;
 
 DELIMITER //
-create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentid int, pricevalue int, resourceres int) returns int deterministic
+create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentdisc int, subtotal int, pricevalue int, resourceres int) returns int deterministic
 	BEGIN
 		declare cost, weekdaynumber int;
 		set weekdaynumber := weekday(entrydatetime);
 		set cost := null;
-		
+
+		if departmentdisc is null then
+			set departmentdisc := 0;
+		end if;
+
 		select
 			sum(
 				happy_hour_duration(
@@ -97,8 +101,12 @@ create function entry_discount(entrydatetime varchar(100), entryslots int, resou
 		where
 			happyhour_assoc_resource = resourceid
 			and weekdaynumber between happyhour_startday and happyhour_endday;
-				
-		return ifnull(cost, 0);
+		
+		if cost is null then 
+			set cost := 0;
+		end if;
+
+		return subtotal - (subtotal - cost) * (1 - departmentdisc * 0.01);
 	END
 //
 DELIMITER ;
@@ -142,14 +150,19 @@ create function countItems(entryid int, userid int) returns int deterministic
 DELIMITER ;
 
 DELIMITER //
-create function sequencingDiscount(resourceid int, entrydatetime varchar(100)) returns int deterministic
+create function sequencing_discount(resourceid int, entrydatetime varchar(100), projdiscount int, subtotal int) returns int deterministic
 	BEGIN
-		declare discount, weekdaynumber, starthour int;
+		declare hhdiscount, weekdaynumber, starthour int;
 		set weekdaynumber := weekday(entrydatetime);
 		set starthour := hour(entrydatetime);
+		set starthour := hour(entrydatetime);
+
+		if projdiscount is null then
+			set projdiscount := 0;
+		end if;
 		
 		select
-			happyhour_discount into discount
+			happyhour_discount into hhdiscount
 		from
 			happyhour join happyhour_assoc on happyhour_id = happyhour_assoc_happyhour
 		where
@@ -160,10 +173,16 @@ create function sequencingDiscount(resourceid int, entrydatetime varchar(100)) r
 			happyhour_starthour
 		limit 1;
 		
-		return ifnull(discount, 0);
+		if hhdiscount is null then
+			set hhdiscount := 0;
+		end if;
+		
+		return (1 - (1 - hhdiscount * 0.01) * (1 - projdiscount * 0.01)) * subtotal;
 	END
 //
 DELIMITER ;
+
+
 --
 -- Triggers `user`
 --
