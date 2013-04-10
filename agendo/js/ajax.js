@@ -62,12 +62,13 @@ var xmlhttp,url;
 
 function ajaxRecoverPWD() {
 	obj=document.getElementById('user_idm');
+
 	if (!obj || obj.value=='') return;
 	
 	var confirmAction = confirm("Are you sure you want to recover " + obj.value + "'s password?");
 	if(confirmAction){
 		
-		url="../agendo/ajax.php?type=newpwd&value=" + obj.title; // title has user_id info
+		url="../agendo/ajax.php?type=newpwd&value=" + obj.value; // title has user_id info
 		
 		$.post(url,
 				function(serverData){
