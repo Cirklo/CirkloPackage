@@ -37,7 +37,8 @@
 	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'entry_datetime');
 	$htmlDisplayArray[] = array('name' => "Unit", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
 	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'resource_status', 'function' => 'htmlUnitType', 'args' => 'resource_status');
-	$htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value', 'function' => 'totals', 'args' => 'price_value');
+	// $htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value', 'function' => 'totals', 'args' => 'price_value');
+	$htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value');
 	$htmlDisplayArray[] = array('name' => "Sub", 'select' => 'subtotal', 'function' => 'totals', 'args' => 'subtotal');
 	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount', 'function' => 'totals', 'args' => 'discount');
 	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total', 'function' => 'totals', 'args' => 'total');
@@ -368,8 +369,8 @@
 						entrystatus,
 						price_value,
 						units,
-						@subtotal := units * price_value as subtotal,
-						@discount := @subtotal * sequencingDiscount(entry_resource, entry_datetime) / 100 as discount,
+						@subtotal := units * price_value * 60 as subtotal,
+						@discount := sequencing_discount(entry_resource, entry_datetime, project_discount, @subtotal) as discount,
 						@subtotal - @discount as total
 					from (
 						select
@@ -381,6 +382,7 @@
 							resource_name,
 							resource_status,
 							project_id,
+							project_discount,
 							ifnull(project_name, 'No project') as project_name,
 							entry_datetime,
 							entry_status,
@@ -426,8 +428,8 @@
 						if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
 						@pricevalue := ifnull(price_value, 0) as price_value,
 						@units := entry_slots * resource_resolution as units,
-						@subtotal := @units * @pricevalue / 60 as subtotal,
-						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, user_dep, @pricevalue, resource_resolution) / 60 as discount,
+						@subtotal := @units * @pricevalue as subtotal,
+						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, project_discount, @subtotal, @pricevalue, resource_resolution) as discount,
 						@subtotal - @discount as total
 					from 
 						".dbHelp::getSchemaName().".user join entry on user_id = entry_user
@@ -515,7 +517,7 @@
 	}
 	
 	function totals($row, $arg){
-		return roundFunction($row[$arg]);
+		return roundFunction($row[$arg] / 60);
 	}
 	
 	function roundFunction($value){
