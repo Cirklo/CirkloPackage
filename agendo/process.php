@@ -634,8 +634,8 @@
 		}
 
 		// Block of code changed to stop users from getting in the waiting list more then once
-		$sql="select * from entry where entry_user = :0 and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id= :1)";
-		$res=dbHelp::query($sql, array($tempUser, $entry));
+		$sql="select * from entry where entry_user = :0 and entry_status != 3 and entry_datetime in (select entry_datetime from entry where entry_id= :1) and entry_resource = :2";
+		$res=dbHelp::query($sql, array($tempUser, $entry, $resource));
 		$arr=dbHelp::fetchRowByIndex($res);
 		if(!empty($arr[0])){
 			throw new Exception("User already on the waiting list!");
