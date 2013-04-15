@@ -328,6 +328,9 @@ function clear_table(table,cleartitle){
 	}
 }
 
+var userLogin, userPass;
+userLogin = "";
+userPass = "";
 function ManageEntries(action,ttime,tresolution) {
     var i,j,k=0,seed=0,add=0,tdatetime,tstartime;
     var bgcolor;
@@ -552,6 +555,9 @@ function ManageEntries(action,ttime,tresolution) {
             }
         break;
     }
+
+	userLogin = "";
+	userPass = "";
 }
 
 function addcomments(entry) {
@@ -708,13 +714,23 @@ function ajaxEntries(method,url,nosync){
 		break;
     }
 	
+
+
     // builds post string
     for (nelements=0;nelements<objForm.length;nelements++){
         if (objForm[nelements].lang=='send') {
 			if (objForm[nelements].type=='checkbox' || objForm[nelements].type=='radio') {
 				par=par+ objForm[nelements].id + '=' + objForm[nelements].checked + "&";
 			} else {
-				par=par+ objForm[nelements].id + '=' + objForm[nelements].value + "&";
+				if(objForm[nelements].id == 'user_id' && objForm[nelements].value == '' && userLogin != ''){
+					par = par+ objForm[nelements].id + '=' + userLogin + "&";
+				}
+				else if(objForm[nelements].id == 'user_passwd' && objForm[nelements].value == '' && userPass != ''){
+					par = par+ objForm[nelements].id + '=' + userPass + "&";
+				}
+				else{
+					par = par+ objForm[nelements].id + '=' + objForm[nelements].value + "&";
+				}
 			}
 		}
     }
@@ -726,6 +742,7 @@ function ajaxEntries(method,url,nosync){
 			par += '&selectedProject=' + selectedProject.value;
 		// }
 	}
+
 	// ********************************************
 	// par has username and pass
 	// $.get instead of the window.location thing below, i will probably regret this
@@ -758,6 +775,7 @@ function ajaxEntries(method,url,nosync){
 	userPass = objForm.user_passwd.value;
 	objForm.user_id.value = "";
 	objForm.user_passwd.value = "";
+
 	// xmlhttp.open(method, url + '&' + par, nosync);
 	// xmlhttp.send(null);
     // xmlhttp.onreadystatechange = function(){
@@ -887,7 +905,7 @@ function addRadioOrCheck(tableName, id, label, type, checked){
 function checkfield(field) {  
 	// this is a horrible, horrible patch but still brilliant (the chosen two has done it again)
 	// its purpose is to be able to ignore the login fields that are empty when the user and pass are as session variables
-    if(usingSession && (field.name == 'user_id' || field.name == 'user_passwd')){
+    if((field.name == 'user_id' || field.name == 'user_passwd') && (usingSession || userLogin != '')){
 		return false;
 	}
 
