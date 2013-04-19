@@ -22,11 +22,11 @@
 		}
 		
 		function getCostAndDiscountTime($date, $slots, $resourceResolution, $price){
-			$weekday = date('N', strtotime($date));
+			$weekday = date('N', strtotime($date)) - 1;
 			if($weekday < $this->startDay || $weekday > $this->endDay){
 				return false;
 			}
-			
+
 			// in minutes
 			$entryLength = $slots * $resourceResolution;
 			$entryStart = date('i', strtotime($date)) + (date('G', strtotime($date)) * 60);
@@ -35,13 +35,16 @@
 			$discountEnd = $this->endHour * 60;
 			// $diff1 = $discountEnd - $entryStart;
 			// $diff2 = $entryEnd - $discountStart;
+
+			$diff1 = $discountEnd - $entryStart;
+			$diff2 = $entryEnd - $discountStart;
+			$time = min($diff1, $diff2, $entryLength);
+
 			if(
-				(($diff1 = $discountEnd - $entryStart) > 0 
-				|| ($diff2 = $entryEnd - $discountStart) > 0)
-				&& ($time = min($diff1, $diff2, $entryLength)) > 0
+				($diff1 > 0 
+				|| $diff2 > 0)
+				&& $time > 0
 			){
-				// this is redundant
-				// $time = min($diff1, $diff2, $entryLength);
 				return array('cost' => ($time / 60 * $price * (100 - $this->discount) * 0.01), 'time' => $time);
 			}
 			

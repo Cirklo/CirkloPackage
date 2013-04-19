@@ -770,9 +770,11 @@
 		
 		// convert datetime to time and get day of the week
 		$timeDate = mktime(0, 0, 0, $month, $day, $year);
-		$dayOfTheWeek = date('N', $timeDate);
-		$firstDayWeekSubtractor = $dayOfTheWeek - 1;
-		$lastDayWeekAdder = 7 - $dayOfTheWeek;
+		$dayOfTheWeek = date('N', $timeDate) - 1;
+		// $firstDayWeekSubtractor = $dayOfTheWeek - 1;
+		$firstDayWeekSubtractor = $dayOfTheWeek;
+		// $lastDayWeekAdder = 7 - $dayOfTheWeek;
+		$lastDayWeekAdder = 6 - $dayOfTheWeek;
 		
 		// get the date of the first day of the week
 		$firstDayWeek = mktime(0, 0, 0, $month  , (int)$day - $firstDayWeekSubtractor, $year);
@@ -808,7 +810,6 @@
 			$prep = dbHelp::query($sql, array($user_id, $resource));
 			while($row = dbHelp::fetchRowByName($prep)){
 				$totalSlots += $row['entry_slots'];
-				
 				foreach($hhArray as $hh){
 					if(($tempArray = $hh->getCostAndDiscountTime($row['entry_datetime'], $row['entry_slots'], $arr[1], 0)) !== false){
 						$happyHourTime += $tempArray['time'];
@@ -818,7 +819,6 @@
 		}
 
 		$arr[0] = $totalSlots - ceil($happyHourTime / $arr[1]);
-
 		return $arr;
 	}
 	
