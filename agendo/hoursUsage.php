@@ -33,8 +33,9 @@
 	$htmlDisplayArray[] = array('name' => "Username", 'select' => 'fullname', 'where' => 'user_id', 'function' => 'htmlFilterLink', 'args' => array('user_id', 'fullname', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Resource", 'select' => 'resource_name', 'where' => 'resource_id', 'function' => 'htmlFilterLink', 'args' => array('resource_id', 'resource_name', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Project", 'select' => 'project_name', 'where' => 'project_id', 'function' => 'htmlFilterLink', 'args' => array('project_id', 'project_name', sizeof($htmlDisplayArray)));
-	$htmlDisplayArray[] = array('name' => "Status", 'select' => 'entry_status', 'where' => 'entry_status', 'function' => 'htmlFilterLink', 'args' => array('entry_status', 'entrystatus', sizeof($htmlDisplayArray)));
-	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'entry_datetime');
+	// $htmlDisplayArray[] = array('name' => "Status", 'select' => 'entry_status', 'where' => 'entry_status', 'function' => 'htmlFilterLink', 'args' => array('entry_status', 'entrystatus', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Status", 'select' => 'entry_status', 'orderby' => 'entrystatus', 'where' => 'entry_status', 'function' => 'htmlFilterLink', 'args' => array('entry_status', 'entrystatus', sizeof($htmlDisplayArray)));
+	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'datetime');
 	$htmlDisplayArray[] = array('name' => "Unit", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
 	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'resource_status', 'function' => 'htmlUnitType', 'args' => 'resource_status');
 	// $htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value', 'function' => 'totals', 'args' => 'price_value');
@@ -75,10 +76,18 @@
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1280;text-align:center;'>";
 		echo "<div style='width: 100%;margin-top: 10px;'>";
-			echo "<div style='float:left;margin-top: 80px;'>";
+			echo "<div style='float:left;margin-top: 25px;text-align:left;'>";
 				echo $backLink;
+
 				echo "<br>";
+				echo "<br>";
+				echo "<label>";
+				echo "Show real usage where possible";
+				echo "<input type='checkbox' id='realTimeCheck' checked/>";
+				echo "</label>";
 				
+				echo "<br>";
+				echo "<br>";
 				echo "<label id='filterText'>";
 				echo "</label>";
 			echo "</div>";
@@ -278,6 +287,7 @@
 		$iTotalRecords = 0;
 		
 		$date_sql = "";
+		$real_date_sql = "";
 		$sql_array = array();
 		$position = -1;
 		
@@ -301,6 +311,7 @@
 			$formatedBeginDate = dbHelp::convertToDate($formatedBeginDate);
 			$formatedEndDate = dbHelp::convertToDate($formatedEndDate);
 			$date_sql = "and entry_datetime between '".$formatedBeginDate."' and '".$formatedEndDate."'";
+			$real_date_sql = "and loginstamp between '".$formatedBeginDate."' and '".$formatedEndDate."'";
 		}
 		
 		
@@ -308,7 +319,13 @@
 		$order_by_direction = $_GET['sSortDir_0'];
 		$direction = array('asc' => 'asc', 'desc' => 'desc'); // cant prepare this values in PDO, it will turn out 'asc' instead of asc
 		if($htmlDisplayArray[$order_by]['select'] && $direction[$order_by_direction]){
-			$order_by_sql = "order by ".$htmlDisplayArray[$order_by]['select']." ".$direction[$order_by_direction];
+			$orderByValue = $htmlDisplayArray[$order_by]['orderby'];
+			if(isset($orderByValue)){
+				$order_by_sql = "order by ".$orderByValue." ".$direction[$order_by_direction];
+			}
+			else{
+				$order_by_sql = "order by ".$htmlDisplayArray[$order_by]['select']." ".$direction[$order_by_direction];
+			}
 		}
 
 		$lowerLimit = $_GET['iDisplayStart'];
@@ -326,7 +343,7 @@
 					|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".$position.",'%'))
 					|| lower(resource_name) like lower(concat('%',:".$position.",'%'))
 					|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".$position.",'%'))
-					|| lower(if(entry_status = 1, 'Confirmed', 'Unconfirmed')) like lower(concat('%',:".$position.",'%'))
+					|| lower(if(entry_status = 1, 'Confirmed', if(entry_status = 'real', 'Real usage', 'Unconfirmed')) like lower(concat('%',:".$position.",'%'))
 				)
 			";
 			
@@ -347,14 +364,62 @@
 			}
 		}
 
-		
+		$realTimeFilterJoin = "";
+		$realTimeFilterWhere = "";
+		$unionWithRealTimeSql = "";
+		// if($_GET['realTimecheck'] === true){
+		if(true){
+			$realTimeFilterJoin = "
+				left join machine on machine_resource = resource_id
+			";
+
+			$realTimeFilterWhere = "
+				and machine_resource is null
+			";
+
+			$unionWithRealTimeSql = "
+				UNION
+					(select
+						department_id,
+						department_name,
+						user_id,
+						@fullname := concat(user_firstname, ' ', user_lastname) as fullname,
+						resource_id,
+						resource_name,
+						resource_status,
+						project_id,
+						ifnull(project_name, 'No project') as project_name,
+						loginstamp as datetime,
+						'real' as entry_status,
+						'Real usage' as entrystatus,
+						@pricevalue := ifnull(price_value, 0) as price_value,
+						@units := TIMESTAMPDIFF(MINUTE,loginstamp,logoutstamp) as units,
+						@subtotal := @units * @pricevalue as subtotal,
+						@discount := entry_discount(loginstamp, @units, resource, project_discount, @subtotal, @pricevalue) as discount,
+						@subtotal - @discount as total
+					from 
+						pginalogview join ".dbHelp::getSchemaName().".user on user_id = username
+						join department on department_id = user_dep
+						join institute on institute_id = department_inst
+						join resource on resource_id = resource
+						left join price on (price_resource = resource_id and price_type = institute_pricetype)
+						left join project on project_id = department_default
+					where
+						resource_status in (1,3,4,5)
+						".$filter_sql."
+						".$real_date_sql."
+						".$userLevelSql."
+					)
+			";
+		}
+
 		$sql = "
 			select
 				SQL_CALC_FOUND_ROWS
 				*
 			from
-				((
-					select
+				(
+					(select
 						department_id,
 						department_name,
 						user_id,
@@ -364,7 +429,7 @@
 						resource_status,
 						project_id,
 						project_name,
-						entry_datetime,
+						entry_datetime as datetime,
 						entry_status,
 						entrystatus,
 						price_value,
@@ -372,8 +437,8 @@
 						@subtotal := units * price_value * 60 as subtotal,
 						@discount := sequencing_discount(entry_resource, entry_datetime, project_discount, @subtotal) as discount,
 						@subtotal - @discount as total
-					from (
-						select
+					from 
+						(select
 							department_id,
 							department_name,
 							user_id,
@@ -409,11 +474,10 @@
 							".$userLevelSql."
 						group by
 							entry_datetime, user_id
-								) as AuxSelect
-						)
+						) as AuxSelect
+					)
 				UNION
-					(
-					select
+					(select
 						department_id,
 						department_name,
 						user_id,
@@ -423,13 +487,13 @@
 						resource_status,
 						project_id,
 						ifnull(project_name, 'No project') as project_name,
-						entry_datetime,
+						entry_datetime as datetime,
 						entry_status,
 						if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
 						@pricevalue := ifnull(price_value, 0) as price_value,
 						@units := entry_slots * resource_resolution as units,
 						@subtotal := @units * @pricevalue as subtotal,
-						@discount := entry_discount(entry_datetime, entry_slots, entry_resource, project_discount, @subtotal, @pricevalue, resource_resolution) as discount,
+						@discount := entry_discount(entry_datetime, @units, entry_resource, project_discount, @subtotal, @pricevalue) as discount,
 						@subtotal - @discount as total
 					from 
 						".dbHelp::getSchemaName().".user join entry on user_id = entry_user
@@ -438,6 +502,7 @@
 						join resource on resource_id = entry_resource
 						left join price on (price_resource = entry_resource and price_type = institute_pricetype)
 						left join project on project_id = entry_project
+						".$realTimeFilterJoin."
 					where
 						entry_status in (1,2)
 						and resource_status in (1,3,4,5)
@@ -445,11 +510,14 @@
 						".$filter_sql."
 						".$date_sql."
 						".$userLevelSql."
-				)
-			) as allData
+						".$realTimeFilterWhere."
+					)
+					".$unionWithRealTimeSql."
+				) as allData
 			".$order_by_sql."
 			".$limit."
 		";
+		wtf(dbHelp::get_real_query($sql, $sql_array));
 		$prep = dbHelp::query($sql, $sql_array);
 
 		// csv generation
@@ -534,7 +602,7 @@
 	}
 	
 	function auxGenerateLink($id, $columnIndex, $value){
-		return "<a class='datatableLink' onclick='filter(".$id.", this.text,".$columnIndex.");'>".$value."</a>";
+		return "<a class='datatableLink' onclick='filter(\"".$id."\", this.text,".$columnIndex.");'>".$value."</a>";
 	}
 	
 	function download_csv(&$prep){

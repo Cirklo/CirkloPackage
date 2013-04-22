@@ -33,8 +33,6 @@
 			$entryEnd = $entryStart + $entryLength;
 			$discountStart = $this->startHour * 60;
 			$discountEnd = $this->endHour * 60;
-			// $diff1 = $discountEnd - $entryStart;
-			// $diff2 = $entryEnd - $discountStart;
 
 			$diff1 = $discountEnd - $entryStart;
 			$diff2 = $entryEnd - $discountStart;

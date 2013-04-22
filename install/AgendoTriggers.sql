@@ -77,7 +77,7 @@ create function validChangeToHHassoc(newRes int, newHH int) returns int determin
 DELIMITER ;
 
 DELIMITER //
-create function entry_discount(entrydatetime varchar(100), entryslots int, resourceid int, departmentdisc int, subtotal int, pricevalue int, resourceres int) returns int deterministic
+create function entry_discount(entrydatetime varchar(100), duration int, resourceid int, departmentdisc int, subtotal int, pricevalue int) returns int deterministic
 	BEGIN
 		declare cost, weekdaynumber int;
 		set weekdaynumber := weekday(entrydatetime);
@@ -91,7 +91,7 @@ create function entry_discount(entrydatetime varchar(100), entryslots int, resou
 			sum(
 				happy_hour_duration(
 					entrydatetime
-					,entryslots * resourceres
+					,duration
 					,happyhour_starthour
 					,happyhour_endhour
 				) * ifnull(happyhour_discount, 0) * 0.01 * pricevalue
