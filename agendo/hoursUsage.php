@@ -83,7 +83,7 @@
 				echo "<br>";
 				echo "<label>";
 				echo "Show real usage where possible";
-				echo "<input type='checkbox' id='realTimeCheck' checked/>";
+				echo "<input type='checkbox' id='realTimeCheck' onchange='refresh_table();'/>";
 				echo "</label>";
 				
 				echo "<br>";
@@ -343,7 +343,7 @@
 					|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".$position.",'%'))
 					|| lower(resource_name) like lower(concat('%',:".$position.",'%'))
 					|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".$position.",'%'))
-					|| lower(if(entry_status = 1, 'Confirmed', if(entry_status = 'real', 'Real usage', 'Unconfirmed')) like lower(concat('%',:".$position.",'%'))
+					|| lower(if(entry_status = 1, 'Confirmed', if(entry_status = 'real', 'Real usage', 'Unconfirmed'))) like lower(concat('%',:".$position.",'%'))
 				)
 			";
 			
@@ -367,8 +367,7 @@
 		$realTimeFilterJoin = "";
 		$realTimeFilterWhere = "";
 		$unionWithRealTimeSql = "";
-		// if($_GET['realTimecheck'] === true){
-		if(true){
+		if($_GET['realTimeCheck'] == 'checked'){
 			$realTimeFilterJoin = "
 				left join machine on machine_resource = resource_id
 			";
@@ -390,7 +389,7 @@
 						project_id,
 						ifnull(project_name, 'No project') as project_name,
 						loginstamp as datetime,
-						'real' as entry_status,
+						entry_status,
 						'Real usage' as entrystatus,
 						@pricevalue := ifnull(price_value, 0) as price_value,
 						@units := TIMESTAMPDIFF(MINUTE,loginstamp,logoutstamp) as units,
@@ -517,6 +516,7 @@
 			".$order_by_sql."
 			".$limit."
 		";
+
 		wtf(dbHelp::get_real_query($sql, $sql_array));
 		$prep = dbHelp::query($sql, $sql_array);
 

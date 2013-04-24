@@ -79,6 +79,7 @@ $(function() {
 				aoData.push( { "name": "endDate", "value": $('#endDateText').val() });
 				aoData.push( { "name": "filters", "value": JSON.stringify(filter_post_array) });
 				aoData.push( { "name": "userLevel", "value": getUserLevel() });
+				aoData.push( { "name": "realTimeCheck", "value": $('#realTimeCheck').attr('checked') });
 				
 				lastSearch = getLastSearch();
 				aoData.push( { "name": "searchField", "value": lastSearch });
