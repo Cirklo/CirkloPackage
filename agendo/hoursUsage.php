@@ -397,7 +397,7 @@
 						@discount := entry_discount(loginstamp, @units, resource, project_discount, @subtotal, @pricevalue) as discount,
 						@subtotal - @discount as total
 					from 
-						pginalogview join ".dbHelp::getSchemaName().".user on user_id = username
+						pginalogview join ".dbHelp::getSchemaName().".user on user_id = user
 						join department on department_id = user_dep
 						join institute on institute_id = department_inst
 						join resource on resource_id = resource

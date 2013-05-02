@@ -110,14 +110,12 @@
 		$sqlDataArray = array($tempUser, $slots, $assistance, $EntryStatus, $resource);
 		
 		// assigning project to entry section
-		$projectValue = null;
 		$projectSqlValue = "NULL";
 		// project is valid and the resource is not the scheduling type
 		// if(valid_project($tempUser, $_GET['selectedProject'])){
 		if(valid_project($tempUser, $_GET['selectedProject']) && $perm->getResourceStatus != 6){
-			$projectValue = $_GET['selectedProject'];
-			$sqlDataArray[] = $projectValue;
-			$projectSqlValue = ":5";
+			$sqlDataArray[] = $_GET['selectedProject'];
+			$projectSqlValue = ":".(sizeOf($sqlDataArray) - 1);
 		}
 
 		// ignores the use project flag if the resource is of the scheduling type

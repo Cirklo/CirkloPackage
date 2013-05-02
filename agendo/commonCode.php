@@ -697,7 +697,7 @@
 		return $mail;
 	}
 	
-	// Sends the mail object, its objective is to patch the crappy send method of the mailer class (seriously, send = false means error? ever heard of exceptions??)
+	// Sends the mail object, its objective is to patch the crappy send method of the mailer class (seriously, send = false means error and the error message is echoed?? ever heard of exceptions??)
 	function sendMailObject($mailObject, $throwException = true){
 		ob_start();
 			$result = $mailObject->Send();
@@ -906,12 +906,13 @@
 				from
 					project join proj_dep_assoc on project_id = proj_dep_assoc_project
 					join ".dbHelp::getSchemaName().".user on proj_dep_assoc_department = user_dep
-					join department on department_id = user_dep and proj_dep_assoc_project = department_default
+					join department on department_id = user_dep
 				where
 					user_id = :0
 					and proj_dep_assoc_project = :1
 					and proj_dep_assoc_active = 1
 					and proj_dep_assoc_visible = 1
+					or department_default = :1
 			";
 			$prep = dbHelp::query($sql, array($user, $project));
 			$row = dbHelp::fetchRowByIndex($prep);
