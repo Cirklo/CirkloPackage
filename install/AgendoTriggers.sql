@@ -306,3 +306,16 @@ CREATE TRIGGER `projDiscPercUpd` BEFORE UPDATE ON `project`
 	END
 //
 DELIMITER ;
+
+DROP TRIGGER IF EXISTS `newmachine`;
+DELIMITER //
+CREATE TRIGGER `newmachine` BEFORE INSERT ON `pginasession`
+FOR EACH ROW BEGIN
+	declare numberMachines int;
+	select count(machine_id) into numberMachines from machine where machine_name = NEW.machine;
+	IF numberMachines = 0 THEN
+		insert into machine values (NULL, NEW.machine);
+	END IF;
+END
+//
+DELIMITER;

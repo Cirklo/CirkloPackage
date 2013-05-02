@@ -197,6 +197,20 @@ INSERT INTO `item_state` (`item_state_id`, `item_state_name`) VALUES
 (3, 'Used');
 
 
+--
+-- Table structure for table `machine`
+--
+
+CREATE TABLE IF NOT EXISTS `machine` (
+  `machine_id` int(11) NOT NULL AUTO_INCREMENT,
+  `machine_name` varchar(100) CHARACTER SET utf8 NOT NULL,
+  `machine_resource` int(11) DEFAULT NULL,
+  PRIMARY KEY (`machine_id`),
+  UNIQUE KEY `machine_name` (`machine_name`),
+  UNIQUE KEY `machine_resource` (`machine_resource`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+
 -- --------------------------------------------------------
 --
 -- Dumping data for table `mask`
@@ -361,6 +375,16 @@ INSERT INTO `permlevel` (`permlevel_id`, `permlevel_desc`) VALUES
 (7, 'Add Back+Ahead'),
 (9, 'Extra reservation');
 
+
+CREATE TABLE IF NOT EXISTS `pginasession` (
+  `dbid` bigint(20) NOT NULL AUTO_INCREMENT,
+  `loginstamp` datetime NOT NULL,
+  `logoutstamp` datetime NOT NULL,
+  `username` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `machine` varchar(100) CHARACTER SET utf8 NOT NULL,
+  `ipaddress` text NOT NULL,
+  KEY `dbid` (`dbid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -729,3 +753,5 @@ resource_id) and
 xfields_id) and
 (xfieldsval_entry = entry_id)) order by entry_id
 desc);
+
+create view pginalogview as select dbid, loginstamp, logoutstamp, user_id as user, machine_resource as resource, ipaddress, 'real' as entry_status from machine join pginasession on machine_name = machine join user on user_login = username where logoutstamp != 0

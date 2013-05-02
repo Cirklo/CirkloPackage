@@ -694,7 +694,8 @@
 	// doesnt need to have the drop trigger command in that script
 	function loadTriggers($sql, $separator){
 		$triggers = getBetweenArray($sql, "DELIMITER //", "//", $separator);
-		for($i=0;$i<sizeOf($triggers);$i++){
+		$size = sizeOf($triggers);
+		for($i=0;$i<$size;$i++){
 			// inserts current trigger
 			dbHelp::query($triggers[$i]);
 		}

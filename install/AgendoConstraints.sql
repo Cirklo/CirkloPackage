@@ -68,7 +68,10 @@ ALTER TABLE `item_assoc`
   ADD CONSTRAINT `item_assoc_ibfk_1` FOREIGN KEY (`item_assoc_item`) REFERENCES `item` (`item_id`),
   ADD CONSTRAINT `item_assoc_ibfk_2` FOREIGN KEY (`item_assoc_entry`) REFERENCES `entry` (`entry_id`);
 
-  
+
+ALTER TABLE `machine`
+  ADD CONSTRAINT `machine_ibfk_1` FOREIGN KEY (`machine_resource`) REFERENCES `resource` (`resource_id`);
+
 --
 -- Constraints for table `measure`
 --

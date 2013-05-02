@@ -44,6 +44,7 @@
 	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount', 'function' => 'totals', 'args' => 'discount');
 	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total', 'function' => 'totals', 'args' => 'total');
 	
+	$realTimeCheck = $_GET['realTimeCheck'];
 	if(isset($_GET['action']) && ($_GET['action'] == 'generateJson' || $_GET['action'] == 'downloadCsv')){
 		echo json_encode(generateJson());
 		exit;
@@ -73,20 +74,34 @@
 		</div>
 	";
 	
+	$sql = "select count(machine_name) from machine";
+	$prep = dbHelp::query($sql, array(dbHelp::getSchemaName()));
+	$row = dbHelp::fetchRowByIndex($prep);
+	$machineNumber = $row[0];
+	$dontShowRealTime = false;
+
+	// hide real usage if the needed tables dont exist
+	if($machineNumber == 0){
+		$realTimeCheck = null;
+		$dontShowRealTime = true;
+	}
+
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1280;text-align:center;'>";
 		echo "<div style='width: 100%;margin-top: 10px;'>";
-			echo "<div style='float:left;margin-top: 25px;text-align:left;'>";
+			echo "<div style='float:left;margin-top: ".(($dontShowRealTime) ? 80 : 25)."px;text-align:left;'>";
 				echo $backLink;
 
-				echo "<br>";
-				echo "<br>";
-				echo "<label>";
-				echo "Show real usage where possible";
-				echo "<input type='checkbox' id='realTimeCheck' onchange='refresh_table();'/>";
-				echo "</label>";
-				
-				echo "<br>";
+				if(!$dontShowRealTime){
+					echo "<br>";
+					echo "<br>";
+					echo "<label>";
+					echo "Show real usage where possible";
+					echo "<input type='checkbox' id='realTimeCheck' onchange='refresh_table();'/>";
+					echo "</label>";
+					
+					echo "<br>";
+				}
 				echo "<br>";
 				echo "<label id='filterText'>";
 				echo "</label>";
@@ -278,7 +293,7 @@
 	
 	
 	function generateJson(){
-		global $htmlDisplayArray, $userLevelSql;
+		global $htmlDisplayArray, $userLevelSql, $realTimeCheck;
 		
 		$beginDate = $_GET['beginDate'];
 		$endDate = $_GET['endDate'];
@@ -367,7 +382,7 @@
 		$realTimeFilterJoin = "";
 		$realTimeFilterWhere = "";
 		$unionWithRealTimeSql = "";
-		if($_GET['realTimeCheck'] == 'checked'){
+		if(isset($realTimeCheck) && $realTimeCheck == 'checked'){
 			$realTimeFilterJoin = "
 				left join machine on machine_resource = resource_id
 			";
@@ -517,7 +532,6 @@
 			".$limit."
 		";
 
-		wtf(dbHelp::get_real_query($sql, $sql_array));
 		$prep = dbHelp::query($sql, $sql_array);
 
 		// csv generation
