@@ -101,8 +101,10 @@ class genObjClass{
 						$fk_query="SELECT * FROM ".$table->fk[$key]." WHERE $header[1]='".$row["update"][$i]."'";
 						$sql=$this->conn->query($fk_query);
 						$res=$sql->fetch();
-						if($res[0]=="")	  throw new Exception("Unable to find foreign key value");
-						$query.=$key."='$res[0]',";
+						// if($res[0]=="")	  throw new Exception("Unable to find foreign key value");
+						// $query.=$key."='$res[0]',";
+						if($res[0]=="")	  $query.=$key.'=NULL,';
+						else $query.=$key."='$res[0]',";
 					}
 					$i++;
 				}
@@ -174,8 +176,10 @@ class genObjClass{
 						$fk_query="SELECT * FROM ".$table->fk[$key]." WHERE $header[1]='".$row["insert"][$i]."'";
 						$sql=$this->conn->query($fk_query);
 						$res=$sql->fetch();
-						if($res[0]=="")	  throw new Exception("Unable to find foreign key value");
-						$query.= "'".$res[0]."',";
+						// if($res[0]=="")	  throw new Exception("Unable to find foreign key value");
+						// $query.= "'".$res[0]."',";
+						if($res[0]=="")	  $query.= 'NULL,';
+						else $query.= "'".$res[0]."',";
 					}
 					$i++;
 				}

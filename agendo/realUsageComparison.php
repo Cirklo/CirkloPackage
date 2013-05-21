@@ -32,19 +32,9 @@
 	$htmlDisplayArray[] = array('name' => "Department", 'select' => 'department_name', 'where' => 'department_id', 'function' => 'htmlFilterLink', 'args' => array('department_id', 'department_name', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Username", 'select' => 'fullname', 'where' => 'user_id', 'function' => 'htmlFilterLink', 'args' => array('user_id', 'fullname', sizeof($htmlDisplayArray)));
 	$htmlDisplayArray[] = array('name' => "Resource", 'select' => 'resource_name', 'where' => 'resource_id', 'function' => 'htmlFilterLink', 'args' => array('resource_id', 'resource_name', sizeof($htmlDisplayArray)));
-	$htmlDisplayArray[] = array('name' => "Project", 'select' => 'project_name', 'where' => 'project_id', 'function' => 'htmlFilterLink', 'args' => array('project_id', 'project_name', sizeof($htmlDisplayArray)));
-	// $htmlDisplayArray[] = array('name' => "Status", 'select' => 'entry_status', 'where' => 'entry_status', 'function' => 'htmlFilterLink', 'args' => array('entry_status', 'entrystatus', sizeof($htmlDisplayArray)));
-	$htmlDisplayArray[] = array('name' => "Status", 'select' => 'entry_status', 'orderby' => 'entrystatus', 'where' => 'entry_status', 'function' => 'htmlFilterLink', 'args' => array('entry_status', 'entrystatus', sizeof($htmlDisplayArray)));
-	$htmlDisplayArray[] = array('name' => "Entry date", 'select' => 'datetime');
-	$htmlDisplayArray[] = array('name' => "Unit", 'select' => 'units', 'function' => 'htmlUnits', 'args' => array('resource_status', 'units'));
-	$htmlDisplayArray[] = array('name' => "Type", 'select' => 'resource_status', 'function' => 'htmlUnitType', 'args' => 'resource_status');
-	// $htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value', 'function' => 'totals', 'args' => 'price_value');
-	$htmlDisplayArray[] = array('name' => "Price", 'select' => 'price_value');
-	$htmlDisplayArray[] = array('name' => "Sub", 'select' => 'subtotal', 'function' => 'totals', 'args' => 'subtotal');
-	$htmlDisplayArray[] = array('name' => "Disc", 'select' => 'discount', 'function' => 'totals', 'args' => 'discount');
-	$htmlDisplayArray[] = array('name' => "Total", 'select' => 'total', 'function' => 'totals', 'args' => 'total');
-	
-	$realTimeCheck = $_GET['realTimeCheck'];
+	$htmlDisplayArray[] = array('name' => "Entry duraton", 'select' => 'entryduration', 'function' => 'htmlUnits', 'args' => array('entryduration'));
+	$htmlDisplayArray[] = array('name' => "Real duraton", 'select' => 'realduration', 'function' => 'htmlUnits', 'args' => array('realduration'));
+
 	if(isset($_GET['action']) && ($_GET['action'] == 'generateJson' || $_GET['action'] == 'downloadCsv')){
 		echo json_encode(generateJson());
 		exit;
@@ -59,14 +49,14 @@
 	echo "<link href='css/hourUsage.css' rel='stylesheet' type='text/css' />";
 	echo "<link href='css/base.css' rel='stylesheet' type='text/css' />";
 	echo "<script type='text/javascript' src='js/jquery.datepick.js'></script>";
-	echo "<script type='text/javascript' src='js/hoursUsage.js'></script>";
+	echo "<script type='text/javascript' src='js/realUsageComparison.js'></script>";
 	echo "<script type='text/javascript' src='js/jquery-ui.js'></script>";
 	echo "<script type='text/javascript' src='js/jquery.dataTables.min.js'></script>";
 	
 	echo "<a name='top'></a>";
 	
 	echo "<br>";
-	echo "<h1>Resource Usage</h1>";
+	echo "<h1>Usage comparison</h1>";
 	
 	$backLink = "
 		<div style='float:left;'>
@@ -74,34 +64,20 @@
 		</div>
 	";
 	
-	$sql = "select count(computer_name) from computer";
-	$prep = dbHelp::query($sql, array(dbHelp::getSchemaName()));
-	$row = dbHelp::fetchRowByIndex($prep);
-	$computerNumber = $row[0];
-	$dontShowRealTime = false;
-
-	// hide real usage if the needed tables dont exist
-	if($computerNumber == 0){
-		$realTimeCheck = null;
-		$dontShowRealTime = true;
-	}
-
 	// Table where the results will appear
 	echo "<div id='resultsDiv' style='margin:auto;width:1280;text-align:center;'>";
 		echo "<div style='width: 100%;margin-top: 10px;'>";
-			echo "<div style='float:left;margin-top: ".(($dontShowRealTime) ? 80 : 25)."px;text-align:left;'>";
+			echo "<div style='float:left;margin-top: 80px;text-align:left;'>";
 				echo $backLink;
 
-				if(!$dontShowRealTime){
-					echo "<br>";
-					echo "<br>";
-					echo "<label>";
-					echo "Show real usage where possible";
-					echo "<input type='checkbox' id='realTimeCheck' onchange='refresh_table();'/>";
-					echo "</label>";
-					
-					echo "<br>";
-				}
+				// echo "<br>";
+				// echo "<br>";
+				// echo "<label>";
+				// echo "Show real usage where possible";
+				// echo "<input type='checkbox' id='realTimeCheck' onchange='refresh_table();'/>";
+				// echo "</label>";
+				// echo "<br>";
+				
 				echo "<br>";
 				echo "<label id='filterText'>";
 				echo "</label>";
@@ -198,11 +174,6 @@
 							echo "</td>";
 						echo "</tr>";
 						
-						// echo "<tr>";
-							// echo "<td colspan='2'>";
-								// echo "<br>";
-							// echo "</td>";
-						// echo "</tr>";
 					// }
 					// *********************************************
 					echo "<tr>";
@@ -213,12 +184,6 @@
 						echo "</td>";
 					echo "</tr>";
 					
-					// echo "<tr>";
-						// echo "<td colspan='2'>";
-							// echo "<br>";
-						// echo "</td>";
-					// echo "</tr>";
-					
 					echo "<tr>";
 						echo "<td colspan='2' style='text-align:right;'>";
 							echo "<input class='searchMessageFont' type='text' id='searchField' style='width:325px;' onkeypress='return synchInfo(event);' onfocus='clearField();' onblur='putDefaultMessage();'/>";
@@ -227,13 +192,8 @@
 						echo "</td>";
 					echo "</tr>";
 				echo "</table>";
-			// echo "<br>";	
-			
 			echo "</div>";
-		
 		echo "</div>";
-		
-		// echo "<div style='clear:both;'></div>";
 		
 		// to be removed, usefull for now to make sure the number of tds in the footer is the same as the header
 		$footer_tds = "";
@@ -293,7 +253,7 @@
 	
 	
 	function generateJson(){
-		global $htmlDisplayArray, $userLevelSql, $realTimeCheck;
+		global $htmlDisplayArray, $userLevelSql;
 		
 		$beginDate = $_GET['beginDate'];
 		$endDate = $_GET['endDate'];
@@ -326,7 +286,6 @@
 			$formatedBeginDate = dbHelp::convertToDate($formatedBeginDate);
 			$formatedEndDate = dbHelp::convertToDate($formatedEndDate);
 			$date_sql = "and entry_datetime between '".$formatedBeginDate."' and '".$formatedEndDate."'";
-			$real_date_sql = "and loginstamp between '".$formatedBeginDate."' and '".$formatedEndDate."'";
 		}
 		
 		
@@ -357,8 +316,6 @@
 					lower(department_name) like lower(concat('%',:".$position.",'%'))
 					|| lower(concat(user_firstname, ' ', user_lastname)) like lower(concat('%',:".$position.",'%'))
 					|| lower(resource_name) like lower(concat('%',:".$position.",'%'))
-					|| lower(ifnull(project_name, 'No project')) like lower(concat('%',:".$position.",'%'))
-					|| lower(if(entry_status = 1, 'Confirmed', if(entry_status = 'real', 'Real usage', 'Unconfirmed'))) like lower(concat('%',:".$position.",'%'))
 				)
 			";
 			
@@ -379,163 +336,35 @@
 			}
 		}
 
-		// $realTimeFilterJoin = "";
-		$realTimeFilterWhere = "";
-		$unionWithRealTimeSql = "";
-		if(isset($realTimeCheck) && $realTimeCheck == 'checked'){
-			// $realTimeFilterJoin = "
-			// 	left join machine on machine_resource = resource_id
-			// ";
-			// $realTimeFilterJoin = "
-			// 	left join computer on computer_id = resource_computer
-			// ";
-
-			// $realTimeFilterWhere = "
-			// 	and machine_resource is null
-			// ";
-			$realTimeFilterWhere = "
-				and resource_computer is null
-			";
-
-			$unionWithRealTimeSql = "
-				UNION
-					(select
-						department_id,
-						department_name,
-						user_id,
-						@fullname := concat(user_firstname, ' ', user_lastname) as fullname,
-						resource_id,
-						resource_name,
-						resource_status,
-						project_id,
-						ifnull(project_name, 'No project') as project_name,
-						loginstamp as datetime,
-						entry_status,
-						'Real usage' as entrystatus,
-						@pricevalue := ifnull(price_value, 0) as price_value,
-						@units := TIMESTAMPDIFF(MINUTE,loginstamp,logoutstamp) as units,
-						@subtotal := @units * @pricevalue as subtotal,
-						@discount := entry_discount(loginstamp, @units, resource, project_discount, @subtotal, @pricevalue) as discount,
-						@subtotal - @discount as total
-					from 
-						pginalogview join ".dbHelp::getSchemaName().".user on user_id = user
-						join department on department_id = user_dep
-						join institute on institute_id = department_inst
-						join resource on resource_id = resource
-						left join price on (price_resource = resource_id and price_type = institute_pricetype)
-						left join project on project_id = department_default
-					where
-						resource_status in (1,3,4,5)
-						".$filter_sql."
-						".$real_date_sql."
-						".$userLevelSql."
-					)
-			";
-		}
 
 		$sql = "
-			select
-				SQL_CALC_FOUND_ROWS
-				*
-			from
-				(
-					(select
-						department_id,
-						department_name,
-						user_id,
-						fullname,
-						resource_id,
-						resource_name,
-						resource_status,
-						project_id,
-						project_name,
-						entry_datetime as datetime,
-						entry_status,
-						entrystatus,
-						price_value,
-						units,
-						@subtotal := units * price_value * 60 as subtotal,
-						@discount := sequencing_discount(entry_resource, entry_datetime, project_discount, @subtotal) as discount,
-						@subtotal - @discount as total
-					from 
-						(select
-							department_id,
-							department_name,
-							user_id,
-							concat(user_firstname, ' ', user_lastname) as fullname,
-							resource_id,
-							resource_name,
-							resource_status,
-							project_id,
-							project_discount,
-							ifnull(project_name, 'No project') as project_name,
-							entry_datetime,
-							entry_status,
-							entry_resource,
-							if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
-							ifnull(price_value, 0) as price_value,
-							count(item_id) as units
-						from 
-							entry join item_assoc on item_assoc_entry = entry_id
-							join resource on resource_id = entry_resource
-							join item on item_id = item_assoc_item
-							join user on user_id = item_user
-							join department on department_id = user_dep
-							join institute on institute_id = department_inst
-							left join project on project_id = item_project
-							left join price on (price_resource = resource_id and price_type = institute_pricetype)
-						where
-							item_state = 3
-							and entry_status in (1,2)
-							and resource_status = 6
-							".$search_sql."
-							".$filter_sql."
-							".$date_sql."
-							".$userLevelSql."
-						group by
-							entry_datetime, user_id
-						) as AuxSelect
-					)
-				UNION
-					(select
-						department_id,
-						department_name,
-						user_id,
-						@fullname := concat(user_firstname, ' ', user_lastname) as fullname,
-						resource_id,
-						resource_name,
-						resource_status,
-						project_id,
-						ifnull(project_name, 'No project') as project_name,
-						entry_datetime as datetime,
-						entry_status,
-						if(entry_status = 1, 'Confirmed', 'Unconfirmed') as entrystatus,
-						@pricevalue := ifnull(price_value, 0) as price_value,
-						@units := entry_slots * resource_resolution as units,
-						@subtotal := @units * @pricevalue as subtotal,
-						@discount := entry_discount(entry_datetime, @units, entry_resource, project_discount, @subtotal, @pricevalue) as discount,
-						@subtotal - @discount as total
-					from 
-						".dbHelp::getSchemaName().".user join entry on user_id = entry_user
-						join department on department_id = user_dep
-						join institute on institute_id = department_inst
-						join resource on resource_id = entry_resource
-						left join price on (price_resource = entry_resource and price_type = institute_pricetype)
-						left join project on project_id = entry_project
-						".
-						//$realTimeFilterJoin.
-						"
-					where
-						entry_status in (1,2)
-						and resource_status in (1,3,4,5)
-						".$search_sql."
-						".$filter_sql."
-						".$date_sql."
-						".$userLevelSql."
-						".$realTimeFilterWhere."
-					)
-					".$unionWithRealTimeSql."
-				) as allData
+			select 
+				department_id,
+				department_name,
+				user, 
+				concat(user_firstname, ' ', user_lastname) as fullname,
+				resource, 
+				resource_name,
+				entryduration, 
+				realduration 
+			from 
+				(select user, resource, sum(TIMESTAMPDIFF(MINUTE, loginstamp, logoutstamp)) as realduration
+			 	from pginalogview 
+			 	group by user, resource) as realData 
+			join 
+				(select entry_user, entry_resource, sum(entry_slots) * resource_resolution as entryduration 
+				from entry join resource on resource_id = entry_resource 
+				where entry_status in (1,2) 
+				group by entry_user, entry_resource) as entryData 
+			on (entry_user = user and entry_resource = resource)
+			join resource on resource_id = resource
+			join production.user on user_id = user
+			join department on department_id = user_dep
+			where realduration > 0 and realduration is not null
+				".$search_sql."
+				".$filter_sql."
+				".$date_sql."
+				".$userLevelSql."
 			".$order_by_sql."
 			".$limit."
 		";
@@ -585,15 +414,11 @@
 	
 
 	function htmlUnits($row, $args){
-		if($row[$args[0]] == 6){
-			return $row[$args[1]];
-		}
-		
 		// $hoursFloored = floor($value / 60);
 		// $minutes = $value % 60;
 		
 		// $formatedValue = $hoursFloored."h : ".$minutes."m";
-		$value = $row[$args[1]];
+		$value = $row[$args[0]];
 		// return round($value / 60, 2);
 		return roundFunction($value / 60);
 	}
