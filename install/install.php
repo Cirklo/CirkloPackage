@@ -319,7 +319,7 @@
 	// Gets current path and adds the previous path to create the htconnect file
 	function makeHtConnect(){
 		//initialize JSON object
-		$json=new stdClass();
+		$json = new stdClass();
 		
 		$msg = "Database connection successfully established.";
 		$separateArray = getSeparator();
@@ -436,6 +436,9 @@
 	
 	// apply the sql script
 	function applySql(){
+		//initialize JSON object
+		$json = new stdClass();
+
 		$msg = "Successfully imported all database settings.";
 		$separateArray = getSeparator();
 		$systemSeparator = $separateArray[0];

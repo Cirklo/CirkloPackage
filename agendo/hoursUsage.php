@@ -367,7 +367,7 @@
 		$filter_sql = "";
 		if($filters){
 			foreach($filters as $key => $filter){
-				if($filter === null){
+				if(!isset($filter) || $filter == 'null'){
 					$filter_sql .= " and ".$htmlDisplayArray[$key]['where']." is null";
 				}
 				else{
