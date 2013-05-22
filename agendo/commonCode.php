@@ -1,7 +1,7 @@
 <?php
 /*
   @author Pedro Pires or the Chosen Two
-  @copyright 2010-2011 Pedro Pires
+  @copyright 2010-2013 Pedro Pires
   @license http://www.gnu.org/copyleft/lesser.html Distributed under the Lesser General Public License (LGPL)
   @version 1.0
   @Code used in lots of places and all joined to avoid copy pasting same methods in different places

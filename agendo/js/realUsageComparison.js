@@ -103,9 +103,8 @@ $(function(){
 			}
 			,"fnFooterCallback": function(nFoot, aData, iStart, iEnd, aiDisplay){
 				var columns_to_change = {
-					// 5: ['usageSum', 'usageEndResult']
-					// 6: ['regularSum', 'regularEndResult']
-					// ,9: ['regularSum', 'regularEndResult']
+					3: ['regularSum', 'regularEndResult']
+					,4: ['regularSum', 'regularEndResult']
 					// ,10: ['regularSum', 'regularEndResult']
 					// ,11: ['regularSum', 'regularEndResult']
 				};

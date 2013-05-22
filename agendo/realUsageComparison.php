@@ -208,7 +208,7 @@
 			}
 			echo "</thead>";
 			
-			echo "<tfoot style='background: grey;border: 1px solid white;'>";
+			echo "<tfoot style='background:#F7C439;font-weight:bold;border:1px solid white;'>";
 				echo "<tr>";
 					echo $footer_tds;
 				echo "</tr>";
