@@ -343,9 +343,9 @@
 			select 
 				department_id,
 				department_name,
-				user, 
+				user as user_id, 
 				concat(user_firstname, ' ', user_lastname) as fullname,
-				resource, 
+				resource as resource_id, 
 				resource_name,
 				entryduration, 
 				realduration 
