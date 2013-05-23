@@ -3,12 +3,26 @@
 --
 
 --
+-- Constraints for table `allowedips`
+--
+ALTER TABLE `allowedips`
+  ADD CONSTRAINT `allowedips_ibfk_1` FOREIGN KEY (`allowedips_institute`) REFERENCES `institute` (`institute_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+--
 -- Constraints for table `announcement`
 --
 ALTER TABLE `announcement`
   ADD CONSTRAINT `announcement_ibfk_1` FOREIGN KEY (`announcement_object`) REFERENCES `resource` (`resource_id`);
 
   
+--
+-- Constraints for table `board`
+--
+ALTER TABLE `board`
+  ADD CONSTRAINT `board_ibfk_1` FOREIGN KEY (`board_parent`) REFERENCES `board` (`board_id`);
+
+
 --
 -- Constraints for table `blacklist`
 --
@@ -137,8 +151,9 @@ ALTER TABLE `pubref`
 --
 ALTER TABLE `resource`
   ADD CONSTRAINT `resource_ibfk_10` FOREIGN KEY (`resource_resp`) REFERENCES `user` (`user_id`),
-  ADD CONSTRAINT `resource_ibfk_11` FOREIGN KEY (`resource_color`) REFERENCES `color` (`color_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `resource_ibfk_11` FOREIGN KEY (`resource_color`) REFERENCES `color` (`color_id`),
   ADD CONSTRAINT `resource_ibfk_12` FOREIGN KEY (`resource_type`) REFERENCES `resourcetype` (`resourcetype_id`),
+  ADD CONSTRAINT `resource_ibfk_13` FOREIGN KEY (`resource_computer`) REFERENCES `computer` (`computer_id`),
   ADD CONSTRAINT `resource_ibfk_9` FOREIGN KEY (`resource_status`) REFERENCES `resstatus` (`resstatus_id`);
 
 --

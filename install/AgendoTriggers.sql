@@ -26,10 +26,26 @@ create function overlappingHH(startDay int, endDay int, startHour int, endHour i
 				`happyhour` inner join `happyhour_assoc` on happyhour_id = happyhour_assoc_happyhour
 			WHERE 
 				happyhour_assoc_resource = resourceId
-				and startDay >= happyhour_startday
-				and endDay <= happyhour_endday
-				and startHour >= happyhour_starthour
-				and endHour <= happyhour_endhour
+				and (
+					startHour >= happyhour_starthour
+					and startHour < happyhour_endhour
+					or 
+					endHour <= happyhour_endhour
+					and endhour > happyhour_starthour
+					or
+					startHour <= happyhour_starthour
+					and endhour >= happyhour_endhour
+				)
+				and (
+					startDay >= happyhour_startday
+					and startDay < happyhour_endday
+					or 
+					endDay <= happyhour_endday
+					and endDay > happyhour_startday
+					or
+					startDay <= happyhour_startday
+					and endDay >= happyhour_endday
+				)
 		);
 	END
 //
@@ -154,7 +170,6 @@ create function sequencing_discount(resourceid int, entrydatetime varchar(100), 
 	BEGIN
 		declare hhdiscount, weekdaynumber, starthour int;
 		set weekdaynumber := weekday(entrydatetime);
-		set starthour := hour(entrydatetime);
 		set starthour := hour(entrydatetime);
 
 		if projdiscount is null then
@@ -307,15 +322,15 @@ CREATE TRIGGER `projDiscPercUpd` BEFORE UPDATE ON `project`
 //
 DELIMITER ;
 
-DROP TRIGGER IF EXISTS `newmachine`;
+DROP TRIGGER IF EXISTS `newcomputer`;
 DELIMITER //
-CREATE TRIGGER `newmachine` BEFORE INSERT ON `pginasession`
+CREATE TRIGGER `newcomputer` BEFORE INSERT ON `pginasession`
 FOR EACH ROW BEGIN
-	declare numberMachines int;
-	select count(machine_id) into numberMachines from machine where machine_name = NEW.machine;
-	IF numberMachines = 0 THEN
-		insert into machine values (NULL, NEW.machine);
-	END IF;
+  declare numberComputers int;
+  select count(computer_id) into numberComputers from computer where computer_name = NEW.machine;
+  IF numberComputers = 0 THEN
+    insert into computer values (NULL, NEW.machine);
+  END IF;
 END
 //
 DELIMITER;

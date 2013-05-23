@@ -23,10 +23,12 @@ INSERT INTO `admin` (`admin_user`, `admin_table`, `admin_permission`) VALUES
 --
 CREATE TABLE IF NOT EXISTS `allowedips` (
   `allowedips_id` int(11) NOT NULL AUTO_INCREMENT,
+  `allowedips_institute` smallint(6) NOT NULL,
   `allowedips_iprange` varchar(45) NOT NULL,
   PRIMARY KEY (`allowedips_id`),
-  UNIQUE KEY `allowedips_iprange_UNIQUE` (`allowedips_iprange`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+  UNIQUE KEY `allowedips_iprange_UNIQUE` (`allowedips_iprange`),
+  KEY `allowedips_institute` (`allowedips_institute`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
 -- --------------------------------------------------------
@@ -51,9 +53,21 @@ CREATE TABLE IF NOT EXISTS `blacklist` (
 CREATE TABLE IF NOT EXISTS `board` (
   `board_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Table used with monitoring system only',
   `board_address` varchar(20) COLLATE utf8_bin NOT NULL,
+  `board_parent` int(11) NOT NULL,
   `board_type` varchar(20) COLLATE utf8_bin NOT NULL,
-  PRIMARY KEY (`board_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+  PRIMARY KEY (`board_id`),
+  KEY `board_parent` (`board_parent`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Monitoring boards. <strong>Only used with monitoring system' AUTO_INCREMENT=1 ;
+
+
+
+CREATE TABLE IF NOT EXISTS `computer` (
+  `computer_id` int(11) NOT NULL AUTO_INCREMENT,
+  `computer_name` varchar(100) CHARACTER SET utf8 NOT NULL,
+  PRIMARY KEY (`computer_id`),
+  UNIQUE KEY `computer_name` (`computer_name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
 
 
 INSERT INTO `configParams` (`configParams_name`, `configParams_value`) VALUES
@@ -503,22 +517,24 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `resource_starttime` smallint(6) NOT NULL COMMENT 'Hour, Starting time of day for reservations.',
   `resource_stoptime` smallint(6) NOT NULL COMMENT 'Hour, Above this time reservations are no longer available.',
   `resource_resp` int(11) NOT NULL,
-  `resource_wikilink` varchar(128) COLLATE utf8_bin DEFAULT NULL,
+  `resource_wikilink` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `resource_price` smallint(6) NOT NULL,
   `resource_resolution` smallint(6) NOT NULL COMMENT 'In minutes, sets the time duration in minutes of  each slot.',
   `resource_maxslots` tinyint(4) NOT NULL COMMENT 'In slots, Maximum time of usage per user per day.',
-  `resource_mac` varchar(17) COLLATE utf8_bin NOT NULL DEFAULT '0-0-0-0-0-0' COMMENT 'IP address of computer to be used to confirm reservation.',
+  `resource_mac` varchar(17) COLLATE utf8_bin NOT NULL DEFAULT '0-0-0-0-0-0' COMMENT 'Macaddress of computer to be used to confirm reservation.',
   `resource_confirmtol` smallint(6) NOT NULL COMMENT 'In slots, Number of time slots of tolerance allowed before and after reservation time to confirm presence or equipment usage.',
   `resource_delhour` int(11) NOT NULL COMMENT 'In hours, minimum time before an entry starts.to delete it.',
   `resource_color` int(11) NOT NULL,
   `resource_maxhoursweek` int(11) NOT NULL DEFAULT '0',
+  `resource_computer` int(11) DEFAULT NULL,
   PRIMARY KEY (`resource_id`),
+  UNIQUE KEY `resource_computer` (`resource_computer`),
   KEY `resource_type` (`resource_type`),
   KEY `resource_status` (`resource_status`),
   KEY `resource_id` (`resource_id`),
   KEY `resource_resp` (`resource_resp`),
   KEY `resource_color` (`resource_color`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `resource`
@@ -754,4 +770,7 @@ xfields_id) and
 (xfieldsval_entry = entry_id)) order by entry_id
 desc);
 
-create view pginalogview as select dbid, loginstamp, logoutstamp, user_id as user, machine_resource as resource, ipaddress, 'real' as entry_status from machine join pginasession on machine_name = machine join user on user_login = username where logoutstamp != 0
+create view pginalogview as select dbid, loginstamp, logoutstamp, user_id as user, resource_id as resource, ipaddress, 'real' as entry_status from computer join pginasession on computer_name = machine join resource on resource_computer = computer_id join user on user_login = username where logoutstamp != 0
+
+create view userpgina AS select `user`.`user_login` AS `user_name`,'SHA256' AS `hash_method`,`user`.`user_passwd` AS `password`,`user`.`user_id` AS `user_id` from `user`;
+
