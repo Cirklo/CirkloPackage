@@ -261,7 +261,7 @@
 		$iTotalDisplayRecords = 0;
 		$iTotalRecords = 0;
 		
-		$date_sql = "";
+		$entry_date_sql = "";
 		$real_date_sql = "";
 		$sql_array = array();
 		$position = -1;
@@ -285,7 +285,9 @@
 			
 			$formatedBeginDate = dbHelp::convertToDate($formatedBeginDate);
 			$formatedEndDate = dbHelp::convertToDate($formatedEndDate);
-			$date_sql = "and entry_datetime between '".$formatedBeginDate."' and '".$formatedEndDate."'";
+			$entry_date_sql = "and entry_datetime between '".$formatedBeginDate."' and '".$formatedEndDate."'";
+			$real_date_sql = "where loginstamp between '".$formatedBeginDate."' and '".$formatedEndDate."'";
+			$real_date_sql .= " and logoutstamp between '".$formatedBeginDate."' and '".$formatedEndDate."'";
 		}
 		
 		
@@ -349,12 +351,14 @@
 				realduration 
 			from 
 				(select user, resource, sum(TIMESTAMPDIFF(MINUTE, loginstamp, logoutstamp)) as realduration
-			 	from pginalogview 
+			 	from pginalogview
+			 	".$real_date_sql."
 			 	group by user, resource) as realData 
 			join 
 				(select entry_user, entry_resource, sum(entry_slots) * resource_resolution as entryduration 
 				from entry join resource on resource_id = entry_resource 
-				where entry_status in (1,2) 
+				where entry_status in (1,2)
+				".$entry_date_sql."
 				group by entry_user, entry_resource) as entryData 
 			on (entry_user = user and entry_resource = resource)
 			join resource on resource_id = resource
@@ -363,7 +367,6 @@
 			where realduration > 0 and realduration is not null
 				".$search_sql."
 				".$filter_sql."
-				".$date_sql."
 				".$userLevelSql."
 			".$order_by_sql."
 			".$limit."
