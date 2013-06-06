@@ -770,7 +770,7 @@ xfields_id) and
 (xfieldsval_entry = entry_id)) order by entry_id
 desc);
 
-create view pginalogview as select dbid, loginstamp, logoutstamp, user_id as user, resource_id as resource, ipaddress, 'real' as entry_status from computer join pginasession on computer_name = machine join resource on resource_computer = computer_id join user on user_login = username where logoutstamp != 0
+create view pginalogview as select dbid, loginstamp, logoutstamp, user_id as user, resource_id as resource, ipaddress, 'real' as entry_status from computer join pginasession on computer_name = machine join resource on resource_computer = computer_id join user on user_login = username where logoutstamp != 0;
 
 create view userpgina AS select `user`.`user_login` AS `user_name`,'SHA256' AS `hash_method`,`user`.`user_passwd` AS `password`,`user`.`user_id` AS `user_id` from `user`;
 

@@ -56,7 +56,6 @@ create function validChangeToHHassoc(newRes int, newHH int) returns int determin
 	BEGIN
 		declare overlapped, startday, endday, starthour, endhour, resStartHour, resEndHour, returnValue INT;
 		
-		-- check if overlapping
 		select
 			happyhour_startday, happyhour_endday, happyhour_starthour, happyhour_endhour
 		into
@@ -72,7 +71,6 @@ create function validChangeToHHassoc(newRes int, newHH int) returns int determin
 			return 0;
 		end if;
 		
-		-- check if the new resource "supports" the HH start and end time
 		select
 			resource_starttime, resource_stoptime
 		into
