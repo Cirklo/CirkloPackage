@@ -6,7 +6,10 @@
 	 * @abstract Agendo homepage. Display most used resources
 	 */
 
-	session_start();
+	// Checks if session has started already
+	if(session_id() == "") {
+		session_start();
+	}
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("../agendo/commonCode.php");

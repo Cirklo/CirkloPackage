@@ -1,6 +1,9 @@
 <?php
 // This file was altered by Pedro Pires (The chosen two)
-	session_start();
+	// Checks if session has started already
+	if(session_id() == "") {
+		session_start();
+	}
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
 	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
 	require_once("../agendo/commonCode.php");
@@ -519,7 +522,8 @@ echo "<table id='master' style='margin:auto' width=750>";
 
 						echo "<tr>";
 							echo "<td colspan=2 style='display:".$display."'>User Name<br>";
-							echo "<input name=user_id class=inpbox onkeypress='return noenter()' id=user_id lang=send title='' value='' onblur=ajaxUser(this) />";
+							// echo "<input name=user_id class=inpbox onkeypress='return noenter()' id=user_id lang=send title='' value='' onblur=ajaxUser(this) />";
+							echo "<input name=user_id class=inpbox onkeypress='return noenter()' id=user_id lang=send title='' value='' />";
 							echo "</td>";
 						echo "</tr>";
 						
