@@ -50,7 +50,7 @@ echo "<table border=0>";
 		echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
 			echo "<option id=0>Select Resource...</option>";
 			// $sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
-			$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id";
+			$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id AND resource_status not in (0, 2)";
 			$res = dbHelp::query($sql) or die ($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
 			while($row = dbHelp::fetchRowByIndex($res)){
 				echo "<option value='".$row[0]."'>".$row[1]."</option>";

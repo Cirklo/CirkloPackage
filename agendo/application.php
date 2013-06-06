@@ -19,7 +19,7 @@ if(isset($_GET['code']) && $_GET['code'] != ''){
 	$userId = $row[0];
 	
 	// get the resource name
-	$sql = "select resource_name, user_email, user_firstname, user_lastname from resource join ".dbHelp::getSchemaName().".user on user_id = resource_resp where resource_id = :0";
+	$sql = "select resource_name, user_email, user_firstname, user_lastname from resource join ".dbHelp::getSchemaName().".user on user_id = resource_resp where resource_id = :0 and resource_status not in (0, 2)";
 	$prep = dbHelp::query($sql, array($_GET['res']));
 	$row = dbHelp::fetchRowByIndex($prep);
 	$resName = $row[0];
@@ -322,7 +322,7 @@ echo "<form method=post name='application' id='application' style='width: 600px;
 				echo "<td>";
 					echo "<select name=Type id=Type onChange=\"ajaxEquiDD(this,'Resource')\">";
 					// $sql = "SELECT resourcetype_id, resourcetype_name FROM resourcetype";
-					$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id";
+					$sql = "SELECT distinct resourcetype_id, resourcetype_name FROM resource, resourcetype where resource_type = resourcetype_id AND resource_status not in (0, 2) order by resourcetype_name";
 					echo "<option id=0>Select Resource...</option>";
 					$res = dbHelp::query($sql); //$error->sqlError(mysql_error(), mysql_errno(), $sql, '', ''));
 					while($row = dbHelp::fetchRowByIndex($res)){

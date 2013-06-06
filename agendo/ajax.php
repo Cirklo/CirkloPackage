@@ -29,7 +29,7 @@ call_user_func($type);
 function resource() {
     $value = (int)cleanValue($_GET['value']);
     // $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type=" . $value);
-    $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type = :0", array($value));
+    $res=dbHelp::query("select resource_id,resource_name from resource where resource_status<>2 and resource_type = :0 and resource_status not in (0, 2) order by resource_name", array($value));
     while($arr=dbHelp::fetchRowByName($res)){
         echo "<name>" . $arr['resource_name'];
         echo "<value>" . $arr['resource_id'];
