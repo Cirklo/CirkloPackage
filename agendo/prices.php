@@ -7,7 +7,7 @@
 		echo "<link href='../agendo/css/intro.css' rel='stylesheet' type='text/css' />";
 		echo "<table style='margin:auto;'>";
 		// $sql = "select resource_name, type_name, pricetype_name, price_value from resource, type, pricetype, price where price_resource = resource_id and resource_type = type_id and price_type = pricetype_id order by resource_name";
-		$sql = "SELECT resource_name, resourcetype_name, pricetype_name, price_value FROM resource, resourcetype, pricetype, price WHERE price_resource = resource_id AND resource_type = resourcetype_id AND price_type = pricetype_id ORDER BY resource_name, pricetype_name";
+		$sql = "SELECT resource_name, resourcetype_name, pricetype_name, price_value FROM resource, resourcetype, pricetype, price WHERE price_resource = resource_id AND resource_type = resourcetype_id AND price_type = pricetype_id AND resource_status not in (0, 2) ORDER BY resource_name, pricetype_name";
 		$res = dbHelp::query($sql);
 		$name = '';
 		if(dbHelp::numberOfRows($res) > 0){
