@@ -572,7 +572,9 @@ function addcomments(entry) {
         }
         entry=document.getElementById('entry').value;
         resource=document.getElementById('resource').value;
-        user_id=document.getElementById('user_id').title;
+        // user_id=document.getElementById('user_id').title;
+        objForm = document.getElementById('entrymanage');
+        user_id = objForm['user_id'].value;
         if (myForm[0].value!='') {
             var re = /\'/g;
             myForm[0].value=myForm[0].value.replace(re," ");
