@@ -694,7 +694,7 @@
 				foreach($rowEntry as $k => $v){
 					$rowEntry[$k] = mb_check_encoding($rowEntry[$k], 'UTF-8') ? $rowEntry[$k] : utf8_encode($rowEntry[$k]);
 				}
-				$itemsArray[$rowEntry[0]] = array('name' => $row[1]." - ".$rowEntry[3]." ".$rowEntry[4], 'state' => $rowEntry[2]);
+				$itemsArray[$rowEntry[0]] = array('name' => $rowEntry[1]." - ".$rowEntry[3]." ".$rowEntry[4], 'state' => $rowEntry[2]);
 			}
 			
 			$sql = $select." ".$from." ".$where." ".$orderBy;
@@ -719,14 +719,6 @@
 					$row[$k] = mb_check_encoding($row[$k], 'UTF-8') ? $row[$k] : utf8_encode($row[$k]);
 				}
 				$itemsArray[$row[0]] = array('name' => $row[1], 'state' => $row[2]);
-			}
-		}
-		dbHelp::query("set names utf8");
-		$path = "./item.log";
-		wtf("-------------", 'w', $path);
-		foreach($itemsArray as $k => $v){
-			foreach($v as $subitem){
-				wtf($k." => ".$subitem, 'a', $path);
 			}
 		}
 
