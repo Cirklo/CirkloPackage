@@ -691,13 +691,19 @@
 			$sqlEntry = $select." ".$fromEntry." ".$whereEntry." ".$orderBy;
 			$prepEntry = dbHelp::query($sqlEntry, $entriesArray);
 			while($rowEntry = dbHelp::fetchRowByIndex($prepEntry)){
-				$itemsArray[$rowEntry[0]] = array('name' => utf8_decode($row[1])." - ".utf8_decode($rowEntry[3])." ".utf8_decode($rowEntry[4]), 'state' => $rowEntry[2]);
+				foreach($rowEntry as $k => $v){
+					$rowEntry[$k] = mb_check_encoding($rowEntry[$k], 'UTF-8') ? $rowEntry[$k] : utf8_encode($rowEntry[$k]);
+				}
+				$itemsArray[$rowEntry[0]] = array('name' => $row[1]." - ".$rowEntry[3]." ".$rowEntry[4], 'state' => $rowEntry[2]);
 			}
 			
 			$sql = $select." ".$from." ".$where." ".$orderBy;
 			$prep = dbHelp::query($sql, $sqlArray);
 			while($row = dbHelp::fetchRowByIndex($prep)){
-				$itemsArray[$row[0]] = array('name' => utf8_decode($row[1])." - ".utf8_decode($row[3])." ".utf8_decode($row[4]), 'state' => $row[2]);
+				foreach($row as $k => $v){
+					$row[$k] = mb_check_encoding($row[$k], 'UTF-8') ? $row[$k] : utf8_encode($row[$k]);
+				}
+				$itemsArray[$row[0]] = array('name' => $row[1]." - ".$row[3]." ".$row[4], 'state' => $row[2]);
 			}
 		}
 		else{ // regular user, needs sorting of the samples by user
@@ -709,7 +715,18 @@
 			$sql = $select." ".$from." ".$where." ".$orderBy;
 			$prep = dbHelp::query($sql, $sqlArray);
 			while($row = dbHelp::fetchRowByIndex($prep)){
-				$itemsArray[$row[0]] = array('name' => utf8_decode($row[1]), 'state' => $row[2]);
+				foreach($row as $k => $v){
+					$row[$k] = mb_check_encoding($row[$k], 'UTF-8') ? $row[$k] : utf8_encode($row[$k]);
+				}
+				$itemsArray[$row[0]] = array('name' => $row[1], 'state' => $row[2]);
+			}
+		}
+		dbHelp::query("set names utf8");
+		$path = "./item.log";
+		wtf("-------------", 'w', $path);
+		foreach($itemsArray as $k => $v){
+			foreach($v as $subitem){
+				wtf($k." => ".$subitem, 'a', $path);
 			}
 		}
 
