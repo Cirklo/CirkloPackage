@@ -691,13 +691,13 @@
 			$sqlEntry = $select." ".$fromEntry." ".$whereEntry." ".$orderBy;
 			$prepEntry = dbHelp::query($sqlEntry, $entriesArray);
 			while($rowEntry = dbHelp::fetchRowByIndex($prepEntry)){
-				$itemsArray[$rowEntry[0]] = array('name' => utf8_decode($row[1])." - ".$rowEntry[3]." ".$rowEntry[4], 'state' => $rowEntry[2]);
+				$itemsArray[$rowEntry[0]] = array('name' => utf8_decode($row[1])." - ".utf8_decode($rowEntry[3])." ".utf8_decode($rowEntry[4]), 'state' => $rowEntry[2]);
 			}
 			
 			$sql = $select." ".$from." ".$where." ".$orderBy;
 			$prep = dbHelp::query($sql, $sqlArray);
 			while($row = dbHelp::fetchRowByIndex($prep)){
-				$itemsArray[$row[0]] = array('name' => utf8_decode($row[1])." - ".$row[3]." ".$row[4], 'state' => $row[2]);
+				$itemsArray[$row[0]] = array('name' => utf8_decode($row[1])." - ".utf8_decode($row[3])." ".utf8_decode($row[4]), 'state' => $row[2]);
 			}
 		}
 		else{ // regular user, needs sorting of the samples by user
