@@ -111,17 +111,35 @@
 		
 		// assigning project to entry section
 		$projectSqlValue = "NULL";
-		// project is valid and the resource is not the scheduling type
-		// if(valid_project($tempUser, $_GET['selectedProject'])){
-		if(valid_project($tempUser, $_GET['selectedProject']) && $perm->getResourceStatus != 6){
-			$sqlDataArray[] = $_GET['selectedProject'];
+		$projectToUse = $_GET['selectedProject'];
+		if(use_projects() && $perm->getResourceStatus != 6){
+			if(!isset($projectToUse) || $projectToUse == ''){
+				$projArray = get_default_project($tempUser);
+
+				if($projArray === false){
+					throw new Exception("There is no default project for this user's department or it is either inactive or invisible");
+				}
+				$projectToUse = $projArray['id'];
+			}
+			elseif(valid_project($tempUser, $_GET['selectedProject']) === false){
+				throw new Exception("Not a valid process for this user");
+			}
+
+			$sqlDataArray[] = $projectToUse;
 			$projectSqlValue = ":".(sizeOf($sqlDataArray) - 1);
 		}
 
+		// project is valid and the resource is not the scheduling type
+		// if(valid_project($tempUser, $_GET['selectedProject'])){
+		// if(valid_project($tempUser, $_GET['selectedProject']) && $perm->getResourceStatus != 6){
+		// 	$sqlDataArray[] = $_GET['selectedProject'];
+		// 	$projectSqlValue = ":".(sizeOf($sqlDataArray) - 1);
+		// }
+
 		// ignores the use project flag if the resource is of the scheduling type
-		if(use_projects() && get_default_project($tempUser) === false && $perm->getResourceStatus != 6){
-			throw new Exception("There is no default project for this user's department or it is either inactive or invisible");
-		}
+		// if(use_projects() && get_default_project($tempUser) === false && $perm->getResourceStatus != 6){
+		// 	throw new Exception("There is no default project for this user's department or it is either inactive or invisible");
+		// }
 		// ***********************************
 
 		$entriesIdArray = array();
