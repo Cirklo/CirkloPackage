@@ -7,14 +7,21 @@ if(isset($_POST['makeUser']) && $_POST['makeUser'] == true){
 }
 
 if(isset($_GET['code']) && $_GET['code'] != ''){
+	// check if code exists
+	$sql = "select * from pending where pending_code = :0";
+	$prep = dbHelp::query($sql, array($_GET['code']));
+	if(dbHelp::numberOfRows($prep) == 0){
+		throw new Exception('This operation has expired');
+	}
+	
 	// a check is made in ajaxdpt.php to make sure the login and email dont exist already in the database
 	$login = generate_login($_GET['first'], $_GET['last'], $_GET['mail']);
 	$pass = generate_password();
 	insert_user(array($login, cryptPassword($pass), $_GET['first'], $_GET['last'], $_GET['dep'], $_GET['phone'], $_GET['ext'], $_GET['mobile'], $_GET['mail']));
 	
 	// get the user id
-	$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_email = :0";
-	$prep = dbHelp::query($sql, array($_GET['mail']));
+	$sql = "select user_id from ".dbHelp::getSchemaName().".user where user_login = :0";
+	$prep = dbHelp::query($sql, array($login));
 	$row = dbHelp::fetchRowByIndex($prep);
 	$userId = $row[0];
 	
@@ -89,13 +96,14 @@ function generate_login($firstName, $lastName, $mail){
 		return $login;
 	}
 	
-	// check if mail can be used to generate the login
-	$login = strtolower(substr($firstName, 1, 1).$lastname);
-	$prep = dbHelp::query($sql, array($login));
+	// $login = strtolower(substr($firstName, 0, 1).$lastName);
+	// $prep = dbHelp::query($sql, array($login));
+	// if(dbHelp::numberOfRows($prep) == 0){
+	// 	return $login;
 	
 	$length = sizeOf($firstName);
 	for($i = 0; $i < $length; $i++){
-		$login = strtolower(substr($firstName, 0, $i).$lastname);
+		$login = strtolower(substr($firstName, 0, $i).$lastName);
 		$prep = dbHelp::query($sql, array($login));
 		if(dbHelp::numberOfRows($prep) == 0){
 			return $login;
@@ -104,7 +112,7 @@ function generate_login($firstName, $lastName, $mail){
 	
 	// this will get a new login fo sure, even if it takes decades
 	$i = 0;
-	$login = substr($firstName, 0, 1).$lastname;
+	$login = strtolower(substr($firstName, 0, 1).$lastName);
 	while(true){
 		$i++;
 		$loginTemp = $login.$i;
