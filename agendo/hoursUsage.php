@@ -348,6 +348,7 @@
 		if($upperLimit != -1){
 			$limit = "limit ".intval($lowerLimit).", ".intval($upperLimit); // cant prepare this values in PDO, it will turn out '10' instead of 10
 		}
+		
 		if(isset($_GET['searchField']) && $_GET['searchField'] != ''){
 			$sql_array[] = $_GET['searchField'];
 			$position++;
@@ -425,6 +426,7 @@
 						left join project on project_id = department_default
 					where
 						resource_status in (1,3,4,5)
+						".$search_sql."
 						".$filter_sql."
 						".$real_date_sql."
 						".$userLevelSql."
