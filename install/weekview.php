@@ -5,7 +5,8 @@
 		session_start();
 	}
 	$pathOfIndex = explode('\\',str_replace('/', '\\', getcwd()));
-	$_SESSION['path'] = "../".$pathOfIndex[sizeof($pathOfIndex)-1];
+	$instName = $pathOfIndex[sizeof($pathOfIndex)-1];
+	$_SESSION['path'] = "../".$instName;
 	require_once("../agendo/commonCode.php");
 	initSession();
 	require_once("../agendo/calClass.php");
@@ -230,7 +231,7 @@ echo "<table id='master' style='margin:auto' width=750>";
 			
 // *******************************************        calendar stuff made here     ***********************************************************
 			$calendar->setStartDate($calendarDate);
-			if ($calendar->getStatus()==0 or $calendar->getStatus()==2) { //inactive or invisible
+			if ($calendar->getStatus()==0) { //inactive
 				echo "<tr>";
 					echo "<td>";
 					echo "<h1 style='color:#cc8888'>".$calendar->getResourceName()." not available for reservations</h1>";
@@ -244,6 +245,21 @@ echo "<table id='master' style='margin:auto' width=750>";
 				echo "</tr>";
 				exit;
 			}
+			elseif ($calendar->getStatus()==2) { //invisible
+				echo "<tr>";
+					echo "<td>";
+					echo "<h1 style='color:#cc8888'>".$calendar->getResourceName()." not available for reservations</h1>";
+					$sql ="SELECT user_firstname,user_lastname,user_email from ".dbHelp::getSchemaName().".user,resource where user_id=resource_resp";
+					$res = dbHelp::query($sql);
+					$arr = dbHelp::fetchRowByName($res);
+					echo "<h2>Please try this <a href='https://next.cirklo.org/".$instName."/view.php?id=".$calendar->getResource()."'>alternative location</a></h2>";
+					// echo "<a href=weekview.php?resource=" . ($calendar->getResource() -1) . "&date=" . $calendar->getStartDate() . "><img border=0 src=pics/resminus.png></a>";
+					// echo "<a href=weekview.php?resource=" . ($calendar->getResource() +1) . "&date=" . $calendar->getStartDate() . "><img border=0 src=pics/resplus.png></a>";
+					echo "</td>";
+				echo "</tr>";
+				exit;
+			}
+
 
 			if(isset($_POST['action'])){ // is this of any use?
 				call_user_func(cleanValue($_POST['action']));
