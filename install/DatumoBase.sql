@@ -1221,6 +1221,8 @@ CREATE TABLE IF NOT EXISTS `pub` (
   `pub_clicks` int(11) DEFAULT '0',
   `pub_time` int(11) DEFAULT '0',
   `pub_pageViews` int(11) DEFAULT '0',
+  `pub_title` varchar(32) COLLATE utf8_bin DEFAULT NULL,
+  `pub_text` varchar(256) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`pub_id`),
   KEY `pub_target` (`pub_target`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=3 ;

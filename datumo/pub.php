@@ -66,7 +66,7 @@ class pubHandler{
 				//JS includes
 				echo "<script type='text/javascript' src='../datumo/js/jquery.timers.js'></script>";
 				echo "<script type='text/javascript' src='../datumo/js/jquery.pub.js'></script>";
-				$query="SELECT pubpages_position, pubpages_width, pubpages_height, pub_image, pub_outlink, pub_id
+				$query="SELECT pubpages_position, pubpages_width, pubpages_height, pub_image, pub_outlink, pub_id, pub_title, pub_text
 				FROM pubpages, pub, pubref, resourcetype
 				WHERE pubpages_id=pub_target
 				AND pubref_pub=pub_id
@@ -76,6 +76,7 @@ class pubHandler{
 				AND pubpages_position='pub1'";
 				$sql=$this->pdo->query($query);
 				if($sql->rowCount()>0){				
+
 					//left main div -> holds children
 					echo "<div style='
 						background-color:#F7C439;
@@ -85,9 +86,43 @@ class pubHandler{
 						border:0px solid;
 						margin:2px;
 						'>";
-					
+
+					$fixedHeight = 195; // slight bonus to compensate for the extra div
 					//loop through all results
 					for($i=0;$row=$sql->fetch();$i++){
+
+						//added by Pedro
+						$height = $row[2];
+						$extraDiv = "";
+
+						if($row[6] || $row[7]){
+							// $height += $fixedHeight;
+							$extraDiv = "
+								<a href=javascript:clickPub('$row[5]','$row[4]');>
+									<div style='
+										color: black;
+										border-left: 1px solid #F7C439;
+										border-right: 1px solid #F7C439;
+										border-top: 1px solid #F7C439;
+										background-color:white;
+										padding-top: 20px;
+										padding-left: 5px;
+										padding-right: 5px;
+										position:absolute;
+										top:0px;
+										height:$fixedHeight;
+									'>
+										<p style='font-size:16px;'>$row[6]</p>
+										</br>
+										<p style='font-size:10px;'>$row[7]</p>
+									</div>
+								</a>
+								</br>
+							";
+						}
+
+						//**************
+
 						echo "<div lang=exp id=$row[0] style='
 							position:relative;
 							border:2px solid #FFF;
@@ -95,10 +130,15 @@ class pubHandler{
 							margin:auto;
 							margin-bottom:0px;
 							width:130px;
-							height:$row[2];
+							height:$height;
 							text-align:center;
 							vertical-align:bottom;
 							'>";			
+
+						//added by Pedro
+						echo $extraDiv;
+						//**************
+
 						echo "<a href=javascript:clickPub('$row[5]','$row[4]');><img src='$row[3]' width=128px></a>";
 						echo "</div>";
 					}		

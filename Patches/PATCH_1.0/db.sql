@@ -602,3 +602,10 @@ UPDATE configParams SET configParams_value='1.8' WHERE configParams_name='Agendo
 
 ALTER TABLE `permissions` CHANGE `permissions_sendmail` `permissions_sendmail` INT( 11 ) NULL DEFAULT '0'
 update permissions set permissions_sendmail = 0 where permissions_sendmail is null
+
+
+
+
+-- 19/03/2014
+ALTER TABLE `pub` ADD `pub_title` VARCHAR( 32 ) CHARACTER SET utf8 COLLATE utf8_bin NULL ,
+ADD `pub_text` VARCHAR( 256 ) CHARACTER SET utf8 COLLATE utf8_bin NULL 
