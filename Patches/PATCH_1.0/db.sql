@@ -607,5 +607,7 @@ update permissions set permissions_sendmail = 0 where permissions_sendmail is nu
 
 
 -- 19/03/2014
+ALTER TABLE `pub` CHANGE `pub_outlink` `pub_outlink` VARCHAR( 256 ) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL
+
 ALTER TABLE `pub` ADD `pub_title` VARCHAR( 32 ) CHARACTER SET utf8 COLLATE utf8_bin NULL ,
 ADD `pub_text` VARCHAR( 256 ) CHARACTER SET utf8 COLLATE utf8_bin NULL 
