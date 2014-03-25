@@ -99,7 +99,7 @@ class pubHandler{
 							// $height += $fixedHeight;
 								// <a href=javascript:clickPub('$row[5]','$row[4]');>
 							$extraDiv = "
-								<a href='javascript:return false;' onclick='clickPub(\'$row[5]\',\'$row[4]\');'>
+								<a href='javascript:;' onclick='clickPub(\"$row[5]\", \"$row[4]\");'>
 									<div style='
 										color: black;
 										border-left: 1px solid #F7C439;
@@ -134,6 +134,7 @@ class pubHandler{
 							height:$height;
 							text-align:center;
 							vertical-align:bottom;
+							onclick='clickPub(\"$row[5]\", \"$row[4]\");'
 							'>";
 
 						//added by Pedro
@@ -142,7 +143,7 @@ class pubHandler{
 
 								
 						// echo "<a href=javascript:clickPub('$row[5]','$row[4]');><img src='$row[3]' width=128px></a>";
-						echo "<a href='javascript:return false;' onclick='clickPub(\"$row[5]\", \"$row[4]\");'><img src='$row[3]' width=128px></a>";
+						echo "<a href='javascript:;' onclick='clickPub(\"$row[5]\", \"$row[4]\");'><img src='$row[3]' width=128px></a>";
 						echo "</div>";
 					}		
 					
