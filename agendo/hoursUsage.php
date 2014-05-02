@@ -425,7 +425,7 @@
 						left join price on (price_resource = resource_id and price_type = institute_pricetype)
 						left join project on project_id = department_default
 					where
-						resource_status in (1,3,4,5)
+						resource_status in (1,2,3,4,5)
 						".$search_sql."
 						".$filter_sql."
 						".$real_date_sql."
