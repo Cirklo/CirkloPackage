@@ -528,7 +528,7 @@
 						"
 					where
 						entry_status in (1,2)
-						and resource_status in (1,3,4,5)
+						and resource_status in (1,2,3,4,5)
 						".$search_sql."
 						".$filter_sql."
 						".$date_sql."
